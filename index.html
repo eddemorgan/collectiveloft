@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collective Loft — Make Something Together</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink: #0f0e0c;
+      --paper: #f5f0e8;
+      --warm: #e8e0ce;
+      --accent: #c84b2f;
+      --accent-dark: #a33a21;
+      --muted: #7a7468;
+      --border: #d4cdc0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* GRAIN OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.6;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      padding: 1.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(245, 240, 232, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .nav-cta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 1px solid var(--accent);
+      padding-bottom: 2px;
+      transition: opacity 0.2s;
+    }
+    .nav-cta:hover { opacity: 0.7; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding-top: 5rem;
+    }
+
+    .hero-left {
+      padding: 8rem 4rem 6rem 5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-right: 1px solid var(--border);
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.1s;
+    }
+
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+
+    .hero-headline {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 5vw, 4.5rem);
+      line-height: 1.1;
+      font-weight: 400;
+      margin-bottom: 2rem;
+    }
+
+    .hero-headline em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 42ch;
+      margin-bottom: 3rem;
+    }
+
+    /* FORM */
+    .form-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 440px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .form-input {
+      flex: 1;
+      padding: 0.9rem 1.2rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+    }
+    .form-input::placeholder { color: var(--muted); }
+    .form-input:focus { border-color: var(--accent); }
+
+    .form-select {
+      width: 100%;
+      padding: 0.9rem 1.2rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: var(--muted);
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7468' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1.2rem center;
+    }
+    .form-select:focus { border-color: var(--accent); }
+    .form-select option { color: var(--ink); background: var(--paper); }
+
+    .form-btn {
+      padding: 0.9rem 2rem;
+      background: var(--accent);
+      color: var(--paper);
+      border: none;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .form-btn:hover { background: var(--accent-dark); }
+    .form-btn:active { transform: scale(0.98); }
+
+    .form-note {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* SUCCESS STATE */
+    .success-msg {
+      display: none;
+      padding: 1.5rem;
+      border: 1px solid var(--accent);
+      background: rgba(200, 75, 47, 0.05);
+    }
+    .success-msg p {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--accent);
+    }
+    .success-msg span {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      letter-spacing: 0.06em;
+    }
+
+    /* HERO RIGHT */
+    .hero-right {
+      padding: 8rem 4rem 6rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 3rem;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.3s;
+    }
+
+    .stat-block {
+      border-left: 2px solid var(--accent);
+      padding-left: 1.5rem;
+    }
+
+    .stat-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      line-height: 1;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.4rem;
+    }
+
+    .divider-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* PROBLEM SECTION */
+    .problem {
+      padding: 8rem 5rem;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 6rem;
+      opacity: 0;
+      animation: fadeUp 0.9s ease forwards 0.5s;
+    }
+
+    .problem-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-top: 0.5rem;
+    }
+
+    .problem-content h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 2rem;
+    }
+
+    .problem-content h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .problem-content p {
+      font-size: 1.05rem;
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 60ch;
+      margin-bottom: 1.2rem;
+    }
+
+    /* PLATFORMS ROW */
+    .platforms {
+      padding: 0 5rem 8rem;
+      display: flex;
+      gap: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .platform-item {
+      flex: 1;
+      padding: 2.5rem 2rem;
+      border-right: 1px solid var(--border);
+    }
+    .platform-item:last-child { border-right: none; }
+
+    .platform-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      text-decoration: line-through;
+      text-decoration-color: var(--accent);
+    }
+
+    .platform-problem {
+      font-size: 0.95rem;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    /* WHAT IT IS */
+    .what {
+      padding: 8rem 5rem;
+      background: var(--ink);
+      color: var(--paper);
+      border-top: 1px solid var(--border);
+    }
+
+    .what-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .what-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 3rem;
+    }
+
+    .what h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 3.5vw, 3.2rem);
+      font-weight: 400;
+      line-height: 1.25;
+      margin-bottom: 3rem;
+    }
+
+    .what h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .modules {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .module {
+      padding: 2.5rem 0 2.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-right: 3rem;
+    }
+    .module:nth-child(even) {
+      padding-left: 3rem;
+      padding-right: 0;
+      border-left: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .module-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    .module-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      margin-bottom: 0.75rem;
+      color: var(--paper);
+    }
+
+    .module-desc {
+      font-size: 0.9rem;
+      color: rgba(245,240,232,0.55);
+      line-height: 1.6;
+    }
+
+    /* FOUNDING */
+    .founding {
+      padding: 8rem 5rem;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: start;
+    }
+
+    .founding-left h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 3vw, 2.8rem);
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+    }
+
+    .founding-left h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .founding-left p {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.75;
+      margin-bottom: 1rem;
+      max-width: 48ch;
+    }
+
+    .perks {
+      margin-top: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .perk {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .perk-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      margin-top: 0.6rem;
+      flex-shrink: 0;
+    }
+
+    .perk-text {
+      font-size: 0.95rem;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .founding-right {
+      padding-top: 0.5rem;
+    }
+
+    /* COUNTER */
+    .counter-block {
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: var(--warm);
+      border: 1px solid var(--border);
+    }
+
+    .counter-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .counter-bar-wrap {
+      height: 4px;
+      background: var(--border);
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+
+    .counter-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 1.5s ease;
+    }
+
+    .counter-numbers {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .counter-taken {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .counter-total {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 3rem 5rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-logo {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .footer-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-link:hover { color: var(--accent); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      nav { padding: 1.25rem 1.5rem; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-left { padding: 7rem 1.5rem 3rem; border-right: none; border-bottom: 1px solid var(--border); }
+      .hero-right { padding: 3rem 1.5rem 5rem; flex-direction: row; flex-wrap: wrap; gap: 2rem; }
+      .problem { grid-template-columns: 1fr; padding: 5rem 1.5rem; gap: 2rem; }
+      .platforms { flex-direction: column; padding: 0 1.5rem 5rem; }
+      .platform-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .what { padding: 5rem 1.5rem; }
+      .modules { grid-template-columns: 1fr; }
+      .module:nth-child(even) { padding-left: 0; border-left: none; }
+      .founding { grid-template-columns: 1fr; padding: 5rem 1.5rem; gap: 3rem; }
+      footer { flex-direction: column; gap: 1.5rem; padding: 2rem 1.5rem; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+      .form-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="#" class="nav-logo">Collective Loft</a>
+    <a href="#founding" class="nav-cta">Apply for Founding Access</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">Now accepting founding members</p>
+      <h1 class="hero-headline">
+        Make something<br>
+        you couldn't make <em>alone.</em>
+      </h1>
+      <p class="hero-sub">
+        Collective Loft is the professional network for the creative class. Find your collaborator. Build the project. Handle the business before a note is recorded or a brushstroke is made.
+      </p>
+
+      <div class="form-wrap" id="hero-form-wrap">
+        <div class="form-row">
+          <input class="form-input" type="text" id="hero-name" placeholder="First name" />
+          <input class="form-input" type="email" id="hero-email" placeholder="Email address" />
+        </div>
+        <select class="form-select" id="hero-discipline">
+          <option value="" disabled selected>Your discipline</option>
+          <option>Visual Artist</option>
+          <option>Musician / Producer</option>
+          <option>Writer / Poet</option>
+          <option>Designer / Web</option>
+          <option>Filmmaker</option>
+          <option>Photographer</option>
+          <option>Performance</option>
+          <option>Creative Tech</option>
+          <option>Other</option>
+        </select>
+        <div class="form-row">
+          <button class="form-btn" onclick="handleSignup('hero')">Apply for founding access</button>
+        </div>
+        <p class="form-note">500 founding spots. No spam. No noise. Just the platform when it's ready.</p>
+      </div>
+
+      <div class="success-msg" id="hero-success">
+        <p>You're on the list.</p>
+        <span>We'll be in touch before anyone else hears about it.</span>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="divider-label">The market</div>
+      <div class="stat-block">
+        <div class="stat-number">165M+</div>
+        <div class="stat-label">Independent creatives globally</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-number">0</div>
+        <div class="stat-label">Platforms built for how they actually work</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-number">8</div>
+        <div class="stat-label">Disciplines. One network.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="problem">
+    <div class="problem-label">The problem</div>
+    <div class="problem-content">
+      <h2>Every platform built "for" creatives<br>treats them as <em>something else.</em></h2>
+      <p>Service workers on Upwork. Content producers on Instagram. Static portfolio holders on Behance. Generic professionals on LinkedIn.</p>
+      <p>None of them are built for what actually drives creative output: the relationship between complementary disciplines that produces work neither party could make alone.</p>
+      <p>The creative class has never had a professional home. That changes.</p>
+    </div>
+  </section>
+
+  <!-- PLATFORMS -->
+  <div class="platforms">
+    <div class="platform-item">
+      <div class="platform-name">LinkedIn</div>
+      <div class="platform-problem">Built for corporate professionals. Treats a musician's profile like a résumé.</div>
+    </div>
+    <div class="platform-item">
+      <div class="platform-name">Upwork</div>
+      <div class="platform-problem">Client-worker hierarchy. Race to the bottom on price. Not a creative relationship.</div>
+    </div>
+    <div class="platform-item">
+      <div class="platform-name">Behance</div>
+      <div class="platform-problem">Work sits waiting to be found. Passive. No path from profile to project.</div>
+    </div>
+    <div class="platform-item">
+      <div class="platform-name">Instagram</div>
+      <div class="platform-problem">Optimizes for attention. Engagement is the metric. Not completed work.</div>
+    </div>
+  </div>
+
+  <!-- WHAT IT IS -->
+  <section class="what">
+    <div class="what-inner">
+      <p class="what-eyebrow">The platform</p>
+      <h2>From the first moment of discovery<br>to the <em>final handoff</em> of finished work.</h2>
+      <div class="modules">
+        <div class="module">
+          <div class="module-num">01</div>
+          <div class="module-name">Creative Profiles</div>
+          <div class="module-desc">A professional identity built around your discipline, not a CV. Your "Right Now" card tells collaborators exactly what you're making and what you need, today.</div>
+        </div>
+        <div class="module">
+          <div class="module-num">02</div>
+          <div class="module-name">Collab Briefs</div>
+          <div class="module-desc">Post what you're making and who you need, in creative language. Not a job listing. A conversation starter with a track record attached.</div>
+        </div>
+        <div class="module">
+          <div class="module-num">03</div>
+          <div class="module-name">Discipline Matching</div>
+          <div class="module-desc">An algorithm that surfaces the right collaborator, with a score and the specific reasons behind it. 94% match means something here.</div>
+        </div>
+        <div class="module">
+          <div class="module-num">04</div>
+          <div class="module-name">The Loft Studio</div>
+          <div class="module-desc">A shared workspace that opens the moment two creatives agree to work together. Brief pinned at the top. Milestones, files, chat, all in one place.</div>
+        </div>
+        <div class="module">
+          <div class="module-num">05</div>
+          <div class="module-name">Collab Terms</div>
+          <div class="module-desc">Creative exchange, paid, or revenue share. Rights timestamped. Deliverables locked. Milestone payments only release when both parties confirm. No surprises.</div>
+        </div>
+        <div class="module" style="background: transparent; border: none;">
+          <div class="module-num" style="opacity:0">06</div>
+          <div class="module-name" style="font-style: italic; font-size: 1.1rem; color: rgba(245,240,232,0.4); margin-top: 1rem;">"The best music I've ever made came from real creative relationships. Not cold DMs."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOUNDING MEMBER -->
+  <section class="founding" id="founding">
+    <div class="founding-left">
+      <h2>500 founding spots.<br><em>Apply before launch.</em></h2>
+      <p>We're not doing an open beta. We're building the founding cohort by hand, across disciplines, across cities, with people who are actively making work right now.</p>
+      <p>Founding members shape the platform. Their feedback, their Studios, their track record becomes the foundation everyone who comes after builds on.</p>
+
+      <div class="perks">
+        <div class="perk">
+          <div class="perk-dot"></div>
+          <div class="perk-text">Early access before public launch</div>
+        </div>
+        <div class="perk">
+          <div class="perk-dot"></div>
+          <div class="perk-text">Founding member badge on your profile, permanently</div>
+        </div>
+        <div class="perk">
+          <div class="perk-dot"></div>
+          <div class="perk-text">Direct line to the team as we build</div>
+        </div>
+        <div class="perk">
+          <div class="perk-dot"></div>
+          <div class="perk-text">Your first completed Studio on us</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="founding-right">
+      <div class="counter-block">
+        <div class="counter-label">Founding spots remaining</div>
+        <div class="counter-bar-wrap">
+          <div class="counter-bar" id="counter-bar"></div>
+        </div>
+        <div class="counter-numbers">
+          <div class="counter-taken" id="counter-taken">47</div>
+          <div class="counter-total">of 500 claimed</div>
+        </div>
+      </div>
+
+      <div id="founding-form-wrap">
+        <select class="form-select" id="founding-discipline" style="margin-bottom: 0.75rem; width: 100%;">
+          <option value="" disabled selected>Your discipline</option>
+          <option>Visual Artist</option>
+          <option>Musician / Producer</option>
+          <option>Writer / Poet</option>
+          <option>Designer / Web</option>
+          <option>Filmmaker</option>
+          <option>Photographer</option>
+          <option>Performance</option>
+          <option>Creative Tech</option>
+          <option>Other</option>
+        </select>
+        <div class="form-row" style="margin-bottom: 0.75rem;">
+          <input class="form-input" type="text" id="founding-name" placeholder="First name" />
+          <input class="form-input" type="email" id="founding-email" placeholder="Email address" />
+        </div>
+        <input class="form-input" type="text" id="founding-project" placeholder="What are you working on right now?" style="width: 100%; margin-bottom: 0.75rem;" />
+        <button class="form-btn" style="width: 100%;" onclick="handleSignup('founding')">Claim your founding spot</button>
+        <p class="form-note" style="margin-top: 0.75rem;">500 spots. We read every application.</p>
+      </div>
+
+      <div class="success-msg" id="founding-success">
+        <p>You're in.</p>
+        <span>Founding member confirmed. We'll be in touch with next steps before anyone else hears about it.</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">Collective Loft · collectiveloft.com</div>
+    <div class="footer-links">
+      <a href="mailto:hello@collectiveloft.com" class="footer-link">hello@collectiveloft.com</a>
+      <a href="mailto:press@collectiveloft.com" class="footer-link">Press</a>
+      <a href="mailto:hello@collectiveloft.com" class="footer-link">Investors</a>
+    </div>
+  </footer>
+
+  <script>
+    // Animate counter bar on load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const bar = document.getElementById('counter-bar');
+        if (bar) bar.style.width = '9.4%'; // 47/500
+      }, 800);
+    });
+
+    // Waitlist storage
+    const waitlist = JSON.parse(localStorage.getItem('cl_waitlist') || '[]');
+    let claimed = 47 + waitlist.length;
+
+    function updateCounter() {
+      const el = document.getElementById('counter-taken');
+      const bar = document.getElementById('counter-bar');
+      if (el) el.textContent = claimed;
+      if (bar) bar.style.width = (claimed / 500 * 100) + '%';
+    }
+
+    updateCounter();
+
+    function handleSignup(form) {
+      const name = document.getElementById(form + '-name').value.trim();
+      const email = document.getElementById(form + '-email').value.trim();
+      const discipline = document.getElementById(form + '-discipline').value;
+
+      if (!name || !email || !discipline) {
+        const inputs = document.querySelectorAll('#' + form + '-name, #' + form + '-email, #' + form + '-discipline');
+        inputs.forEach(i => {
+          if (!i.value.trim()) {
+            i.style.borderColor = 'var(--accent)';
+            setTimeout(() => i.style.borderColor = '', 2000);
+          }
+        });
+        return;
+      }
+
+      // Basic email check
+      if (!email.includes('@') || !email.includes('.')) {
+        const emailEl = document.getElementById(form + '-email');
+        emailEl.style.borderColor = 'var(--accent)';
+        setTimeout(() => emailEl.style.borderColor = '', 2000);
+        return;
+      }
+
+      // Save locally
+      const entry = { name, email, discipline, ts: Date.now() };
+      waitlist.push(entry);
+      localStorage.setItem('cl_waitlist', JSON.stringify(waitlist));
+
+      claimed++;
+      updateCounter();
+
+      // Show success
+      document.getElementById(form + '-form-wrap').style.display = 'none';
+      const success = document.getElementById(form + '-success');
+      success.style.display = 'block';
+    }
+
+    // Intersection observer for scroll animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.problem, .founding').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(24px)';
+      el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>

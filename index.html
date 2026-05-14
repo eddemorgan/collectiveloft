@@ -1,4 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collective Loft — Make Something Together</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNjAgMjYwIiB3aWR0aD0iMjYwbW0iIGhlaWdodD0iMjYwbW0iPgogIDx0aXRsZT5Db2xsZWN0aXZlIExvZnQg4oCUIENpcmN1bGFyIEJhZGdlPC90aXRsZT4KICA8ZGVzYz5QcmludC1yZWFkeSBjaXJjdWxhciBiYWRnZSBmb3IgQ29sbGVjdGl2ZSBMb2Z0LjwvZGVzYz4KCiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC53bSB7IGZvbnQtZmFtaWx5OiAiUGFsYXRpbm8gTGlub3R5cGUiLCJQYWxhdGlubyIsIkJvb2sgQW50aXF1YSIsR2VvcmdpYSxzZXJpZjsgfQogICAgPC9zdHlsZT4KICA8L2RlZnM+CgogIDwhLS0gZmFjZSAtLT4KICA8Y2lyY2xlIGN4PSIxMzAiIGN5PSIxMzAiIHI9IjEyNyIgZmlsbD0iIzBEMEQwRCIgc3Ryb2tlPSIjQzlBODRDIiBzdHJva2Utd2lkdGg9IjEuNSIvPgogIDwhLS0gaW5uZXIgcmluZ3MgLS0+CiAgPGNpcmNsZSBjeD0iMTMwIiBjeT0iMTMwIiByPSIxMTEiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0M5QTg0QyIgc3Ryb2tlLXdpZHRoPSIwLjUiIG9wYWNpdHk9IjAuNCIvPgogIDxjaXJjbGUgY3g9IjEzMCIgY3k9IjEzMCIgcj0iOTciICBmaWxsPSJub25lIiBzdHJva2U9IiNDOUE4NEMiIHN0cm9rZS13aWR0aD0iMC40IiBvcGFjaXR5PSIwLjIyIi8+CgogIDwhLS0gY2FyZGluYWwgZGlhbW9uZHMgLS0+CiAgPHRleHQgeD0iMTMwIiB5PSIxOCIgIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ3bSIgZm9udC1zaXplPSI5IiBmaWxsPSIjQzlBODRDIiBvcGFjaXR5PSIwLjU1Ij7inKY8L3RleHQ+CiAgPHRleHQgeD0iMTMwIiB5PSIyNTEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ3bSIgZm9udC1zaXplPSI5IiBmaWxsPSIjQzlBODRDIiBvcGFjaXR5PSIwLjU1Ij7inKY8L3RleHQ+CiAgPHRleHQgeD0iNyIgICB5PSIxMzQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ3bSIgZm9udC1zaXplPSI5IiBmaWxsPSIjQzlBODRDIiBvcGFjaXR5PSIwLjU1Ij7inKY8L3RleHQ+CiAgPHRleHQgeD0iMjUzIiB5PSIxMzQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ3bSIgZm9udC1zaXplPSI5IiBmaWxsPSIjQzlBODRDIiBvcGFjaXR5PSIwLjU1Ij7inKY8L3RleHQ+CgogIDwhLS0gdG9wIGFyYyAtLT4KICA8cGF0aCBpZD0idEFyYyIgZD0iTSAxOSAxMzAgQSAxMTEgMTExIDAgMCAxIDI0MSAxMzAiIGZpbGw9Im5vbmUiLz4KICA8dGV4dCBjbGFzcz0id20iIGZvbnQtc2l6ZT0iMTAiIGZpbGw9IiNDOUE4NEMiIGxldHRlci1zcGFjaW5nPSIyLjIiPgogICAgPHRleHRQYXRoIGhyZWY9IiN0QXJjIiBzdGFydE9mZnNldD0iNTAlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5XSEVSRSBDUkVBVElWRVMgRklORCBFQUNIIE9USEVSPC90ZXh0UGF0aD4KICA8L3RleHQ+CgogIDwhLS0gYm90dG9tIGFyYyAtLT4KICA8cGF0aCBpZD0iYkFyYyIgZD0iTSAyNSAxMzAgQSAxMDUgMTA1IDAgMCAwIDIzNSAxMzAiIGZpbGw9Im5vbmUiLz4KICA8dGV4dCBjbGFzcz0id20iIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI0M5QTg0QyIgbGV0dGVyLXNwYWNpbmc9IjEuOCIgb3BhY2l0eT0iMC43NSI+CiAgICA8dGV4dFBhdGggaHJlZj0iI2JBcmMiIHN0YXJ0T2Zmc2V0PSI1MCUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPuKcpiBBUlRJU1RTIMK3IE1VU0lDSUFOUyDCtyBXUklURVJTIMK3IERFU0lHTkVSUyDinKY8L3RleHRQYXRoPgogIDwvdGV4dD4KCiAgPCEtLSBDb2xsZWN0aXZlIOKAlCBjcmVhbSAtLT4KICA8dGV4dCB4PSIxMzAiIHk9IjEyMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9IndtIiBmb250LXNpemU9IjM2IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0iI0YwRUNFMyIgbGV0dGVyLXNwYWNpbmc9IjAuNSI+Q29sbGVjdGl2ZTwvdGV4dD4KCiAgPCEtLSBydWxlIC0tPgogIDxsaW5lIHgxPSI2MiIgeTE9IjEyOSIgeDI9IjE5OCIgeTI9IjEyOSIgc3Ryb2tlPSIjQzlBODRDIiBzdHJva2Utd2lkdGg9IjAuNSIgb3BhY2l0eT0iMC40NSIvPgoKICA8IS0tIExPRlQg4oCUIGdvbGQgLS0+CiAgPHRleHQgeD0iMTMwIiB5PSIxNTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGNsYXNzPSJ3bSIgZm9udC1zaXplPSIxOCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IiNDOUE4NEMiIGxldHRlci1zcGFjaW5nPSI4Ij5MT0ZUPC90ZXh0PgoKICA8IS0tIGRpdmlkZXIgcm93IC0tPgogIDxsaW5lIHgxPSI3NCIgIHkxPSIxNjAiIHgyPSIxMDIiIHkyPSIxNjAiIHN0cm9rZT0iI0M5QTg0QyIgc3Ryb2tlLXdpZHRoPSIwLjYiIG9wYWNpdHk9IjAuNSIvPgogIDx0ZXh0IHg9IjEzMCIgeT0iMTY0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBjbGFzcz0id20iIGZvbnQtc2l6ZT0iOSIgZmlsbD0iI0M5QTg0QyIgb3BhY2l0eT0iMC42NSI+4pymPC90ZXh0PgogIDxsaW5lIHgxPSIxNTgiIHkxPSIxNjAiIHgyPSIxODYiIHkyPSIxNjAiIHN0cm9rZT0iI0M5QTg0QyIgc3Ryb2tlLXdpZHRoPSIwLjYiIG9wYWNpdHk9IjAuNSIvPgoKICA8IS0tIFVSTCAtLT4KICA8dGV4dCB4PSIxMzAiIHk9IjE3OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgY2xhc3M9IndtIiBmb250LXNpemU9IjguNSIgZmlsbD0iI0YwRUNFMyIgb3BhY2l0eT0iMC40MiIgbGV0dGVyLXNwYWNpbmc9IjAuOCI+Y29sbGVjdGl2ZWxvZnQuY29tPC90ZXh0Pgo8L3N2Zz4K" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --ink: #0f0e0c;
+      --paper: #f5f0e8;
+      --warm: #e8e0ce;
+      --accent: #c84b2f;
+      --accent-dark: #a33a21;
+      --muted: #7a7468;
+      --border: #d4cdc0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* GRAIN OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.6;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky;
+      top: 0;
       left: 0;
       right: 0;
       z-index: 50;

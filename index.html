@@ -8,7 +8,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
     :root {
       --ink: #0f0e0c;
       --paper: #f5f0e8;
@@ -18,9 +18,9 @@
       --muted: #7a7468;
       --border: #d4cdc0;
     }
-
+ 
     html { scroll-behavior: smooth; }
-
+ 
     body {
       background: var(--paper);
       color: var(--ink);
@@ -29,7 +29,7 @@
       line-height: 1.6;
       overflow-x: hidden;
     }
-
+ 
     /* GRAIN OVERLAY */
     body::before {
       content: '';
@@ -40,7 +40,7 @@
       z-index: 100;
       opacity: 0.6;
     }
-
+ 
     /* NAV */
     nav {
       position: sticky;
@@ -56,7 +56,7 @@
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
     }
-
+ 
     .nav-logo {
       font-family: 'DM Mono', monospace;
       font-size: 0.85rem;
@@ -65,7 +65,7 @@
       color: var(--ink);
       text-decoration: none;
     }
-
+ 
     .nav-cta {
       font-family: 'DM Mono', monospace;
       font-size: 0.75rem;
@@ -78,7 +78,7 @@
       transition: opacity 0.2s;
     }
     .nav-cta:hover { opacity: 0.7; }
-
+ 
     /* HERO */
     .hero {
       min-height: 100vh;
@@ -86,7 +86,7 @@
       grid-template-columns: 1fr 1fr;
       padding-top: 0;
     }
-
+ 
     .hero-left {
       padding: 8rem 4rem 6rem 5rem;
       display: flex;
@@ -96,7 +96,7 @@
       opacity: 0;
       animation: fadeUp 0.9s ease forwards 0.1s;
     }
-
+ 
     .hero-eyebrow {
       font-family: 'DM Mono', monospace;
       font-size: 0.72rem;
@@ -105,7 +105,7 @@
       color: var(--muted);
       margin-bottom: 2rem;
     }
-
+ 
     .hero-headline {
       font-family: 'Playfair Display', serif;
       font-size: clamp(3rem, 5vw, 4.5rem);
@@ -113,12 +113,12 @@
       font-weight: 400;
       margin-bottom: 2rem;
     }
-
+ 
     .hero-headline em {
       font-style: italic;
       color: var(--accent);
     }
-
+ 
     .hero-sub {
       font-size: 1.1rem;
       color: var(--muted);
@@ -126,7 +126,7 @@
       max-width: 42ch;
       margin-bottom: 3rem;
     }
-
+ 
     /* FORM */
     .form-wrap {
       display: flex;
@@ -134,12 +134,12 @@
       gap: 1rem;
       max-width: 440px;
     }
-
+ 
     .form-row {
       display: flex;
       gap: 0.75rem;
     }
-
+ 
     .form-input {
       flex: 1;
       padding: 0.9rem 1.2rem;
@@ -154,7 +154,7 @@
     }
     .form-input::placeholder { color: var(--muted); }
     .form-input:focus { border-color: var(--accent); }
-
+ 
     .form-select {
       width: 100%;
       padding: 0.9rem 1.2rem;
@@ -173,7 +173,7 @@
     }
     .form-select:focus { border-color: var(--accent); }
     .form-select option { color: var(--ink); background: var(--paper); }
-
+ 
     .form-btn {
       padding: 0.9rem 2rem;
       background: var(--accent);
@@ -189,14 +189,14 @@
     }
     .form-btn:hover { background: var(--accent-dark); }
     .form-btn:active { transform: scale(0.98); }
-
+ 
     .form-note {
       font-family: 'DM Mono', monospace;
       font-size: 0.68rem;
       color: var(--muted);
       letter-spacing: 0.04em;
     }
-
+ 
     /* SUCCESS STATE */
     .success-msg {
       display: none;
@@ -218,7 +218,7 @@
       margin-top: 0.5rem;
       letter-spacing: 0.06em;
     }
-
+ 
     /* HERO RIGHT */
     .hero-right {
       padding: 8rem 4rem 6rem 4rem;
@@ -229,12 +229,12 @@
       opacity: 0;
       animation: fadeUp 0.9s ease forwards 0.3s;
     }
-
+ 
     .stat-block {
       border-left: 2px solid var(--accent);
       padding-left: 1.5rem;
     }
-
+ 
     .stat-number {
       font-family: 'Playfair Display', serif;
       font-size: 3rem;
@@ -242,7 +242,7 @@
       font-weight: 700;
       color: var(--ink);
     }
-
+ 
     .stat-label {
       font-family: 'DM Mono', monospace;
       font-size: 0.72rem;
@@ -251,7 +251,7 @@
       color: var(--muted);
       margin-top: 0.4rem;
     }
-
+ 
     .divider-label {
       font-family: 'DM Mono', monospace;
       font-size: 0.68rem;
@@ -261,7 +261,7 @@
       padding-bottom: 1rem;
       border-bottom: 1px solid var(--border);
     }
-
+ 
     /* PROBLEM SECTION */
     .problem {
       padding: 8rem 5rem;
@@ -272,7 +272,7 @@
       opacity: 0;
       animation: fadeUp 0.9s ease forwards 0.5s;
     }
-
+ 
     .problem-label {
       font-family: 'DM Mono', monospace;
       font-size: 0.72rem;
@@ -281,7 +281,7 @@
       color: var(--muted);
       padding-top: 0.5rem;
     }
-
+ 
     .problem-content h2 {
       font-family: 'Playfair Display', serif;
       font-size: clamp(2rem, 3vw, 2.8rem);
@@ -289,12 +289,12 @@
       line-height: 1.2;
       margin-bottom: 2rem;
     }
-
+ 
     .problem-content h2 em {
       font-style: italic;
       color: var(--accent);
     }
-
+ 
     .problem-content p {
       font-size: 1.05rem;
       color: var(--muted);
@@ -302,7 +302,7 @@
       max-width: 60ch;
       margin-bottom: 1.2rem;
     }
-
+ 
     /* PLATFORMS ROW */
     .platforms {
       padding: 0 5rem 8rem;
@@ -310,14 +310,14 @@
       gap: 0;
       border-top: 1px solid var(--border);
     }
-
+ 
     .platform-item {
       flex: 1;
       padding: 2.5rem 2rem;
       border-right: 1px solid var(--border);
     }
     .platform-item:last-child { border-right: none; }
-
+ 
     .platform-name {
       font-family: 'DM Mono', monospace;
       font-size: 0.75rem;
@@ -328,13 +328,13 @@
       text-decoration: line-through;
       text-decoration-color: var(--accent);
     }
-
+ 
     .platform-problem {
       font-size: 0.95rem;
       color: var(--ink);
       line-height: 1.5;
     }
-
+ 
     /* WHAT IT IS */
     .what {
       padding: 8rem 5rem;
@@ -342,12 +342,12 @@
       color: var(--paper);
       border-top: 1px solid var(--border);
     }
-
+ 
     .what-inner {
       max-width: 900px;
       margin: 0 auto;
     }
-
+ 
     .what-eyebrow {
       font-family: 'DM Mono', monospace;
       font-size: 0.72rem;
@@ -356,7 +356,7 @@
       color: var(--muted);
       margin-bottom: 3rem;
     }
-
+ 
     .what h2 {
       font-family: 'Playfair Display', serif;
       font-size: clamp(2rem, 3.5vw, 3.2rem);
@@ -364,19 +364,19 @@
       line-height: 1.25;
       margin-bottom: 3rem;
     }
-
+ 
     .what h2 em {
       font-style: italic;
       color: var(--accent);
     }
-
+ 
     .modules {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0;
       border-top: 1px solid rgba(255,255,255,0.1);
     }
-
+ 
     .module {
       padding: 2.5rem 0 2.5rem;
       border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -387,7 +387,7 @@
       padding-right: 0;
       border-left: 1px solid rgba(255,255,255,0.1);
     }
-
+ 
     .module-num {
       font-family: 'DM Mono', monospace;
       font-size: 0.65rem;
@@ -395,7 +395,7 @@
       color: var(--accent);
       margin-bottom: 0.75rem;
     }
-
+ 
     .module-name {
       font-family: 'Playfair Display', serif;
       font-size: 1.3rem;
@@ -403,13 +403,13 @@
       margin-bottom: 0.75rem;
       color: var(--paper);
     }
-
+ 
     .module-desc {
       font-size: 0.9rem;
       color: rgba(245,240,232,0.55);
       line-height: 1.6;
     }
-
+ 
     /* FOUNDING */
     .founding {
       padding: 8rem 5rem;
@@ -419,7 +419,7 @@
       gap: 6rem;
       align-items: start;
     }
-
+ 
     .founding-left h2 {
       font-family: 'Playfair Display', serif;
       font-size: clamp(2rem, 3vw, 2.8rem);
@@ -427,12 +427,12 @@
       line-height: 1.2;
       margin-bottom: 1.5rem;
     }
-
+ 
     .founding-left h2 em {
       font-style: italic;
       color: var(--accent);
     }
-
+ 
     .founding-left p {
       font-size: 1rem;
       color: var(--muted);
@@ -440,20 +440,20 @@
       margin-bottom: 1rem;
       max-width: 48ch;
     }
-
+ 
     .perks {
       margin-top: 2.5rem;
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
-
+ 
     .perk {
       display: flex;
       align-items: flex-start;
       gap: 1rem;
     }
-
+ 
     .perk-dot {
       width: 6px;
       height: 6px;
@@ -462,17 +462,17 @@
       margin-top: 0.6rem;
       flex-shrink: 0;
     }
-
+ 
     .perk-text {
       font-size: 0.95rem;
       color: var(--ink);
       line-height: 1.5;
     }
-
+ 
     .founding-right {
       padding-top: 0.5rem;
     }
-
+ 
     /* COUNTER */
     .counter-block {
       margin-bottom: 3rem;
@@ -480,7 +480,7 @@
       background: var(--warm);
       border: 1px solid var(--border);
     }
-
+ 
     .counter-label {
       font-family: 'DM Mono', monospace;
       font-size: 0.68rem;
@@ -489,41 +489,41 @@
       color: var(--muted);
       margin-bottom: 1rem;
     }
-
+ 
     .counter-bar-wrap {
       height: 4px;
       background: var(--border);
       margin-bottom: 0.75rem;
       overflow: hidden;
     }
-
+ 
     .counter-bar {
       height: 100%;
       background: var(--accent);
       width: 0%;
       transition: width 1.5s ease;
     }
-
+ 
     .counter-numbers {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
     }
-
+ 
     .counter-taken {
       font-family: 'Playfair Display', serif;
       font-size: 2rem;
       font-weight: 700;
       color: var(--accent);
     }
-
+ 
     .counter-total {
       font-family: 'DM Mono', monospace;
       font-size: 0.72rem;
       color: var(--muted);
       letter-spacing: 0.1em;
     }
-
+ 
     /* FOOTER */
     footer {
       padding: 3rem 5rem;
@@ -532,7 +532,7 @@
       justify-content: space-between;
       align-items: center;
     }
-
+ 
     .footer-logo {
       font-family: 'DM Mono', monospace;
       font-size: 0.8rem;
@@ -540,12 +540,12 @@
       text-transform: uppercase;
       color: var(--muted);
     }
-
+ 
     .footer-links {
       display: flex;
       gap: 2rem;
     }
-
+ 
     .footer-link {
       font-family: 'DM Mono', monospace;
       font-size: 0.72rem;
@@ -556,8 +556,8 @@
       transition: color 0.2s;
     }
     .footer-link:hover { color: var(--accent); }
-
-
+ 
+ 
     /* BANNER HEADER */
     .site-banner {
       width: 100%;
@@ -570,7 +570,7 @@
       height: auto;
       display: block;
     }
-
+ 
     /* FOUNDING CTA BAR */
     .founding-cta-bar {
       background: var(--paper);
@@ -594,7 +594,7 @@
       transition: opacity 0.2s;
     }
     .founding-cta-bar a:hover { opacity: 0.7; }
-
+ 
     /* STRIP FOOTER */
     .site-strip-footer {
       width: 100%;
@@ -605,13 +605,13 @@
       height: auto;
       display: block;
     }
-
+ 
     /* ANIMATIONS */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
+ 
     /* RESPONSIVE */
     @media (max-width: 900px) {
       nav { padding: 1.25rem 1.5rem; }
@@ -632,7 +632,7 @@
   </style>
 </head>
 <body>
-
+ 
   <!-- BANNER HEADER -->
   <div class="site-banner">
     <div style="background:#f5f0e8; border-bottom:1px solid #d4cdc0; padding:20px 48px; display:grid; grid-template-columns:1fr auto; align-items:center; gap:40px;">
@@ -641,7 +641,6 @@
         <div style="font-family:'Playfair Display',serif; font-size:42px; font-weight:700; color:#0f0e0c; line-height:1.1; margin-bottom:2px;">Collective</div>
         <div style="font-family:'DM Mono',monospace; font-size:18px; letter-spacing:10px; color:#C9A84C; margin-bottom:6px;">LOFT</div>
         <div style="font-family:'Playfair Display',serif; font-size:12px; font-style:italic; color:#7a7468; letter-spacing:1.5px;">Make something together.</div>
-        <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; color:#7a7468; margin-top:4px;">collectiveloft.com</div>
       </div>
       <div style="border-left:1px solid #d4cdc0; padding-left:40px;">
         <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2.5px; text-transform:uppercase; color:#C9A84C; line-height:2.2;">
@@ -650,7 +649,7 @@
       </div>
     </div>
   </div>
-
+ 
     <div class="hero-right">
       <div class="divider-label">The market</div>
       <div class="stat-block">
@@ -667,7 +666,7 @@
       </div>
     </div>
   </section>
-
+ 
   <!-- PROBLEM -->
   <section class="problem">
     <div class="problem-label">The problem</div>
@@ -678,7 +677,7 @@
       <p>The creative class has never had a professional home. That changes.</p>
     </div>
   </section>
-
+ 
   <!-- PLATFORMS -->
   <div class="platforms">
     <div class="platform-item">
@@ -698,7 +697,7 @@
       <div class="platform-problem">Optimizes for attention. Engagement is the metric. Not completed work.</div>
     </div>
   </div>
-
+ 
   <!-- WHAT IT IS -->
   <section class="what">
     <div class="what-inner">
@@ -737,15 +736,14 @@
       </div>
     </div>
   </section>
-
+ 
   <!-- FOUNDING MEMBER -->
   <section class="founding" id="founding">
     <div class="founding-left">
       <h2>500 founding spots.<br><em>Apply before launch.</em></h2>
-      <a href="mailto:help@collectiveloft.com" style="font-family:'DM Mono',monospace; font-size:0.75rem; letter-spacing:0.1em; color:#c84b2f; text-decoration:none; border-bottom:1px solid #c84b2f; padding-bottom:2px;">help@collectiveloft.com</a>
       <p>We're not doing an open beta. We're building the founding cohort by hand, across disciplines, across cities, with people who are actively making work right now.</p>
       <p>Founding members shape the platform. Their feedback, their Studios, their track record becomes the foundation everyone who comes after builds on.</p>
-
+ 
       <div class="perks">
         <div class="perk">
           <div class="perk-dot"></div>
@@ -765,7 +763,7 @@
         </div>
       </div>
     </div>
-
+ 
     <div class="founding-right">
       <div class="counter-block">
         <div class="counter-label">Founding spots remaining</div>
@@ -777,7 +775,7 @@
           <div class="counter-total">of 500 claimed</div>
         </div>
       </div>
-
+ 
       <div id="founding-form-wrap">
         <select class="form-select" id="founding-discipline" style="margin-bottom: 0.75rem; width: 100%;">
           <option value="" disabled selected>Your discipline</option>
@@ -798,22 +796,29 @@
         <input class="form-input" type="text" id="founding-project" placeholder="What are you working on right now?" style="width: 100%; margin-bottom: 0.75rem;" />
         <button class="form-btn" style="width: 100%;" onclick="handleSignup('founding')">Claim your founding spot</button>
         <p class="form-note" style="margin-top: 0.75rem;">500 spots. We read every application.</p>
+        <p class="form-note" style="margin-top: 0.5rem;"><a href="mailto:help@collectiveloft.com" style="font-family:'DM Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; color:#c84b2f; text-decoration:none; border-bottom:1px solid #c84b2f; padding-bottom:1px;">help@collectiveloft.com</a></p>
       </div>
-
+ 
       <div class="success-msg" id="founding-success">
         <p>You're in.</p>
         <span>Founding member confirmed. We'll be in touch with next steps before anyone else hears about it.</span>
       </div>
     </div>
   </section>
-
+ 
   <footer style="padding:0; border-top:none;">    <div style="background:#f5f0e8; border-top:1px solid #d4cdc0; padding:20px 48px; display:grid; grid-template-columns:1fr auto; align-items:center; gap:40px;">
       <div>
         <div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:#C9A84C; margin-bottom:6px;">Where Creatives Find Each Other</div>
         <div style="font-family:'Playfair Display',serif; font-size:28px; font-weight:700; color:#0f0e0c; line-height:1.1; margin-bottom:2px;">Collective</div>
         <div style="font-family:'DM Mono',monospace; font-size:13px; letter-spacing:8px; color:#C9A84C; margin-bottom:6px;">LOFT</div>
         <div style="font-family:'Playfair Display',serif; font-size:11px; font-style:italic; color:#7a7468; letter-spacing:1px; margin-bottom:4px;">Make something together.</div>
-        <div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; color:#7a7468;">collectiveloft.com</div>
+        <a href="https://www.instagram.com/the.collective.loft" target="_blank" rel="noopener" style="display:inline-block; margin-top:6px; color:#7a7468; transition:color 0.2s;" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='#7a7468'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/>
+          </svg>
+        </a>
       </div>
       <div style="border-left:1px solid #d4cdc0; padding-left:40px;">
         <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#C9A84C; line-height:2.2;">
@@ -822,7 +827,7 @@
       </div>
     </div>
   </footer>
-
+ 
   <script>
     // Animate counter bar on load
     window.addEventListener('load', () => {
@@ -831,25 +836,25 @@
         if (bar) bar.style.width = '9.4%'; // 47/500
       }, 800);
     });
-
+ 
     // Waitlist storage
     const waitlist = JSON.parse(localStorage.getItem('cl_waitlist') || '[]');
     let claimed = 47 + waitlist.length;
-
+ 
     function updateCounter() {
       const el = document.getElementById('counter-taken');
       const bar = document.getElementById('counter-bar');
       if (el) el.textContent = claimed;
       if (bar) bar.style.width = (claimed / 500 * 100) + '%';
     }
-
+ 
     updateCounter();
-
+ 
     function handleSignup(form) {
       const name = document.getElementById(form + '-name').value.trim();
       const email = document.getElementById(form + '-email').value.trim();
       const discipline = document.getElementById(form + '-discipline').value;
-
+ 
       if (!name || !email || !discipline) {
         const inputs = document.querySelectorAll('#' + form + '-name, #' + form + '-email, #' + form + '-discipline');
         inputs.forEach(i => {
@@ -860,7 +865,7 @@
         });
         return;
       }
-
+ 
       // Basic email check
       if (!email.includes('@') || !email.includes('.')) {
         const emailEl = document.getElementById(form + '-email');
@@ -868,21 +873,21 @@
         setTimeout(() => emailEl.style.borderColor = '', 2000);
         return;
       }
-
+ 
       // Save locally
       const entry = { name, email, discipline, ts: Date.now() };
       waitlist.push(entry);
       localStorage.setItem('cl_waitlist', JSON.stringify(waitlist));
-
+ 
       claimed++;
       updateCounter();
-
+ 
       // Show success
       document.getElementById(form + '-form-wrap').style.display = 'none';
       const success = document.getElementById(form + '-success');
       success.style.display = 'block';
     }
-
+ 
     // Intersection observer for scroll animations
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => {
@@ -892,7 +897,7 @@
         }
       });
     }, { threshold: 0.1 });
-
+ 
     document.querySelectorAll('.problem, .founding').forEach(el => {
       el.style.opacity = '0';
       el.style.transform = 'translateY(24px)';

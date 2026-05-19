@@ -1,0 +1,38 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0 }
+
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --gold: #C9A84C;
+  --gold-d: #B8922E;
+  --ink: #0D0D0D;
+  --bg: #111111;
+  --bg1: #161616;
+  --bg2: #1C1C1C;
+  --cream: #F0ECE3;
+  --dim: rgba(240,236,227,0.62);
+  --faint: rgba(240,236,227,0.35);
+  --rule: rgba(201,168,76,0.18);
+  --teal: #56b39c;
+  --serif: 'EB Garamond', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth }
+
+body {
+  background: var(--bg);
+  color: var(--cream);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 4px }
+::-webkit-scrollbar-track { background: transparent }
+::-webkit-scrollbar-thumb {
+  background: rgba(201,168,76,0.2);
+  border-radius: 2px;
+}

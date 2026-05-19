@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import styles from './landing.module.css'
+import { supabase } from '../lib/supabase'
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -86,6 +87,7 @@ export default function LandingPage() {
   // Modal open/closed
   const [modalOpen, setModalOpen]   = useState(false)
   const [submitted, setSubmitted]   = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   // Form fields
   const [form, setForm] = useState({

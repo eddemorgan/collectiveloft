@@ -150,7 +150,10 @@ export default function LandingPage() {
           country,
           state: stateVal,
           city,
-          disciplines: selectedDiscs,
+disciplines: selectedDiscs.map(id => {
+  const found = DISCIPLINES.find(d => d.id === id)
+  return found ? found.label : id
+}),
           skills: selectedSkills,
           compensation: selectedComps,
         })

@@ -191,7 +191,6 @@ export default function LandingPage() {
   } catch (err) {
   console.error('Signup error:', err)
   alert('Error: ' + (err.message || JSON.stringify(err)))
-}
   } finally {
     setSubmitting(false)
   }

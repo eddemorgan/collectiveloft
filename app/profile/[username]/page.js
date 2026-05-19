@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import styles from './profile.module.css'
 
 const SKILL_WIDTHS = [95, 88, 78, 65, 55, 48, 42, 38]
-const GALLERY_BG   = ['#1c1228','#0f1e1b','#1e1510','#0e1520','#1a0f15','#141a0e']
 
 const DISC_OPTS = [
   { id:'visual',  icon:'🎨', label:'Visual Art' },
@@ -31,14 +30,39 @@ const SKILL_OPTS = [
   'Creative coding','Generative art','Interactive installation','Audio-visual',
 ]
 
-function profileSlug(p) {
-  return `${(p.firstname||'').toLowerCase()}-${(p.lastname||'').toLowerCase()}`
+// Detect file type from MIME type
+function detectType(file) {
+  const mime = file.type
+  if (mime.startsWith('image/')) return 'image'
+  if (mime.startsWith('video/')) return 'video'
+  if (mime.startsWith('audio/')) return 'audio'
+  if (mime === 'application/pdf') return 'document'
+  return 'document'
 }
+
+function bucketForType(type) {
+  if (type === 'image')    return 'portfolio-images'
+  if (type === 'video')    return 'portfolio-video'
+  if (type === 'audio')    return 'portfolio-audio'
+  return 'portfolio-docs'
+}
+
+function typeIcon(type) {
+  if (type === 'image')    return '🖼'
+  if (type === 'video')    return '▶'
+  if (type === 'audio')    return '🎵'
+  if (type === 'document') return '📄'
+  return '✦'
+}
+
 function initials(p) {
   return [(p.firstname||'?')[0],(p.lastname||'?')[0]].join('').toUpperCase()
 }
 function locationStr(p) {
   return [p.city,p.state,p.country].filter(Boolean).join(', ')
+}
+function profileSlug(p) {
+  return `${(p.firstname||'').toLowerCase()}-${(p.lastname||'').toLowerCase()}`
 }
 
 // ── Inline editable field ─────────────────────────────────────────────────────
@@ -69,14 +93,54 @@ function Editable({ value, onSave, placeholder, multiline, isOwner, className })
   }
 
   return (
-    <span
-      className={`${className} ${styles.editableField}`}
-      onClick={() => setEditing(true)}
-      title="Click to edit"
-    >
+    <span className={`${className} ${styles.editableField}`} onClick={() => setEditing(true)} title="Click to edit">
       {value || <span className={styles.editPlaceholder}>{placeholder}</span>}
       <span className={styles.editPencil}>✎</span>
     </span>
+  )
+}
+
+// ── Lightbox ──────────────────────────────────────────────────────────────────
+function Lightbox({ items, startIndex, onClose }) {
+  const [idx, setIdx] = useState(startIndex)
+  const item = items[idx]
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowRight') setIdx(i => Math.min(i + 1, items.length - 1))
+      if (e.key === 'ArrowLeft')  setIdx(i => Math.max(i - 1, 0))
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [items, onClose])
+
+  return (
+    <div className={styles.lightbox} onClick={onClose}>
+      <button className={styles.lbClose} onClick={onClose}>✕</button>
+      {idx > 0 && <button className={styles.lbPrev} onClick={e => { e.stopPropagation(); setIdx(i => i - 1) }}>‹</button>}
+      {idx < items.length - 1 && <button className={styles.lbNext} onClick={e => { e.stopPropagation(); setIdx(i => i + 1) }}>›</button>}
+      <div className={styles.lbContent} onClick={e => e.stopPropagation()}>
+        {item.type === 'image' && <img src={item.file_url} alt={item.title || ''} className={styles.lbImage} />}
+        {item.type === 'video' && <video src={item.file_url} controls autoPlay className={styles.lbVideo} />}
+        {item.type === 'audio' && (
+          <div className={styles.lbAudio}>
+            <div className={styles.lbAudioIcon}>🎵</div>
+            <div className={styles.lbAudioTitle}>{item.title || 'Audio track'}</div>
+            <audio src={item.file_url} controls autoPlay className={styles.audioPlayer} />
+          </div>
+        )}
+        {item.type === 'document' && (
+          <div className={styles.lbDoc}>
+            <div className={styles.lbDocIcon}>📄</div>
+            <div className={styles.lbDocTitle}>{item.title || 'Document'}</div>
+            <a href={item.file_url} target="_blank" rel="noopener noreferrer" className={styles.lbDocBtn}>Open document ↗</a>
+            <iframe src={item.file_url} className={styles.lbDocFrame} title={item.title || 'Document'} />
+          </div>
+        )}
+        {item.title && <div className={styles.lbCaption}>{item.title}</div>}
+      </div>
+    </div>
   )
 }
 
@@ -85,25 +149,27 @@ export default function ProfilePage() {
   const params   = useParams()
   const username = params?.username
 
-  const [profile,   setProfile]   = useState(null)
-  const [studios,   setStudios]   = useState([])
-  const [ratings,   setRatings]   = useState([])
-  const [loading,   setLoading]   = useState(true)
-  const [notFound,  setNotFound]  = useState(false)
-  const [activeTab, setActiveTab] = useState('work')
-  const [connected, setConnected] = useState(false)
-  const [isOwner,   setIsOwner]   = useState(false)
-  const [saving,    setSaving]    = useState(false)
-  const [saveMsg,   setSaveMsg]   = useState('')
-
-  // Edit state for disciplines and skills
+  const [profile,       setProfile]       = useState(null)
+  const [studios,       setStudios]       = useState([])
+  const [ratings,       setRatings]       = useState([])
+  const [portfolio,     setPortfolio]     = useState([])
+  const [loading,       setLoading]       = useState(true)
+  const [notFound,      setNotFound]      = useState(false)
+  const [activeTab,     setActiveTab]     = useState('work')
+  const [connected,     setConnected]     = useState(false)
+  const [isOwner,       setIsOwner]       = useState(false)
+  const [saving,        setSaving]        = useState(false)
+  const [saveMsg,       setSaveMsg]       = useState('')
+  const [lightboxIdx,   setLightboxIdx]   = useState(null)
+  const [uploading,     setUploading]     = useState(false)
   const [editingDiscs,  setEditingDiscs]  = useState(false)
   const [editingSkills, setEditingSkills] = useState(false)
   const [draftDiscs,    setDraftDiscs]    = useState([])
   const [draftSkills,   setDraftSkills]   = useState([])
 
-  const avatarInputRef = useRef()
-  const coverInputRef  = useRef()
+  const avatarInputRef    = useRef()
+  const coverInputRef     = useRef()
+  const portfolioInputRef = useRef()
 
   useEffect(() => { if (username) loadProfile() }, [username])
 
@@ -115,11 +181,9 @@ export default function ProfilePage() {
       query = query.eq('id', username)
     } else {
       const parts = username.split('-')
-      if (parts.length >= 2) {
-        query = query.ilike('firstname', parts[0]).ilike('lastname', parts.slice(1).join(' '))
-      } else {
-        query = query.ilike('firstname', username)
-      }
+      parts.length >= 2
+        ? query = query.ilike('firstname', parts[0]).ilike('lastname', parts.slice(1).join(' '))
+        : query = query.ilike('firstname', username)
     }
     const { data, error } = await query.single()
     if (error || !data) { setNotFound(true); setLoading(false); return }
@@ -128,11 +192,9 @@ export default function ProfilePage() {
     setDraftDiscs(data.disciplines || [])
     setDraftSkills(data.skills || [])
 
-    // Check if current user owns this profile
     const { data: { user } } = await supabase.auth.getUser()
     if (user && user.id === data.id) setIsOwner(true)
 
-    // Load studios
     const { data: studioData } = await supabase
       .from('studios')
       .select('*, profiles!studios_collaborator_id_fkey(firstname,lastname,headline)')
@@ -141,17 +203,23 @@ export default function ProfilePage() {
       .order('created_at', { ascending: false })
     setStudios(studioData || [])
 
-    // Load ratings
     const { data: ratingData } = await supabase
       .from('ratings')
       .select('*, profiles!ratings_rater_id_fkey(firstname,lastname,headline)')
       .eq('ratee_id', data.id)
       .eq('submitted', true)
     setRatings(ratingData || [])
+
+    const { data: portfolioData } = await supabase
+      .from('portfolio_items')
+      .select('*')
+      .eq('profile_id', data.id)
+      .order('sort_order', { ascending: true })
+    setPortfolio(portfolioData || [])
+
     setLoading(false)
   }
 
-  // ── Save a single field ───────────────────────────────────────────────────
   async function saveField(field, value) {
     if (!profile) return
     setSaving(true)
@@ -159,11 +227,13 @@ export default function ProfilePage() {
       .from('profiles')
       .update({ [field]: value, updated_at: new Date().toISOString() })
       .eq('id', profile.id)
-    if (!error) {
-      setProfile(p => ({ ...p, [field]: value }))
-      flashSave()
-    }
+    if (!error) { setProfile(p => ({ ...p, [field]: value })); flashSave() }
     setSaving(false)
+  }
+
+  function flashSave() {
+    setSaveMsg('Saved ✦')
+    setTimeout(() => setSaveMsg(''), 2000)
   }
 
   async function saveDiscs() {
@@ -176,35 +246,62 @@ export default function ProfilePage() {
     setEditingSkills(false)
   }
 
-  function flashSave() {
-    setSaveMsg('Saved ✦')
-    setTimeout(() => setSaveMsg(''), 2000)
-  }
-
-  // ── Image upload ──────────────────────────────────────────────────────────
   async function uploadImage(file, bucket, field) {
     if (!file || !profile) return
     setSaving(true)
     const ext  = file.name.split('.').pop()
     const path = `${profile.id}/${Date.now()}.${ext}`
-    const { error: uploadError } = await supabase.storage
-      .from(bucket)
-      .upload(path, file, { upsert: true })
-
+    const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
     if (uploadError) { console.error(uploadError); setSaving(false); return }
-
-    const { data: { publicUrl } } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(path)
-
+    const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path)
     await saveField(field, publicUrl)
     setSaving(false)
   }
 
+  // ── Portfolio upload ──────────────────────────────────────────────────────
+  async function uploadPortfolioItem(file) {
+    if (!file || !profile) return
+    setUploading(true)
+    const type   = detectType(file)
+    const bucket = bucketForType(type)
+    const ext    = file.name.split('.').pop()
+    const path   = `${profile.id}/${Date.now()}.${ext}`
+
+    const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
+    if (uploadError) { console.error(uploadError); setUploading(false); return }
+
+    const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path)
+    const title = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
+
+    const { data: item, error: insertError } = await supabase
+      .from('portfolio_items')
+      .insert({
+        profile_id: profile.id,
+        type,
+        title,
+        file_url: publicUrl,
+        sort_order: portfolio.length,
+      })
+      .select()
+      .single()
+
+    if (!insertError && item) setPortfolio(prev => [...prev, item])
+    setUploading(false)
+    flashSave()
+  }
+
+  async function deletePortfolioItem(id) {
+    await supabase.from('portfolio_items').delete().eq('id', id)
+    setPortfolio(prev => prev.filter(p => p.id !== id))
+  }
+
+  async function updatePortfolioTitle(id, title) {
+    await supabase.from('portfolio_items').update({ title }).eq('id', id)
+    setPortfolio(prev => prev.map(p => p.id === id ? { ...p, title } : p))
+  }
+
   // ── Loading / not found ───────────────────────────────────────────────────
-  if (loading) return (
-    <div className={styles.loading}><div className={styles.loadingDot}>✦</div></div>
-  )
+  if (loading) return <div className={styles.loading}><div className={styles.loadingDot}>✦</div></div>
   if (notFound) return (
     <div className={styles.notFound}>
       <div className={styles.nfIcon}>✦</div>
@@ -214,25 +311,27 @@ export default function ProfilePage() {
     </div>
   )
 
-  const fullName   = `${profile.firstname||''} ${profile.lastname||''}`.trim()
-  const ini        = initials(profile)
-  const location   = locationStr(profile)
+  const fullName    = `${profile.firstname||''} ${profile.lastname||''}`.trim()
+  const ini         = initials(profile)
+  const location    = locationStr(profile)
   const disciplines = profile.disciplines || []
   const skills      = profile.skills || []
-  const avgRating   = ratings.length
-    ? (ratings.reduce((s,r) => s + r.stars, 0) / ratings.length).toFixed(1) : null
-  const availText = [
-    profile.seeking          && `Seeking ${profile.seeking}.`,
-    profile.location_preference && `${profile.location_preference}.`,
-    profile.compensation?.length && `${profile.compensation.join(' or ')}.`,
-  ].filter(Boolean).join(' ')
+  const avgRating   = ratings.length ? (ratings.reduce((s,r) => s+r.stars,0)/ratings.length).toFixed(1) : null
   const links = [
-    profile.website      && { icon:'🔗', label: profile.website.replace(/^https?:\/\//,''),      href: profile.website },
-    profile.instagram    && { icon:'📷', label:`@${profile.instagram.replace('@','')}`,           href:`https://instagram.com/${profile.instagram.replace('@','')}` },
-    profile.soundcloud   && { icon:'🎵', label: profile.soundcloud.replace(/^https?:\/\//,''),    href: profile.soundcloud },
-    profile.other_link   && { icon:'🔗', label: profile.other_link.replace(/^https?:\/\//,''),    href: profile.other_link },
-    profile.portfolio_link && { icon:'💼', label: profile.portfolio_link.replace(/^https?:\/\//,''), href: profile.portfolio_link },
+    profile.website       && { icon:'🔗', label:profile.website.replace(/^https?:\/\//,''),       href:profile.website },
+    profile.instagram     && { icon:'📷', label:`@${profile.instagram.replace('@','')}`,           href:`https://instagram.com/${profile.instagram.replace('@','')}` },
+    profile.soundcloud    && { icon:'🎵', label:profile.soundcloud.replace(/^https?:\/\//,''),     href:profile.soundcloud },
+    profile.other_link    && { icon:'🔗', label:profile.other_link.replace(/^https?:\/\//,''),     href:profile.other_link },
+    profile.portfolio_link && { icon:'💼', label:profile.portfolio_link.replace(/^https?:\/\//,''), href:profile.portfolio_link },
   ].filter(Boolean)
+
+  // Portfolio grid: real items + empty slots (owner sees up to 12, visitor sees only filled)
+  const GRID_SIZE = 12
+  const emptySlots = isOwner ? Math.max(0, GRID_SIZE - portfolio.length) : 0
+  const gridItems  = [
+    ...portfolio.map(p => ({ ...p, isEmpty: false })),
+    ...Array(emptySlots).fill(null).map((_, i) => ({ id: `empty-${i}`, isEmpty: true })),
+  ]
 
   return (
     <>
@@ -243,9 +342,7 @@ export default function ProfilePage() {
           <Link href="/discover">Discover</Link>
           <Link href="/briefs">Collabs</Link>
           <Link href="/studio">Studio</Link>
-          {isOwner && (
-            <span className={styles.saveIndicator}>{saving ? 'Saving…' : saveMsg}</span>
-          )}
+          {isOwner && <span className={styles.saveIndicator}>{saving ? 'Saving…' : saveMsg}</span>}
           {isOwner
             ? <span className={styles.btnEdit}>Editing profile</span>
             : <Link href="/login" className={styles.btnEdit}>Edit profile</Link>
@@ -255,22 +352,13 @@ export default function ProfilePage() {
 
       {/* Cover banner */}
       <div className={styles.coverBanner}>
-        {profile.cover_url
-          ? <img src={profile.cover_url} alt="Cover" className={styles.coverImg} />
-          : <div className={styles.coverPattern} />
-        }
+        {profile.cover_url ? <img src={profile.cover_url} alt="Cover" className={styles.coverImg} /> : <div className={styles.coverPattern} />}
         {isOwner && (
           <>
             <button className={styles.coverUploadBtn} onClick={() => coverInputRef.current?.click()}>
               {profile.cover_url ? '↑ Change cover' : '+ Add cover image'}
             </button>
-            <input
-              ref={coverInputRef}
-              type="file"
-              accept="image/*"
-              style={{ display:'none' }}
-              onChange={e => uploadImage(e.target.files[0], 'covers', 'cover_url')}
-            />
+            <input ref={coverInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={e => uploadImage(e.target.files[0], 'covers', 'cover_url')} />
           </>
         )}
       </div>
@@ -279,52 +367,23 @@ export default function ProfilePage() {
       <div className={styles.identityStrip}>
         <div className={styles.avWrap}>
           <div className={styles.avCircle} onClick={() => isOwner && avatarInputRef.current?.click()} style={isOwner ? { cursor:'pointer' } : {}}>
-            {profile.avatar_url
-              ? <img src={profile.avatar_url} alt={fullName} />
-              : <span>{ini}</span>
-            }
+            {profile.avatar_url ? <img src={profile.avatar_url} alt={fullName} /> : <span>{ini}</span>}
             {isOwner && <div className={styles.avOverlay}>↑</div>}
             <div className={styles.onlineDot} />
           </div>
-          <input
-            ref={avatarInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display:'none' }}
-            onChange={e => uploadImage(e.target.files[0], 'avatars', 'avatar_url')}
-          />
+          <input ref={avatarInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={e => uploadImage(e.target.files[0], 'avatars', 'avatar_url')} />
         </div>
 
         <div className={styles.identityContent}>
           <div className={styles.identityTop}>
             <div>
-              {/* Editable name */}
               <div className={styles.profileName}>
-                <Editable
-                  value={profile.firstname}
-                  onSave={v => saveField('firstname', v)}
-                  placeholder="First name"
-                  isOwner={isOwner}
-                  className={styles.nameFirst}
-                />
+                <Editable value={profile.firstname} onSave={v => saveField('firstname',v)} placeholder="First name" isOwner={isOwner} className={styles.nameFirst} />
                 {' '}
-                <Editable
-                  value={profile.lastname}
-                  onSave={v => saveField('lastname', v)}
-                  placeholder="Last name"
-                  isOwner={isOwner}
-                  className={styles.nameLast}
-                />
+                <Editable value={profile.lastname} onSave={v => saveField('lastname',v)} placeholder="Last name" isOwner={isOwner} className={styles.nameLast} />
               </div>
-              {/* Editable headline */}
               <div className={styles.profileHeadline}>
-                <Editable
-                  value={profile.headline}
-                  onSave={v => saveField('headline', v)}
-                  placeholder="Your discipline · Your style · Your medium"
-                  isOwner={isOwner}
-                  className={styles.headlineText}
-                />
+                <Editable value={profile.headline} onSave={v => saveField('headline',v)} placeholder="Your discipline · Your style · Your medium" isOwner={isOwner} className={styles.headlineText} />
               </div>
             </div>
             {!isOwner && (
@@ -336,13 +395,11 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
-
           <div className={styles.metaRow}>
             {location && <div className={styles.metaItem}><span>📍</span><span>{location}</span></div>}
             <div className={styles.metaItem}><span>⊞</span><span>{profile.connections_count||0} connections</span></div>
             <div className={styles.metaItem}><span>◎</span><span>{profile.collabs_count||0} collabs completed</span></div>
           </div>
-
           <div className={styles.profileTags}>
             {profile.availability === 'open' && <span className={`${styles.ptag} ${styles.ptagOpen}`}>Open to collabs</span>}
             {disciplines.slice(0,2).map(d => <span key={d} className={`${styles.ptag} ${styles.ptagDisc}`}>{d}</span>)}
@@ -354,70 +411,136 @@ export default function ProfilePage() {
       {/* Tabs */}
       <div className={styles.tabsBar}>
         {['work','about','collabs','briefs'].map(tab => (
-          <div key={tab} className={`${styles.tab} ${activeTab===tab ? styles.active : ''}`} onClick={() => setActiveTab(tab)}>
+          <div key={tab} className={`${styles.tab} ${activeTab===tab?styles.active:''}`} onClick={() => setActiveTab(tab)}>
             {tab.charAt(0).toUpperCase()+tab.slice(1)}
           </div>
         ))}
       </div>
 
-      {/* Profile body */}
+      {/* Body */}
       <div className={styles.profileBody}>
         <div className={styles.profileMain}>
 
-          {/* WORK */}
+          {/* WORK tab */}
           {activeTab === 'work' && (
             <>
+              {/* Bio + Right Now */}
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>About</div>
                 <div className={styles.bioText}>
-                  <Editable
-                    value={profile.bio}
-                    onSave={v => saveField('bio', v)}
-                    placeholder={isOwner ? 'Click to add your bio…' : 'No bio added yet.'}
-                    multiline
-                    isOwner={isOwner}
-                    className={styles.bioInner}
-                  />
+                  <Editable value={profile.bio} onSave={v => saveField('bio',v)} placeholder={isOwner ? 'Click to add your bio…' : 'No bio added yet.'} multiline isOwner={isOwner} className={styles.bioInner} />
                 </div>
                 <div className={styles.rightnowCard}>
                   <div className={styles.rnLabel}>Right now</div>
                   <div className={styles.rnText}>
-                    <Editable
-                      value={profile.rightnow}
-                      onSave={v => saveField('rightnow', v)}
-                      placeholder={isOwner ? 'Click to describe what you\'re actively making…' : 'Nothing listed right now.'}
-                      multiline
-                      isOwner={isOwner}
-                      className={styles.rnInner}
-                    />
+                    <Editable value={profile.rightnow} onSave={v => saveField('rightnow',v)} placeholder={isOwner ? 'Click to describe what you\'re actively making…' : 'Nothing listed right now.'} multiline isOwner={isOwner} className={styles.rnInner} />
                   </div>
                 </div>
               </div>
 
+              {/* Portfolio */}
               <div className={styles.contentSection}>
-                <div className={styles.secLabel}>Portfolio · selected works</div>
-                <div className={styles.galleryGrid}>
-                  {GALLERY_BG.map((bg,i) => (
-                    <div key={i} className={styles.galleryItem} style={{ background:bg }}>
-                      <div className={styles.giPlaceholder}>✦</div>
+                <div className={styles.secLabelRow}>
+                  <div className={styles.secLabel}>Portfolio</div>
+                  {isOwner && (
+                    <div className={styles.portfolioHint}>
+                      {uploading ? 'Uploading…' : 'Click any slot to upload — images, video, audio, or PDF'}
                     </div>
-                  ))}
+                  )}
                 </div>
+
+                {/* Hidden file input */}
+                <input
+                  ref={portfolioInputRef}
+                  type="file"
+                  accept="image/*,video/*,audio/*,.pdf"
+                  style={{ display:'none' }}
+                  onChange={e => { if (e.target.files[0]) uploadPortfolioItem(e.target.files[0]); e.target.value = '' }}
+                />
+
+                {portfolio.length === 0 && !isOwner ? (
+                  <div className={styles.emptyState}>No portfolio items yet.</div>
+                ) : (
+                  <div className={styles.portfolioGrid}>
+                    {gridItems.map((item, i) => {
+                      if (item.isEmpty) {
+                        return (
+                          <div
+                            key={item.id}
+                            className={`${styles.portfolioSlot} ${styles.emptySlot}`}
+                            onClick={() => !uploading && portfolioInputRef.current?.click()}
+                          >
+                            <div className={styles.slotPlus}>+</div>
+                          </div>
+                        )
+                      }
+                      return (
+                        <div
+                          key={item.id}
+                          className={styles.portfolioSlot}
+                          onClick={() => setLightboxIdx(portfolio.findIndex(p => p.id === item.id))}
+                        >
+                          {/* Thumbnail */}
+                          {item.type === 'image' && (
+                            <img src={item.file_url} alt={item.title||''} className={styles.slotImage} />
+                          )}
+                          {item.type === 'video' && (
+                            <div className={styles.slotVideo}>
+                              <video src={item.file_url} className={styles.slotVideoEl} muted />
+                              <div className={styles.slotPlayBtn}>▶</div>
+                            </div>
+                          )}
+                          {item.type === 'audio' && (
+                            <div className={styles.slotAudio}>
+                              <div className={styles.slotAudioIcon}>🎵</div>
+                              <div className={styles.slotAudioWave}>
+                                {Array(12).fill(0).map((_,j) => (
+                                  <div key={j} className={styles.waveBar} style={{ height:`${20+Math.random()*60}%` }} />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {item.type === 'document' && (
+                            <div className={styles.slotDoc}>
+                              <div className={styles.slotDocIcon}>📄</div>
+                              <div className={styles.slotDocTitle}>{item.title || 'Document'}</div>
+                            </div>
+                          )}
+
+                          {/* Overlay on hover */}
+                          <div className={styles.slotOverlay}>
+                            <div className={styles.slotTypeIcon}>{typeIcon(item.type)}</div>
+                            <div className={styles.slotTitle}>{item.title || item.type}</div>
+                            {isOwner && (
+                              <button
+                                className={styles.slotDelete}
+                                onClick={e => { e.stopPropagation(); deletePortfolioItem(item.id) }}
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
 
+              {/* Past collabs */}
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Past collaborations</div>
                 {studios.length === 0 ? (
-                  <div className={styles.emptyState}>No completed collaborations yet. Post a brief or apply to one to start building your track record.</div>
+                  <div className={styles.emptyState}>No completed collaborations yet.</div>
                 ) : studios.map(s => {
                   const collab = s.profiles
-                  const collabName = collab ? `${collab.firstname} ${collab.lastname}` : 'Collaborator'
-                  const collabInitials = collab ? `${collab.firstname[0]}${collab.lastname[0]}` : '??'
+                  const cn = collab ? `${collab.firstname} ${collab.lastname}` : 'Collaborator'
+                  const ci = collab ? `${collab.firstname[0]}${collab.lastname[0]}` : '??'
                   return (
                     <div key={s.id} className={styles.collabItem}>
-                      <div className={`${styles.collabAv} ${styles.avTeal}`}>{collabInitials}</div>
+                      <div className={`${styles.collabAv} ${styles.avTeal}`}>{ci}</div>
                       <div className={styles.collabInfo}>
-                        <div className={styles.collabName}>{collabName} · {collab?.headline}</div>
+                        <div className={styles.collabName}>{cn} · {collab?.headline}</div>
                         <div className={styles.collabRole}>{s.title}</div>
                       </div>
                       <span className={styles.collabStatus}>Completed</span>
@@ -428,7 +551,7 @@ export default function ProfilePage() {
             </>
           )}
 
-          {/* ABOUT */}
+          {/* ABOUT tab */}
           {activeTab === 'about' && (
             <>
               <div className={styles.contentSection}>
@@ -440,14 +563,12 @@ export default function ProfilePage() {
 
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Disciplines &amp; skills</div>
-
-                {/* Editable disciplines */}
                 {editingDiscs ? (
                   <div>
                     <div className={styles.discEditGrid}>
                       {DISC_OPTS.map(d => (
-                        <div key={d.id} className={`${styles.discEditOpt} ${draftDiscs.includes(d.label) ? styles.on : ''}`}
-                          onClick={() => setDraftDiscs(prev => prev.includes(d.label) ? prev.filter(x => x!==d.label) : [...prev, d.label])}>
+                        <div key={d.id} className={`${styles.discEditOpt} ${draftDiscs.includes(d.label)?styles.on:''}`}
+                          onClick={() => setDraftDiscs(prev => prev.includes(d.label) ? prev.filter(x=>x!==d.label) : [...prev,d.label])}>
                           <span>{d.icon}</span> {d.label}
                         </div>
                       ))}
@@ -463,14 +584,12 @@ export default function ProfilePage() {
                     {isOwner && <button className={styles.editTagsBtn} onClick={() => setEditingDiscs(true)}>✎ Edit</button>}
                   </div>
                 )}
-
-                {/* Editable skills */}
                 {editingSkills ? (
                   <div>
                     <div className={styles.skillEditGrid}>
                       {SKILL_OPTS.map(s => (
-                        <div key={s} className={`${styles.skillEditOpt} ${draftSkills.includes(s) ? styles.on : ''}`}
-                          onClick={() => setDraftSkills(prev => prev.includes(s) ? prev.filter(x => x!==s) : [...prev,s])}>
+                        <div key={s} className={`${styles.skillEditOpt} ${draftSkills.includes(s)?styles.on:''}`}
+                          onClick={() => setDraftSkills(prev => prev.includes(s) ? prev.filter(x=>x!==s) : [...prev,s])}>
                           {s}
                         </div>
                       ))}
@@ -505,12 +624,12 @@ export default function ProfilePage() {
                   <div className={styles.secLabel}>Links &amp; social</div>
                   <div className={styles.linksEditGrid}>
                     {[
-                      ['website',       'Personal website', 'https://yoursite.com'],
-                      ['instagram',     'Instagram',        '@yourhandle'],
-                      ['soundcloud',    'SoundCloud / Spotify', 'https://soundcloud.com/…'],
-                      ['portfolio_link','Portfolio link',   'https://behance.net/…'],
-                      ['other_link',    'Other link',       'https://…'],
-                    ].map(([field, label, ph]) => (
+                      ['website','Personal website','https://yoursite.com'],
+                      ['instagram','Instagram','@yourhandle'],
+                      ['soundcloud','SoundCloud / Spotify','https://soundcloud.com/…'],
+                      ['portfolio_link','Portfolio link','https://behance.net/…'],
+                      ['other_link','Other link','https://…'],
+                    ].map(([field,label,ph]) => (
                       <div key={field} className={styles.linkEditRow}>
                         <span className={styles.linkLabel}>{label}</span>
                         <Editable value={profile[field]} onSave={v => saveField(field,v)} placeholder={ph} isOwner={isOwner} className={styles.linkValue} />
@@ -522,21 +641,21 @@ export default function ProfilePage() {
             </>
           )}
 
-          {/* COLLABS */}
+          {/* COLLABS tab */}
           {activeTab === 'collabs' && (
             <div className={styles.contentSection}>
               <div className={styles.secLabel}>Collaboration history</div>
               {studios.length === 0 ? (
-                <div className={styles.emptyState}>Once you complete a collab through Collective Loft, it will appear here as part of your track record.</div>
+                <div className={styles.emptyState}>Once you complete a collab through Collective Loft, it will appear here.</div>
               ) : studios.map(s => {
                 const collab = s.profiles
-                const collabName = collab ? `${collab.firstname} ${collab.lastname}` : 'Collaborator'
-                const collabInitials = collab ? `${collab.firstname[0]}${collab.lastname[0]}` : '??'
+                const cn = collab ? `${collab.firstname} ${collab.lastname}` : 'Collaborator'
+                const ci = collab ? `${collab.firstname[0]}${collab.lastname[0]}` : '??'
                 return (
                   <div key={s.id} className={styles.collabItem}>
-                    <div className={`${styles.collabAv} ${styles.avTeal}`}>{collabInitials}</div>
+                    <div className={`${styles.collabAv} ${styles.avTeal}`}>{ci}</div>
                     <div className={styles.collabInfo}>
-                      <div className={styles.collabName}>{collabName} · {collab?.headline}</div>
+                      <div className={styles.collabName}>{cn} · {collab?.headline}</div>
                       <div className={styles.collabRole}>{s.title}</div>
                     </div>
                     <span className={styles.collabStatus}>Completed</span>
@@ -546,7 +665,7 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* BRIEFS */}
+          {/* BRIEFS tab */}
           {activeTab === 'briefs' && (
             <div className={styles.contentSection}>
               <div className={styles.secLabel}>Active briefs</div>
@@ -555,7 +674,7 @@ export default function ProfilePage() {
                   <div className={styles.briefTitle}>{fullName} — {profile.headline}</div>
                   <div className={styles.briefTags}>
                     {disciplines.slice(0,3).map(d => <span key={d} className={`${styles.ptag} ${styles.ptagDisc}`}>{d}</span>)}
-                    {profile.compensation?.map(c => <span key={c} className={`${styles.ptag} ${styles.ptagOpen}`}>{c}</span>)}
+                    {(profile.compensation||[]).map(c => <span key={c} className={`${styles.ptag} ${styles.ptagOpen}`}>{c}</span>)}
                   </div>
                   <div className={styles.briefDesc}>{profile.rightnow}</div>
                 </div>
@@ -581,16 +700,14 @@ export default function ProfilePage() {
           {(profile.seeking || profile.compensation?.length) && (
             <div className={styles.availCard}>
               <div className={styles.availTitle}>Open to collaborate</div>
-              <div className={styles.availText}>{availText}</div>
+              <div className={styles.availText}>{[profile.seeking && `Seeking ${profile.seeking}.`, profile.location_preference, profile.compensation?.length && `${profile.compensation.join(' or ')}.`].filter(Boolean).join(' ')}</div>
             </div>
           )}
 
           {disciplines.length > 0 && (
             <div>
               <div className={styles.sbLabel}>Disciplines</div>
-              <div className={styles.discTags}>
-                {disciplines.map(d => <span key={d} className={styles.discTag}>{d}</span>)}
-              </div>
+              <div className={styles.discTags}>{disciplines.map(d => <span key={d} className={styles.discTag}>{d}</span>)}</div>
             </div>
           )}
 
@@ -640,6 +757,11 @@ export default function ProfilePage() {
           )}
         </aside>
       </div>
+
+      {/* Lightbox */}
+      {lightboxIdx !== null && (
+        <Lightbox items={portfolio} startIndex={lightboxIdx} onClose={() => setLightboxIdx(null)} />
+      )}
     </>
   )
 }

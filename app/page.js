@@ -189,8 +189,9 @@ export default function LandingPage() {
 
     setSubmitted(true)
   } catch (err) {
-    console.error('Signup error:', err)
-    alert('Something went wrong. Please try again.')
+  console.error('Signup error:', err)
+  alert('Error: ' + (err.message || JSON.stringify(err)))
+}
   } finally {
     setSubmitting(false)
   }

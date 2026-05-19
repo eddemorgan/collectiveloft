@@ -146,24 +146,53 @@ export default function LandingPage() {
     setCity('')
   }
 
-  function handleSubmit() {
-    const profile = {
-      ...form,
-      disciplines: selectedDiscs,
-      skills: selectedSkills,
-      compensation: selectedComps,
-      country,
-      state: stateVal,
-      city,
-      createdAt: new Date().toISOString(),
-    }
-    try {
-      localStorage.setItem('cl_profile', JSON.stringify(profile))
-    } catch {
-      window._clProfile = profile
-    }
+  async function handleSubmit() {
+  setSubmitting(true)
+  try {
+    // 1. Sign up the user with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: form.email,
+      password: Math.random().toString(36).slice(-10) + 'Aa1!',
+      options: {
+        data: {
+          firstname: form.firstname,
+          lastname: form.lastname,
+        }
+      }
+    })
+
+    if (authError) throw authError
+
+    // 2. Save their profile to the profiles table
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .insert({
+        id: authData.user.id,
+        firstname: form.firstname,
+        lastname: form.lastname,
+        email: form.email,
+        headline: form.headline,
+        bio: form.bio,
+        rightnow: form.rightnow,
+        seeking: form.seeking,
+        country,
+        state: stateVal,
+        city,
+        disciplines: selectedDiscs,
+        skills: selectedSkills,
+        compensation: selectedComps,
+      })
+
+    if (profileError) throw profileError
+
     setSubmitted(true)
+  } catch (err) {
+    console.error('Signup error:', err)
+    alert('Something went wrong. Please try again.')
+  } finally {
+    setSubmitting(false)
   }
+}
 
   function closeModal() {
     setModalOpen(false)

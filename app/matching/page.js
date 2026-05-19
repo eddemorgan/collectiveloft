@@ -179,10 +179,10 @@ export default function MatchingPage() {
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
-          <Link href="/discover">Discover</Link>
-          <Link href="/briefs">Collabs</Link>
-          <Link href="/my-studios">Loft Studio</Link>
-          <Link href="/matching" className={styles.active}>Matching</Link>
+<Link href="/discover">Discover</Link>
+<Link href="/briefs">Collabs</Link>
+<Link href="/matching" className={styles.active}>Matching</Link>
+<Link href="/my-studios">Loft Studio</Link>
         </div>
       </nav>
 

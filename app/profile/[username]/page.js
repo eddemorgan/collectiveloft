@@ -248,7 +248,7 @@ export default function ProfilePage() {
           )}
           {isOwner
             ? <span className={styles.btnEdit}>Editing profile</span>
-            : <Link href="/join" className={styles.btnEdit}>Edit profile</Link>
+            : <Link href="/login" className={styles.btnEdit}>Edit profile</Link>
           }
         </div>
       </nav>

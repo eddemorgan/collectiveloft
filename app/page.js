@@ -119,7 +119,7 @@ export default function LandingPage() {
   const stateOptions = countryData?.states
     ? Object.entries(countryData.states).map(([k, v]) => ({ value: k, label: v.l }))
     : countryData?.r?.map(r => ({ value: r, label: r })) ?? []
-  const cityOptions  = country && LOCATION_DATA[country]?.states?.[stateVal]?.c ?? []
+  const cityOptions  = (country && LOCATION_DATA[country]?.states?.[stateVal]?.c) ?? []
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   function toggleDisc(id) {

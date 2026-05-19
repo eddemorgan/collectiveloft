@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import styles from './landing.module.css'
 import { supabase } from '../lib/supabase'
+import styles from './landing.module.css'
 
-// ── Data ─────────────────────────────────────────────────────────────────────
+// ── Static data ───────────────────────────────────────────────────────────────
 
 const LOCATION_DATA = {
   US: { states: { IL: { l: 'Illinois', c: ['Chicago','Aurora','Springfield'] }, NY: { l: 'New York', c: ['New York City','Brooklyn','Buffalo'] }, CA: { l: 'California', c: ['Los Angeles','San Francisco','San Diego'] }, TX: { l: 'Texas', c: ['Houston','Austin','Dallas'] }, GA: { l: 'Georgia', c: ['Atlanta','Savannah'] }, TN: { l: 'Tennessee', c: ['Nashville','Memphis'] }, WA: { l: 'Washington', c: ['Seattle','Spokane'] }, MA: { l: 'Massachusetts', c: ['Boston','Cambridge'] }, FL: { l: 'Florida', c: ['Miami','Orlando','Tampa'] } } },
@@ -35,236 +35,212 @@ const DISCIPLINES = [
 ]
 
 const SKILLS = [
-  { d: 'visual',  label: 'Oil on canvas' },
-  { d: 'visual',  label: 'Watercolour' },
-  { d: 'visual',  label: 'Illustration' },
-  { d: 'visual',  label: 'Large format' },
-  { d: 'visual',  label: 'Art direction' },
-  { d: 'music',   label: 'Beat production' },
-  { d: 'music',   label: 'Mixing & mastering' },
-  { d: 'music',   label: 'Co-writing' },
-  { d: 'music',   label: 'Film scoring' },
-  { d: 'music',   label: 'Songwriting' },
-  { d: 'writing', label: 'Poetry' },
-  { d: 'writing', label: 'Copywriting' },
-  { d: 'writing', label: 'Editing' },
-  { d: 'design',  label: 'Web design' },
-  { d: 'design',  label: 'Branding' },
-  { d: 'design',  label: 'UX design' },
-  { d: 'film',    label: 'Cinematography' },
-  { d: 'film',    label: 'Directing' },
-  { d: 'photo',   label: 'Fine art photography' },
-  { d: 'photo',   label: 'Portrait photography' },
-  { d: 'perf',    label: 'Choreography' },
-  { d: 'perf',    label: 'Spoken word' },
-  { d: 'tech',    label: 'Generative art' },
-  { d: 'tech',    label: 'Creative coding' },
+  { d: 'visual',  label: 'Oil on canvas' },   { d: 'visual',  label: 'Watercolour' },
+  { d: 'visual',  label: 'Illustration' },     { d: 'visual',  label: 'Large format' },
+  { d: 'visual',  label: 'Art direction' },    { d: 'music',   label: 'Beat production' },
+  { d: 'music',   label: 'Mixing & mastering'},{ d: 'music',   label: 'Co-writing' },
+  { d: 'music',   label: 'Film scoring' },     { d: 'music',   label: 'Songwriting' },
+  { d: 'writing', label: 'Poetry' },           { d: 'writing', label: 'Copywriting' },
+  { d: 'writing', label: 'Editing' },          { d: 'design',  label: 'Web design' },
+  { d: 'design',  label: 'Branding' },         { d: 'design',  label: 'UX design' },
+  { d: 'film',    label: 'Cinematography' },   { d: 'film',    label: 'Directing' },
+  { d: 'photo',   label: 'Fine art photography'},{ d: 'photo', label: 'Portrait photography' },
+  { d: 'perf',    label: 'Choreography' },     { d: 'perf',    label: 'Spoken word' },
+  { d: 'tech',    label: 'Generative art' },   { d: 'tech',    label: 'Creative coding' },
 ]
 
 const DISC_GRID = [
-  { icon: '🎨', name: 'Visual Art',      count: '2,840 creatives' },
-  { icon: '🎵', name: 'Music',           count: '3,102 creatives' },
+  { icon: '🎨', name: 'Visual Art',       count: '2,840 creatives' },
+  { icon: '🎵', name: 'Music',            count: '3,102 creatives' },
   { icon: '✍️', name: 'Writing & Poetry', count: '1,974 creatives' },
-  { icon: '🖥',  name: 'Design & Web',   count: '1,688 creatives' },
-  { icon: '🎬', name: 'Film',            count: '1,210 creatives' },
-  { icon: '📷', name: 'Photography',     count: '980 creatives' },
-  { icon: '🎭', name: 'Performance',     count: '642 creatives' },
-  { icon: '💻', name: 'Creative Tech',   count: '418 creatives' },
+  { icon: '🖥',  name: 'Design & Web',    count: '1,688 creatives' },
+  { icon: '🎬', name: 'Film',             count: '1,210 creatives' },
+  { icon: '📷', name: 'Photography',      count: '980 creatives' },
+  { icon: '🎭', name: 'Performance',      count: '642 creatives' },
+  { icon: '💻', name: 'Creative Tech',    count: '418 creatives' },
 ]
 
-const MEMBERS = [
-  { initials: 'MV', avClass: 'avG', dotColor: 'var(--teal)', name: 'Marisol Vega', role: 'Visual Artist · Canvas & Oil', text: 'Looking for a web designer and composer to build a portfolio site for gallery submissions.', tags: [{ label: 'Open to Collab', cls: 'tagG' }, { label: 'Chicago', cls: '' }] },
-  { initials: 'JD', avClass: 'avT', dotColor: 'rgba(240,236,227,0.15)', name: 'James Delacroix', role: 'Poet · Spoken Word', text: 'Finishing a debut collection. Need a developmental editor and a visual artist for the cover.', tags: [{ label: 'Open to Collab', cls: 'tagG' }, { label: 'Remote', cls: '' }] },
-  { initials: 'SA', avClass: 'avR', dotColor: 'var(--gold)', name: 'Simone Adeyemi', role: 'Singer-Songwriter · R&B / Soul', text: 'Searching for a beat producer for a neo-soul and pop hybrid EP.', tags: [{ label: 'Paid Collab', cls: 'tagG' }, { label: 'NYC', cls: '' }] },
-]
-
-// ── Required fields for progress bar ────────────────────────────────────────
+const AV_CLASSES = ['avG', 'avT', 'avR']
 const REQUIRED_FIELDS = ['firstname', 'lastname', 'email', 'bio', 'rightnow', 'seeking', 'headline']
 
-// ── Component ────────────────────────────────────────────────────────────────
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
-  // Modal open/closed
-  const [modalOpen, setModalOpen]   = useState(false)
-  const [submitted, setSubmitted]   = useState(false)
+  // ── Real members from Supabase ───────────────────────────────────────────
+  const [members, setMembers] = useState([])
+
+  useEffect(() => {
+    supabase
+      .from('profiles')
+      .select('id, firstname, lastname, headline, disciplines, rightnow, compensation, availability, city, state')
+      .order('created_at', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setMembers(data || []))
+  }, [])
+
+  // ── Modal state ──────────────────────────────────────────────────────────
+  const [modalOpen,  setModalOpen]  = useState(false)
+  const [submitted,  setSubmitted]  = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
-  // Form fields
+  // ── Form fields ──────────────────────────────────────────────────────────
   const [form, setForm] = useState({
     firstname: '', lastname: '', email: '', headline: '',
     bio: '', rightnow: '', seeking: '',
   })
+  const [country,       setCountry]       = useState('')
+  const [stateVal,      setStateVal]      = useState('')
+  const [city,          setCity]          = useState('')
+  const [selectedDiscs, setSelectedDiscs] = useState([])
+  const [selectedSkills,setSelectedSkills]= useState([])
+  const [selectedComps, setSelectedComps] = useState(['Creative exchange'])
 
-  // Location
-  const [country, setCountry]   = useState('')
-  const [stateVal, setStateVal] = useState('')
-  const [city, setCity]         = useState('')
-
-  // Discipline & skill toggles
-  const [selectedDiscs,   setSelectedDiscs]   = useState([])
-  const [selectedSkills,  setSelectedSkills]  = useState([])
-  const [selectedComps,   setSelectedComps]   = useState(['Creative exchange'])
-
-  // ── Derived state ──────────────────────────────────────────────────────────
+  // ── Derived ──────────────────────────────────────────────────────────────
   const progress = Math.round(
     REQUIRED_FIELDS.filter(k => (form[k] || '').trim().length > 1).length /
     REQUIRED_FIELDS.length * 100
   )
-
-  // Visible skills depend on selected disciplines
   const visibleSkills = selectedDiscs.length === 0
-    ? SKILLS
-    : SKILLS.filter(s => selectedDiscs.includes(s.d))
+    ? SKILLS : SKILLS.filter(s => selectedDiscs.includes(s.d))
 
-  // Location derived options
   const countryData  = LOCATION_DATA[country]
   const stateOptions = countryData?.states
     ? Object.entries(countryData.states).map(([k, v]) => ({ value: k, label: v.l }))
     : countryData?.r?.map(r => ({ value: r, label: r })) ?? []
-  const cityOptions  = (country && LOCATION_DATA[country]?.states?.[stateVal]?.c) ?? []
+  const cityOptions = (country && LOCATION_DATA[country]?.states?.[stateVal]?.c) ?? []
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  // ── Handlers ─────────────────────────────────────────────────────────────
   function toggleDisc(id) {
-    setSelectedDiscs(prev =>
-      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
-    )
+    setSelectedDiscs(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id])
   }
-
   function toggleSkill(label) {
-    setSelectedSkills(prev =>
-      prev.includes(label) ? prev.filter(s => s !== label) : [...prev, label]
-    )
+    setSelectedSkills(prev => prev.includes(label) ? prev.filter(s => s !== label) : [...prev, label])
   }
-
   function toggleComp(label) {
-    setSelectedComps(prev =>
-      prev.includes(label) ? prev.filter(c => c !== label) : [...prev, label]
-    )
+    setSelectedComps(prev => prev.includes(label) ? prev.filter(c => c !== label) : [...prev, label])
   }
-
   function handleCountryChange(val) {
-    setCountry(val)
-    setStateVal('')
-    setCity('')
+    setCountry(val); setStateVal(''); setCity('')
+  }
+  function closeModal() {
+    setModalOpen(false); setSubmitted(false)
   }
 
   async function handleSubmit() {
-  setSubmitting(true)
-  try {
-    // 1. Sign up the user with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: form.email,
-      password: Math.random().toString(36).slice(-10) + 'Aa1!',
-      options: {
-        data: {
+    setSubmitting(true)
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.email,
+        password: Math.random().toString(36).slice(-10) + 'Aa1!',
+        options: { data: { firstname: form.firstname, lastname: form.lastname } }
+      })
+      if (authError) throw authError
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: authData.user.id,
           firstname: form.firstname,
           lastname: form.lastname,
-        }
-      }
-    })
+          email: form.email,
+          headline: form.headline,
+          bio: form.bio,
+          rightnow: form.rightnow,
+          seeking: form.seeking,
+          country,
+          state: stateVal,
+          city,
+          disciplines: selectedDiscs,
+          skills: selectedSkills,
+          compensation: selectedComps,
+        })
+      if (profileError) throw profileError
 
-    if (authError) throw authError
-
-    // 2. Save their profile to the profiles table
-const { error: profileError } = await supabase
-  .from('profiles')
-  .upsert({
-        id: authData.user.id,
-        firstname: form.firstname,
-        lastname: form.lastname,
-        email: form.email,
-        headline: form.headline,
-        bio: form.bio,
-        rightnow: form.rightnow,
-        seeking: form.seeking,
-        country,
-        state: stateVal,
-        city,
-        disciplines: selectedDiscs,
-        skills: selectedSkills,
-        compensation: selectedComps,
-      })
-
-    if (profileError) throw profileError
-
-    setSubmitted(true)
-  } catch (err) {
-  console.error('Signup error:', err)
-  alert('Error: ' + (err.message || JSON.stringify(err)))
-  } finally {
-    setSubmitting(false)
-  }
-}
-
-  function closeModal() {
-    setModalOpen(false)
-    setSubmitted(false)
+      // Refresh hero members
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, firstname, lastname, headline, disciplines, rightnow, compensation, availability, city, state')
+        .order('created_at', { ascending: false })
+        .limit(3)
+      setMembers(data || [])
+      setSubmitted(true)
+    } catch (err) {
+      alert('Error: ' + (err.message || JSON.stringify(err)))
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* ── Nav ─────────────────────────────────────────────────────────── */}
+      {/* Nav */}
       <nav className={styles.nav}>
-        <Link href="/" className={styles.logo}>
-          Collective <span>Loft</span>
-        </Link>
+        <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
           <Link href="/discover">Discover</Link>
           <Link href="/briefs">Collabs</Link>
           <Link href="/studio">Loft Studio</Link>
-          <button className={styles.btnJoin} onClick={() => setModalOpen(true)}>
-            Join
-          </button>
+          <button className={styles.btnJoin} onClick={() => setModalOpen(true)}>Join</button>
         </div>
       </nav>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      {/* Hero */}
       <div className={styles.hero}>
         <div className={styles.heroLeft}>
           <div className={styles.eyebrow}>Where Creatives Find Each Other</div>
-          <div className={styles.headline}>
-            Make<br /><em>something</em><br />together.
-          </div>
+          <div className={styles.headline}>Make<br /><em>something</em><br />together.</div>
           <div className={styles.sub}>
             Collective Loft is a professional network built for artists, musicians,
             writers, poets, designers, and makers. Find collaborators who match your vision.
           </div>
           <div className={styles.heroBtns}>
-            <button className={styles.btnP} onClick={() => setModalOpen(true)}>
-              Build Your Profile
-            </button>
-            <Link href="/discover" className={styles.btnS}>
-              Browse Creatives
-            </Link>
+            <button className={styles.btnP} onClick={() => setModalOpen(true)}>Build Your Profile</button>
+            <Link href="/discover" className={styles.btnS}>Browse Creatives</Link>
           </div>
         </div>
 
         <div className={styles.heroRight}>
-          {MEMBERS.map((m, i) => (
-            <div className={styles.mc} key={i}>
-              <div className={`${styles.mcAv} ${styles[m.avClass]}`}>
-                {m.initials}
-                <div className={styles.dot} style={{ background: m.dotColor }} />
-              </div>
-              <div>
-                <div className={styles.mcName}>{m.name}</div>
-                <div className={styles.mcRole}>{m.role}</div>
-                <div className={styles.mcText}>{m.text}</div>
-                <div className={styles.mcTags}>
-                  {m.tags.map((t, j) => (
-                    <span key={j} className={`${styles.tag} ${t.cls ? styles[t.cls] : ''}`}>
-                      {t.label}
-                    </span>
-                  ))}
-                </div>
+          {members.length === 0 ? (
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', flex:1 }}>
+              <div style={{ color:'rgba(240,236,227,0.18)', fontSize:'0.78rem', fontWeight:300, textAlign:'center', lineHeight:1.7 }}>
+                Creatives joining now.<br />Be the first to build your profile.
               </div>
             </div>
-          ))}
+          ) : (
+            members.map((m, i) => {
+              const name = `${m.firstname || ''} ${m.lastname || ''}`.trim()
+              const ini  = [(m.firstname||'?')[0], (m.lastname||'?')[0]].join('').toUpperCase()
+              const disc = (m.disciplines || [])[0] || 'Creative'
+              const loc  = m.city || m.state || null
+              return (
+                <Link href={`/profile/${(m.firstname||'').toLowerCase()}-${(m.lastname||'').toLowerCase()}`} key={m.id} className={styles.mc} style={{ textDecoration:'none', color:'inherit' }}>
+                  <div className={`${styles.mcAv} ${styles[AV_CLASSES[i] || 'avG']}`}>
+                    {ini}
+                    <div className={styles.dot} style={{ background: 'var(--teal)' }} />
+                  </div>
+                  <div>
+                    <div className={styles.mcName}>{name}</div>
+                    <div className={styles.mcRole}>{disc}</div>
+                    <div className={styles.mcText}>{m.rightnow || 'Building something new on Collective Loft.'}</div>
+                    <div className={styles.mcTags}>
+                      {m.availability === 'open' && (
+                        <span className={`${styles.tag} ${styles.tagG}`}>Open to Collab</span>
+                      )}
+                      {loc && <span className={styles.tag}>{loc}</span>}
+                      {(m.compensation || []).slice(0,1).map(c => (
+                        <span key={c} className={`${styles.tag} ${styles.tagG}`}>{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                </Link>
+              )
+            })
+          )}
         </div>
       </div>
 
-      {/* ── Discipline strip ─────────────────────────────────────────────── */}
+      {/* Discipline strip */}
       <div className={styles.discStrip}>
         <div className={styles.stripLbl}>Disciplines on the platform</div>
         <div className={styles.discGrid}>
@@ -278,7 +254,7 @@ const { error: profileError } = await supabase
         </div>
       </div>
 
-      {/* ── Manifesto ────────────────────────────────────────────────────── */}
+      {/* Manifesto */}
       <div className={styles.manifesto}>
         <div className={styles.manifestoTxt}>
           Not a marketplace. Not a portfolio dump.{' '}
@@ -286,12 +262,12 @@ const { error: profileError } = await supabase
         </div>
       </div>
 
-      {/* ── How it works ─────────────────────────────────────────────────── */}
+      {/* How it works */}
       <div className={styles.how}>
         {[
-          { num: '01', title: 'Build your creative identity', desc: 'Show your work, your influences, what you\'re making right now, and what kind of collaborators you\'re looking for.' },
-          { num: '02', title: 'Post a Collab Brief',         desc: 'Describe your project and who you need. Creatives apply or reach out directly. The brief lives on your profile and in the public feed.' },
-          { num: '03', title: 'Create in the Loft Studio',   desc: 'Your shared Studio holds your brief, files, messages, and milestones — a home for the work as it comes to life.' },
+          { num: '01', title: 'Build your creative identity',  desc: 'Show your work, your influences, what you\'re making right now, and what kind of collaborators you\'re looking for.' },
+          { num: '02', title: 'Post a Collab Brief',           desc: 'Describe your project and who you need. Creatives apply or reach out directly. The brief lives on your profile and in the public feed.' },
+          { num: '03', title: 'Create in the Loft Studio',     desc: 'Your shared Studio holds your brief, files, messages, and milestones — a home for the work as it comes to life.' },
         ].map((h, i) => (
           <div className={styles.hi} key={i}>
             <div className={styles.hiNum}>{h.num}</div>
@@ -301,12 +277,11 @@ const { error: profileError } = await supabase
         ))}
       </div>
 
-      {/* ── Modal overlay ────────────────────────────────────────────────── */}
+      {/* Modal */}
       {modalOpen && (
-        <div className={styles.mo} onClick={(e) => { if (e.target === e.currentTarget) closeModal() }}>
+        <div className={styles.mo} onClick={e => { if (e.target === e.currentTarget) closeModal() }}>
           <div className={styles.modal}>
 
-            {/* Header */}
             <div className={styles.mhdr}>
               <div>
                 <div className={styles.mey}>Join Collective Loft</div>
@@ -316,21 +291,17 @@ const { error: profileError } = await supabase
               <button className={styles.mcl} onClick={closeModal}>✕</button>
             </div>
 
-            {/* Progress bar */}
             <div className={styles.pbWrap}>
               <div className={styles.pb} style={{ width: `${progress}%` }} />
             </div>
 
             {submitted ? (
-              /* Success screen */
               <div className={styles.scs}>
                 <div className={styles.scM}>✦</div>
                 <div className={styles.scT}>Welcome to <span>Collective Loft</span>.</div>
-                <div className={styles.scS}>
-                  Your profile is live. Keep your "Right Now" field current — that's what makes people reach out.
-                </div>
+                <div className={styles.scS}>Your profile is live. Keep your "Right Now" field current — that's what makes people reach out.</div>
                 <div className={styles.scA}>
-                  <Link href="/profile" className={styles.bvp}>View my profile</Link>
+                  <Link href={`/profile/${form.firstname.toLowerCase()}-${form.lastname.toLowerCase()}`} className={styles.bvp}>View my profile</Link>
                   <button className={styles.bbh} onClick={closeModal}>Done</button>
                 </div>
               </div>
@@ -338,7 +309,7 @@ const { error: profileError } = await supabase
               <>
                 <div className={styles.mbody}>
 
-                  {/* ── Your identity ─────────────────────────────────── */}
+                  {/* Your identity */}
                   <section>
                     <div className={styles.msl}>Your identity</div>
                     <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>
@@ -381,18 +352,14 @@ const { error: profileError } = await supabase
                     </div>
                   </section>
 
-                  {/* ── Discipline & skills ───────────────────────────── */}
+                  {/* Discipline & skills */}
                   <section>
                     <div className={styles.msl}>Discipline &amp; skills</div>
                     <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
                       <label>Primary discipline(s)</label>
                       <div className={styles.mdg}>
                         {DISCIPLINES.map(d => (
-                          <div
-                            key={d.id}
-                            className={`${styles.mdo} ${selectedDiscs.includes(d.id) ? styles.on : ''}`}
-                            onClick={() => toggleDisc(d.id)}
-                          >
+                          <div key={d.id} className={`${styles.mdo} ${selectedDiscs.includes(d.id) ? styles.on : ''}`} onClick={() => toggleDisc(d.id)}>
                             <span className={styles.mdoI}>{d.icon}</span>
                             <div className={styles.mdoN}>{d.label}</div>
                           </div>
@@ -401,55 +368,33 @@ const { error: profileError } = await supabase
                     </div>
                     <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
                       <label>Your headline</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Oil painter · Large format canvas · Abstract realism"
-                        maxLength={100}
-                        value={form.headline}
-                        onChange={e => setForm(f => ({ ...f, headline: e.target.value }))}
-                      />
+                      <input type="text" placeholder="e.g. Oil painter · Large format canvas · Abstract realism" maxLength={100} value={form.headline} onChange={e => setForm(f => ({ ...f, headline: e.target.value }))} />
                     </div>
                     <div className={styles.mf}>
                       <label>Specific skills</label>
                       <div className={styles.stags}>
                         {visibleSkills.map(s => (
-                          <button
-                            key={s.label}
-                            className={`${styles.stag} ${selectedSkills.includes(s.label) ? styles.on : ''}`}
-                            onClick={() => toggleSkill(s.label)}
-                          >
-                            {s.label}
-                          </button>
+                          <button key={s.label} className={`${styles.stag} ${selectedSkills.includes(s.label) ? styles.on : ''}`} onClick={() => toggleSkill(s.label)}>{s.label}</button>
                         ))}
                       </div>
                     </div>
                   </section>
 
-                  {/* ── About you ─────────────────────────────────────── */}
+                  {/* About you */}
                   <section>
                     <div className={styles.msl}>About you</div>
                     <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
                       <label>Your bio</label>
-                      <textarea
-                        placeholder="Tell other creatives who you are, what drives your practice…"
-                        rows={3}
-                        value={form.bio}
-                        onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
-                      />
+                      <textarea placeholder="Tell other creatives who you are, what drives your practice…" rows={3} value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} />
                     </div>
                     <div className={styles.mf}>
                       <label>Right now — what are you actively making?</label>
-                      <textarea
-                        placeholder="e.g. Completing a 12-piece oil series. Looking for a web designer for gallery submissions — deadline Sept 2025."
-                        rows={3}
-                        value={form.rightnow}
-                        onChange={e => setForm(f => ({ ...f, rightnow: e.target.value }))}
-                      />
+                      <textarea placeholder="e.g. Completing a 12-piece oil series. Looking for a web designer for gallery submissions — deadline Sept 2025." rows={3} value={form.rightnow} onChange={e => setForm(f => ({ ...f, rightnow: e.target.value }))} />
                       <div className={styles.hint}>The most important field on your profile.</div>
                     </div>
                   </section>
 
-                  {/* ── Work samples ──────────────────────────────────── */}
+                  {/* Work samples */}
                   <section>
                     <div className={styles.msl}>Work samples</div>
                     <div className={styles.uz}>
@@ -464,31 +409,20 @@ const { error: profileError } = await supabase
                     </div>
                   </section>
 
-                  {/* ── Collaboration ─────────────────────────────────── */}
+                  {/* Collaboration */}
                   <section>
                     <div className={styles.msl}>Collaboration</div>
                     <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
                       <label>Who are you looking for right now?</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Web designer, ambient composer, beat producer…"
-                        value={form.seeking}
-                        onChange={e => setForm(f => ({ ...f, seeking: e.target.value }))}
-                      />
+                      <input type="text" placeholder="e.g. Web designer, ambient composer, beat producer…" value={form.seeking} onChange={e => setForm(f => ({ ...f, seeking: e.target.value }))} />
                     </div>
                     <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
                       <label>Compensation type</label>
                       <div className={styles.co}>
                         {['Creative exchange', 'Paid', 'Revenue share'].map(c => (
-                          <div
-                            key={c}
-                            className={`${styles.coo} ${selectedComps.includes(c) ? styles.on : ''}`}
-                            onClick={() => toggleComp(c)}
-                          >
+                          <div key={c} className={`${styles.coo} ${selectedComps.includes(c) ? styles.on : ''}`} onClick={() => toggleComp(c)}>
                             <div className={styles.cooT}>{c}</div>
-                            <div className={styles.cooD}>
-                              {c === 'Creative exchange' ? 'Trade skills. No money moves.' : c === 'Paid' ? 'Fee agreed upfront.' : 'Split the outcome.'}
-                            </div>
+                            <div className={styles.cooD}>{c === 'Creative exchange' ? 'Trade skills. No money moves.' : c === 'Paid' ? 'Fee agreed upfront.' : 'Split the outcome.'}</div>
                           </div>
                         ))}
                       </div>
@@ -496,27 +430,16 @@ const { error: profileError } = await supabase
                     <div className={styles.mfRow}>
                       <div className={styles.mf}>
                         <label>Location preference</label>
-                        <select>
-                          <option value="">Select…</option>
-                          <option>Local only</option>
-                          <option>Remote OK</option>
-                          <option>Remote preferred</option>
-                          <option>No preference</option>
-                        </select>
+                        <select><option value="">Select…</option><option>Local only</option><option>Remote OK</option><option>Remote preferred</option><option>No preference</option></select>
                       </div>
                       <div className={styles.mf}>
                         <label>Availability</label>
-                        <select>
-                          <option value="">Select…</option>
-                          <option>Open to collabs now</option>
-                          <option>Available in 1–2 months</option>
-                          <option>Not available right now</option>
-                        </select>
+                        <select><option value="">Select…</option><option>Open to collabs now</option><option>Available in 1–2 months</option><option>Not available right now</option></select>
                       </div>
                     </div>
                   </section>
 
-                  {/* ── Find me elsewhere ─────────────────────────────── */}
+                  {/* Find me elsewhere */}
                   <section>
                     <div className={styles.msl}>Find me elsewhere</div>
                     <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>
@@ -531,12 +454,13 @@ const { error: profileError } = await supabase
 
                 </div>
 
-                {/* Footer */}
                 <div className={styles.mftr}>
                   <div className={styles.fnote}>You can edit everything from your profile at any time.</div>
                   <div className={styles.fbtns}>
                     <button className={styles.bcn} onClick={closeModal}>Cancel</button>
-                    <button className={styles.bsp} onClick={handleSubmit}>Create my profile ↗</button>
+                    <button className={styles.bsp} onClick={handleSubmit} disabled={submitting}>
+                      {submitting ? 'Creating profile…' : 'Create my profile ↗'}
+                    </button>
                   </div>
                 </div>
               </>

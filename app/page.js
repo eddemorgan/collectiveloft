@@ -166,9 +166,9 @@ export default function LandingPage() {
     if (authError) throw authError
 
     // 2. Save their profile to the profiles table
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .insert({
+const { error: profileError } = await supabase
+  .from('profiles')
+  .upsert({
         id: authData.user.id,
         firstname: form.firstname,
         lastname: form.lastname,

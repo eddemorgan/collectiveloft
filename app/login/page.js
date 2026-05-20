@@ -20,7 +20,6 @@ export default function LoginPage() {
     setLoading(true); setError('')
     const { data, error: err } = await supabase.auth.signInWithPassword({ email, password })
     if (err) { setError(err.message); setLoading(false); return }
-    // Redirect to their profile
     const { data: profile } = await supabase
       .from('profiles')
       .select('firstname, lastname')
@@ -29,7 +28,7 @@ export default function LoginPage() {
     if (profile) {
       router.push(`/profile/${profile.firstname.toLowerCase()}-${profile.lastname.toLowerCase()}`)
     } else {
-      router.push('/')
+      router.push('/discover')
     }
   }
 
@@ -55,8 +54,8 @@ export default function LoginPage() {
           <div className={styles.title}>{resetMode ? 'Reset your password' : 'Welcome back.'}</div>
           <div className={styles.sub}>
             {resetMode
-              ? 'Enter your email and we\'ll send you a reset link.'
-              : 'Sign in to edit your profile, manage briefs, and access your studios.'
+              ? 'Enter your email and we\'ll send you a reset link. Click it to set a new password.'
+              : 'Sign in to your account.'
             }
           </div>
 
@@ -64,7 +63,9 @@ export default function LoginPage() {
             <div className={styles.successBox}>
               <div className={styles.successIcon}>✦</div>
               <div className={styles.successTitle}>Check your email</div>
-              <div className={styles.successSub}>We sent a password reset link to {email}. Click it to set a new password.</div>
+              <div className={styles.successSub}>
+                We sent a password reset link to {email}. Click it to set a new password and you'll be logged in automatically.
+              </div>
               <button className={styles.linkBtn} onClick={() => { setResetMode(false); setResetSent(false) }}>
                 Back to sign in
               </button>
@@ -111,16 +112,16 @@ export default function LoginPage() {
 
               <div className={styles.footer}>
                 {resetMode ? (
-                  <button className={styles.linkBtn} onClick={() => setResetMode(false)}>
+                  <button className={styles.linkBtn} onClick={() => { setResetMode(false); setError('') }}>
                     Back to sign in
                   </button>
                 ) : (
-                  <button className={styles.linkBtn} onClick={() => setResetMode(true)}>
+                  <button className={styles.linkBtn} onClick={() => { setResetMode(true); setError('') }}>
                     Forgot your password?
                   </button>
                 )}
                 <span className={styles.footerDivider}>·</span>
-                <Link href="/join" className={styles.linkBtn}>Create an account</Link>
+                <Link href="/" className={styles.linkBtn}>Create an account</Link>
               </div>
             </>
           )}

@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { supabase } from '../lib/supabase'
 import styles from './landing.module.css'
-
-// ── Static data ───────────────────────────────────────────────────────────────
 
 const LOCATION_DATA = {
   US: { states: { IL: { l: 'Illinois', c: ['Chicago','Aurora','Springfield'] }, NY: { l: 'New York', c: ['New York City','Brooklyn','Buffalo'] }, CA: { l: 'California', c: ['Los Angeles','San Francisco','San Diego'] }, TX: { l: 'Texas', c: ['Houston','Austin','Dallas'] }, GA: { l: 'Georgia', c: ['Atlanta','Savannah'] }, TN: { l: 'Tennessee', c: ['Nashville','Memphis'] }, WA: { l: 'Washington', c: ['Seattle','Spokane'] }, MA: { l: 'Massachusetts', c: ['Boston','Cambridge'] }, FL: { l: 'Florida', c: ['Miami','Orlando','Tampa'] } } },
@@ -63,10 +62,8 @@ const DISC_GRID = [
 const AV_CLASSES = ['avG', 'avT', 'avR']
 const REQUIRED_FIELDS = ['firstname', 'lastname', 'email', 'bio', 'rightnow', 'seeking', 'headline']
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
 export default function LandingPage() {
-  // ── Real members from Supabase ───────────────────────────────────────────
+  const router = useRouter()
   const [members, setMembers] = useState([])
 
   useEffect(() => {
@@ -78,24 +75,22 @@ export default function LandingPage() {
       .then(({ data }) => setMembers(data || []))
   }, [])
 
-  // ── Modal state ──────────────────────────────────────────────────────────
   const [modalOpen,  setModalOpen]  = useState(false)
   const [submitted,  setSubmitted]  = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [formError,  setFormError]  = useState('')
 
-  // ── Form fields ──────────────────────────────────────────────────────────
   const [form, setForm] = useState({
     firstname: '', lastname: '', email: '', headline: '',
-    bio: '', rightnow: '', seeking: '',
+    bio: '', rightnow: '', seeking: '', password: '', confirmPassword: '',
   })
-  const [country,       setCountry]       = useState('')
-  const [stateVal,      setStateVal]      = useState('')
-  const [city,          setCity]          = useState('')
-  const [selectedDiscs, setSelectedDiscs] = useState([])
-  const [selectedSkills,setSelectedSkills]= useState([])
-  const [selectedComps, setSelectedComps] = useState(['Creative exchange'])
+  const [country,        setCountry]        = useState('')
+  const [stateVal,       setStateVal]       = useState('')
+  const [city,           setCity]           = useState('')
+  const [selectedDiscs,  setSelectedDiscs]  = useState([])
+  const [selectedSkills, setSelectedSkills] = useState([])
+  const [selectedComps,  setSelectedComps]  = useState(['Creative exchange'])
 
-  // ── Derived ──────────────────────────────────────────────────────────────
   const progress = Math.round(
     REQUIRED_FIELDS.filter(k => (form[k] || '').trim().length > 1).length /
     REQUIRED_FIELDS.length * 100
@@ -109,7 +104,6 @@ export default function LandingPage() {
     : countryData?.r?.map(r => ({ value: r, label: r })) ?? []
   const cityOptions = (country && LOCATION_DATA[country]?.states?.[stateVal]?.c) ?? []
 
-  // ── Handlers ─────────────────────────────────────────────────────────────
   function toggleDisc(id) {
     setSelectedDiscs(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id])
   }
@@ -123,19 +117,37 @@ export default function LandingPage() {
     setCountry(val); setStateVal(''); setCity('')
   }
   function closeModal() {
-    setModalOpen(false); setSubmitted(false)
+    setModalOpen(false); setSubmitted(false); setFormError('')
   }
 
   async function handleSubmit() {
+    setFormError('')
+
+    // Validate required fields
+    if (!form.firstname || !form.lastname || !form.email) {
+      setFormError('Please fill in your first name, last name, and email.'); return
+    }
+    if (!form.password) {
+      setFormError('Please choose a password.'); return
+    }
+    if (form.password.length < 8) {
+      setFormError('Password must be at least 8 characters.'); return
+    }
+    if (form.password !== form.confirmPassword) {
+      setFormError('Passwords don\'t match.'); return
+    }
+
     setSubmitting(true)
     try {
+      // Create auth account with real password
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
-        password: Math.random().toString(36).slice(-10) + 'Aa1!',
+        password: form.password,
         options: { data: { firstname: form.firstname, lastname: form.lastname } }
       })
       if (authError) throw authError
 
+      // Upsert full profile
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -150,10 +162,10 @@ export default function LandingPage() {
           country,
           state: stateVal,
           city,
-disciplines: selectedDiscs.map(id => {
-  const found = DISCIPLINES.find(d => d.id === id)
-  return found ? found.label : id
-}),
+          disciplines: selectedDiscs.map(id => {
+            const found = DISCIPLINES.find(d => d.id === id)
+            return found ? found.label : id
+          }),
           skills: selectedSkills,
           compensation: selectedComps,
         })
@@ -168,22 +180,19 @@ disciplines: selectedDiscs.map(id => {
       setMembers(data || [])
       setSubmitted(true)
     } catch (err) {
-      alert('Error: ' + (err.message || JSON.stringify(err)))
+      setFormError(err.message || 'Something went wrong. Please try again.')
     } finally {
       setSubmitting(false)
     }
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
       {/* Nav */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
-          <Link href="/discover">Discover</Link>
-          <Link href="/briefs">Collabs</Link>
-          <Link href="/studio">Loft Studio</Link>
+          <Link href="/login">Sign in</Link>
           <button className={styles.btnJoin} onClick={() => setModalOpen(true)}>Join</button>
         </div>
       </nav>
@@ -199,7 +208,7 @@ disciplines: selectedDiscs.map(id => {
           </div>
           <div className={styles.heroBtns}>
             <button className={styles.btnP} onClick={() => setModalOpen(true)}>Build Your Profile</button>
-            <Link href="/discover" className={styles.btnS}>Browse Creatives</Link>
+            <Link href="/login" className={styles.btnS}>Sign in</Link>
           </div>
         </div>
 
@@ -217,7 +226,7 @@ disciplines: selectedDiscs.map(id => {
               const disc = (m.disciplines || [])[0] || 'Creative'
               const loc  = m.city || m.state || null
               return (
-                <Link href={`/profile/${(m.firstname||'').toLowerCase()}-${(m.lastname||'').toLowerCase()}`} key={m.id} className={styles.mc} style={{ textDecoration:'none', color:'inherit' }}>
+                <div key={m.id} className={styles.mc}>
                   <div className={`${styles.mcAv} ${styles[AV_CLASSES[i] || 'avG']}`}>
                     {ini}
                     <div className={styles.dot} style={{ background: 'var(--teal)' }} />
@@ -236,7 +245,7 @@ disciplines: selectedDiscs.map(id => {
                       ))}
                     </div>
                   </div>
-                </Link>
+                </div>
               )
             })
           )}
@@ -248,11 +257,11 @@ disciplines: selectedDiscs.map(id => {
         <div className={styles.stripLbl}>Disciplines on the platform</div>
         <div className={styles.discGrid}>
           {DISC_GRID.map((d, i) => (
-            <Link href="/discover" className={styles.dc} key={i}>
+            <div className={styles.dc} key={i}>
               <div className={styles.dcIcon}>{d.icon}</div>
               <div className={styles.dcName}>{d.name}</div>
               <div className={styles.dcCount}>{d.count}</div>
-            </Link>
+            </div>
           ))}
         </div>
       </div>
@@ -312,6 +321,20 @@ disciplines: selectedDiscs.map(id => {
               <>
                 <div className={styles.mbody}>
 
+                  {formError && (
+                    <div style={{
+                      background: 'rgba(194,112,128,0.1)',
+                      border: '0.5px solid rgba(194,112,128,0.35)',
+                      borderRadius: '3px',
+                      padding: '0.65rem 0.85rem',
+                      fontSize: '0.75rem',
+                      color: '#c27080',
+                      marginBottom: '1rem',
+                    }}>
+                      {formError}
+                    </div>
+                  )}
+
                   {/* Your identity */}
                   <section>
                     <div className={styles.msl}>Your identity</div>
@@ -328,6 +351,16 @@ disciplines: selectedDiscs.map(id => {
                     <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
                       <label>Email</label>
                       <input type="email" placeholder="you@example.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+                    </div>
+                    <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>
+                      <div className={styles.mf}>
+                        <label>Password</label>
+                        <input type="password" placeholder="Min 8 characters" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+                      </div>
+                      <div className={styles.mf}>
+                        <label>Confirm password</label>
+                        <input type="password" placeholder="Repeat password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} />
+                      </div>
                     </div>
                     <div className={styles.mf}>
                       <label>Location</label>

@@ -264,3 +264,94 @@
   letter-spacing: 0.07em; text-transform: uppercase; border-radius: 2px;
   text-decoration: none; display: inline-flex; align-items: center;
 }
+.pendingCard {
+  background: var(--bg1);
+  border: 0.5px solid rgba(201,168,76,0.2);
+  border-radius: 5px;
+  overflow: hidden;
+  animation: fadeUp 0.3s ease both;
+}
+.pcStripe { height: 3px; background: linear-gradient(to right, rgba(201,168,76,0.5), rgba(201,168,76,0.15)); }
+.pcBody   { padding: 1rem 1.1rem; }
+.pcTop    { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.85rem; }
+.pcTitle  { font-family: var(--serif); font-size: 0.95rem; font-weight: 700; color: var(--cream); margin-bottom: 0.2rem; line-height: 1.25; }
+.pcWith   { font-size: 0.65rem; color: var(--faint); font-weight: 300; margin-bottom: 0.85rem; }
+
+.pillPending {
+  font-size: 0.52rem; padding: 0.1rem 0.5rem; border-radius: 2px;
+  background: rgba(201,168,76,0.08); border: 0.5px solid rgba(201,168,76,0.25);
+  color: rgba(201,168,76,0.7); letter-spacing: 0.04em; text-transform: uppercase;
+  animation: pillPulse 2s ease-in-out infinite;
+}
+
+/* TERMS SUMMARY */
+.termsSummary {
+  background: rgba(255,255,255,0.02);
+  border: 0.5px solid rgba(255,255,255,0.05);
+  border-radius: 3px;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.tsRow { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+.tsK   { font-size: 0.58rem; color: rgba(255,255,255,0.25); font-weight: 300; flex-shrink: 0; }
+.tsV   { font-size: 0.65rem; color: var(--dim); text-align: right; }
+
+/* PENDING ACTIONS */
+.pcActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.btnAccept {
+  flex: 1;
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  padding: 0.5rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btnAccept:hover    { background: var(--gold-d); }
+.btnAccept:disabled { opacity: 0.5; cursor: not-allowed; }
+.btnDecline {
+  background: transparent;
+  color: rgba(255,255,255,0.3);
+  border: 0.5px solid rgba(255,255,255,0.1);
+  padding: 0.5rem 0.85rem;
+  font-family: var(--sans);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btnDecline:hover    { border-color: rgba(194,112,128,0.4); color: #c27080; }
+.btnDecline:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* WAITING STATE (initiator view) */
+.pcWaiting {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.25);
+  font-weight: 300;
+  margin-top: 0.5rem;
+}
+.waitingDot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(201,168,76,0.4);
+  animation: waitPulse 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes waitPulse { 0%,100%{opacity:0.4} 50%{opacity:1} }

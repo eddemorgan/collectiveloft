@@ -167,8 +167,10 @@ export default function MatchingPage() {
     setToggles(prev => ({ ...prev, [key]: !prev[key] }))
   }
 
-  function handleReachOut(id, name) {
-    setReachedOut(prev => ({ ...prev, [id]: true }))
+function handleReachOut(id, name) {
+  if (!myProfile) { router.push('/login'); return }
+  router.push(`/terms?with=${id}`)
+}
   }
 
   const myDiscs = myProfile?.disciplines || []
@@ -182,7 +184,7 @@ export default function MatchingPage() {
 <Link href="/discover">Discover</Link>
 <Link href="/briefs">Collabs</Link>
 <Link href="/matching" className={styles.active}>Matching</Link>
-<Link href="/my-studios">Loft Studio</Link>
+<Link href="/my-studios">My Loft Studios</Link>
         </div>
       </nav>
 

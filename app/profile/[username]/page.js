@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
@@ -30,7 +30,6 @@ const SKILL_OPTS = [
   'Creative coding','Generative art','Interactive installation','Audio-visual',
 ]
 
-// Detect file type from MIME type
 function detectType(file) {
   const mime = file.type
   if (mime.startsWith('image/')) return 'image'
@@ -61,11 +60,7 @@ function initials(p) {
 function locationStr(p) {
   return [p.city,p.state,p.country].filter(Boolean).join(', ')
 }
-function profileSlug(p) {
-  return `${(p.firstname||'').toLowerCase()}-${(p.lastname||'').toLowerCase()}`
-}
 
-// ── Inline editable field ─────────────────────────────────────────────────────
 function Editable({ value, onSave, placeholder, multiline, isOwner, className }) {
   const [editing, setEditing] = useState(false)
   const [draft,   setDraft]   = useState(value || '')
@@ -100,7 +95,6 @@ function Editable({ value, onSave, placeholder, multiline, isOwner, className })
   )
 }
 
-// ── Lightbox ──────────────────────────────────────────────────────────────────
 function Lightbox({ items, startIndex, onClose }) {
   const [idx, setIdx] = useState(startIndex)
   const item = items[idx]
@@ -144,12 +138,12 @@ function Lightbox({ items, startIndex, onClose }) {
   )
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
 export default function ProfilePage() {
   const params   = useParams()
   const username = params?.username
 
   const [profile,       setProfile]       = useState(null)
+  const [profileId,     setProfileId]     = useState(null)
   const [studios,       setStudios]       = useState([])
   const [ratings,       setRatings]       = useState([])
   const [portfolio,     setPortfolio]     = useState([])
@@ -189,27 +183,35 @@ export default function ProfilePage() {
     if (error || !data) { setNotFound(true); setLoading(false); return }
 
     setProfile(data)
+    setProfileId(data.id)
     setDraftDiscs(data.disciplines || [])
     setDraftSkills(data.skills || [])
 
     const { data: { user } } = await supabase.auth.getUser()
     if (user && user.id === data.id) setIsOwner(true)
 
+    // Load completed collabs from collab_terms
     const { data: studioData } = await supabase
-      .from('studios')
-      .select('*, profiles!studios_collaborator_id_fkey(firstname,lastname,headline)')
-      .or(`poster_id.eq.${data.id},collaborator_id.eq.${data.id}`)
+      .from('collab_terms')
+      .select(`
+        *,
+        initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, headline),
+        partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, headline)
+      `)
+      .or(`initiator_id.eq.${data.id},partner_id.eq.${data.id}`)
       .eq('status', 'complete')
       .order('created_at', { ascending: false })
     setStudios(studioData || [])
 
+    // Load ratings
     const { data: ratingData } = await supabase
       .from('ratings')
-      .select('*, profiles!ratings_rater_id_fkey(firstname,lastname,headline)')
+      .select('*, rater:profiles!ratings_rater_id_fkey(firstname, lastname, headline)')
       .eq('ratee_id', data.id)
       .eq('submitted', true)
     setRatings(ratingData || [])
 
+    // Load portfolio
     const { data: portfolioData } = await supabase
       .from('portfolio_items')
       .select('*')
@@ -258,7 +260,6 @@ export default function ProfilePage() {
     setSaving(false)
   }
 
-  // ── Portfolio upload ──────────────────────────────────────────────────────
   async function uploadPortfolioItem(file) {
     if (!file || !profile) return
     setUploading(true)
@@ -295,12 +296,27 @@ export default function ProfilePage() {
     setPortfolio(prev => prev.filter(p => p.id !== id))
   }
 
-  async function updatePortfolioTitle(id, title) {
-    await supabase.from('portfolio_items').update({ title }).eq('id', id)
-    setPortfolio(prev => prev.map(p => p.id === id ? { ...p, title } : p))
+  function collabPartner(s) {
+    if (!profileId) return null
+    return s.initiator_id === profileId ? s.partner : s.initiator
   }
 
-  // ── Loading / not found ───────────────────────────────────────────────────
+  function CollabItem({ s }) {
+    const collab = collabPartner(s)
+    const cn = collab ? `${collab.firstname} ${collab.lastname}` : 'Collaborator'
+    const ci = collab ? `${collab.firstname[0]}${collab.lastname[0]}` : '??'
+    return (
+      <div className={styles.collabItem}>
+        <div className={`${styles.collabAv} ${styles.avTeal}`}>{ci}</div>
+        <div className={styles.collabInfo}>
+          <div className={styles.collabName}>{cn} · {collab?.headline}</div>
+          <div className={styles.collabRole}>{s.project_title || 'Collaboration'}</div>
+        </div>
+        <span className={styles.collabStatus}>Completed</span>
+      </div>
+    )
+  }
+
   if (loading) return <div className={styles.loading}><div className={styles.loadingDot}>✦</div></div>
   if (notFound) return (
     <div className={styles.notFound}>
@@ -316,17 +332,16 @@ export default function ProfilePage() {
   const location    = locationStr(profile)
   const disciplines = profile.disciplines || []
   const skills      = profile.skills || []
-  const avgRating   = ratings.length ? (ratings.reduce((s,r) => s+r.stars,0)/ratings.length).toFixed(1) : null
+  const avgRating   = ratings.length ? (ratings.reduce((s,r) => s + r.stars, 0) / ratings.length).toFixed(1) : null
   const links = [
-    profile.website       && { icon:'🔗', label:profile.website.replace(/^https?:\/\//,''),       href:profile.website },
-    profile.instagram     && { icon:'📷', label:`@${profile.instagram.replace('@','')}`,           href:`https://instagram.com/${profile.instagram.replace('@','')}` },
-    profile.soundcloud    && { icon:'🎵', label:profile.soundcloud.replace(/^https?:\/\//,''),     href:profile.soundcloud },
-    profile.other_link    && { icon:'🔗', label:profile.other_link.replace(/^https?:\/\//,''),     href:profile.other_link },
-    profile.portfolio_link && { icon:'💼', label:profile.portfolio_link.replace(/^https?:\/\//,''), href:profile.portfolio_link },
+    profile.website        && { icon:'🔗', label:profile.website.replace(/^https?:\/\//,''),        href:profile.website },
+    profile.instagram      && { icon:'📷', label:`@${profile.instagram.replace('@','')}`,            href:`https://instagram.com/${profile.instagram.replace('@','')}` },
+    profile.soundcloud     && { icon:'🎵', label:profile.soundcloud.replace(/^https?:\/\//,''),      href:profile.soundcloud },
+    profile.other_link     && { icon:'🔗', label:profile.other_link.replace(/^https?:\/\//,''),      href:profile.other_link },
+    profile.portfolio_link && { icon:'💼', label:profile.portfolio_link.replace(/^https?:\/\//,''),  href:profile.portfolio_link },
   ].filter(Boolean)
 
-  // Portfolio grid: real items + empty slots (owner sees up to 12, visitor sees only filled)
-  const GRID_SIZE = 12
+  const GRID_SIZE  = 12
   const emptySlots = isOwner ? Math.max(0, GRID_SIZE - portfolio.length) : 0
   const gridItems  = [
     ...portfolio.map(p => ({ ...p, isEmpty: false })),
@@ -339,10 +354,10 @@ export default function ProfilePage() {
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
-<Link href="/discover">Discover</Link>
-<Link href="/briefs">Collabs</Link>
-<Link href="/matching">Matching</Link>
-<Link href="/my-studios">My Loft Studios</Link>
+          <Link href="/discover">Discover</Link>
+          <Link href="/briefs">Collabs</Link>
+          <Link href="/matching">Matching</Link>
+          <Link href="/my-studios">My Loft Studios</Link>
           {isOwner && <span className={styles.saveIndicator}>{saving ? 'Saving…' : saveMsg}</span>}
           {isOwner
             ? <span className={styles.btnEdit}>Editing profile</span>
@@ -351,7 +366,7 @@ export default function ProfilePage() {
         </div>
       </nav>
 
-      {/* Cover banner */}
+      {/* Cover */}
       <div className={styles.coverBanner}>
         {profile.cover_url ? <img src={profile.cover_url} alt="Cover" className={styles.coverImg} /> : <div className={styles.coverPattern} />}
         {isOwner && (
@@ -364,7 +379,7 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Identity strip */}
+      {/* Identity */}
       <div className={styles.identityStrip}>
         <div className={styles.avWrap}>
           <div className={styles.avCircle} onClick={() => isOwner && avatarInputRef.current?.click()} style={isOwner ? { cursor:'pointer' } : {}}>
@@ -411,12 +426,12 @@ export default function ProfilePage() {
 
       {/* Tabs */}
       <div className={styles.tabsBar}>
-{['work','about','collabs','briefs'].map(tab => (
-  <div key={tab} className={`${styles.tab} ${activeTab===tab?styles.active:''}`} onClick={() => setActiveTab(tab)}>
-    {tab.charAt(0).toUpperCase()+tab.slice(1)}
-  </div>
-))}
-<Link href="/my-studios" className={styles.tab}>My Loft Studios</Link>
+        {['work','about','collabs','briefs'].map(tab => (
+          <div key={tab} className={`${styles.tab} ${activeTab===tab?styles.active:''}`} onClick={() => setActiveTab(tab)}>
+            {tab.charAt(0).toUpperCase()+tab.slice(1)}
+          </div>
+        ))}
+        <Link href="/my-studios" className={styles.tab}>My Loft Studios</Link>
       </div>
 
       {/* Body */}
@@ -426,7 +441,6 @@ export default function ProfilePage() {
           {/* WORK tab */}
           {activeTab === 'work' && (
             <>
-              {/* Bio + Right Now */}
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>About</div>
                 <div className={styles.bioText}>
@@ -440,7 +454,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Portfolio */}
               <div className={styles.contentSection}>
                 <div className={styles.secLabelRow}>
                   <div className={styles.secLabel}>Portfolio</div>
@@ -450,8 +463,6 @@ export default function ProfilePage() {
                     </div>
                   )}
                 </div>
-
-                {/* Hidden file input */}
                 <input
                   ref={portfolioInputRef}
                   type="file"
@@ -459,7 +470,6 @@ export default function ProfilePage() {
                   style={{ display:'none' }}
                   onChange={e => { if (e.target.files[0]) uploadPortfolioItem(e.target.files[0]); e.target.value = '' }}
                 />
-
                 {portfolio.length === 0 && !isOwner ? (
                   <div className={styles.emptyState}>No portfolio items yet.</div>
                 ) : (
@@ -467,25 +477,14 @@ export default function ProfilePage() {
                     {gridItems.map((item, i) => {
                       if (item.isEmpty) {
                         return (
-                          <div
-                            key={item.id}
-                            className={`${styles.portfolioSlot} ${styles.emptySlot}`}
-                            onClick={() => !uploading && portfolioInputRef.current?.click()}
-                          >
+                          <div key={item.id} className={`${styles.portfolioSlot} ${styles.emptySlot}`} onClick={() => !uploading && portfolioInputRef.current?.click()}>
                             <div className={styles.slotPlus}>+</div>
                           </div>
                         )
                       }
                       return (
-                        <div
-                          key={item.id}
-                          className={styles.portfolioSlot}
-                          onClick={() => setLightboxIdx(portfolio.findIndex(p => p.id === item.id))}
-                        >
-                          {/* Thumbnail */}
-                          {item.type === 'image' && (
-                            <img src={item.file_url} alt={item.title||''} className={styles.slotImage} />
-                          )}
+                        <div key={item.id} className={styles.portfolioSlot} onClick={() => setLightboxIdx(portfolio.findIndex(p => p.id === item.id))}>
+                          {item.type === 'image' && <img src={item.file_url} alt={item.title||''} className={styles.slotImage} />}
                           {item.type === 'video' && (
                             <div className={styles.slotVideo}>
                               <video src={item.file_url} className={styles.slotVideoEl} muted />
@@ -508,18 +507,11 @@ export default function ProfilePage() {
                               <div className={styles.slotDocTitle}>{item.title || 'Document'}</div>
                             </div>
                           )}
-
-                          {/* Overlay on hover */}
                           <div className={styles.slotOverlay}>
                             <div className={styles.slotTypeIcon}>{typeIcon(item.type)}</div>
                             <div className={styles.slotTitle}>{item.title || item.type}</div>
                             {isOwner && (
-                              <button
-                                className={styles.slotDelete}
-                                onClick={e => { e.stopPropagation(); deletePortfolioItem(item.id) }}
-                              >
-                                ✕
-                              </button>
+                              <button className={styles.slotDelete} onClick={e => { e.stopPropagation(); deletePortfolioItem(item.id) }}>✕</button>
                             )}
                           </div>
                         </div>
@@ -529,26 +521,11 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              {/* Past collabs */}
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Past collaborations</div>
                 {studios.length === 0 ? (
                   <div className={styles.emptyState}>No completed collaborations yet.</div>
-                ) : studios.map(s => {
-                  const collab = s.profiles
-                  const cn = collab ? `${collab.firstname} ${collab.lastname}` : 'Collaborator'
-                  const ci = collab ? `${collab.firstname[0]}${collab.lastname[0]}` : '??'
-                  return (
-                    <div key={s.id} className={styles.collabItem}>
-                      <div className={`${styles.collabAv} ${styles.avTeal}`}>{ci}</div>
-                      <div className={styles.collabInfo}>
-                        <div className={styles.collabName}>{cn} · {collab?.headline}</div>
-                        <div className={styles.collabRole}>{s.title}</div>
-                      </div>
-                      <span className={styles.collabStatus}>Completed</span>
-                    </div>
-                  )
-                })}
+                ) : studios.map(s => <CollabItem key={s.id} s={s} />)}
               </div>
             </>
           )}
@@ -649,21 +626,7 @@ export default function ProfilePage() {
               <div className={styles.secLabel}>Collaboration history</div>
               {studios.length === 0 ? (
                 <div className={styles.emptyState}>Once you complete a collab through Collective Loft, it will appear here.</div>
-              ) : studios.map(s => {
-                const collab = s.profiles
-                const cn = collab ? `${collab.firstname} ${collab.lastname}` : 'Collaborator'
-                const ci = collab ? `${collab.firstname[0]}${collab.lastname[0]}` : '??'
-                return (
-                  <div key={s.id} className={styles.collabItem}>
-                    <div className={`${styles.collabAv} ${styles.avTeal}`}>{ci}</div>
-                    <div className={styles.collabInfo}>
-                      <div className={styles.collabName}>{cn} · {collab?.headline}</div>
-                      <div className={styles.collabRole}>{s.title}</div>
-                    </div>
-                    <span className={styles.collabStatus}>Completed</span>
-                  </div>
-                )
-              })}
+              ) : studios.map(s => <CollabItem key={s.id} s={s} />)}
             </div>
           )}
 
@@ -702,7 +665,13 @@ export default function ProfilePage() {
           {(profile.seeking || profile.compensation?.length) && (
             <div className={styles.availCard}>
               <div className={styles.availTitle}>Open to collaborate</div>
-              <div className={styles.availText}>{[profile.seeking && `Seeking ${profile.seeking}.`, profile.location_preference, profile.compensation?.length && `${profile.compensation.join(' or ')}.`].filter(Boolean).join(' ')}</div>
+              <div className={styles.availText}>
+                {[
+                  profile.seeking && `Seeking ${profile.seeking}.`,
+                  profile.location_preference,
+                  profile.compensation?.length && `${profile.compensation.join(' or ')}.`
+                ].filter(Boolean).join(' ')}
+              </div>
             </div>
           )}
 
@@ -732,7 +701,7 @@ export default function ProfilePage() {
               <div className={styles.sbLabel}>Community voice</div>
               <div className={styles.endorsements}>
                 {ratings.slice(0,3).map(r => {
-                  const rater = r.profiles
+                  const rater = r.rater
                   const raterName = rater ? `${rater.firstname} ${rater.lastname}` : 'Collaborator'
                   return r.review ? (
                     <div key={r.id} className={styles.endorse}>
@@ -760,7 +729,6 @@ export default function ProfilePage() {
         </aside>
       </div>
 
-      {/* Lightbox */}
       {lightboxIdx !== null && (
         <Lightbox items={portfolio} startIndex={lightboxIdx} onClose={() => setLightboxIdx(null)} />
       )}

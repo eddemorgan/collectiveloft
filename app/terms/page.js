@@ -111,7 +111,7 @@ function TermsPage() {
     setMilestones(prev => [...prev, { desc: '', pct: '' }])
   }
 
-  async function handleSubmit() {
+async function handleSubmit() {
     setSaving(true)
     try {
       const termsData = {
@@ -134,7 +134,24 @@ function TermsPage() {
         cadence,
         status: 'pending',
       }
-      await supabase.from('collab_terms').insert(termsData)
+      const { data: inserted } = await supabase
+        .from('collab_terms')
+        .insert(termsData)
+        .select()
+        .single()
+
+      // Send email notification to partner
+      if (inserted && partner?.id && myProfile?.id) {
+        await fetch('/api/send-terms-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            studioId: inserted.id,
+            initiatorId: myProfile.id,
+            partnerId: partner.id,
+          }),
+        })
+      }
     } catch (e) {
       console.error(e)
     }

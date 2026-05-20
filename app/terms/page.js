@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
@@ -46,7 +46,7 @@ const DEFAULT_DELIVERABLES = [
   'Source files transferred on final payment',
 ]
 
-export default function TermsPage() {
+function TermsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const partnerId = searchParams.get('with')
@@ -520,5 +520,12 @@ export default function TermsPage() {
         </div>
       )}
     </div>
+  )
+}
+export default function TermsPageWrapper() {
+  return (
+    <Suspense fallback={<div style={{color:'var(--faint)',padding:'4rem',textAlign:'center'}}>Loading…</div>}>
+      <TermsPage />
+    </Suspense>
   )
 }

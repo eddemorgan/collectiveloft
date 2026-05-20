@@ -342,7 +342,7 @@ export default function ProfilePage() {
 <Link href="/discover">Discover</Link>
 <Link href="/briefs">Collabs</Link>
 <Link href="/matching">Matching</Link>
-<Link href="/my-studios">Loft Studio</Link>
+<Link href="/my-studios">My Loft Studios</Link>
           {isOwner && <span className={styles.saveIndicator}>{saving ? 'Saving…' : saveMsg}</span>}
           {isOwner
             ? <span className={styles.btnEdit}>Editing profile</span>
@@ -411,11 +411,12 @@ export default function ProfilePage() {
 
       {/* Tabs */}
       <div className={styles.tabsBar}>
-        {['work','about','collabs','briefs'].map(tab => (
-          <div key={tab} className={`${styles.tab} ${activeTab===tab?styles.active:''}`} onClick={() => setActiveTab(tab)}>
-            {tab.charAt(0).toUpperCase()+tab.slice(1)}
-          </div>
-        ))}
+{['work','about','collabs','briefs'].map(tab => (
+  <div key={tab} className={`${styles.tab} ${activeTab===tab?styles.active:''}`} onClick={() => setActiveTab(tab)}>
+    {tab.charAt(0).toUpperCase()+tab.slice(1)}
+  </div>
+))}
+<Link href="/my-studios" className={styles.tab}>My Loft Studios</Link>
       </div>
 
       {/* Body */}

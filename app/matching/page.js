@@ -29,30 +29,20 @@ const DISC_KEY_MAP = {
   'Creative Tech': 'tech',
 }
 
-// Simple match score: shared skills + cross-discipline bonus
 function computeScore(profile, myProfile) {
   if (!myProfile) return Math.floor(Math.random() * 40) + 50
-  const myDiscs = myProfile.disciplines || []
-  const mySkills = (myProfile.skills || []).map(s => s.toLowerCase())
+  const myDiscs    = myProfile.disciplines || []
+  const mySkills   = (myProfile.skills || []).map(s => s.toLowerCase())
   const theirDiscs = profile.disciplines || []
   const theirSkills = (profile.skills || []).map(s => s.toLowerCase())
 
   let score = 50
-
-  // Cross-discipline bonus — they have something you don't
   const crossDisc = theirDiscs.some(d => !myDiscs.includes(d))
   if (crossDisc) score += 20
-
-  // Shared skills overlap
   const overlap = mySkills.filter(s => theirSkills.includes(s)).length
   score += Math.min(overlap * 5, 20)
-
-  // Both open to collab
   if (profile.open_to_collab) score += 5
-
-  // Has collab history
   if ((profile.collab_count || 0) > 0) score += 5
-
   return Math.min(score, 99)
 }
 
@@ -72,12 +62,12 @@ function slugify(first, last) {
 
 export default function MatchingPage() {
   const router = useRouter()
-  const [myProfile, setMyProfile]     = useState(null)
-  const [profiles, setProfiles]       = useState([])
-  const [loading, setLoading]         = useState(true)
-  const [activeDisc, setActiveDisc]   = useState('all')
-  const [sortMode, setSortMode]       = useState('score')
-  const [reachedOut, setReachedOut]   = useState({})
+
+  const [myProfile,  setMyProfile]  = useState(null)
+  const [profiles,   setProfiles]   = useState([])
+  const [loading,    setLoading]    = useState(true)
+  const [activeDisc, setActiveDisc] = useState('all')
+  const [sortMode,   setSortMode]   = useState('score')
 
   const [toggles, setToggles] = useState({
     open: true, collabs: false, remote: false,
@@ -87,22 +77,17 @@ export default function MatchingPage() {
   useEffect(() => {
     async function load() {
       setLoading(true)
-
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser()
 
-      let myP = null
       if (user) {
         const { data } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single()
-        myP = data
         setMyProfile(data)
       }
 
-      // Get all other profiles
       const query = supabase
         .from('profiles')
         .select('id, firstname, lastname, headline, disciplines, skills, location, avatar_url, open_to_collab, collab_count, compensation, seeking, bio')
@@ -126,16 +111,12 @@ export default function MatchingPage() {
 
   const filtered = useMemo(() => {
     let list = scored.filter(p => {
-      // Discipline filter
       if (activeDisc !== 'all') {
         const discs = p.disciplines || []
         if (!discs.includes(activeDisc)) return false
       }
-      // Open to collab
       if (toggles.open && !p.open_to_collab) return false
-      // Has collabs
       if (toggles.collabs && !(p.collab_count > 0)) return false
-      // Compensation
       const comp = p.compensation || []
       if (toggles.exchange && !toggles.paid) {
         if (!comp.includes('Creative exchange')) return false
@@ -147,13 +128,12 @@ export default function MatchingPage() {
     })
 
     if (sortMode === 'collabs') list.sort((a, b) => (b.collab_count || 0) - (a.collab_count || 0))
-    else if (sortMode === 'recent') list.sort((a, b) => 0) // already ordered by created_at
+    else if (sortMode === 'recent') list.sort(() => 0)
     else list.sort((a, b) => b.score - a.score)
 
     return list
   }, [scored, activeDisc, toggles, sortMode])
 
-  // Disc counts from filtered (without disc filter applied)
   const discCounts = useMemo(() => {
     const counts = {}
     scored.forEach(p => {
@@ -167,10 +147,11 @@ export default function MatchingPage() {
     setToggles(prev => ({ ...prev, [key]: !prev[key] }))
   }
 
-function handleReachOut(id, name) {
-  if (!myProfile) { router.push('/login'); return }
-  router.push(`/terms?with=${id}`)
-}
+  function handleReachOut(e, id) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!myProfile) { router.push('/login'); return }
+    router.push(`/terms?with=${id}`)
   }
 
   const myDiscs = myProfile?.disciplines || []
@@ -181,10 +162,10 @@ function handleReachOut(id, name) {
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
-<Link href="/discover">Discover</Link>
-<Link href="/briefs">Collabs</Link>
-<Link href="/matching" className={styles.active}>Matching</Link>
-<Link href="/my-studios">My Loft Studios</Link>
+          <Link href="/discover">Discover</Link>
+          <Link href="/briefs">Collabs</Link>
+          <Link href="/matching" className={styles.active}>Matching</Link>
+          <Link href="/my-studios">My Loft Studios</Link>
         </div>
       </nav>
 
@@ -317,10 +298,9 @@ function handleReachOut(id, name) {
             <div className={styles.matchGrid}>
               {filtered.map((p, i) => {
                 const discKey = (p.disciplines || [])[0]
-                const dk = DISC_KEY_MAP[discKey] || 'visual'
-                const slug = slugify(p.firstname, p.lastname)
-                const initials = avatarInitials(p.firstname, p.lastname)
-                const sent = reachedOut[p.id]
+                const dk      = DISC_KEY_MAP[discKey] || 'visual'
+                const slug    = slugify(p.firstname, p.lastname)
+                const inits   = avatarInitials(p.firstname, p.lastname)
 
                 return (
                   <Link
@@ -342,7 +322,7 @@ function handleReachOut(id, name) {
                           <img src={p.avatar_url} alt={p.firstname} className={styles.mcAv} />
                         ) : (
                           <div className={`${styles.mcAv} ${styles.mcAvInitials}`}>
-                            {initials}
+                            {inits}
                             <div className={`${styles.mcOnline} ${p.open_to_collab ? styles.dotOn : styles.dotOff}`} />
                           </div>
                         )}
@@ -385,10 +365,10 @@ function handleReachOut(id, name) {
                             <span>◎ {p.collab_count || 0} collabs</span>
                           </div>
                           <button
-                            className={`${styles.btnReachOut} ${sent ? styles.sent : ''}`}
-                            onClick={e => { e.preventDefault(); e.stopPropagation(); handleReachOut(p.id, p.firstname) }}
+                            className={styles.btnReachOut}
+                            onClick={e => handleReachOut(e, p.id)}
                           >
-                            {sent ? 'Sent ✦' : 'Reach out'}
+                            Reach out
                           </button>
                         </div>
                       </div>

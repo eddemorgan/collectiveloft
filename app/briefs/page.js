@@ -166,9 +166,10 @@ export default function BriefsPage() {
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
-          <Link href="/discover">Discover</Link>
-          <Link href="/briefs" className={styles.active}>Collabs</Link>
-          <Link href="/studio">Studio</Link>
+<Link href="/discover">Discover</Link>
+<Link href="/briefs">Collabs</Link>
+<Link href="/matching">Matching</Link>
+<Link href="/my-studios">Loft Studio</Link>
           <Link href="/join"><button className={styles.btnJoin}>Join</button></Link>
         </div>
       </nav>

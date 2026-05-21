@@ -19,16 +19,28 @@ const DISC_OPTS = [
   { id:'tech',    icon:'💻', label:'Creative Tech' },
 ]
 
-const SKILL_OPTS = [
-  'Oil on canvas','Watercolour','Illustration','Large format','Art direction','Sculpture','Mixed media','Printmaking',
-  'Beat production','Mixing & mastering','Co-writing','Film scoring','Songwriting','Vocals','Sound design','Session musician',
-  'Poetry','Copywriting','Editing','Screenwriting','Fiction','Arts writing','Grant writing',
-  'Web design','Branding','UX design','Motion design','Typography','Print design',
-  'Cinematography','Directing','Film editing','Documentary','Short film',
-  'Portrait photography','Fine art photography','Documentary photography',
-  'Choreography','Spoken word','Theatre','Dance',
-  'Creative coding','Generative art','Interactive installation','Audio-visual',
-]
+// Skills keyed by discipline ID -- this is what powers the sync
+const SKILLS_BY_DISC = {
+  visual:  ['Oil on canvas','Watercolour','Illustration','Large format','Art direction','Sculpture','Mixed media','Printmaking'],
+  music:   ['Beat production','Mixing & mastering','Co-writing','Film scoring','Songwriting','Vocals','Sound design','Session musician'],
+  writing: ['Poetry','Copywriting','Editing','Screenwriting','Fiction','Arts writing','Grant writing','Writer','Novel','Short Story'],
+  design:  ['Web design','Branding','UX design','Motion design','Typography','Print design'],
+  film:    ['Cinematography','Directing','Film editing','Documentary','Short film'],
+  photo:   ['Portrait photography','Fine art photography','Documentary photography','Landscape photography'],
+  perf:    ['Choreography','Spoken word','Theatre','Dance','Singer','Acting'],
+  tech:    ['Creative coding','Generative art','Interactive installation','Audio-visual'],
+}
+
+// All skills flat -- used for display
+const ALL_SKILLS = Object.values(SKILLS_BY_DISC).flat()
+
+// Get all skills belonging to a given set of discipline labels
+function skillsForDiscs(discLabels) {
+  return discLabels.flatMap(label => {
+    const disc = DISC_OPTS.find(d => d.label === label)
+    return disc ? (SKILLS_BY_DISC[disc.id] || []) : []
+  })
+}
 
 function detectType(file) {
   const mime = file.type
@@ -242,8 +254,24 @@ export default function ProfilePage() {
     setTimeout(() => setSaveMsg(''), 2000)
   }
 
+  // Toggle a discipline in draft -- and auto-remove orphaned skills
+  function toggleDraftDisc(label) {
+    setDraftDiscs(prev => {
+      const next = prev.includes(label)
+        ? prev.filter(x => x !== label)
+        : [...prev, label]
+
+      // Remove skills that no longer belong to any selected discipline
+      const validSkills = skillsForDiscs(next)
+      setDraftSkills(s => s.filter(sk => validSkills.includes(sk)))
+
+      return next
+    })
+  }
+
   async function saveDiscs() {
     await saveField('disciplines', draftDiscs)
+    await saveField('skills', draftSkills)
     setEditingDiscs(false)
   }
 
@@ -351,6 +379,9 @@ export default function ProfilePage() {
     ...portfolio.map(p => ({ ...p, isEmpty: false })),
     ...Array(emptySlots).fill(null).map((_, i) => ({ id: `empty-${i}`, isEmpty: true })),
   ]
+
+  // Skills available to select based on current draft disciplines
+  const availableSkills = skillsForDiscs(draftDiscs)
 
   return (
     <>
@@ -556,39 +587,53 @@ export default function ProfilePage() {
 
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Disciplines &amp; skills</div>
+
+                {/* DISCIPLINE EDITOR */}
                 {editingDiscs ? (
                   <div>
                     <div className={styles.discEditGrid}>
                       {DISC_OPTS.map(d => (
-                        <div key={d.id} className={`${styles.discEditOpt} ${draftDiscs.includes(d.label)?styles.on:''}`}
-                          onClick={() => setDraftDiscs(prev => prev.includes(d.label) ? prev.filter(x=>x!==d.label) : [...prev,d.label])}>
+                        <div
+                          key={d.id}
+                          className={`${styles.discEditOpt} ${draftDiscs.includes(d.label) ? styles.on : ''}`}
+                          onClick={() => toggleDraftDisc(d.label)}
+                        >
                           <span>{d.icon}</span> {d.label}
                         </div>
                       ))}
                     </div>
                     <div className={styles.editActions}>
-                      <button className={styles.saveBtn} onClick={saveDiscs}>Save</button>
-                      <button className={styles.cancelBtn} onClick={() => { setEditingDiscs(false); setDraftDiscs(disciplines) }}>Cancel</button>
+                      <button className={styles.saveBtn} onClick={saveDiscs}>Save disciplines</button>
+                      <button className={styles.cancelBtn} onClick={() => { setEditingDiscs(false); setDraftDiscs(disciplines); setDraftSkills(skills) }}>Cancel</button>
                     </div>
                   </div>
                 ) : (
                   <div className={styles.discTags} style={{ marginBottom:'1rem' }}>
                     {disciplines.map(d => <span key={d} className={styles.discTag}>{d}</span>)}
-                    {isOwner && editMode && <button className={styles.editTagsBtn} onClick={() => setEditingDiscs(true)}>✎ Edit</button>}
+                    {isOwner && editMode && <button className={styles.editTagsBtn} onClick={() => { setDraftDiscs(disciplines); setDraftSkills(skills); setEditingDiscs(true) }}>✎ Edit</button>}
                   </div>
                 )}
+
+                {/* SKILL EDITOR -- shows skills for currently selected disciplines */}
                 {editingSkills ? (
                   <div>
-                    <div className={styles.skillEditGrid}>
-                      {SKILL_OPTS.map(s => (
-                        <div key={s} className={`${styles.skillEditOpt} ${draftSkills.includes(s)?styles.on:''}`}
-                          onClick={() => setDraftSkills(prev => prev.includes(s) ? prev.filter(x=>x!==s) : [...prev,s])}>
-                          {s}
-                        </div>
-                      ))}
-                    </div>
+                    {availableSkills.length === 0 ? (
+                      <div className={styles.emptyState}>Select at least one discipline above to see available skills.</div>
+                    ) : (
+                      <div className={styles.skillEditGrid}>
+                        {availableSkills.map(s => (
+                          <div
+                            key={s}
+                            className={`${styles.skillEditOpt} ${draftSkills.includes(s) ? styles.on : ''}`}
+                            onClick={() => setDraftSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+                          >
+                            {s}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                     <div className={styles.editActions}>
-                      <button className={styles.saveBtn} onClick={saveSkills}>Save</button>
+                      <button className={styles.saveBtn} onClick={saveSkills}>Save skills</button>
                       <button className={styles.cancelBtn} onClick={() => { setEditingSkills(false); setDraftSkills(skills) }}>Cancel</button>
                     </div>
                   </div>
@@ -600,7 +645,7 @@ export default function ProfilePage() {
                         <div className={styles.skillBarBg}><div className={styles.skillBarFill} style={{ width:`${SKILL_WIDTHS[i]||40}%` }} /></div>
                       </div>
                     ))}
-                    {isOwner && editMode && <button className={styles.editTagsBtn} onClick={() => setEditingSkills(true)}>✎ Edit skills</button>}
+                    {isOwner && editMode && <button className={styles.editTagsBtn} onClick={() => { setDraftSkills(skills); setEditingSkills(true) }}>✎ Edit skills</button>}
                   </div>
                 )}
               </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import styles from './profile.module.css'
 
@@ -61,7 +61,7 @@ function locationStr(p) {
   return [p.city,p.state,p.country].filter(Boolean).join(', ')
 }
 
-function Editable({ value, onSave, placeholder, multiline, isOwner, className }) {
+function Editable({ value, onSave, placeholder, multiline, isOwner, editMode, className }) {
   const [editing, setEditing] = useState(false)
   const [draft,   setDraft]   = useState(value || '')
   const ref = useRef()
@@ -69,7 +69,7 @@ function Editable({ value, onSave, placeholder, multiline, isOwner, className })
   useEffect(() => { if (editing && ref.current) ref.current.focus() }, [editing])
   useEffect(() => { setDraft(value || '') }, [value])
 
-  if (!isOwner) return <span className={className}>{value || placeholder}</span>
+  if (!isOwner || !editMode) return <span className={className}>{value || placeholder}</span>
 
   if (editing) {
     const props = {
@@ -140,6 +140,7 @@ function Lightbox({ items, startIndex, onClose }) {
 
 export default function ProfilePage() {
   const params   = useParams()
+  const router   = useRouter()
   const username = params?.username
 
   const [profile,       setProfile]       = useState(null)
@@ -152,6 +153,7 @@ export default function ProfilePage() {
   const [activeTab,     setActiveTab]     = useState('work')
   const [connected,     setConnected]     = useState(false)
   const [isOwner,       setIsOwner]       = useState(false)
+  const [editMode,      setEditMode]      = useState(false)
   const [saving,        setSaving]        = useState(false)
   const [saveMsg,       setSaveMsg]       = useState('')
   const [lightboxIdx,   setLightboxIdx]   = useState(null)
@@ -190,7 +192,6 @@ export default function ProfilePage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (user && user.id === data.id) setIsOwner(true)
 
-    // Load completed collabs from collab_terms
     const { data: studioData } = await supabase
       .from('collab_terms')
       .select(`
@@ -203,7 +204,6 @@ export default function ProfilePage() {
       .order('created_at', { ascending: false })
     setStudios(studioData || [])
 
-    // Load ratings
     const { data: ratingData } = await supabase
       .from('ratings')
       .select('*, rater:profiles!ratings_rater_id_fkey(firstname, lastname, headline)')
@@ -211,7 +211,6 @@ export default function ProfilePage() {
       .eq('submitted', true)
     setRatings(ratingData || [])
 
-    // Load portfolio
     const { data: portfolioData } = await supabase
       .from('portfolio_items')
       .select('*')
@@ -220,6 +219,11 @@ export default function ProfilePage() {
     setPortfolio(portfolioData || [])
 
     setLoading(false)
+  }
+
+  async function handleSignOut() {
+    await supabase.auth.signOut()
+    router.push('/')
   }
 
   async function saveField(field, value) {
@@ -342,7 +346,7 @@ export default function ProfilePage() {
   ].filter(Boolean)
 
   const GRID_SIZE  = 12
-  const emptySlots = isOwner ? Math.max(0, GRID_SIZE - portfolio.length) : 0
+  const emptySlots = isOwner && editMode ? Math.max(0, GRID_SIZE - portfolio.length) : 0
   const gridItems  = [
     ...portfolio.map(p => ({ ...p, isEmpty: false })),
     ...Array(emptySlots).fill(null).map((_, i) => ({ id: `empty-${i}`, isEmpty: true })),
@@ -358,18 +362,28 @@ export default function ProfilePage() {
           <Link href="/briefs">Collabs</Link>
           <Link href="/matching">Matching</Link>
           <Link href="/my-studios">My Loft Studios</Link>
-          {isOwner && <span className={styles.saveIndicator}>{saving ? 'Saving…' : saveMsg}</span>}
-          {isOwner
-            ? <span className={styles.btnEdit}>Editing profile</span>
-            : <Link href="/login" className={styles.btnEdit}>Edit profile</Link>
-          }
+          {isOwner && saving && <span className={styles.saveIndicator}>Saving…</span>}
+          {isOwner && saveMsg && !saving && <span className={styles.saveIndicator}>{saveMsg}</span>}
+          {isOwner && (
+            <button
+              className={`${styles.btnEdit} ${editMode ? styles.btnEditActive : ''}`}
+              onClick={() => setEditMode(v => !v)}
+            >
+              {editMode ? 'Done editing' : 'Edit profile'}
+            </button>
+          )}
+          {isOwner && (
+            <button className={styles.btnSignOut} onClick={handleSignOut}>
+              Sign out
+            </button>
+          )}
         </div>
       </nav>
 
       {/* Cover */}
       <div className={styles.coverBanner}>
         {profile.cover_url ? <img src={profile.cover_url} alt="Cover" className={styles.coverImg} /> : <div className={styles.coverPattern} />}
-        {isOwner && (
+        {isOwner && editMode && (
           <>
             <button className={styles.coverUploadBtn} onClick={() => coverInputRef.current?.click()}>
               {profile.cover_url ? '↑ Change cover' : '+ Add cover image'}
@@ -382,9 +396,9 @@ export default function ProfilePage() {
       {/* Identity */}
       <div className={styles.identityStrip}>
         <div className={styles.avWrap}>
-          <div className={styles.avCircle} onClick={() => isOwner && avatarInputRef.current?.click()} style={isOwner ? { cursor:'pointer' } : {}}>
+          <div className={styles.avCircle} onClick={() => isOwner && editMode && avatarInputRef.current?.click()} style={isOwner && editMode ? { cursor:'pointer' } : {}}>
             {profile.avatar_url ? <img src={profile.avatar_url} alt={fullName} /> : <span>{ini}</span>}
-            {isOwner && <div className={styles.avOverlay}>↑</div>}
+            {isOwner && editMode && <div className={styles.avOverlay}>↑</div>}
             <div className={styles.onlineDot} />
           </div>
           <input ref={avatarInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={e => uploadImage(e.target.files[0], 'avatars', 'avatar_url')} />
@@ -394,12 +408,12 @@ export default function ProfilePage() {
           <div className={styles.identityTop}>
             <div>
               <div className={styles.profileName}>
-                <Editable value={profile.firstname} onSave={v => saveField('firstname',v)} placeholder="First name" isOwner={isOwner} className={styles.nameFirst} />
+                <Editable value={profile.firstname} onSave={v => saveField('firstname',v)} placeholder="First name" isOwner={isOwner} editMode={editMode} className={styles.nameFirst} />
                 {' '}
-                <Editable value={profile.lastname} onSave={v => saveField('lastname',v)} placeholder="Last name" isOwner={isOwner} className={styles.nameLast} />
+                <Editable value={profile.lastname} onSave={v => saveField('lastname',v)} placeholder="Last name" isOwner={isOwner} editMode={editMode} className={styles.nameLast} />
               </div>
               <div className={styles.profileHeadline}>
-                <Editable value={profile.headline} onSave={v => saveField('headline',v)} placeholder="Your discipline · Your style · Your medium" isOwner={isOwner} className={styles.headlineText} />
+                <Editable value={profile.headline} onSave={v => saveField('headline',v)} placeholder="Your discipline · Your style · Your medium" isOwner={isOwner} editMode={editMode} className={styles.headlineText} />
               </div>
             </div>
             {!isOwner && (
@@ -444,12 +458,12 @@ export default function ProfilePage() {
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>About</div>
                 <div className={styles.bioText}>
-                  <Editable value={profile.bio} onSave={v => saveField('bio',v)} placeholder={isOwner ? 'Click to add your bio…' : 'No bio added yet.'} multiline isOwner={isOwner} className={styles.bioInner} />
+                  <Editable value={profile.bio} onSave={v => saveField('bio',v)} placeholder={isOwner ? 'Click to add your bio…' : 'No bio added yet.'} multiline isOwner={isOwner} editMode={editMode} className={styles.bioInner} />
                 </div>
                 <div className={styles.rightnowCard}>
                   <div className={styles.rnLabel}>Right now</div>
                   <div className={styles.rnText}>
-                    <Editable value={profile.rightnow} onSave={v => saveField('rightnow',v)} placeholder={isOwner ? 'Click to describe what you\'re actively making…' : 'Nothing listed right now.'} multiline isOwner={isOwner} className={styles.rnInner} />
+                    <Editable value={profile.rightnow} onSave={v => saveField('rightnow',v)} placeholder={isOwner ? 'Click to describe what you\'re actively making…' : 'Nothing listed right now.'} multiline isOwner={isOwner} editMode={editMode} className={styles.rnInner} />
                   </div>
                 </div>
               </div>
@@ -457,7 +471,7 @@ export default function ProfilePage() {
               <div className={styles.contentSection}>
                 <div className={styles.secLabelRow}>
                   <div className={styles.secLabel}>Portfolio</div>
-                  {isOwner && (
+                  {isOwner && editMode && (
                     <div className={styles.portfolioHint}>
                       {uploading ? 'Uploading…' : 'Click any slot to upload — images, video, audio, or PDF'}
                     </div>
@@ -510,7 +524,7 @@ export default function ProfilePage() {
                           <div className={styles.slotOverlay}>
                             <div className={styles.slotTypeIcon}>{typeIcon(item.type)}</div>
                             <div className={styles.slotTitle}>{item.title || item.type}</div>
-                            {isOwner && (
+                            {isOwner && editMode && (
                               <button className={styles.slotDelete} onClick={e => { e.stopPropagation(); deletePortfolioItem(item.id) }}>✕</button>
                             )}
                           </div>
@@ -536,7 +550,7 @@ export default function ProfilePage() {
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Bio</div>
                 <div className={styles.bioText}>
-                  <Editable value={profile.bio} onSave={v => saveField('bio',v)} placeholder={isOwner ? 'Click to add your bio…' : 'No bio.'} multiline isOwner={isOwner} className={styles.bioInner} />
+                  <Editable value={profile.bio} onSave={v => saveField('bio',v)} placeholder={isOwner ? 'Click to add your bio…' : 'No bio.'} multiline isOwner={isOwner} editMode={editMode} className={styles.bioInner} />
                 </div>
               </div>
 
@@ -560,7 +574,7 @@ export default function ProfilePage() {
                 ) : (
                   <div className={styles.discTags} style={{ marginBottom:'1rem' }}>
                     {disciplines.map(d => <span key={d} className={styles.discTag}>{d}</span>)}
-                    {isOwner && <button className={styles.editTagsBtn} onClick={() => setEditingDiscs(true)}>✎ Edit</button>}
+                    {isOwner && editMode && <button className={styles.editTagsBtn} onClick={() => setEditingDiscs(true)}>✎ Edit</button>}
                   </div>
                 )}
                 {editingSkills ? (
@@ -586,7 +600,7 @@ export default function ProfilePage() {
                         <div className={styles.skillBarBg}><div className={styles.skillBarFill} style={{ width:`${SKILL_WIDTHS[i]||40}%` }} /></div>
                       </div>
                     ))}
-                    {isOwner && <button className={styles.editTagsBtn} onClick={() => setEditingSkills(true)}>✎ Edit skills</button>}
+                    {isOwner && editMode && <button className={styles.editTagsBtn} onClick={() => setEditingSkills(true)}>✎ Edit skills</button>}
                   </div>
                 )}
               </div>
@@ -594,11 +608,11 @@ export default function ProfilePage() {
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Collaboration preferences</div>
                 <div className={styles.prefText}>
-                  <Editable value={profile.seeking} onSave={v => saveField('seeking',v)} placeholder={isOwner ? 'Click to describe who you\'re looking for…' : 'Not specified.'} multiline isOwner={isOwner} className={styles.prefInner} />
+                  <Editable value={profile.seeking} onSave={v => saveField('seeking',v)} placeholder={isOwner ? 'Click to describe who you\'re looking for…' : 'Not specified.'} multiline isOwner={isOwner} editMode={editMode} className={styles.prefInner} />
                 </div>
               </div>
 
-              {isOwner && (
+              {isOwner && editMode && (
                 <div className={styles.contentSection}>
                   <div className={styles.secLabel}>Links &amp; social</div>
                   <div className={styles.linksEditGrid}>
@@ -611,7 +625,7 @@ export default function ProfilePage() {
                     ].map(([field,label,ph]) => (
                       <div key={field} className={styles.linkEditRow}>
                         <span className={styles.linkLabel}>{label}</span>
-                        <Editable value={profile[field]} onSave={v => saveField(field,v)} placeholder={ph} isOwner={isOwner} className={styles.linkValue} />
+                        <Editable value={profile[field]} onSave={v => saveField(field,v)} placeholder={ph} isOwner={isOwner} editMode={editMode} className={styles.linkValue} />
                       </div>
                     ))}
                   </div>

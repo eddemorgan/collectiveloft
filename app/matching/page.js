@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 import styles from './matching.module.css'
 
 const DISCIPLINES = [
@@ -62,6 +63,7 @@ function slugify(first, last) {
 
 export default function MatchingPage() {
   const router = useRouter()
+  const { loading: authLoading } = useAuth()
 
   const [myProfile,  setMyProfile]  = useState(null)
   const [profiles,   setProfiles]   = useState([])
@@ -75,6 +77,7 @@ export default function MatchingPage() {
   })
 
   useEffect(() => {
+    if (authLoading) return
     async function load() {
       setLoading(true)
       const { data: { user } } = await supabase.auth.getUser()
@@ -100,7 +103,7 @@ export default function MatchingPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [authLoading])
 
   const scored = useMemo(() => {
     return profiles.map(p => ({
@@ -156,9 +159,10 @@ export default function MatchingPage() {
 
   const myDiscs = myProfile?.disciplines || []
 
+  if (authLoading) return null
+
   return (
     <div className={styles.page}>
-      {/* NAV */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
@@ -169,7 +173,6 @@ export default function MatchingPage() {
         </div>
       </nav>
 
-      {/* PAGE HEADER */}
       <div className={styles.pageHdr}>
         <div>
           <div className={styles.eyebrow}>Collective Loft</div>
@@ -186,10 +189,7 @@ export default function MatchingPage() {
         )}
       </div>
 
-      {/* BODY */}
       <div className={styles.bodyLayout}>
-
-        {/* SIDEBAR */}
         <aside className={styles.sidebar}>
           <div className={styles.filterSection}>
             <div className={styles.filterLabel}>I'm looking for</div>
@@ -256,9 +256,7 @@ export default function MatchingPage() {
           </button>
         </aside>
 
-        {/* RESULTS */}
         <div className={styles.resultsArea}>
-
           <div className={styles.howBanner}>
             <span className={styles.howIcon}>✦</span>
             <div className={styles.howText}>

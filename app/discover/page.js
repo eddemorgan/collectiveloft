@@ -2,10 +2,11 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 import styles from './discover.module.css'
 
-// ── Discipline config ─────────────────────────────────────────────────────────
 const DISCIPLINES = [
   { key: 'all',          icon: '✦',  label: 'All disciplines' },
   { key: 'Visual Art',   icon: '🎨', label: 'Visual Art' },
@@ -54,8 +55,9 @@ function locationStr(p) {
   return [p.city, p.state].filter(Boolean).join(', ') || 'Remote'
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 export default function DiscoverPage() {
+  const { loading: authLoading } = useAuth()
+
   const [creatives,     setCreatives]     = useState([])
   const [loading,       setLoading]       = useState(true)
   const [activeDisc,    setActiveDisc]    = useState('all')
@@ -70,6 +72,7 @@ export default function DiscoverPage() {
   const [sentIds,       setSentIds]       = useState([])
 
   useEffect(() => {
+    if (authLoading) return
     async function load() {
       setLoading(true)
       const { data } = await supabase
@@ -80,7 +83,7 @@ export default function DiscoverPage() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [authLoading])
 
   const discCounts = useMemo(() => {
     const counts = { all: creatives.length }
@@ -123,16 +126,17 @@ export default function DiscoverPage() {
     setLocation(''); setSearch(''); setSortMode('recent')
   }
 
+  if (authLoading) return null
+
   return (
     <>
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
-<Link href="/discover">Discover</Link>
-<Link href="/briefs">Collabs</Link>
-<Link href="/matching">Matching</Link>
-<Link href="/my-studios">Loft Studio</Link>
-          <Link href="/join"><button className={styles.btnJoin}>Join</button></Link>
+          <Link href="/discover">Discover</Link>
+          <Link href="/briefs">Collabs</Link>
+          <Link href="/matching">Matching</Link>
+          <Link href="/my-studios">My Loft Studios</Link>
         </div>
       </nav>
 

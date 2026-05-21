@@ -3,9 +3,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../hooks/useAuth'
 import styles from './briefs.module.css'
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
 const DISC_CLASS = {
   'Visual Art':   'dtV',
   'Music':        'dtM',
@@ -46,8 +46,9 @@ function initials(firstname, lastname) {
 }
 
 export default function BriefsPage() {
+  const { loading: authLoading } = useAuth()
+
   const [briefs,        setBriefs]        = useState([])
-  const [applications,  setApplications]  = useState([])
   const [loading,       setLoading]       = useState(true)
   const [selectedId,    setSelectedId]    = useState(null)
   const [activeFilter,  setActiveFilter]  = useState('all')
@@ -58,15 +59,17 @@ export default function BriefsPage() {
   const [savedIds,      setSavedIds]      = useState([])
   const [submitting,    setSubmitting]    = useState(false)
 
-  // Post brief form state
   const [postForm, setPostForm] = useState({
     title: '', making: '', needing: '', timeline: '',
     deadline: '', fee_range: '', location_preference: '',
   })
-  const [postDiscs, setPostDiscs]   = useState([])
-  const [postComp,  setPostComp]    = useState('Creative exchange')
+  const [postDiscs, setPostDiscs] = useState([])
+  const [postComp,  setPostComp]  = useState('Creative exchange')
 
-  useEffect(() => { loadBriefs() }, [])
+  useEffect(() => {
+    if (authLoading) return
+    loadBriefs()
+  }, [authLoading])
 
   async function loadBriefs() {
     setLoading(true)
@@ -77,14 +80,10 @@ export default function BriefsPage() {
       .order('created_at', { ascending: false })
 
     if (!error && data) setBriefs(data)
-
-    // Auto-select first
     if (data && data.length > 0) setSelectedId(data[0].id)
-
     setLoading(false)
   }
 
-  // ── Filter ───────────────────────────────────────────────────────────────
   const filtered = useMemo(() => {
     if (activeFilter === 'all') return briefs
     if (activeFilter === 'paid') return briefs.filter(b => b.compensation === 'Paid')
@@ -93,7 +92,6 @@ export default function BriefsPage() {
 
   const selected = briefs.find(b => b.id === selectedId) || null
 
-  // ── Post brief ────────────────────────────────────────────────────────────
   async function submitBrief() {
     if (!postForm.title.trim()) return
     setSubmitting(true)
@@ -132,7 +130,6 @@ export default function BriefsPage() {
     }
   }
 
-  // ── Apply ─────────────────────────────────────────────────────────────────
   async function submitApplication() {
     if (!applyMsg.trim() || !selectedId) return
     setSubmitting(true)
@@ -159,22 +156,20 @@ export default function BriefsPage() {
     )
   }
 
-  // ── Render ───────────────────────────────────────────────────────────────
+  if (authLoading) return null
+
   return (
     <>
-      {/* Nav */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
-<Link href="/discover">Discover</Link>
-<Link href="/briefs">Collabs</Link>
-<Link href="/matching">Matching</Link>
-<Link href="/my-studios">Loft Studio</Link>
-          <Link href="/join"><button className={styles.btnJoin}>Join</button></Link>
+          <Link href="/discover">Discover</Link>
+          <Link href="/briefs">Collabs</Link>
+          <Link href="/matching">Matching</Link>
+          <Link href="/my-studios">My Loft Studios</Link>
         </div>
       </nav>
 
-      {/* Page header */}
       <div className={styles.pageHdr}>
         <div className={styles.hdrLeft}>
           <div className={styles.hdrTitle}>Collab Briefs</div>
@@ -185,7 +180,6 @@ export default function BriefsPage() {
         </button>
       </div>
 
-      {/* Filter tabs */}
       <div className={styles.filterTabs}>
         {[
           ['all',         'All briefs'],
@@ -206,10 +200,7 @@ export default function BriefsPage() {
         ))}
       </div>
 
-      {/* Body split */}
       <div className={styles.bodySplit}>
-
-        {/* Brief list */}
         <div className={styles.briefListCol}>
           {loading ? (
             <div className={styles.emptyState}>Loading briefs…</div>
@@ -255,7 +246,6 @@ export default function BriefsPage() {
           )}
         </div>
 
-        {/* Detail panel */}
         <div className={styles.detailPanel}>
           {!selected ? (
             <div className={styles.detailEmpty}>
@@ -274,7 +264,6 @@ export default function BriefsPage() {
             const stars = '★'.repeat(Math.floor(rating)) + (rating % 1 ? '½' : '')
             return (
               <div className={styles.detailInner}>
-                {/* Detail header */}
                 <div className={styles.detailHdr}>
                   <div className={styles.detailTags}>
                     {(selected.disciplines || []).map(d => (
@@ -305,7 +294,6 @@ export default function BriefsPage() {
                   </div>
                 </div>
 
-                {/* Poster card */}
                 <div className={styles.posterCard}>
                   <div className={`${styles.posterAv} ${styles[avCls]}`}>{ini}</div>
                   <div>
@@ -324,7 +312,6 @@ export default function BriefsPage() {
                   )}
                 </div>
 
-                {/* What making */}
                 {selected.what_making && (
                   <div className={styles.dsec}>
                     <div className={styles.dsecLabel}>What I'm making</div>
@@ -332,7 +319,6 @@ export default function BriefsPage() {
                   </div>
                 )}
 
-                {/* Who needed */}
                 {selected.who_needed && (
                   <div className={styles.dsec}>
                     <div className={styles.dsecLabel}>Who I need</div>
@@ -340,7 +326,6 @@ export default function BriefsPage() {
                   </div>
                 )}
 
-                {/* Project specs */}
                 <div className={styles.dsec}>
                   <div className={styles.dsecLabel}>Project specs</div>
                   <div className={styles.specsGrid}>
@@ -351,14 +336,13 @@ export default function BriefsPage() {
                     <div className={styles.specRow}><span className={styles.specK}>Applications</span><span className={`${styles.specV} ${styles.teal}`}>{selected.applicants_count || 0} received</span></div>
                   </div>
                 </div>
-
               </div>
             )
           })()}
         </div>
       </div>
 
-      {/* ── POST BRIEF MODAL ── */}
+      {/* POST BRIEF MODAL */}
       {postOpen && (
         <div className={styles.modalOverlay} onClick={e => { if (e.target === e.currentTarget) setPostOpen(false) }}>
           <div className={styles.modal}>
@@ -444,7 +428,7 @@ export default function BriefsPage() {
         </div>
       )}
 
-      {/* ── APPLY MODAL ── */}
+      {/* APPLY MODAL */}
       {applyOpen && selected && (
         <div className={styles.applyModal} onClick={e => { if (e.target === e.currentTarget) setApplyOpen(false) }}>
           <div className={styles.applyInner}>

@@ -10,6 +10,7 @@ export default function LoginPage() {
   const router = useRouter()
   const [email,      setEmail]      = useState('')
   const [password,   setPassword]   = useState('')
+  const [showPw,     setShowPw]     = useState(false)
   const [loading,    setLoading]    = useState(false)
   const [error,      setError]      = useState('')
   const [resetMode,  setResetMode]  = useState(false)
@@ -88,13 +89,18 @@ export default function LoginPage() {
                 {!resetMode && (
                   <div className={styles.field}>
                     <label>Password</label>
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                    />
+                    <div className={styles.pwWrap}>
+                      <input
+                        type={showPw ? 'text' : 'password'}
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                      />
+                      <button type="button" className={styles.pwEye} onClick={() => setShowPw(v => !v)}>
+                        {showPw ? '🙈' : '👁'}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

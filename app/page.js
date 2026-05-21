@@ -64,7 +64,9 @@ const REQUIRED_FIELDS = ['firstname', 'lastname', 'email', 'bio', 'rightnow', 's
 
 export default function LandingPage() {
   const router = useRouter()
-  const [members, setMembers] = useState([])
+  const [members,   setMembers]   = useState([])
+  const [authUser,  setAuthUser]  = useState(null)
+  const [myProfile, setMyProfile] = useState(null)
 
   useEffect(() => {
     supabase
@@ -73,12 +75,44 @@ export default function LandingPage() {
       .order('created_at', { ascending: false })
       .limit(3)
       .then(({ data }) => setMembers(data || []))
+
+    // Check auth state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setAuthUser(session.user)
+        supabase
+          .from('profiles')
+          .select('firstname, lastname')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => setMyProfile(data))
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setAuthUser(session?.user || null)
+      if (session?.user) {
+        supabase
+          .from('profiles')
+          .select('firstname, lastname')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => setMyProfile(data))
+      } else {
+        setMyProfile(null)
+      }
+    })
+    return () => subscription.unsubscribe()
   }, [])
 
   const [modalOpen,  setModalOpen]  = useState(false)
   const [submitted,  setSubmitted]  = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [formError,  setFormError]  = useState('')
+
+  // Password visibility toggles
+  const [showPw,     setShowPw]     = useState(false)
+  const [showConfPw, setShowConfPw] = useState(false)
 
   const [form, setForm] = useState({
     firstname: '', lastname: '', email: '', headline: '',
@@ -122,8 +156,6 @@ export default function LandingPage() {
 
   async function handleSubmit() {
     setFormError('')
-
-    // Validate required fields
     if (!form.firstname || !form.lastname || !form.email) {
       setFormError('Please fill in your first name, last name, and email.'); return
     }
@@ -139,7 +171,6 @@ export default function LandingPage() {
 
     setSubmitting(true)
     try {
-      // Create auth account with real password
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -147,7 +178,6 @@ export default function LandingPage() {
       })
       if (authError) throw authError
 
-      // Upsert full profile
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -171,7 +201,6 @@ export default function LandingPage() {
         })
       if (profileError) throw profileError
 
-      // Refresh hero members
       const { data } = await supabase
         .from('profiles')
         .select('id, firstname, lastname, headline, disciplines, rightnow, compensation, availability, city, state')
@@ -186,14 +215,24 @@ export default function LandingPage() {
     }
   }
 
+  const profileSlug = myProfile
+    ? `${myProfile.firstname.toLowerCase()}-${myProfile.lastname.toLowerCase()}`
+    : null
+
   return (
     <>
       {/* Nav */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
-          <Link href="/login">Sign in</Link>
-          <button className={styles.btnJoin} onClick={() => setModalOpen(true)}>Join</button>
+          {authUser && profileSlug ? (
+            <Link href={`/profile/${profileSlug}`}>My Profile</Link>
+          ) : (
+            <Link href="/login">Sign in</Link>
+          )}
+          {!authUser && (
+            <button className={styles.btnJoin} onClick={() => setModalOpen(true)}>Join</button>
+          )}
         </div>
       </nav>
 
@@ -207,8 +246,12 @@ export default function LandingPage() {
             writers, poets, designers, and makers. Find collaborators who match your vision.
           </div>
           <div className={styles.heroBtns}>
-            <button className={styles.btnP} onClick={() => setModalOpen(true)}>Build Your Profile</button>
-            <Link href="/login" className={styles.btnS}>Sign in</Link>
+            {authUser && profileSlug ? (
+              <Link href={`/profile/${profileSlug}`} className={styles.btnP}>My Profile</Link>
+            ) : (
+              <button className={styles.btnP} onClick={() => setModalOpen(true)}>Build Your Profile</button>
+            )}
+            {!authUser && <Link href="/login" className={styles.btnS}>Sign in</Link>}
           </div>
         </div>
 
@@ -355,11 +398,31 @@ export default function LandingPage() {
                     <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>
                       <div className={styles.mf}>
                         <label>Password</label>
-                        <input type="password" placeholder="Min 8 characters" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
+                        <div className={styles.pwWrap}>
+                          <input
+                            type={showPw ? 'text' : 'password'}
+                            placeholder="Min 8 characters"
+                            value={form.password}
+                            onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                          />
+                          <button type="button" className={styles.pwEye} onClick={() => setShowPw(v => !v)}>
+                            {showPw ? '🙈' : '👁'}
+                          </button>
+                        </div>
                       </div>
                       <div className={styles.mf}>
                         <label>Confirm password</label>
-                        <input type="password" placeholder="Repeat password" value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} />
+                        <div className={styles.pwWrap}>
+                          <input
+                            type={showConfPw ? 'text' : 'password'}
+                            placeholder="Repeat password"
+                            value={form.confirmPassword}
+                            onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                          />
+                          <button type="button" className={styles.pwEye} onClick={() => setShowConfPw(v => !v)}>
+                            {showConfPw ? '🙈' : '👁'}
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div className={styles.mf}>

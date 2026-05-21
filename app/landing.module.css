@@ -598,3 +598,24 @@
   display: inline-flex;
   align-items: center;
 }
+.pwWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.pwWrap input {
+  width: 100%;
+  padding-right: 2.5rem;
+}
+.pwEye {
+  position: absolute;
+  right: 0.6rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  opacity: 0.5;
+  padding: 0;
+  line-height: 1;
+}
+.pwEye:hover { opacity: 1; }

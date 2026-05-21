@@ -350,16 +350,20 @@ export default function LandingPage() {
               <div className={styles.pb} style={{ width: `${progress}%` }} />
             </div>
 
-            {submitted ? (
-              <div className={styles.scs}>
-                <div className={styles.scM}>✦</div>
-                <div className={styles.scT}>Welcome to <span>Collective Loft</span>.</div>
-                <div className={styles.scS}>Your profile is live. Keep your "Right Now" field current — that's what makes people reach out.</div>
-                <div className={styles.scA}>
-                  <Link href={`/profile/${form.firstname.toLowerCase()}-${form.lastname.toLowerCase()}`} className={styles.bvp}>View my profile</Link>
-                  <button className={styles.bbh} onClick={closeModal}>Done</button>
-                </div>
-              </div>
+{submitted ? (
+  <div className={styles.scs}>
+    <div className={styles.scM}>✦</div>
+    <div className={styles.scT}>Check your <span>email.</span></div>
+    <div className={styles.scS}>
+      We sent a confirmation link to <strong style={{ color: 'var(--cream)' }}>{form.email}</strong>. Click it to activate your account and sign in for the first time.
+    </div>
+    <div className={styles.scS} style={{ marginTop: '0.5rem', fontSize: '0.72rem', color: 'rgba(240,236,227,0.35)' }}>
+      Check your spam folder if it doesn't arrive within a minute.
+    </div>
+    <div className={styles.scA}>
+      <button className={styles.bbh} onClick={closeModal}>Got it</button>
+    </div>
+  </div>
             ) : (
               <>
                 <div className={styles.mbody}>

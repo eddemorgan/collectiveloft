@@ -33,19 +33,67 @@ const DISCIPLINES = [
   { id: 'tech',    icon: '💻', label: 'Creative Tech' },
 ]
 
+// Updated skills with all new additions
 const SKILLS = [
-  { d: 'visual',  label: 'Oil on canvas' },   { d: 'visual',  label: 'Watercolour' },
-  { d: 'visual',  label: 'Illustration' },     { d: 'visual',  label: 'Large format' },
-  { d: 'visual',  label: 'Art direction' },    { d: 'music',   label: 'Beat production' },
-  { d: 'music',   label: 'Mixing & mastering'},{ d: 'music',   label: 'Co-writing' },
-  { d: 'music',   label: 'Film scoring' },     { d: 'music',   label: 'Songwriting' },
-  { d: 'writing', label: 'Poetry' },           { d: 'writing', label: 'Copywriting' },
-  { d: 'writing', label: 'Editing' },          { d: 'design',  label: 'Web design' },
-  { d: 'design',  label: 'Branding' },         { d: 'design',  label: 'UX design' },
-  { d: 'film',    label: 'Cinematography' },   { d: 'film',    label: 'Directing' },
-  { d: 'photo',   label: 'Fine art photography'},{ d: 'photo', label: 'Portrait photography' },
-  { d: 'perf',    label: 'Choreography' },     { d: 'perf',    label: 'Spoken word' },
-  { d: 'tech',    label: 'Generative art' },   { d: 'tech',    label: 'Creative coding' },
+  // Visual Art
+  { d: 'visual',  label: 'Oil on canvas' },
+  { d: 'visual',  label: 'Watercolour' },
+  { d: 'visual',  label: 'Illustration' },
+  { d: 'visual',  label: 'Large format' },
+  { d: 'visual',  label: 'Art direction' },
+  { d: 'visual',  label: 'Sculpture' },
+  { d: 'visual',  label: 'Mixed media' },
+  { d: 'visual',  label: 'Printmaking' },
+  // Music
+  { d: 'music',   label: 'Beat production' },
+  { d: 'music',   label: 'Mixing & mastering' },
+  { d: 'music',   label: 'Co-writing' },
+  { d: 'music',   label: 'Film scoring' },
+  { d: 'music',   label: 'Songwriting' },
+  { d: 'music',   label: 'Vocals' },
+  { d: 'music',   label: 'Sound design' },
+  { d: 'music',   label: 'Session musician' },
+  // Writing
+  { d: 'writing', label: 'Poetry' },
+  { d: 'writing', label: 'Copywriting' },
+  { d: 'writing', label: 'Editing' },
+  { d: 'writing', label: 'Screenwriting' },
+  { d: 'writing', label: 'Fiction' },
+  { d: 'writing', label: 'Arts writing' },
+  { d: 'writing', label: 'Grant writing' },
+  { d: 'writing', label: 'Writer' },
+  { d: 'writing', label: 'Novel' },
+  { d: 'writing', label: 'Short Story' },
+  // Design & Web
+  { d: 'design',  label: 'Web design' },
+  { d: 'design',  label: 'Branding' },
+  { d: 'design',  label: 'UX design' },
+  { d: 'design',  label: 'Motion design' },
+  { d: 'design',  label: 'Typography' },
+  { d: 'design',  label: 'Print design' },
+  // Film
+  { d: 'film',    label: 'Cinematography' },
+  { d: 'film',    label: 'Directing' },
+  { d: 'film',    label: 'Film editing' },
+  { d: 'film',    label: 'Documentary' },
+  { d: 'film',    label: 'Short film' },
+  // Photography
+  { d: 'photo',   label: 'Portrait photography' },
+  { d: 'photo',   label: 'Fine art photography' },
+  { d: 'photo',   label: 'Documentary photography' },
+  { d: 'photo',   label: 'Landscape photography' },
+  // Performance
+  { d: 'perf',    label: 'Choreography' },
+  { d: 'perf',    label: 'Spoken word' },
+  { d: 'perf',    label: 'Theatre' },
+  { d: 'perf',    label: 'Dance' },
+  { d: 'perf',    label: 'Singer' },
+  { d: 'perf',    label: 'Acting' },
+  // Creative Tech
+  { d: 'tech',    label: 'Creative coding' },
+  { d: 'tech',    label: 'Generative art' },
+  { d: 'tech',    label: 'Interactive installation' },
+  { d: 'tech',    label: 'Audio-visual' },
 ]
 
 const DISC_GRID = [
@@ -76,7 +124,6 @@ export default function LandingPage() {
       .limit(3)
       .then(({ data }) => setMembers(data || []))
 
-    // Check auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setAuthUser(session.user)
@@ -109,8 +156,6 @@ export default function LandingPage() {
   const [submitted,  setSubmitted]  = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [formError,  setFormError]  = useState('')
-
-  // Password visibility toggles
   const [showPw,     setShowPw]     = useState(false)
   const [showConfPw, setShowConfPw] = useState(false)
 
@@ -139,7 +184,13 @@ export default function LandingPage() {
   const cityOptions = (country && LOCATION_DATA[country]?.states?.[stateVal]?.c) ?? []
 
   function toggleDisc(id) {
-    setSelectedDiscs(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id])
+    setSelectedDiscs(prev => {
+      const next = prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
+      // Remove skills no longer belonging to selected disciplines
+      const validSkillLabels = SKILLS.filter(s => next.includes(s.d)).map(s => s.label)
+      setSelectedSkills(sk => sk.filter(s => validSkillLabels.includes(s)))
+      return next
+    })
   }
   function toggleSkill(label) {
     setSelectedSkills(prev => prev.includes(label) ? prev.filter(s => s !== label) : [...prev, label])
@@ -171,6 +222,7 @@ export default function LandingPage() {
 
     setSubmitting(true)
     try {
+      // Sign up -- with email confirmation on, user.id is still returned
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -178,6 +230,12 @@ export default function LandingPage() {
       })
       if (authError) throw authError
 
+      // authData.user can be null if the email already exists and is confirmed
+      if (!authData.user) {
+        throw new Error('An account with this email already exists. Try signing in instead.')
+      }
+
+      // Store the profile -- works even before email is confirmed
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -201,12 +259,6 @@ export default function LandingPage() {
         })
       if (profileError) throw profileError
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('id, firstname, lastname, headline, disciplines, rightnow, compensation, availability, city, state')
-        .order('created_at', { ascending: false })
-        .limit(3)
-      setMembers(data || [])
       setSubmitted(true)
     } catch (err) {
       setFormError(err.message || 'Something went wrong. Please try again.')
@@ -350,20 +402,20 @@ export default function LandingPage() {
               <div className={styles.pb} style={{ width: `${progress}%` }} />
             </div>
 
-{submitted ? (
-  <div className={styles.scs}>
-    <div className={styles.scM}>✦</div>
-    <div className={styles.scT}>Check your <span>email.</span></div>
-    <div className={styles.scS}>
-      We sent a confirmation link to <strong style={{ color: 'var(--cream)' }}>{form.email}</strong>. Click it to activate your account and sign in for the first time.
-    </div>
-    <div className={styles.scS} style={{ marginTop: '0.5rem', fontSize: '0.72rem', color: 'rgba(240,236,227,0.35)' }}>
-      Check your spam folder if it doesn't arrive within a minute.
-    </div>
-    <div className={styles.scA}>
-      <button className={styles.bbh} onClick={closeModal}>Got it</button>
-    </div>
-  </div>
+            {submitted ? (
+              <div className={styles.scs}>
+                <div className={styles.scM}>✦</div>
+                <div className={styles.scT}>Check your <span>email.</span></div>
+                <div className={styles.scS}>
+                  We sent a confirmation link to <strong style={{ color: 'var(--cream)' }}>{form.email}</strong>. Click it to activate your account and sign in for the first time.
+                </div>
+                <div className={styles.scS} style={{ marginTop: '0.5rem', fontSize: '0.72rem', color: 'rgba(240,236,227,0.35)' }}>
+                  Check your spam folder if it doesn't arrive within a minute.
+                </div>
+                <div className={styles.scA}>
+                  <button className={styles.bbh} onClick={closeModal}>Got it</button>
+                </div>
+              </div>
             ) : (
               <>
                 <div className={styles.mbody}>

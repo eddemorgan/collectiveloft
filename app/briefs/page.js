@@ -46,7 +46,7 @@ function initials(firstname, lastname) {
 }
 
 export default function BriefsPage() {
-  const { loading: authLoading } = useAuth()
+  const { loading: authLoading, user } = useAuth()
 
   const [briefs,        setBriefs]        = useState([])
   const [loading,       setLoading]       = useState(true)
@@ -58,6 +58,7 @@ export default function BriefsPage() {
   const [appliedIds,    setAppliedIds]    = useState([])
   const [savedIds,      setSavedIds]      = useState([])
   const [submitting,    setSubmitting]    = useState(false)
+  const [deletingId,    setDeletingId]    = useState(null)
 
   const [postForm, setPostForm] = useState({
     title: '', making: '', needing: '', timeline: '',
@@ -92,15 +93,25 @@ export default function BriefsPage() {
 
   const selected = briefs.find(b => b.id === selectedId) || null
 
+  async function deleteBrief(e, id) {
+    e.stopPropagation()
+    if (!confirm('Delete this brief? This cannot be undone.')) return
+    setDeletingId(id)
+    await supabase.from('briefs').update({ status: 'deleted' }).eq('id', id)
+    setBriefs(prev => prev.filter(b => b.id !== id))
+    if (selectedId === id) setSelectedId(null)
+    setDeletingId(null)
+  }
+
   async function submitBrief() {
     if (!postForm.title.trim()) return
     setSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user: u } } = await supabase.auth.getUser()
       const { data, error } = await supabase
         .from('briefs')
         .insert({
-          poster_id: user?.id || null,
+          poster_id: u?.id || null,
           title: postForm.title,
           disciplines: postDiscs,
           what_making: postForm.making,
@@ -134,10 +145,10 @@ export default function BriefsPage() {
     if (!applyMsg.trim() || !selectedId) return
     setSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { user: u } } = await supabase.auth.getUser()
       await supabase.from('applications').insert({
         brief_id: selectedId,
-        applicant_id: user?.id || null,
+        applicant_id: u?.id || null,
         message: applyMsg,
       })
       setAppliedIds(prev => [...prev, selectedId])
@@ -208,10 +219,12 @@ export default function BriefsPage() {
             <div className={styles.emptyState}>No briefs match this filter.</div>
           ) : (
             filtered.map(b => {
-              const poster = b.profiles
-              const ini = poster ? initials(poster.firstname, poster.lastname) : '??'
-              const avCls = AV_COLORS[b.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
-              const dl = daysLeft(b.deadline)
+              const poster   = b.profiles
+              const ini      = poster ? initials(poster.firstname, poster.lastname) : '??'
+              const avCls    = AV_COLORS[b.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
+              const dl       = daysLeft(b.deadline)
+              const isPoster = user && b.poster_id === user.id
+
               return (
                 <div
                   key={b.id}
@@ -226,6 +239,16 @@ export default function BriefsPage() {
                       <span className={`${styles.dtag} ${styles[COMP_CLASS[b.compensation] || 'ctEx']}`}>
                         {b.compensation}
                       </span>
+                    )}
+                    {isPoster && (
+                      <button
+                        className={styles.biDelete}
+                        onClick={e => deleteBrief(e, b.id)}
+                        disabled={deletingId === b.id}
+                        title="Delete brief"
+                      >
+                        ✕
+                      </button>
                     )}
                   </div>
                   <div className={styles.biTitle}>{b.title}</div>
@@ -254,14 +277,16 @@ export default function BriefsPage() {
               <div className={styles.deSub}>Click any brief on the left to see the full details, project specs, and who's already applied.</div>
             </div>
           ) : (() => {
-            const poster = selected.profiles
-            const ini = poster ? initials(poster.firstname, poster.lastname) : '??'
-            const avCls = AV_COLORS[selected.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
-            const applied = appliedIds.includes(selected.id)
-            const saved = savedIds.includes(selected.id)
-            const dl = daysLeft(selected.deadline)
-            const rating = poster?.rating || 0
-            const stars = '★'.repeat(Math.floor(rating)) + (rating % 1 ? '½' : '')
+            const poster   = selected.profiles
+            const ini      = poster ? initials(poster.firstname, poster.lastname) : '??'
+            const avCls    = AV_COLORS[selected.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
+            const applied  = appliedIds.includes(selected.id)
+            const saved    = savedIds.includes(selected.id)
+            const dl       = daysLeft(selected.deadline)
+            const rating   = poster?.rating || 0
+            const stars    = '★'.repeat(Math.floor(rating)) + (rating % 1 ? '½' : '')
+            const isPoster = user && selected.poster_id === user.id
+
             return (
               <div className={styles.detailInner}>
                 <div className={styles.detailHdr}>
@@ -277,20 +302,32 @@ export default function BriefsPage() {
                   </div>
                   <div className={styles.detailTitle}>{selected.title}</div>
                   <div className={styles.detailActionRow}>
-                    <button
-                      className={styles.btnApply}
-                      onClick={() => !applied && setApplyOpen(true)}
-                      style={applied ? { background: 'rgba(86,179,156,0.2)', color: 'var(--teal)', border: '0.5px solid rgba(86,179,156,0.3)' } : {}}
-                    >
-                      {applied ? 'Application sent ✦' : 'Apply to this brief'}
-                    </button>
-                    <button
-                      className={styles.btnSave}
-                      onClick={() => setSavedIds(prev => prev.includes(selected.id) ? prev.filter(i => i !== selected.id) : [...prev, selected.id])}
-                      style={saved ? { color: 'var(--teal)', borderColor: 'rgba(86,179,156,0.3)' } : {}}
-                    >
-                      {saved ? 'Saved ✦' : 'Save brief'}
-                    </button>
+                    {!isPoster && (
+                      <button
+                        className={styles.btnApply}
+                        onClick={() => !applied && setApplyOpen(true)}
+                        style={applied ? { background: 'rgba(86,179,156,0.2)', color: 'var(--teal)', border: '0.5px solid rgba(86,179,156,0.3)' } : {}}
+                      >
+                        {applied ? 'Application sent ✦' : 'Apply to this brief'}
+                      </button>
+                    )}
+                    {isPoster ? (
+                      <button
+                        className={styles.btnDeleteBrief}
+                        onClick={e => deleteBrief(e, selected.id)}
+                        disabled={deletingId === selected.id}
+                      >
+                        {deletingId === selected.id ? 'Deleting…' : '✕ Delete this brief'}
+                      </button>
+                    ) : (
+                      <button
+                        className={styles.btnSave}
+                        onClick={() => setSavedIds(prev => prev.includes(selected.id) ? prev.filter(i => i !== selected.id) : [...prev, selected.id])}
+                        style={saved ? { color: 'var(--teal)', borderColor: 'rgba(86,179,156,0.3)' } : {}}
+                      >
+                        {saved ? 'Saved ✦' : 'Save brief'}
+                      </button>
+                    )}
                   </div>
                 </div>
 

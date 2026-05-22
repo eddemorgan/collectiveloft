@@ -56,7 +56,8 @@ function locationStr(p) {
 }
 
 export default function DiscoverPage() {
-  const { loading: authLoading } = useAuth()
+  const router = useRouter()
+  const { loading: authLoading, user } = useAuth()
 
   const [creatives,     setCreatives]     = useState([])
   const [loading,       setLoading]       = useState(true)
@@ -69,7 +70,6 @@ export default function DiscoverPage() {
   const [location,      setLocation]      = useState('')
   const [search,        setSearch]        = useState('')
   const [sortMode,      setSortMode]      = useState('recent')
-  const [sentIds,       setSentIds]       = useState([])
 
   useEffect(() => {
     if (authLoading) return
@@ -124,6 +124,12 @@ export default function DiscoverPage() {
     setHistCompleted(false); setHistActive(false)
     setActiveComp(['Creative exchange', 'Paid', 'Revenue share'])
     setLocation(''); setSearch(''); setSortMode('recent')
+  }
+
+  function handleReachOut(e, id) {
+    e.preventDefault()
+    e.stopPropagation()
+    router.push(`/terms?with=${id}`)
   }
 
   if (authLoading) return null
@@ -248,14 +254,17 @@ export default function DiscoverPage() {
               </div>
             ) : (
               filtered.map((c, i) => {
-                const dk = discKey((c.disciplines || [])[0])
+                const dk   = discKey((c.disciplines || [])[0])
                 const slug = profileSlug(c)
-                const ini = initials(c)
-                const loc = locationStr(c)
+                const ini  = initials(c)
+                const loc  = locationStr(c)
                 const tags = [
                   c.availability === 'open' && { label: 'Open to collab', cls: styles.tagOpen },
                   ...(c.compensation || []).slice(0,1).map(comp => ({ label: comp, cls: comp === 'Paid' ? styles.tagPaid : styles.tagDisc }))
                 ].filter(Boolean)
+
+                // Don't show Reach out on your own card
+                const isMe = user && user.id === c.id
 
                 return (
                   <Link key={c.id} href={`/profile/${slug}`} className={styles.profileCard} style={{ animationDelay: `${i * 30}ms` }}>
@@ -279,13 +288,14 @@ export default function DiscoverPage() {
                         <div className={styles.cardFooter}>
                           <span className={styles.cardLocation}>📍 {loc}</span>
                           <span className={styles.cardCollabs}>◎ {c.collabs_count || 0} collabs</span>
-                          <button
-                            className={styles.cardConnect}
-                            onClick={e => { e.preventDefault(); e.stopPropagation(); setSentIds(prev => [...prev, c.id]) }}
-                            style={sentIds.includes(c.id) ? { color:'var(--teal)', borderColor:'rgba(86,179,156,0.3)' } : {}}
-                          >
-                            {sentIds.includes(c.id) ? 'Sent ✦' : 'Connect'}
-                          </button>
+                          {!isMe && (
+                            <button
+                              className={styles.cardConnect}
+                              onClick={e => handleReachOut(e, c.id)}
+                            >
+                              Reach out
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>

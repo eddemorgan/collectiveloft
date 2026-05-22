@@ -57,10 +57,14 @@ export default function BriefsPage() {
   const [postOpen,      setPostOpen]      = useState(false)
   const [applyOpen,     setApplyOpen]     = useState(false)
   const [applyMsg,      setApplyMsg]      = useState('')
-  const [appliedIds,    setAppliedIds]    = useState([])
+  // appliedBriefIds -- loaded from DB, persists across sessions
+  const [appliedBriefIds, setAppliedBriefIds] = useState(new Set())
   const [savedIds,      setSavedIds]      = useState([])
   const [submitting,    setSubmitting]    = useState(false)
   const [deletingId,    setDeletingId]    = useState(null)
+  // applicants for the currently selected brief (visible to poster)
+  const [applicants,    setApplicants]    = useState([])
+  const [acceptingId,   setAcceptingId]   = useState(null)
 
   const [postForm, setPostForm] = useState({
     title: '', making: '', needing: '', timeline: '',
@@ -73,6 +77,35 @@ export default function BriefsPage() {
     if (authLoading) return
     loadBriefs()
   }, [authLoading])
+
+  // Load applied brief IDs from DB whenever user changes
+  useEffect(() => {
+    if (!user) return
+    supabase
+      .from('applications')
+      .select('brief_id')
+      .eq('applicant_id', user.id)
+      .then(({ data }) => {
+        if (data) setAppliedBriefIds(new Set(data.map(a => a.brief_id)))
+      })
+  }, [user])
+
+  // Load applicants when selected brief changes and user is the poster
+  useEffect(() => {
+    if (!selectedId || !user) return
+    const brief = briefs.find(b => b.id === selectedId)
+    if (!brief || brief.poster_id !== user.id) { setApplicants([]); return }
+    supabase
+      .from('applications')
+      .select(`
+        id, message, status, created_at,
+        applicant:profiles!applications_applicant_id_fkey(id, firstname, lastname, headline, disciplines)
+      `)
+      .eq('brief_id', selectedId)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: true })
+      .then(({ data }) => setApplicants(data || []))
+  }, [selectedId, user, briefs])
 
   async function loadBriefs() {
     setLoading(true)
@@ -142,16 +175,16 @@ export default function BriefsPage() {
   }
 
   async function submitApplication() {
-    if (!applyMsg.trim() || !selectedId) return
+    if (!applyMsg.trim() || !selectedId || !user) return
     setSubmitting(true)
     try {
-      const { data: { user: u } } = await supabase.auth.getUser()
       await supabase.from('applications').insert({
         brief_id: selectedId,
-        applicant_id: u?.id || null,
+        applicant_id: user.id,
         message: applyMsg,
+        status: 'pending',
       })
-      setAppliedIds(prev => [...prev, selectedId])
+      setAppliedBriefIds(prev => new Set([...prev, selectedId]))
       setApplyOpen(false)
       setApplyMsg('')
     } catch (err) {
@@ -159,6 +192,28 @@ export default function BriefsPage() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  // Poster accepts an applicant -- creates collab_terms and redirects to terms page
+  async function acceptApplicant(application) {
+    setAcceptingId(application.id)
+    try {
+      // Mark application as accepted
+      await supabase.from('applications').update({ status: 'accepted' }).eq('id', application.id)
+
+      // Redirect poster to terms page with the applicant as partner
+      // Pre-populate brief data via URL params
+      const brief = briefs.find(b => b.id === selectedId)
+      const params = new URLSearchParams({
+        with: application.applicant.id,
+        brief: selectedId,
+        title: brief?.title || '',
+      })
+      window.location.href = `/terms?${params.toString()}`
+    } catch (err) {
+      console.error(err)
+    }
+    setAcceptingId(null)
   }
 
   function toggleDisc(label) {
@@ -204,6 +259,7 @@ export default function BriefsPage() {
               const avCls    = AV_COLORS[b.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
               const dl       = daysLeft(b.deadline)
               const isPoster = user && b.poster_id === user.id
+              const hasApplied = appliedBriefIds.has(b.id)
               return (
                 <div key={b.id} className={`${styles.briefItem} ${selectedId === b.id ? styles.selected : ''}`}
                   onClick={() => setSelectedId(b.id)}>
@@ -213,6 +269,9 @@ export default function BriefsPage() {
                     ))}
                     {b.compensation && (
                       <span className={`${styles.dtag} ${styles[COMP_CLASS[b.compensation] || 'ctEx']}`}>{b.compensation}</span>
+                    )}
+                    {hasApplied && !isPoster && (
+                      <span className={styles.dtag} style={{ background:'rgba(86,179,156,0.15)', color:'var(--teal)', borderColor:'rgba(86,179,156,0.3)' }}>Applied</span>
                     )}
                     {isPoster && (
                       <button className={styles.biDelete} onClick={e => deleteBrief(e, b.id)}
@@ -242,14 +301,14 @@ export default function BriefsPage() {
               <div className={styles.deSub}>Click any brief on the left to see the full details, project specs, and who's already applied.</div>
             </div>
           ) : (() => {
-            const poster   = selected.profiles
-            const ini      = poster ? initials(poster.firstname, poster.lastname) : '??'
-            const avCls    = AV_COLORS[selected.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
-            const applied  = appliedIds.includes(selected.id)
-            const saved    = savedIds.includes(selected.id)
-            const rating   = poster?.rating || 0
-            const stars    = '★'.repeat(Math.floor(rating)) + (rating % 1 ? '½' : '')
-            const isPoster = user && selected.poster_id === user.id
+            const poster    = selected.profiles
+            const ini       = poster ? initials(poster.firstname, poster.lastname) : '??'
+            const avCls     = AV_COLORS[selected.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
+            const hasApplied = appliedBriefIds.has(selected.id)
+            const saved     = savedIds.includes(selected.id)
+            const rating    = poster?.rating || 0
+            const stars     = '★'.repeat(Math.floor(rating)) + (rating % 1 ? '½' : '')
+            const isPoster  = user && selected.poster_id === user.id
             return (
               <div className={styles.detailInner}>
                 <div className={styles.detailHdr}>
@@ -264,9 +323,10 @@ export default function BriefsPage() {
                   <div className={styles.detailTitle}>{selected.title}</div>
                   <div className={styles.detailActionRow}>
                     {!isPoster && (
-                      <button className={styles.btnApply} onClick={() => !applied && setApplyOpen(true)}
-                        style={applied ? { background:'rgba(86,179,156,0.2)', color:'var(--teal)', border:'0.5px solid rgba(86,179,156,0.3)' } : {}}>
-                        {applied ? 'Application sent ✦' : 'Apply to this brief'}
+                      <button className={styles.btnApply}
+                        onClick={() => !hasApplied && setApplyOpen(true)}
+                        style={hasApplied ? { background:'rgba(86,179,156,0.2)', color:'var(--teal)', border:'0.5px solid rgba(86,179,156,0.3)', cursor:'default' } : {}}>
+                        {hasApplied ? 'Application sent ✦' : 'Apply to this brief'}
                       </button>
                     )}
                     {isPoster ? (
@@ -320,6 +380,92 @@ export default function BriefsPage() {
                     <div className={styles.specRow}><span className={styles.specK}>Applications</span><span className={`${styles.specV} ${styles.teal}`}>{selected.applicants_count || 0} received</span></div>
                   </div>
                 </div>
+
+                {/* APPLICANTS LIST -- only visible to the poster */}
+                {isPoster && (
+                  <div className={styles.dsec}>
+                    <div className={styles.dsecLabel}>
+                      {applicants.length === 0 ? 'No applications yet' : `${applicants.length} application${applicants.length > 1 ? 's' : ''}`}
+                    </div>
+                    {applicants.length === 0 ? (
+                      <div style={{ fontSize:'0.72rem', color:'rgba(240,236,227,0.3)', fontStyle:'italic' }}>
+                        Applications will appear here once creatives apply.
+                      </div>
+                    ) : (
+                      <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem', marginTop:'0.5rem' }}>
+                        {applicants.map(app => {
+                          const a = app.applicant
+                          const aIni = a ? initials(a.firstname, a.lastname) : '??'
+                          const slug = a ? `${a.firstname.toLowerCase()}-${a.lastname.toLowerCase()}` : null
+                          return (
+                            <div key={app.id} style={{
+                              background:'rgba(240,236,227,0.03)',
+                              border:'0.5px solid rgba(240,236,227,0.08)',
+                              borderRadius:'4px',
+                              padding:'0.85rem 1rem',
+                            }}>
+                              <div style={{ display:'flex', alignItems:'center', gap:'0.65rem', marginBottom:'0.5rem' }}>
+                                <div style={{
+                                  width:'32px', height:'32px', borderRadius:'50%', flexShrink:0,
+                                  background:'rgba(86,179,156,0.2)', color:'var(--teal)',
+                                  display:'flex', alignItems:'center', justifyContent:'center',
+                                  fontSize:'0.72rem', fontWeight:600,
+                                }}>
+                                  {aIni}
+                                </div>
+                                <div style={{ flex:1, minWidth:0 }}>
+                                  {slug ? (
+                                    <Link href={`/profile/${slug}`} style={{
+                                      fontFamily:'var(--sans)', fontSize:'0.78rem', fontWeight:600,
+                                      color:'var(--cream)', textDecoration:'none',
+                                    }}
+                                      onMouseEnter={e => e.currentTarget.style.color = 'var(--gold)'}
+                                      onMouseLeave={e => e.currentTarget.style.color = 'var(--cream)'}
+                                    >
+                                      {a.firstname} {a.lastname}
+                                    </Link>
+                                  ) : (
+                                    <span style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', fontWeight:600, color:'var(--cream)' }}>Anonymous</span>
+                                  )}
+                                  {a?.headline && (
+                                    <div style={{ fontFamily:'var(--sans)', fontSize:'0.65rem', color:'rgba(240,236,227,0.4)', marginTop:'1px' }}>{a.headline}</div>
+                                  )}
+                                </div>
+                                <span style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', color:'rgba(240,236,227,0.25)' }}>
+                                  {new Date(app.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' })}
+                                </span>
+                              </div>
+                              {app.message && (
+                                <div style={{
+                                  fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(240,236,227,0.55)',
+                                  lineHeight:1.65, marginBottom:'0.65rem',
+                                  borderLeft:'2px solid rgba(240,236,227,0.08)', paddingLeft:'0.65rem',
+                                }}>
+                                  {app.message}
+                                </div>
+                              )}
+                              <button
+                                onClick={() => acceptApplicant(app)}
+                                disabled={acceptingId === app.id}
+                                style={{
+                                  background:'var(--gold)', color:'#0D0D0D',
+                                  border:'none', borderRadius:'3px',
+                                  padding:'0.4rem 0.9rem',
+                                  fontFamily:'var(--sans)', fontSize:'0.65rem',
+                                  fontWeight:600, letterSpacing:'0.06em',
+                                  textTransform:'uppercase', cursor:'pointer',
+                                  opacity: acceptingId === app.id ? 0.5 : 1,
+                                }}
+                              >
+                                {acceptingId === app.id ? 'Opening terms…' : 'Accept & set terms ↗'}
+                              </button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )
           })()}

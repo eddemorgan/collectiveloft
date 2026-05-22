@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import Nav from '../components/Nav'
+import Footer from '../components/Footer'
 import styles from './my-studios.module.css'
 
 const DISC_COLORS = {
@@ -41,7 +43,7 @@ export default function MyStudiosPage() {
   const [myProfile, setMyProfile] = useState(null)
   const [studios,   setStudios]   = useState([])
   const [loading,   setLoading]   = useState(true)
-  const [acting,    setActing]    = useState({}) // studioId → 'accepting' | 'declining'
+  const [acting,    setActing]    = useState({})
 
   useEffect(() => {
     async function load() {
@@ -72,17 +74,10 @@ export default function MyStudiosPage() {
     load()
   }, [])
 
-  // Accept terms -- activate studio and seed milestones
   async function acceptTerms(studio) {
     setActing(prev => ({ ...prev, [studio.id]: 'accepting' }))
     try {
-      // Activate the studio
-      await supabase
-        .from('collab_terms')
-        .update({ status: 'active' })
-        .eq('id', studio.id)
-
-      // Seed milestones from terms data if present
+      await supabase.from('collab_terms').update({ status: 'active' }).eq('id', studio.id)
       const ms = studio.milestones || []
       if (ms.length > 0) {
         const rows = ms.map((m, i) => ({
@@ -94,22 +89,14 @@ export default function MyStudiosPage() {
         }))
         await supabase.from('studio_milestones').insert(rows)
       }
-
-      // Create empty notes row
       await supabase.from('studio_notes').upsert({ studio_id: studio.id, content: '' }, { onConflict: 'studio_id' })
-
-      // Add system message
       await supabase.from('studio_messages').insert({
         studio_id: studio.id,
         sender_id: null,
         type:      'sys',
         content:   `Studio created · ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
       })
-
-      // Update local state
       setStudios(prev => prev.map(s => s.id === studio.id ? { ...s, status: 'active' } : s))
-
-      // Navigate into the studio
       router.push(`/studio/${studio.id}`)
     } catch (e) {
       console.error(e)
@@ -124,11 +111,11 @@ export default function MyStudiosPage() {
     setActing(prev => ({ ...prev, [studio.id]: null }))
   }
 
-  const active   = studios.filter(s => s.status === 'active')
-  const pending  = studios.filter(s => s.status === 'pending')
-  const paused   = studios.filter(s => s.status === 'paused')
-  const complete = studios.filter(s => s.status === 'complete')
-  const pendingRating = complete.filter(s => !s.rated)
+  const active         = studios.filter(s => s.status === 'active')
+  const pending        = studios.filter(s => s.status === 'pending')
+  const paused         = studios.filter(s => s.status === 'paused')
+  const complete       = studios.filter(s => s.status === 'complete')
+  const pendingRating  = complete.filter(s => !s.rated)
 
   const myInitials  = myProfile ? initials(myProfile.firstname, myProfile.lastname) : '?'
   const myDiscColor = myProfile ? avatarColor(myProfile.disciplines) : { bg: 'rgba(201,168,76,0.18)', color: 'var(--gold)' }
@@ -142,7 +129,6 @@ export default function MyStudiosPage() {
     return myProfile && studio.partner_id === myProfile.id
   }
 
-  // Pending terms card -- shown to the partner who needs to accept/decline
   function PendingCard({ studio, delay = 0 }) {
     const partner   = partnerFor(studio)
     const pColor    = partner ? avatarColor(partner.disciplines) : { bg: 'rgba(86,179,156,0.18)', color: 'var(--teal)' }
@@ -165,61 +151,33 @@ export default function MyStudiosPage() {
             </div>
             <span className={styles.pillPending}>Awaiting review</span>
           </div>
-
           <div className={styles.pcTitle}>{studio.project_title || 'Untitled project'}</div>
           <div className={styles.pcWith}>
             {iAmRecip
               ? `${partner?.firstname} ${partner?.lastname} has sent you collab terms`
               : `Waiting for ${partner?.firstname} ${partner?.lastname} to respond`}
           </div>
-
-          {/* Terms summary */}
           <div className={styles.termsSummary}>
-            <div className={styles.tsRow}>
-              <span className={styles.tsK}>Type</span>
-              <span className={styles.tsV}>{compType}</span>
-            </div>
+            <div className={styles.tsRow}><span className={styles.tsK}>Type</span><span className={styles.tsV}>{compType}</span></div>
             {studio.rights && (
-              <div className={styles.tsRow}>
-                <span className={styles.tsK}>Rights</span>
-                <span className={styles.tsV}>{studio.rights === 'transfer' ? 'Full transfer on payment' : studio.rights === 'shared' ? 'Shared credit' : studio.rights === 'license' ? 'License only' : 'Negotiate separately'}</span>
-              </div>
+              <div className={styles.tsRow}><span className={styles.tsK}>Rights</span><span className={styles.tsV}>{studio.rights === 'transfer' ? 'Full transfer on payment' : studio.rights === 'shared' ? 'Shared credit' : studio.rights === 'license' ? 'License only' : 'Negotiate separately'}</span></div>
             )}
             {studio.timeline && (
-              <div className={styles.tsRow}>
-                <span className={styles.tsK}>Timeline</span>
-                <span className={styles.tsV}>{studio.timeline}</span>
-              </div>
+              <div className={styles.tsRow}><span className={styles.tsK}>Timeline</span><span className={styles.tsV}>{studio.timeline}</span></div>
             )}
             {(studio.deliverables || []).length > 0 && (
-              <div className={styles.tsRow}>
-                <span className={styles.tsK}>Deliverables</span>
-                <span className={styles.tsV}>{studio.deliverables.length} agreed</span>
-              </div>
+              <div className={styles.tsRow}><span className={styles.tsK}>Deliverables</span><span className={styles.tsV}>{studio.deliverables.length} agreed</span></div>
             )}
             {(studio.milestones || []).length > 0 && (
-              <div className={styles.tsRow}>
-                <span className={styles.tsK}>Milestones</span>
-                <span className={styles.tsV}>{studio.milestones.length} milestones</span>
-              </div>
+              <div className={styles.tsRow}><span className={styles.tsK}>Milestones</span><span className={styles.tsV}>{studio.milestones.length} milestones</span></div>
             )}
           </div>
-
-          {/* Actions -- only shown to recipient */}
           {iAmRecip ? (
             <div className={styles.pcActions}>
-              <button
-                className={styles.btnAccept}
-                onClick={() => acceptTerms(studio)}
-                disabled={!!isActing}
-              >
+              <button className={styles.btnAccept} onClick={() => acceptTerms(studio)} disabled={!!isActing}>
                 {isActing === 'accepting' ? 'Opening studio…' : 'Accept & open studio ↗'}
               </button>
-              <button
-                className={styles.btnDecline}
-                onClick={() => declineTerms(studio)}
-                disabled={!!isActing}
-              >
+              <button className={styles.btnDecline} onClick={() => declineTerms(studio)} disabled={!!isActing}>
                 {isActing === 'declining' ? 'Declining…' : 'Decline'}
               </button>
             </div>
@@ -241,32 +199,16 @@ export default function MyStudiosPage() {
     const prog         = progressWidth(studio.milestones_done || 0, studio.milestones_total || (studio.milestones?.length || 0))
     const needsRating  = studio.status === 'complete' && !studio.rated
 
-    const stripeClass = studio.status === 'active'   ? styles.stripeActive
-      : studio.status === 'complete' ? styles.stripeComplete
-      : styles.stripePaused
-
-    const fillClass = studio.status === 'active'   ? styles.fillActive
-      : studio.status === 'complete' ? styles.fillComplete
-      : styles.fillPaused
-
-    const pillClass = studio.status === 'active'                          ? styles.pillActive
-      : studio.status === 'complete' && !needsRating ? styles.pillComplete
-      : studio.status === 'complete' && needsRating  ? styles.pillRate
-      : styles.pillPaused
-
-    const pillText = studio.status === 'active'                          ? 'In progress'
-      : studio.status === 'complete' && needsRating  ? 'Rate ↗'
-      : studio.status === 'complete'                 ? '★ Rated'
-      : 'Paused'
-
-    const href = needsRating ? `/rating?studio=${studio.id}` : `/studio/${studio.id}`
+    const stripeClass = studio.status === 'active' ? styles.stripeActive : studio.status === 'complete' ? styles.stripeComplete : styles.stripePaused
+    const fillClass   = studio.status === 'active' ? styles.fillActive   : studio.status === 'complete' ? styles.fillComplete   : styles.fillPaused
+    const pillClass   = studio.status === 'active' ? styles.pillActive   : studio.status === 'complete' && !needsRating ? styles.pillComplete : studio.status === 'complete' && needsRating ? styles.pillRate : styles.pillPaused
+    const pillText    = studio.status === 'active' ? 'In progress'       : studio.status === 'complete' && needsRating ? 'Rate ↗' : studio.status === 'complete' ? '★ Rated' : 'Paused'
+    const href        = needsRating ? `/rating?studio=${studio.id}` : `/studio/${studio.id}`
 
     return (
-      <Link
-        href={href}
+      <Link href={href}
         className={`${styles.studioCard} ${studio.status === 'paused' ? styles.cardPaused : ''} ${studio.status === 'complete' ? styles.cardComplete : ''}`}
-        style={{ animationDelay: `${delay}ms` }}
-      >
+        style={{ animationDelay: `${delay}ms` }}>
         <div className={`${styles.cardStripe} ${stripeClass}`} />
         <div className={styles.cardBody}>
           <div className={styles.cardAvs}>
@@ -301,20 +243,11 @@ export default function MyStudiosPage() {
   }
 
   return (
-    <div className={styles.page}>
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
-        <div className={styles.navLinks}>
-          <Link href="/discover">Discover</Link>
-          <Link href="/briefs">Collabs</Link>
-          <Link href="/matching">Matching</Link>
-          <Link href="/my-studios" className={styles.active}>My Loft Studios</Link>
-        </div>
-      </nav>
+    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh' }}>
+      <Nav />
 
-      <div className={styles.pageLayout}>
+      <div className={styles.pageLayout} style={{ flex: 1 }}>
         <aside className={styles.sidebar}>
-          <div className={styles.sbLogoRow}>Collective <span>Loft</span></div>
           {myProfile && (
             <div className={styles.sbProfileRow}>
               <div className={styles.sbAv} style={{ background: myDiscColor.bg, color: myDiscColor.color }}>{myInitials}</div>
@@ -326,7 +259,7 @@ export default function MyStudiosPage() {
           )}
           <div className={styles.sbNav}>
             <div className={styles.sbNavLabel}>Navigate</div>
-            <Link href="/profile" className={styles.sbNavItem}><div className={styles.sbNavIcon}>◎</div>Profile</Link>
+            <Link href="/discover" className={styles.sbNavItem}><div className={styles.sbNavIcon}>◎</div>Discover</Link>
             <Link href="/my-studios" className={`${styles.sbNavItem} ${styles.sbNavItemActive}`}><div className={styles.sbNavIcon}>◈</div>My Studios</Link>
             <Link href="/matching" className={styles.sbNavItem}><div className={styles.sbNavIcon}>✦</div>Matching</Link>
           </div>
@@ -356,7 +289,6 @@ export default function MyStudiosPage() {
             <div className={styles.loading}>Loading your studios…</div>
           ) : (
             <>
-              {/* PENDING */}
               {pending.length > 0 && (
                 <>
                   <div className={styles.sectionLbl}>Pending terms</div>
@@ -366,7 +298,6 @@ export default function MyStudiosPage() {
                 </>
               )}
 
-              {/* ACTIVE */}
               <div className={styles.sectionLbl}>Active</div>
               <div className={styles.studiosGrid}>
                 {active.length === 0 ? (
@@ -381,7 +312,6 @@ export default function MyStudiosPage() {
                 </Link>
               </div>
 
-              {/* PAUSED */}
               {paused.length > 0 && (
                 <>
                   <div className={styles.sectionLbl}>Paused</div>
@@ -391,7 +321,6 @@ export default function MyStudiosPage() {
                 </>
               )}
 
-              {/* COMPLETE */}
               {complete.length > 0 && (
                 <>
                   <div className={styles.sectionLbl}>Complete</div>
@@ -416,6 +345,8 @@ export default function MyStudiosPage() {
           )}
         </div>
       </div>
+
+      <Footer />
     </div>
   )
 }

@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import Nav from '../components/Nav'
+import Footer from '../components/Footer'
 import styles from './discover.module.css'
 
 const DISCIPLINES = [
@@ -85,12 +87,10 @@ export default function DiscoverPage() {
     load()
   }, [authLoading])
 
-  // Build dynamic city list from actual profile data -- city and state columns
   const cityOptions = useMemo(() => {
     const cities = new Set()
     creatives.forEach(c => {
       if (c.city && c.city.trim()) cities.add(c.city.trim())
-      // Also check state column since some international profiles stored city there
       if (c.state && c.state.trim() && !c.city) cities.add(c.state.trim())
     })
     return Array.from(cities).sort()
@@ -106,13 +106,14 @@ export default function DiscoverPage() {
 
   const filtered = useMemo(() => {
     let list = creatives.filter(c => {
+      // Hide your own profile
+      if (user && c.id === user.id) return false
       if (activeDisc !== 'all' && !(c.disciplines || []).includes(activeDisc)) return false
       if (availOpen && c.availability !== 'open') return false
       if (activeComp.length > 0 && (c.compensation || []).length > 0) {
         if (!(c.compensation || []).some(x => activeComp.includes(x))) return false
       }
       if (location) {
-        // Match against both city and state columns
         const cityMatch  = (c.city || '').toLowerCase().includes(location.toLowerCase())
         const stateMatch = (c.state || '').toLowerCase().includes(location.toLowerCase())
         if (!cityMatch && !stateMatch) return false
@@ -127,7 +128,7 @@ export default function DiscoverPage() {
     if (sortMode === 'collabs') list = [...list].sort((a, b) => (b.collabs_count||0) - (a.collabs_count||0))
     else if (sortMode === 'new') list = [...list].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     return list
-  }, [creatives, activeDisc, availOpen, availSoon, histCompleted, histActive, activeComp, location, search, sortMode])
+  }, [creatives, user, activeDisc, availOpen, availSoon, histCompleted, histActive, activeComp, location, search, sortMode])
 
   function toggleComp(label) {
     setActiveComp(prev => prev.includes(label) ? prev.filter(x => x !== label) : [...prev, label])
@@ -149,16 +150,8 @@ export default function DiscoverPage() {
   if (authLoading) return null
 
   return (
-    <>
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
-        <div className={styles.navLinks}>
-          <Link href="/discover">Discover</Link>
-          <Link href="/briefs">Collabs</Link>
-          <Link href="/matching">Matching</Link>
-          <Link href="/my-studios">My Loft Studios</Link>
-        </div>
-      </nav>
+    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh' }}>
+      <Nav />
 
       <div className={styles.pageHdr}>
         <div>
@@ -175,7 +168,7 @@ export default function DiscoverPage() {
         </div>
       </div>
 
-      <div className={styles.bodyLayout}>
+      <div className={styles.bodyLayout} style={{ flex: 1 }}>
         <aside className={styles.filterSidebar}>
           <div className={styles.filterSection}>
             <div className={styles.filterLabel}>Discipline</div>
@@ -274,8 +267,6 @@ export default function DiscoverPage() {
                   ...(c.compensation || []).slice(0,1).map(comp => ({ label: comp, cls: comp === 'Paid' ? styles.tagPaid : styles.tagDisc }))
                 ].filter(Boolean)
 
-                const isMe = user && user.id === c.id
-
                 return (
                   <Link key={c.id} href={`/profile/${slug}`} className={styles.profileCard} style={{ animationDelay: `${i * 30}ms` }}>
                     <div className={`${styles.cardCover} ${styles[`cv_${dk}`]}`}>
@@ -298,14 +289,9 @@ export default function DiscoverPage() {
                         <div className={styles.cardFooter}>
                           <span className={styles.cardLocation}>📍 {loc}</span>
                           <span className={styles.cardCollabs}>◎ {c.collabs_count || 0} collabs</span>
-                          {!isMe && (
-                            <button
-                              className={styles.cardConnect}
-                              onClick={e => handleReachOut(e, c.id)}
-                            >
-                              Reach out
-                            </button>
-                          )}
+                          <button className={styles.cardConnect} onClick={e => handleReachOut(e, c.id)}>
+                            Reach out
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -316,6 +302,8 @@ export default function DiscoverPage() {
           </div>
         </div>
       </div>
-    </>
+
+      <Footer />
+    </div>
   )
 }

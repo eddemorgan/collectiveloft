@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
+import Footer from '../../components/Footer'
 import styles from './profile.module.css'
 
 const SKILL_WIDTHS = [95, 88, 78, 65, 55, 48, 42, 38]
@@ -19,7 +20,6 @@ const DISC_OPTS = [
   { id:'tech',    icon:'💻', label:'Creative Tech' },
 ]
 
-// Skills keyed by discipline ID -- this is what powers the sync
 const SKILLS_BY_DISC = {
   visual:  ['Oil on canvas','Watercolour','Illustration','Large format','Art direction','Sculpture','Mixed media','Printmaking'],
   music:   ['Beat production','Mixing & mastering','Co-writing','Film scoring','Songwriting','Vocals','Sound design','Session musician'],
@@ -31,10 +31,6 @@ const SKILLS_BY_DISC = {
   tech:    ['Creative coding','Generative art','Interactive installation','Audio-visual'],
 }
 
-// All skills flat -- used for display
-const ALL_SKILLS = Object.values(SKILLS_BY_DISC).flat()
-
-// Get all skills belonging to a given set of discipline labels
 function skillsForDiscs(discLabels) {
   return discLabels.flatMap(label => {
     const disc = DISC_OPTS.find(d => d.label === label)
@@ -206,11 +202,7 @@ export default function ProfilePage() {
 
     const { data: studioData } = await supabase
       .from('collab_terms')
-      .select(`
-        *,
-        initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, headline),
-        partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, headline)
-      `)
+      .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, headline), partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, headline)`)
       .or(`initiator_id.eq.${data.id},partner_id.eq.${data.id}`)
       .eq('status', 'complete')
       .order('created_at', { ascending: false })
@@ -229,7 +221,6 @@ export default function ProfilePage() {
       .eq('profile_id', data.id)
       .order('sort_order', { ascending: true })
     setPortfolio(portfolioData || [])
-
     setLoading(false)
   }
 
@@ -254,17 +245,11 @@ export default function ProfilePage() {
     setTimeout(() => setSaveMsg(''), 2000)
   }
 
-  // Toggle a discipline in draft -- and auto-remove orphaned skills
   function toggleDraftDisc(label) {
     setDraftDiscs(prev => {
-      const next = prev.includes(label)
-        ? prev.filter(x => x !== label)
-        : [...prev, label]
-
-      // Remove skills that no longer belong to any selected discipline
+      const next = prev.includes(label) ? prev.filter(x => x !== label) : [...prev, label]
       const validSkills = skillsForDiscs(next)
       setDraftSkills(s => s.filter(sk => validSkills.includes(sk)))
-
       return next
     })
   }
@@ -299,25 +284,14 @@ export default function ProfilePage() {
     const bucket = bucketForType(type)
     const ext    = file.name.split('.').pop()
     const path   = `${profile.id}/${Date.now()}.${ext}`
-
     const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
     if (uploadError) { console.error(uploadError); setUploading(false); return }
-
     const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path)
     const title = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
-
     const { data: item, error: insertError } = await supabase
       .from('portfolio_items')
-      .insert({
-        profile_id: profile.id,
-        type,
-        title,
-        file_url: publicUrl,
-        sort_order: portfolio.length,
-      })
-      .select()
-      .single()
-
+      .insert({ profile_id: profile.id, type, title, file_url: publicUrl, sort_order: portfolio.length })
+      .select().single()
     if (!insertError && item) setPortfolio(prev => [...prev, item])
     setUploading(false)
     flashSave()
@@ -366,26 +340,21 @@ export default function ProfilePage() {
   const skills      = profile.skills || []
   const avgRating   = ratings.length ? (ratings.reduce((s,r) => s + r.stars, 0) / ratings.length).toFixed(1) : null
   const links = [
-    profile.website        && { icon:'🔗', label:profile.website.replace(/^https?:\/\//,''),        href:profile.website },
-    profile.instagram      && { icon:'📷', label:`@${profile.instagram.replace('@','')}`,            href:`https://instagram.com/${profile.instagram.replace('@','')}` },
-    profile.soundcloud     && { icon:'🎵', label:profile.soundcloud.replace(/^https?:\/\//,''),      href:profile.soundcloud },
-    profile.other_link     && { icon:'🔗', label:profile.other_link.replace(/^https?:\/\//,''),      href:profile.other_link },
-    profile.portfolio_link && { icon:'💼', label:profile.portfolio_link.replace(/^https?:\/\//,''),  href:profile.portfolio_link },
+    profile.website        && { icon:'🔗', label:profile.website.replace(/^https?:\/\//,''),       href:profile.website },
+    profile.instagram      && { icon:'📷', label:`@${profile.instagram.replace('@','')}`,           href:`https://instagram.com/${profile.instagram.replace('@','')}` },
+    profile.soundcloud     && { icon:'🎵', label:profile.soundcloud.replace(/^https?:\/\//,''),     href:profile.soundcloud },
+    profile.other_link     && { icon:'🔗', label:profile.other_link.replace(/^https?:\/\//,''),     href:profile.other_link },
+    profile.portfolio_link && { icon:'💼', label:profile.portfolio_link.replace(/^https?:\/\//,''), href:profile.portfolio_link },
   ].filter(Boolean)
 
-  const GRID_SIZE  = 12
-  const emptySlots = isOwner && editMode ? Math.max(0, GRID_SIZE - portfolio.length) : 0
-  const gridItems  = [
-    ...portfolio.map(p => ({ ...p, isEmpty: false })),
-    ...Array(emptySlots).fill(null).map((_, i) => ({ id: `empty-${i}`, isEmpty: true })),
-  ]
-
-  // Skills available to select based on current draft disciplines
+  const GRID_SIZE      = 12
+  const emptySlots     = isOwner && editMode ? Math.max(0, GRID_SIZE - portfolio.length) : 0
+  const gridItems      = [...portfolio.map(p => ({ ...p, isEmpty: false })), ...Array(emptySlots).fill(null).map((_, i) => ({ id: `empty-${i}`, isEmpty: true }))]
   const availableSkills = skillsForDiscs(draftDiscs)
 
   return (
-    <>
-      {/* Nav */}
+    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh' }}>
+      {/* Nav -- profile page keeps its own nav for edit/signout controls */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
@@ -396,17 +365,12 @@ export default function ProfilePage() {
           {isOwner && saving && <span className={styles.saveIndicator}>Saving…</span>}
           {isOwner && saveMsg && !saving && <span className={styles.saveIndicator}>{saveMsg}</span>}
           {isOwner && (
-            <button
-              className={`${styles.btnEdit} ${editMode ? styles.btnEditActive : ''}`}
-              onClick={() => setEditMode(v => !v)}
-            >
+            <button className={`${styles.btnEdit} ${editMode ? styles.btnEditActive : ''}`} onClick={() => setEditMode(v => !v)}>
               {editMode ? 'Done editing' : 'Edit profile'}
             </button>
           )}
           {isOwner && (
-            <button className={styles.btnSignOut} onClick={handleSignOut}>
-              Sign out
-            </button>
+            <button className={styles.btnSignOut} onClick={handleSignOut}>Sign out</button>
           )}
         </div>
       </nav>
@@ -434,7 +398,6 @@ export default function ProfilePage() {
           </div>
           <input ref={avatarInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={e => uploadImage(e.target.files[0], 'avatars', 'avatar_url')} />
         </div>
-
         <div className={styles.identityContent}>
           <div className={styles.identityTop}>
             <div>
@@ -480,10 +443,9 @@ export default function ProfilePage() {
       </div>
 
       {/* Body */}
-      <div className={styles.profileBody}>
+      <div className={styles.profileBody} style={{ flex: 1 }}>
         <div className={styles.profileMain}>
 
-          {/* WORK tab */}
           {activeTab === 'work' && (
             <>
               <div className={styles.contentSection}>
@@ -503,23 +465,16 @@ export default function ProfilePage() {
                 <div className={styles.secLabelRow}>
                   <div className={styles.secLabel}>Portfolio</div>
                   {isOwner && editMode && (
-                    <div className={styles.portfolioHint}>
-                      {uploading ? 'Uploading…' : 'Click any slot to upload — images, video, audio, or PDF'}
-                    </div>
+                    <div className={styles.portfolioHint}>{uploading ? 'Uploading…' : 'Click any slot to upload — images, video, audio, or PDF'}</div>
                   )}
                 </div>
-                <input
-                  ref={portfolioInputRef}
-                  type="file"
-                  accept="image/*,video/*,audio/*,.pdf"
-                  style={{ display:'none' }}
-                  onChange={e => { if (e.target.files[0]) uploadPortfolioItem(e.target.files[0]); e.target.value = '' }}
-                />
+                <input ref={portfolioInputRef} type="file" accept="image/*,video/*,audio/*,.pdf" style={{ display:'none' }}
+                  onChange={e => { if (e.target.files[0]) uploadPortfolioItem(e.target.files[0]); e.target.value = '' }} />
                 {portfolio.length === 0 && !isOwner ? (
                   <div className={styles.emptyState}>No portfolio items yet.</div>
                 ) : (
                   <div className={styles.portfolioGrid}>
-                    {gridItems.map((item, i) => {
+                    {gridItems.map((item) => {
                       if (item.isEmpty) {
                         return (
                           <div key={item.id} className={`${styles.portfolioSlot} ${styles.emptySlot}`} onClick={() => !uploading && portfolioInputRef.current?.click()}>
@@ -530,34 +485,13 @@ export default function ProfilePage() {
                       return (
                         <div key={item.id} className={styles.portfolioSlot} onClick={() => setLightboxIdx(portfolio.findIndex(p => p.id === item.id))}>
                           {item.type === 'image' && <img src={item.file_url} alt={item.title||''} className={styles.slotImage} />}
-                          {item.type === 'video' && (
-                            <div className={styles.slotVideo}>
-                              <video src={item.file_url} className={styles.slotVideoEl} muted />
-                              <div className={styles.slotPlayBtn}>▶</div>
-                            </div>
-                          )}
-                          {item.type === 'audio' && (
-                            <div className={styles.slotAudio}>
-                              <div className={styles.slotAudioIcon}>🎵</div>
-                              <div className={styles.slotAudioWave}>
-                                {Array(12).fill(0).map((_,j) => (
-                                  <div key={j} className={styles.waveBar} style={{ height:`${20+Math.random()*60}%` }} />
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {item.type === 'document' && (
-                            <div className={styles.slotDoc}>
-                              <div className={styles.slotDocIcon}>📄</div>
-                              <div className={styles.slotDocTitle}>{item.title || 'Document'}</div>
-                            </div>
-                          )}
+                          {item.type === 'video' && <div className={styles.slotVideo}><video src={item.file_url} className={styles.slotVideoEl} muted /><div className={styles.slotPlayBtn}>▶</div></div>}
+                          {item.type === 'audio' && <div className={styles.slotAudio}><div className={styles.slotAudioIcon}>🎵</div><div className={styles.slotAudioWave}>{Array(12).fill(0).map((_,j) => <div key={j} className={styles.waveBar} style={{ height:`${20+Math.random()*60}%` }} />)}</div></div>}
+                          {item.type === 'document' && <div className={styles.slotDoc}><div className={styles.slotDocIcon}>📄</div><div className={styles.slotDocTitle}>{item.title || 'Document'}</div></div>}
                           <div className={styles.slotOverlay}>
                             <div className={styles.slotTypeIcon}>{typeIcon(item.type)}</div>
                             <div className={styles.slotTitle}>{item.title || item.type}</div>
-                            {isOwner && editMode && (
-                              <button className={styles.slotDelete} onClick={e => { e.stopPropagation(); deletePortfolioItem(item.id) }}>✕</button>
-                            )}
+                            {isOwner && editMode && <button className={styles.slotDelete} onClick={e => { e.stopPropagation(); deletePortfolioItem(item.id) }}>✕</button>}
                           </div>
                         </div>
                       )
@@ -568,14 +502,11 @@ export default function ProfilePage() {
 
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Past collaborations</div>
-                {studios.length === 0 ? (
-                  <div className={styles.emptyState}>No completed collaborations yet.</div>
-                ) : studios.map(s => <CollabItem key={s.id} s={s} />)}
+                {studios.length === 0 ? <div className={styles.emptyState}>No completed collaborations yet.</div> : studios.map(s => <CollabItem key={s.id} s={s} />)}
               </div>
             </>
           )}
 
-          {/* ABOUT tab */}
           {activeTab === 'about' && (
             <>
               <div className={styles.contentSection}>
@@ -587,17 +518,11 @@ export default function ProfilePage() {
 
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Disciplines &amp; skills</div>
-
-                {/* DISCIPLINE EDITOR */}
                 {editingDiscs ? (
                   <div>
                     <div className={styles.discEditGrid}>
                       {DISC_OPTS.map(d => (
-                        <div
-                          key={d.id}
-                          className={`${styles.discEditOpt} ${draftDiscs.includes(d.label) ? styles.on : ''}`}
-                          onClick={() => toggleDraftDisc(d.label)}
-                        >
+                        <div key={d.id} className={`${styles.discEditOpt} ${draftDiscs.includes(d.label) ? styles.on : ''}`} onClick={() => toggleDraftDisc(d.label)}>
                           <span>{d.icon}</span> {d.label}
                         </div>
                       ))}
@@ -613,8 +538,6 @@ export default function ProfilePage() {
                     {isOwner && editMode && <button className={styles.editTagsBtn} onClick={() => { setDraftDiscs(disciplines); setDraftSkills(skills); setEditingDiscs(true) }}>✎ Edit</button>}
                   </div>
                 )}
-
-                {/* SKILL EDITOR -- shows skills for currently selected disciplines */}
                 {editingSkills ? (
                   <div>
                     {availableSkills.length === 0 ? (
@@ -622,11 +545,8 @@ export default function ProfilePage() {
                     ) : (
                       <div className={styles.skillEditGrid}>
                         {availableSkills.map(s => (
-                          <div
-                            key={s}
-                            className={`${styles.skillEditOpt} ${draftSkills.includes(s) ? styles.on : ''}`}
-                            onClick={() => setDraftSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
-                          >
+                          <div key={s} className={`${styles.skillEditOpt} ${draftSkills.includes(s) ? styles.on : ''}`}
+                            onClick={() => setDraftSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}>
                             {s}
                           </div>
                         ))}
@@ -679,17 +599,13 @@ export default function ProfilePage() {
             </>
           )}
 
-          {/* COLLABS tab */}
           {activeTab === 'collabs' && (
             <div className={styles.contentSection}>
               <div className={styles.secLabel}>Collaboration history</div>
-              {studios.length === 0 ? (
-                <div className={styles.emptyState}>Once you complete a collab through Collective Loft, it will appear here.</div>
-              ) : studios.map(s => <CollabItem key={s.id} s={s} />)}
+              {studios.length === 0 ? <div className={styles.emptyState}>Once you complete a collab through Collective Loft, it will appear here.</div> : studios.map(s => <CollabItem key={s.id} s={s} />)}
             </div>
           )}
 
-          {/* BRIEFS tab */}
           {activeTab === 'briefs' && (
             <div className={styles.contentSection}>
               <div className={styles.secLabel}>Active briefs</div>
@@ -709,7 +625,6 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Sidebar */}
         <aside className={styles.profileSidebar}>
           <div>
             <div className={styles.sbLabel}>Activity</div>
@@ -725,11 +640,7 @@ export default function ProfilePage() {
             <div className={styles.availCard}>
               <div className={styles.availTitle}>Open to collaborate</div>
               <div className={styles.availText}>
-                {[
-                  profile.seeking && `Seeking ${profile.seeking}.`,
-                  profile.location_preference,
-                  profile.compensation?.length && `${profile.compensation.join(' or ')}.`
-                ].filter(Boolean).join(' ')}
+                {[profile.seeking && `Seeking ${profile.seeking}.`, profile.location_preference, profile.compensation?.length && `${profile.compensation.join(' or ')}.`].filter(Boolean).join(' ')}
               </div>
             </div>
           )}
@@ -788,9 +699,11 @@ export default function ProfilePage() {
         </aside>
       </div>
 
+      <Footer />
+
       {lightboxIdx !== null && (
         <Lightbox items={portfolio} startIndex={lightboxIdx} onClose={() => setLightboxIdx(null)} />
       )}
-    </>
+    </div>
   )
 }

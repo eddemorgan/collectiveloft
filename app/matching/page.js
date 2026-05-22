@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import Nav from '../components/Nav'
+import Footer from '../components/Footer'
 import styles from './matching.module.css'
 
 const DISCIPLINES = [
@@ -32,11 +34,10 @@ const DISC_KEY_MAP = {
 
 function computeScore(profile, myProfile) {
   if (!myProfile) return Math.floor(Math.random() * 40) + 50
-  const myDiscs    = myProfile.disciplines || []
-  const mySkills   = (myProfile.skills || []).map(s => s.toLowerCase())
-  const theirDiscs = profile.disciplines || []
+  const myDiscs     = myProfile.disciplines || []
+  const mySkills    = (myProfile.skills || []).map(s => s.toLowerCase())
+  const theirDiscs  = profile.disciplines || []
   const theirSkills = (profile.skills || []).map(s => s.toLowerCase())
-
   let score = 50
   const crossDisc = theirDiscs.some(d => !myDiscs.includes(d))
   if (crossDisc) score += 20
@@ -81,23 +82,15 @@ export default function MatchingPage() {
     async function load() {
       setLoading(true)
       const { data: { user } } = await supabase.auth.getUser()
-
       if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single()
+        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
         setMyProfile(data)
       }
-
       const query = supabase
         .from('profiles')
         .select('id, firstname, lastname, headline, disciplines, skills, location, avatar_url, open_to_collab, collab_count, compensation, seeking, bio')
         .order('created_at', { ascending: false })
-
       if (user) query.neq('id', user.id)
-
       const { data: all } = await query
       setProfiles(all || [])
       setLoading(false)
@@ -106,17 +99,13 @@ export default function MatchingPage() {
   }, [authLoading])
 
   const scored = useMemo(() => {
-    return profiles.map(p => ({
-      ...p,
-      score: computeScore(p, myProfile),
-    }))
+    return profiles.map(p => ({ ...p, score: computeScore(p, myProfile) }))
   }, [profiles, myProfile])
 
   const filtered = useMemo(() => {
     let list = scored.filter(p => {
       if (activeDisc !== 'all') {
-        const discs = p.disciplines || []
-        if (!discs.includes(activeDisc)) return false
+        if (!(p.disciplines || []).includes(activeDisc)) return false
       }
       if (toggles.open && !p.open_to_collab) return false
       if (toggles.collabs && !(p.collab_count > 0)) return false
@@ -129,19 +118,16 @@ export default function MatchingPage() {
       }
       return true
     })
-
     if (sortMode === 'collabs') list.sort((a, b) => (b.collab_count || 0) - (a.collab_count || 0))
     else if (sortMode === 'recent') list.sort(() => 0)
     else list.sort((a, b) => b.score - a.score)
-
     return list
   }, [scored, activeDisc, toggles, sortMode])
 
   const discCounts = useMemo(() => {
     const counts = {}
     scored.forEach(p => {
-      const discs = p.disciplines || []
-      discs.forEach(d => { counts[d] = (counts[d] || 0) + 1 })
+      (p.disciplines || []).forEach(d => { counts[d] = (counts[d] || 0) + 1 })
     })
     return counts
   }, [scored])
@@ -162,16 +148,8 @@ export default function MatchingPage() {
   if (authLoading) return null
 
   return (
-    <div className={styles.page}>
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
-        <div className={styles.navLinks}>
-          <Link href="/discover">Discover</Link>
-          <Link href="/briefs">Collabs</Link>
-          <Link href="/matching" className={styles.active}>Matching</Link>
-          <Link href="/my-studios">My Loft Studios</Link>
-        </div>
-      </nav>
+    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh' }}>
+      <Nav />
 
       <div className={styles.pageHdr}>
         <div>
@@ -182,24 +160,20 @@ export default function MatchingPage() {
         {myDiscs.length > 0 && (
           <div className={styles.youAre}>
             <span className={styles.yaLabel}>You are</span>
-            {myDiscs.map(d => (
-              <span key={d} className={styles.yaTag}>{d}</span>
-            ))}
+            {myDiscs.map(d => <span key={d} className={styles.yaTag}>{d}</span>)}
           </div>
         )}
       </div>
 
-      <div className={styles.bodyLayout}>
+      <div className={styles.bodyLayout} style={{ flex: 1 }}>
         <aside className={styles.sidebar}>
           <div className={styles.filterSection}>
             <div className={styles.filterLabel}>I'm looking for</div>
             <div className={styles.discBtns}>
               {DISCIPLINES.map(d => (
-                <button
-                  key={d.key}
+                <button key={d.key}
                   className={`${styles.discBtn} ${activeDisc === d.key ? styles.discBtnActive : ''}`}
-                  onClick={() => setActiveDisc(d.key)}
-                >
+                  onClick={() => setActiveDisc(d.key)}>
                   <div className={styles.discBtnLeft}>
                     <span className={styles.discIcon}>{d.icon}</span>
                     <span className={styles.discName}>{d.label}</span>
@@ -273,11 +247,9 @@ export default function MatchingPage() {
                 { mode: 'collabs', label: 'Most collabs' },
                 { mode: 'recent',  label: 'Recently active' },
               ].map(s => (
-                <button
-                  key={s.mode}
+                <button key={s.mode}
                   className={`${styles.sortOpt} ${sortMode === s.mode ? styles.sortOptActive : ''}`}
-                  onClick={() => setSortMode(s.mode)}
-                >
+                  onClick={() => setSortMode(s.mode)}>
                   {s.label}
                 </button>
               ))}
@@ -299,21 +271,14 @@ export default function MatchingPage() {
                 const dk      = DISC_KEY_MAP[discKey] || 'visual'
                 const slug    = slugify(p.firstname, p.lastname)
                 const inits   = avatarInitials(p.firstname, p.lastname)
-
                 return (
-                  <Link
-                    key={p.id}
-                    href={`/profile/${slug}`}
+                  <Link key={p.id} href={`/profile/${slug}`}
                     className={`${styles.matchCard} ${p.score >= 85 ? styles.topMatch : ''}`}
-                    style={{ animationDelay: `${i * 30}ms` }}
-                  >
+                    style={{ animationDelay: `${i * 30}ms` }}>
                     <div className={`${styles.mcCover} ${styles[`cv_${dk}`]}`}>
                       <div className={`${styles.mcCoverInner} ${styles[`pat_${dk}`]}`} />
-                      <div className={`${styles.scoreBadge} ${scoreClass(p.score)}`}>
-                        {p.score}% match
-                      </div>
+                      <div className={`${styles.scoreBadge} ${scoreClass(p.score)}`}>{p.score}% match</div>
                     </div>
-
                     <div className={styles.mcBody}>
                       <div className={styles.mcAvWrap}>
                         {p.avatar_url ? (
@@ -325,47 +290,33 @@ export default function MatchingPage() {
                           </div>
                         )}
                       </div>
-
                       <div className={styles.mcContent}>
                         <div className={styles.mcName}>{p.firstname} {p.lastname}</div>
                         <div className={`${styles.mcRole} ${styles[`hl_${dk}`]}`}>
                           {p.headline || (p.disciplines || []).join(' · ')}
                         </div>
-
                         {p.bio && (
-                          <div className={styles.mcWhy}>
-                            {p.bio.slice(0, 100)}{p.bio.length > 100 ? '…' : ''}
-                          </div>
+                          <div className={styles.mcWhy}>{p.bio.slice(0, 100)}{p.bio.length > 100 ? '…' : ''}</div>
                         )}
-
                         {(p.disciplines || []).length > 0 && (
                           <div className={styles.mcReasons}>
                             {p.disciplines.map(d => (
                               <div key={d} className={styles.mcReason}>Discipline: {d}</div>
                             ))}
-                            {p.open_to_collab && (
-                              <div className={styles.mcReason}>Open to collaborate now</div>
-                            )}
+                            {p.open_to_collab && <div className={styles.mcReason}>Open to collaborate now</div>}
                           </div>
                         )}
-
                         {(p.skills || []).length > 0 && (
                           <div className={styles.mcTags}>
-                            {p.skills.slice(0, 3).map(s => (
-                              <span key={s} className={styles.mctag}>{s}</span>
-                            ))}
+                            {p.skills.slice(0, 3).map(s => <span key={s} className={styles.mctag}>{s}</span>)}
                           </div>
                         )}
-
                         <div className={styles.mcFooter}>
                           <div className={styles.mcMeta}>
                             {p.location && <span>📍 {p.location}</span>}
                             <span>◎ {p.collab_count || 0} collabs</span>
                           </div>
-                          <button
-                            className={styles.btnReachOut}
-                            onClick={e => handleReachOut(e, p.id)}
-                          >
+                          <button className={styles.btnReachOut} onClick={e => handleReachOut(e, p.id)}>
                             Reach out
                           </button>
                         </div>
@@ -378,6 +329,8 @@ export default function MatchingPage() {
           )}
         </div>
       </div>
+
+      <Footer />
     </div>
   )
 }

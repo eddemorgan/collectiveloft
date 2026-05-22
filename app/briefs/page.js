@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import Nav from '../components/Nav'
+import Footer from '../components/Footer'
 import styles from './briefs.module.css'
 
 const DISC_CLASS = {
@@ -79,7 +81,6 @@ export default function BriefsPage() {
       .select('*, profiles(firstname, lastname, headline, rating, collabs_count)')
       .eq('status', 'open')
       .order('created_at', { ascending: false })
-
     if (!error && data) setBriefs(data)
     if (data && data.length > 0) setSelectedId(data[0].id)
     setLoading(false)
@@ -125,7 +126,6 @@ export default function BriefsPage() {
         })
         .select('*, profiles(firstname, lastname, headline, rating, collabs_count)')
         .single()
-
       if (!error && data) {
         setBriefs(prev => [data, ...prev])
         setSelectedId(data.id)
@@ -162,56 +162,36 @@ export default function BriefsPage() {
   }
 
   function toggleDisc(label) {
-    setPostDiscs(prev =>
-      prev.includes(label) ? prev.filter(d => d !== label) : [...prev, label]
-    )
+    setPostDiscs(prev => prev.includes(label) ? prev.filter(d => d !== label) : [...prev, label])
   }
 
   if (authLoading) return null
 
   return (
-    <>
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
-        <div className={styles.navLinks}>
-          <Link href="/discover">Discover</Link>
-          <Link href="/briefs">Collabs</Link>
-          <Link href="/matching">Matching</Link>
-          <Link href="/my-studios">My Loft Studios</Link>
-        </div>
-      </nav>
+    <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh' }}>
+      <Nav />
 
       <div className={styles.pageHdr}>
         <div className={styles.hdrLeft}>
           <div className={styles.hdrTitle}>Collab Briefs</div>
           <div className={styles.hdrCount}>{filtered.length} open</div>
         </div>
-        <button className={styles.btnPost} onClick={() => setPostOpen(true)}>
-          + Post a Brief
-        </button>
+        <button className={styles.btnPost} onClick={() => setPostOpen(true)}>+ Post a Brief</button>
       </div>
 
       <div className={styles.filterTabs}>
         {[
-          ['all',         'All briefs'],
-          ['Visual Art',  'Visual art'],
-          ['Music',       'Music'],
-          ['Writing',     'Writing'],
-          ['Design & Web','Design & web'],
-          ['Film',        'Film'],
-          ['paid',        'Paid only'],
+          ['all','All briefs'],['Visual Art','Visual art'],['Music','Music'],
+          ['Writing','Writing'],['Design & Web','Design & web'],['Film','Film'],['paid','Paid only'],
         ].map(([key, label]) => (
-          <div
-            key={key}
-            className={`${styles.ftab} ${activeFilter === key ? styles.active : ''}`}
-            onClick={() => { setActiveFilter(key); setSelectedId(null) }}
-          >
+          <div key={key} className={`${styles.ftab} ${activeFilter === key ? styles.active : ''}`}
+            onClick={() => { setActiveFilter(key); setSelectedId(null) }}>
             {label}
           </div>
         ))}
       </div>
 
-      <div className={styles.bodySplit}>
+      <div className={styles.bodySplit} style={{ flex: 1 }}>
         <div className={styles.briefListCol}>
           {loading ? (
             <div className={styles.emptyState}>Loading briefs…</div>
@@ -224,31 +204,19 @@ export default function BriefsPage() {
               const avCls    = AV_COLORS[b.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
               const dl       = daysLeft(b.deadline)
               const isPoster = user && b.poster_id === user.id
-
               return (
-                <div
-                  key={b.id}
-                  className={`${styles.briefItem} ${selectedId === b.id ? styles.selected : ''}`}
-                  onClick={() => setSelectedId(b.id)}
-                >
+                <div key={b.id} className={`${styles.briefItem} ${selectedId === b.id ? styles.selected : ''}`}
+                  onClick={() => setSelectedId(b.id)}>
                   <div className={styles.biTags}>
                     {(b.disciplines || []).map(d => (
                       <span key={d} className={`${styles.dtag} ${styles[DISC_CLASS[d] || 'dtV']}`}>{d}</span>
                     ))}
                     {b.compensation && (
-                      <span className={`${styles.dtag} ${styles[COMP_CLASS[b.compensation] || 'ctEx']}`}>
-                        {b.compensation}
-                      </span>
+                      <span className={`${styles.dtag} ${styles[COMP_CLASS[b.compensation] || 'ctEx']}`}>{b.compensation}</span>
                     )}
                     {isPoster && (
-                      <button
-                        className={styles.biDelete}
-                        onClick={e => deleteBrief(e, b.id)}
-                        disabled={deletingId === b.id}
-                        title="Delete brief"
-                      >
-                        ✕
-                      </button>
+                      <button className={styles.biDelete} onClick={e => deleteBrief(e, b.id)}
+                        disabled={deletingId === b.id} title="Delete brief">✕</button>
                     )}
                   </div>
                   <div className={styles.biTitle}>{b.title}</div>
@@ -258,10 +226,7 @@ export default function BriefsPage() {
                       <div className={`${styles.biAv} ${styles[avCls]}`}>{ini}</div>
                       <span>{poster ? `${poster.firstname} ${poster.lastname}` : 'Anonymous'}</span>
                     </div>
-                    <span>
-                      {b.applicants_count || 0} applicants
-                      {dl !== null ? ` · ${dl} days left` : ''}
-                    </span>
+                    <span>{b.applicants_count || 0} applicants{dl !== null ? ` · ${dl} days left` : ''}</span>
                   </div>
                 </div>
               )
@@ -282,11 +247,9 @@ export default function BriefsPage() {
             const avCls    = AV_COLORS[selected.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
             const applied  = appliedIds.includes(selected.id)
             const saved    = savedIds.includes(selected.id)
-            const dl       = daysLeft(selected.deadline)
             const rating   = poster?.rating || 0
             const stars    = '★'.repeat(Math.floor(rating)) + (rating % 1 ? '½' : '')
             const isPoster = user && selected.poster_id === user.id
-
             return (
               <div className={styles.detailInner}>
                 <div className={styles.detailHdr}>
@@ -295,36 +258,26 @@ export default function BriefsPage() {
                       <span key={d} className={`${styles.dtag} ${styles[DISC_CLASS[d] || 'dtV']}`}>{d}</span>
                     ))}
                     {selected.compensation && (
-                      <span className={`${styles.dtag} ${styles[COMP_CLASS[selected.compensation] || 'ctEx']}`}>
-                        {selected.compensation}
-                      </span>
+                      <span className={`${styles.dtag} ${styles[COMP_CLASS[selected.compensation] || 'ctEx']}`}>{selected.compensation}</span>
                     )}
                   </div>
                   <div className={styles.detailTitle}>{selected.title}</div>
                   <div className={styles.detailActionRow}>
                     {!isPoster && (
-                      <button
-                        className={styles.btnApply}
-                        onClick={() => !applied && setApplyOpen(true)}
-                        style={applied ? { background: 'rgba(86,179,156,0.2)', color: 'var(--teal)', border: '0.5px solid rgba(86,179,156,0.3)' } : {}}
-                      >
+                      <button className={styles.btnApply} onClick={() => !applied && setApplyOpen(true)}
+                        style={applied ? { background:'rgba(86,179,156,0.2)', color:'var(--teal)', border:'0.5px solid rgba(86,179,156,0.3)' } : {}}>
                         {applied ? 'Application sent ✦' : 'Apply to this brief'}
                       </button>
                     )}
                     {isPoster ? (
-                      <button
-                        className={styles.btnDeleteBrief}
-                        onClick={e => deleteBrief(e, selected.id)}
-                        disabled={deletingId === selected.id}
-                      >
+                      <button className={styles.btnDeleteBrief} onClick={e => deleteBrief(e, selected.id)}
+                        disabled={deletingId === selected.id}>
                         {deletingId === selected.id ? 'Deleting…' : '✕ Delete this brief'}
                       </button>
                     ) : (
-                      <button
-                        className={styles.btnSave}
+                      <button className={styles.btnSave}
                         onClick={() => setSavedIds(prev => prev.includes(selected.id) ? prev.filter(i => i !== selected.id) : [...prev, selected.id])}
-                        style={saved ? { color: 'var(--teal)', borderColor: 'rgba(86,179,156,0.3)' } : {}}
-                      >
+                        style={saved ? { color:'var(--teal)', borderColor:'rgba(86,179,156,0.3)' } : {}}>
                         {saved ? 'Saved ✦' : 'Save brief'}
                       </button>
                     )}
@@ -334,12 +287,8 @@ export default function BriefsPage() {
                 <div className={styles.posterCard}>
                   <div className={`${styles.posterAv} ${styles[avCls]}`}>{ini}</div>
                   <div>
-                    <div className={styles.posterName}>
-                      {poster ? `${poster.firstname} ${poster.lastname}` : 'Anonymous'}
-                    </div>
-                    <div className={styles.posterRole}>
-                      {poster?.headline || 'Creative'} · {poster?.collabs_count || 0} collabs
-                    </div>
+                    <div className={styles.posterName}>{poster ? `${poster.firstname} ${poster.lastname}` : 'Anonymous'}</div>
+                    <div className={styles.posterRole}>{poster?.headline || 'Creative'} · {poster?.collabs_count || 0} collabs</div>
                   </div>
                   {rating > 0 && (
                     <div className={styles.posterRating}>
@@ -355,14 +304,12 @@ export default function BriefsPage() {
                     <div className={styles.dsecText}>{selected.what_making}</div>
                   </div>
                 )}
-
                 {selected.who_needed && (
                   <div className={styles.dsec}>
                     <div className={styles.dsecLabel}>Who I need</div>
                     <div className={styles.dsecText}>{selected.who_needed}</div>
                   </div>
                 )}
-
                 <div className={styles.dsec}>
                   <div className={styles.dsecLabel}>Project specs</div>
                   <div className={styles.specsGrid}>
@@ -378,6 +325,8 @@ export default function BriefsPage() {
           })()}
         </div>
       </div>
+
+      <Footer />
 
       {/* POST BRIEF MODAL */}
       {postOpen && (
@@ -422,9 +371,7 @@ export default function BriefsPage() {
                 {['Creative exchange','Paid','Revenue share'].map(c => (
                   <div key={c} className={`${styles.ctopt} ${postComp === c ? styles.on : ''}`} onClick={() => setPostComp(c)}>
                     <div className={styles.ctoptTitle}>{c}</div>
-                    <div className={styles.ctoptDesc}>
-                      {c === 'Creative exchange' ? 'Trade skills. No money moves.' : c === 'Paid' ? 'Fee agreed upfront.' : 'Split the outcome.'}
-                    </div>
+                    <div className={styles.ctoptDesc}>{c === 'Creative exchange' ? 'Trade skills. No money moves.' : c === 'Paid' ? 'Fee agreed upfront.' : 'Split the outcome.'}</div>
                   </div>
                 ))}
               </div>
@@ -474,12 +421,8 @@ export default function BriefsPage() {
             <div className={styles.applyBriefRef}><strong>Brief:</strong> {selected.title}</div>
             <div className={styles.mfield}>
               <label>Your message</label>
-              <textarea
-                placeholder="Hi — I came across your brief and I'm really drawn to this project because…"
-                rows={5}
-                value={applyMsg}
-                onChange={e => setApplyMsg(e.target.value)}
-              />
+              <textarea placeholder="Hi — I came across your brief and I'm really drawn to this project because…"
+                rows={5} value={applyMsg} onChange={e => setApplyMsg(e.target.value)} />
             </div>
             <div className={styles.applyFooter}>
               <button className={styles.btnCancelBrief} onClick={() => setApplyOpen(false)}>Cancel</button>
@@ -490,6 +433,6 @@ export default function BriefsPage() {
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }

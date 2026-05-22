@@ -1,43 +1,23 @@
-'use client'
+ 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import Footer from '../components/Footer'
 import styles from './terms.module.css'
 
 const COLLAB_TYPES = [
-  {
-    key: 'exchange',
-    icon: '⇄',
-    name: 'Creative exchange',
-    badge: 'Exchange',
-    badgeClass: 'badgeEx',
-    desc: 'Both parties contribute work of equal value. No money changes hands.',
-  },
-  {
-    key: 'paid',
-    icon: '$',
-    name: 'Paid collaboration',
-    badge: 'Paid',
-    badgeClass: 'badgePd',
-    desc: 'One party pays the other. Fee, milestones, and rights are agreed upfront.',
-  },
-  {
-    key: 'revenue',
-    icon: '%',
-    name: 'Revenue share',
-    badge: 'Rev share',
-    badgeClass: 'badgeRs',
-    desc: 'No upfront fee. Both parties share in the revenue the work generates.',
-  },
+  { key: 'exchange', icon: '⇄', name: 'Creative exchange', badge: 'Exchange', badgeClass: 'badgeEx', desc: 'Both parties contribute work of equal value. No money changes hands.' },
+  { key: 'paid',     icon: '$', name: 'Paid collaboration', badge: 'Paid',     badgeClass: 'badgePd', desc: 'One party pays the other. Fee, milestones, and rights are agreed upfront.' },
+  { key: 'revenue',  icon: '%', name: 'Revenue share',      badge: 'Rev share',badgeClass: 'badgeRs', desc: 'No upfront fee. Both parties share in the revenue the work generates.' },
 ]
 
 const RIGHTS_OPTS = [
-  { key: 'transfer',   title: 'Full transfer on payment',  desc: 'All rights pass to client on final payment. Creator retains portfolio use only.' },
-  { key: 'shared',     title: 'Shared credit',             desc: 'Both parties credited. Creator may display work publicly.' },
-  { key: 'license',    title: 'License only',              desc: 'Client licenses for defined use. Creator retains underlying IP.' },
-  { key: 'negotiate',  title: 'Negotiate separately',      desc: 'Terms to be added to the Studio before work begins.' },
+  { key: 'transfer',  title: 'Full transfer on payment', desc: 'All rights pass to client on final payment. Creator retains portfolio use only.' },
+  { key: 'shared',    title: 'Shared credit',            desc: 'Both parties credited. Creator may display work publicly.' },
+  { key: 'license',   title: 'License only',             desc: 'Client licenses for defined use. Creator retains underlying IP.' },
+  { key: 'negotiate', title: 'Negotiate separately',     desc: 'Terms to be added to the Studio before work begins.' },
 ]
 
 const DEFAULT_DELIVERABLES = [
@@ -51,35 +31,36 @@ function TermsPage() {
   const searchParams = useSearchParams()
   const partnerId = searchParams.get('with')
 
-  const [myProfile, setMyProfile]       = useState(null)
-  const [partner, setPartner]           = useState(null)
-  const [collabType, setCollabType]     = useState('exchange')
-  const [rights, setRights]             = useState('transfer')
+  const [myProfile,    setMyProfile]    = useState(null)
+  const [partner,      setPartner]      = useState(null)
+  const [collabType,   setCollabType]   = useState('exchange')
+  const [rights,       setRights]       = useState('transfer')
   const [deliverables, setDeliverables] = useState(DEFAULT_DELIVERABLES)
-  const [delChecked, setDelChecked]     = useState([true, true, true])
-  const [newDel, setNewDel]             = useState('')
-  const [milestones, setMilestones]     = useState([
+  const [delChecked,   setDelChecked]   = useState([true, true, true])
+  const [newDel,       setNewDel]       = useState('')
+  const [milestones,   setMilestones]   = useState([
     { desc: 'Design mockup approved', pct: '30' },
-    { desc: 'Development complete', pct: '50' },
-    { desc: 'Final delivery', pct: '20' },
+    { desc: 'Development complete',   pct: '50' },
+    { desc: 'Final delivery',         pct: '20' },
   ])
-  const [feeFrom, setFeeFrom]           = useState('')
-  const [feeTo, setFeeTo]               = useState('')
-  const [paySchedule, setPaySchedule]   = useState('')
-  const [myShare, setMyShare]           = useState('')
-  const [theirShare, setTheirShare]     = useState('')
-  const [revSources, setRevSources]     = useState('')
-  const [timeline, setTimeline]         = useState('')
-  const [deadline, setDeadline]         = useState('')
-  const [location, setLocation]         = useState('')
-  const [cadence, setCadence]           = useState('')
-  const [projectTitle, setProjectTitle] = useState('')
-  const [submitted, setSubmitted]       = useState(false)
-  const [saving, setSaving]             = useState(false)
+  const [feeFrom,       setFeeFrom]       = useState('')
+  const [feeTo,         setFeeTo]         = useState('')
+  const [paySchedule,   setPaySchedule]   = useState('')
+  const [myShare,       setMyShare]       = useState('')
+  const [theirShare,    setTheirShare]    = useState('')
+  const [revSources,    setRevSources]    = useState('')
+  const [timeline,      setTimeline]      = useState('')
+  const [deadline,      setDeadline]      = useState('')
+  const [location,      setLocation]      = useState('')
+  const [cadence,       setCadence]       = useState('')
+  const [projectTitle,  setProjectTitle]  = useState('')
+  const [submitted,     setSubmitted]     = useState(false)
+  const [saving,        setSaving]        = useState(false)
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
       if (user) {
         const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
         setMyProfile(data)
@@ -111,23 +92,23 @@ function TermsPage() {
     setMilestones(prev => [...prev, { desc: '', pct: '' }])
   }
 
-async function handleSubmit() {
+  async function handleSubmit() {
     setSaving(true)
     try {
       const termsData = {
         initiator_id: myProfile?.id,
-        partner_id: partner?.id,
-        collab_type: collabType,
+        partner_id:   partner?.id,
+        collab_type:  collabType,
         project_title: projectTitle,
         rights,
         deliverables: deliverables.filter((_, i) => delChecked[i]),
-        milestones: collabType === 'paid' ? milestones : [],
-        fee_from: collabType === 'paid' ? feeFrom : null,
-        fee_to: collabType === 'paid' ? feeTo : null,
+        milestones:   collabType === 'paid' ? milestones : [],
+        fee_from:     collabType === 'paid' ? feeFrom : null,
+        fee_to:       collabType === 'paid' ? feeTo : null,
         pay_schedule: collabType === 'paid' ? paySchedule : null,
-        my_share: collabType === 'revenue' ? myShare : null,
-        their_share: collabType === 'revenue' ? theirShare : null,
-        rev_sources: collabType === 'revenue' ? revSources : null,
+        my_share:     collabType === 'revenue' ? myShare : null,
+        their_share:  collabType === 'revenue' ? theirShare : null,
+        rev_sources:  collabType === 'revenue' ? revSources : null,
         timeline,
         deadline: deadline || null,
         location,
@@ -140,16 +121,11 @@ async function handleSubmit() {
         .select()
         .single()
 
-      // Send email notification to partner
       if (inserted && partner?.id && myProfile?.id) {
         await fetch('/api/send-terms-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            studioId: inserted.id,
-            initiatorId: myProfile.id,
-            partnerId: partner.id,
-          }),
+          body: JSON.stringify({ studioId: inserted.id, initiatorId: myProfile.id, partnerId: partner.id }),
         })
       }
     } catch (e) {
@@ -160,14 +136,11 @@ async function handleSubmit() {
   }
 
   const partnerFirst = partner?.firstname || 'your collaborator'
-  const myFirst = myProfile?.firstname || 'You'
-
-  const summaryComp = collabType === 'exchange' ? 'Creative exchange'
-    : collabType === 'paid' ? 'Paid · fee agreed'
-    : 'Revenue share'
+  const myFirst      = myProfile?.firstname || 'You'
+  const summaryComp  = collabType === 'exchange' ? 'Creative exchange' : collabType === 'paid' ? 'Paid · fee agreed' : 'Revenue share'
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} style={{ display:'flex', flexDirection:'column', minHeight:'100vh' }}>
       {/* NAV */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
@@ -194,11 +167,10 @@ async function handleSubmit() {
         </div>
       </nav>
 
-      <div className={styles.pageLayout}>
+      <div className={styles.pageLayout} style={{ flex: 1 }}>
         {/* FORM SIDE */}
         <div className={styles.formSide}>
 
-          {/* Context bar */}
           {(myProfile || partner) && (
             <div className={styles.contextBar}>
               <div className={styles.ctxAvs}>
@@ -210,12 +182,8 @@ async function handleSubmit() {
                 </div>
               </div>
               <div className={styles.ctxInfo}>
-                <div className={styles.ctxTitle}>
-                  {myFirst} + {partnerFirst}
-                </div>
-                <div className={styles.ctxMeta}>
-                  Setting collab terms · {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </div>
+                <div className={styles.ctxTitle}>{myFirst} + {partnerFirst}</div>
+                <div className={styles.ctxMeta}>Setting collab terms · {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</div>
               </div>
             </div>
           )}
@@ -223,35 +191,22 @@ async function handleSubmit() {
           <div className={styles.pageHdr}>
             <div className={styles.pageEyebrow}>Collective Loft</div>
             <div className={styles.pageTitle}>Collab Terms</div>
-            <div className={styles.pageSub}>
-              Set the terms before the work starts. Clear agreements make better collaborations — and protect both sides if things get complicated.
-            </div>
+            <div className={styles.pageSub}>Set the terms before the work starts. Clear agreements make better collaborations — and protect both sides if things get complicated.</div>
           </div>
 
-          {/* Project title */}
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Project</div>
             <div className={styles.field}>
               <label>Project title</label>
-              <input
-                type="text"
-                placeholder="e.g. Portfolio site for gallery submissions"
-                value={projectTitle}
-                onChange={e => setProjectTitle(e.target.value)}
-              />
+              <input type="text" placeholder="e.g. Portfolio site for gallery submissions" value={projectTitle} onChange={e => setProjectTitle(e.target.value)} />
             </div>
           </div>
 
-          {/* Collab type */}
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Collaboration type</div>
             <div className={styles.typeChooser}>
               {COLLAB_TYPES.map(t => (
-                <div
-                  key={t.key}
-                  className={`${styles.typeCard} ${collabType === t.key ? styles.typeCardSelected : ''}`}
-                  onClick={() => setCollabType(t.key)}
-                >
+                <div key={t.key} className={`${styles.typeCard} ${collabType === t.key ? styles.typeCardSelected : ''}`} onClick={() => setCollabType(t.key)}>
                   <div className={styles.typeIcon}>{t.icon}</div>
                   <div className={styles.typeName}>{t.name}</div>
                   <div className={`${styles.typeBadge} ${styles[t.badgeClass]}`}>{t.badge}</div>
@@ -261,7 +216,6 @@ async function handleSubmit() {
             </div>
           </div>
 
-          {/* Paid section */}
           {collabType === 'paid' && (
             <div className={styles.formSection}>
               <div className={styles.fsecLabel}>Payment</div>
@@ -286,7 +240,7 @@ async function handleSubmit() {
               </div>
               <div className={styles.field}>
                 <label>Milestones</label>
-                <div className={styles.msBuilder} id="msBuilder">
+                <div className={styles.msBuilder}>
                   {milestones.map((m, i) => (
                     <div key={i} className={styles.msRow}>
                       <div className={styles.msNum}>{i + 1}</div>
@@ -300,7 +254,6 @@ async function handleSubmit() {
             </div>
           )}
 
-          {/* Revenue share section */}
           {collabType === 'revenue' && (
             <div className={styles.formSection}>
               <div className={styles.fsecLabel}>Revenue split</div>
@@ -325,16 +278,12 @@ async function handleSubmit() {
             </div>
           )}
 
-          {/* Deliverables */}
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Deliverables</div>
             <div className={styles.delList}>
               {deliverables.map((d, i) => (
                 <div key={i} className={styles.delRow}>
-                  <div
-                    className={`${styles.delChk} ${delChecked[i] ? styles.delChkOn : ''}`}
-                    onClick={() => toggleDel(i)}
-                  >
+                  <div className={`${styles.delChk} ${delChecked[i] ? styles.delChkOn : ''}`} onClick={() => toggleDel(i)}>
                     {delChecked[i] ? '✓' : ''}
                   </div>
                   <span className={`${styles.delText} ${delChecked[i] ? styles.delTextOn : ''}`}>{d}</span>
@@ -342,27 +291,16 @@ async function handleSubmit() {
               ))}
             </div>
             <div className={styles.field} style={{ marginTop: '0.75rem' }}>
-              <input
-                type="text"
-                placeholder="Add a deliverable…"
-                value={newDel}
-                onChange={e => setNewDel(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && addDeliverable()}
-              />
+              <input type="text" placeholder="Add a deliverable…" value={newDel} onChange={e => setNewDel(e.target.value)} onKeyDown={e => e.key === 'Enter' && addDeliverable()} />
               <div className={styles.hint}>Once both parties accept, this list locks. No scope creep.</div>
             </div>
           </div>
 
-          {/* Rights */}
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Rights & credit</div>
             <div className={styles.rightsGrid}>
               {RIGHTS_OPTS.map(r => (
-                <div
-                  key={r.key}
-                  className={`${styles.rightsOpt} ${rights === r.key ? styles.rightsOptSelected : ''}`}
-                  onClick={() => setRights(r.key)}
-                >
+                <div key={r.key} className={`${styles.rightsOpt} ${rights === r.key ? styles.rightsOptSelected : ''}`} onClick={() => setRights(r.key)}>
                   <div className={styles.rightsTitle}>{r.title}</div>
                   <div className={styles.rightsDesc}>{r.desc}</div>
                 </div>
@@ -370,7 +308,6 @@ async function handleSubmit() {
             </div>
           </div>
 
-          {/* Timeline */}
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Timeline</div>
             <div className={styles.fieldRow}>
@@ -407,7 +344,6 @@ async function handleSubmit() {
             </div>
           </div>
 
-          {/* Examples */}
           <div className={styles.exampleStrip}>
             <div className={styles.exampleCard}>
               <div className={styles.exLabel}>Creative exchange example</div>
@@ -440,63 +376,32 @@ async function handleSubmit() {
         {/* SUMMARY SIDEBAR */}
         <aside className={styles.summarySide}>
           <div className={styles.summaryHeader}>Live agreement summary</div>
-
           <div className={`${styles.summaryCard} ${projectTitle || collabType ? styles.hasContent : ''}`}>
             <div className={styles.scHdr}>
-              <div className={styles.scType}>
-                {collabType === 'exchange' ? 'Creative exchange' : collabType === 'paid' ? 'Paid collaboration' : 'Revenue share'}
-              </div>
+              <div className={styles.scType}>{collabType === 'exchange' ? 'Creative exchange' : collabType === 'paid' ? 'Paid collaboration' : 'Revenue share'}</div>
               <div className={styles.scTitle}>{projectTitle || 'Untitled project'}</div>
             </div>
             <div className={styles.scRows}>
-              <div className={styles.scRow}>
-                <span className={styles.scK}>Parties</span>
-                <span className={styles.scV}>{myFirst} + {partnerFirst}</span>
-              </div>
-              <div className={styles.scRow}>
-                <span className={styles.scK}>Compensation</span>
-                <span className={`${styles.scV} ${styles.gold}`}>{summaryComp}</span>
-              </div>
+              <div className={styles.scRow}><span className={styles.scK}>Parties</span><span className={styles.scV}>{myFirst} + {partnerFirst}</span></div>
+              <div className={styles.scRow}><span className={styles.scK}>Compensation</span><span className={`${styles.scV} ${styles.gold}`}>{summaryComp}</span></div>
               {collabType === 'paid' && (
                 <>
-                  <div className={styles.scRow}>
-                    <span className={styles.scK}>Fee range</span>
-                    <span className={`${styles.scV} ${styles.gold} ${!feeFrom && !feeTo ? styles.empty : ''}`}>
-                      {feeFrom || feeTo ? `$${feeFrom}${feeTo ? '–' + feeTo : ''}` : '—'}
-                    </span>
-                  </div>
-                  <div className={styles.scRow}>
-                    <span className={styles.scK}>Schedule</span>
-                    <span className={`${styles.scV} ${!paySchedule ? styles.empty : ''}`}>{paySchedule || '—'}</span>
-                  </div>
+                  <div className={styles.scRow}><span className={styles.scK}>Fee range</span><span className={`${styles.scV} ${styles.gold} ${!feeFrom && !feeTo ? styles.empty : ''}`}>{feeFrom || feeTo ? `$${feeFrom}${feeTo ? '–' + feeTo : ''}` : '—'}</span></div>
+                  <div className={styles.scRow}><span className={styles.scK}>Schedule</span><span className={`${styles.scV} ${!paySchedule ? styles.empty : ''}`}>{paySchedule || '—'}</span></div>
                 </>
               )}
               {collabType === 'revenue' && (
-                <div className={styles.scRow}>
-                  <span className={styles.scK}>Split</span>
-                  <span className={`${styles.scV} ${styles.gold} ${!myShare && !theirShare ? styles.empty : ''}`}>
-                    {myShare || theirShare ? `${myShare || '?'} / ${theirShare || '?'}` : '—'}
-                  </span>
-                </div>
+                <div className={styles.scRow}><span className={styles.scK}>Split</span><span className={`${styles.scV} ${styles.gold} ${!myShare && !theirShare ? styles.empty : ''}`}>{myShare || theirShare ? `${myShare || '?'} / ${theirShare || '?'}` : '—'}</span></div>
               )}
-              <div className={styles.scRow}>
-                <span className={styles.scK}>Rights</span>
-                <span className={styles.scV}>{RIGHTS_OPTS.find(r => r.key === rights)?.title}</span>
-              </div>
+              <div className={styles.scRow}><span className={styles.scK}>Rights</span><span className={styles.scV}>{RIGHTS_OPTS.find(r => r.key === rights)?.title}</span></div>
               <div className={styles.scRow}>
                 <span className={styles.scK}>Timeline</span>
                 <span className={`${styles.scV} ${!timeline && !deadline ? styles.empty : ''}`}>
                   {timeline || deadline ? [timeline, deadline ? 'Deadline: ' + new Date(deadline + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''].filter(Boolean).join(' · ') : 'Not set'}
                 </span>
               </div>
-              <div className={styles.scRow}>
-                <span className={styles.scK}>Location</span>
-                <span className={`${styles.scV} ${!location ? styles.empty : ''}`}>{location || 'Not set'}</span>
-              </div>
-              <div className={styles.scRow}>
-                <span className={styles.scK}>Status</span>
-                <span className={`${styles.scV} ${styles.teal}`}>Draft · pending {partnerFirst}'s review</span>
-              </div>
+              <div className={styles.scRow}><span className={styles.scK}>Location</span><span className={`${styles.scV} ${!location ? styles.empty : ''}`}>{location || 'Not set'}</span></div>
+              <div className={styles.scRow}><span className={styles.scK}>Status</span><span className={`${styles.scV} ${styles.teal}`}>Draft · pending {partnerFirst}'s review</span></div>
             </div>
           </div>
 
@@ -508,9 +413,7 @@ async function handleSubmit() {
               'Deliverables list locks once accepted — no scope creep',
               'Rights terms timestamped and cannot be altered retroactively',
               'Disputes can be flagged to the Collective Loft team for mediation',
-            ].map((item, i) => (
-              <div key={i} className={styles.protectionItem}>{item}</div>
-            ))}
+            ].map((item, i) => <div key={i} className={styles.protectionItem}>{item}</div>)}
           </div>
 
           <button className={styles.btnSidebarSend} onClick={handleSubmit} disabled={saving}>
@@ -520,7 +423,8 @@ async function handleSubmit() {
         </aside>
       </div>
 
-      {/* SUCCESS OVERLAY */}
+      <Footer />
+
       {submitted && (
         <div className={styles.successOverlay}>
           <div className={styles.successInner}>
@@ -539,6 +443,7 @@ async function handleSubmit() {
     </div>
   )
 }
+
 export default function TermsPageWrapper() {
   return (
     <Suspense fallback={<div style={{color:'var(--faint)',padding:'4rem',textAlign:'center'}}>Loading…</div>}>

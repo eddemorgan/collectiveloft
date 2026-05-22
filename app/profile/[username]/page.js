@@ -170,6 +170,7 @@ export default function ProfilePage() {
   const [editingSkills, setEditingSkills] = useState(false)
   const [draftDiscs,    setDraftDiscs]    = useState([])
   const [draftSkills,   setDraftSkills]   = useState([])
+  const [notifCount,    setNotifCount]    = useState(0)
 
   const avatarInputRef    = useRef()
   const coverInputRef     = useRef()
@@ -198,7 +199,10 @@ export default function ProfilePage() {
     setDraftSkills(data.skills || [])
 
     const { data: { user } } = await supabase.auth.getUser()
-    if (user && user.id === data.id) setIsOwner(true)
+    if (user && user.id === data.id) {
+      setIsOwner(true)
+      loadNotifCount(user.id)
+    }
 
     const { data: studioData } = await supabase
       .from('collab_terms')
@@ -222,6 +226,41 @@ export default function ProfilePage() {
       .order('sort_order', { ascending: true })
     setPortfolio(portfolioData || [])
     setLoading(false)
+  }
+
+  async function loadNotifCount(userId) {
+    let count = 0
+    const { count: pendingTerms } = await supabase
+      .from('collab_terms')
+      .select('id', { count: 'exact', head: true })
+      .eq('partner_id', userId)
+      .eq('status', 'pending')
+    count += pendingTerms || 0
+
+    const { count: unrated } = await supabase
+      .from('collab_terms')
+      .select('id', { count: 'exact', head: true })
+      .or(`initiator_id.eq.${userId},partner_id.eq.${userId}`)
+      .eq('status', 'complete')
+      .eq('rated', false)
+    count += unrated || 0
+
+    const { data: myBriefs } = await supabase
+      .from('briefs')
+      .select('id')
+      .eq('poster_id', userId)
+      .eq('status', 'open')
+
+    if (myBriefs && myBriefs.length > 0) {
+      const { count: apps } = await supabase
+        .from('applications')
+        .select('id', { count: 'exact', head: true })
+        .in('brief_id', myBriefs.map(b => b.id))
+        .eq('seen', false)
+      count += apps || 0
+    }
+
+    setNotifCount(count)
   }
 
   async function handleSignOut() {
@@ -333,12 +372,12 @@ export default function ProfilePage() {
     </div>
   )
 
-  const fullName    = `${profile.firstname||''} ${profile.lastname||''}`.trim()
-  const ini         = initials(profile)
-  const location    = locationStr(profile)
-  const disciplines = profile.disciplines || []
-  const skills      = profile.skills || []
-  const avgRating   = ratings.length ? (ratings.reduce((s,r) => s + r.stars, 0) / ratings.length).toFixed(1) : null
+  const fullName     = `${profile.firstname||''} ${profile.lastname||''}`.trim()
+  const ini          = initials(profile)
+  const location     = locationStr(profile)
+  const disciplines  = profile.disciplines || []
+  const skills       = profile.skills || []
+  const avgRating    = ratings.length ? (ratings.reduce((s,r) => s + r.stars, 0) / ratings.length).toFixed(1) : null
   const links = [
     profile.website        && { icon:'🔗', label:profile.website.replace(/^https?:\/\//,''),       href:profile.website },
     profile.instagram      && { icon:'📷', label:`@${profile.instagram.replace('@','')}`,           href:`https://instagram.com/${profile.instagram.replace('@','')}` },
@@ -347,14 +386,13 @@ export default function ProfilePage() {
     profile.portfolio_link && { icon:'💼', label:profile.portfolio_link.replace(/^https?:\/\//,''), href:profile.portfolio_link },
   ].filter(Boolean)
 
-  const GRID_SIZE      = 12
-  const emptySlots     = isOwner && editMode ? Math.max(0, GRID_SIZE - portfolio.length) : 0
-  const gridItems      = [...portfolio.map(p => ({ ...p, isEmpty: false })), ...Array(emptySlots).fill(null).map((_, i) => ({ id: `empty-${i}`, isEmpty: true }))]
+  const GRID_SIZE       = 12
+  const emptySlots      = isOwner && editMode ? Math.max(0, GRID_SIZE - portfolio.length) : 0
+  const gridItems       = [...portfolio.map(p => ({ ...p, isEmpty: false })), ...Array(emptySlots).fill(null).map((_, i) => ({ id: `empty-${i}`, isEmpty: true }))]
   const availableSkills = skillsForDiscs(draftDiscs)
 
   return (
     <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh' }}>
-      {/* Nav -- profile page keeps its own nav for edit/signout controls */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
@@ -375,7 +413,6 @@ export default function ProfilePage() {
         </div>
       </nav>
 
-      {/* Cover */}
       <div className={styles.coverBanner}>
         {profile.cover_url ? <img src={profile.cover_url} alt="Cover" className={styles.coverImg} /> : <div className={styles.coverPattern} />}
         {isOwner && editMode && (
@@ -388,7 +425,6 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Identity */}
       <div className={styles.identityStrip}>
         <div className={styles.avWrap}>
           <div className={styles.avCircle} onClick={() => isOwner && editMode && avatarInputRef.current?.click()} style={isOwner && editMode ? { cursor:'pointer' } : {}}>
@@ -401,10 +437,28 @@ export default function ProfilePage() {
         <div className={styles.identityContent}>
           <div className={styles.identityTop}>
             <div>
-              <div className={styles.profileName}>
+              <div className={styles.profileName} style={{ display:'flex', alignItems:'center', gap:'0.6rem', flexWrap:'wrap' }}>
                 <Editable value={profile.firstname} onSave={v => saveField('firstname',v)} placeholder="First name" isOwner={isOwner} editMode={editMode} className={styles.nameFirst} />
                 {' '}
                 <Editable value={profile.lastname} onSave={v => saveField('lastname',v)} placeholder="Last name" isOwner={isOwner} editMode={editMode} className={styles.nameLast} />
+
+                {/* Envelope notification badge -- only visible to owner */}
+                {isOwner && (
+                  <Link href="/notifications" style={{ position:'relative', display:'inline-flex', alignItems:'center', textDecoration:'none', marginLeft:'0.25rem' }}>
+                    <span style={{ fontSize:'1rem', color: notifCount > 0 ? 'var(--gold)' : 'rgba(240,236,227,0.25)', lineHeight:1 }}>✉</span>
+                    {notifCount > 0 && (
+                      <span style={{
+                        position:'absolute', top:'-6px', right:'-8px',
+                        background:'var(--gold)', color:'#0D0D0D',
+                        fontSize:'0.48rem', fontWeight:700, fontFamily:'var(--sans)',
+                        borderRadius:'10px', padding:'1px 4px',
+                        minWidth:'14px', textAlign:'center', lineHeight:'14px',
+                      }}>
+                        {notifCount > 9 ? '9+' : notifCount}
+                      </span>
+                    )}
+                  </Link>
+                )}
               </div>
               <div className={styles.profileHeadline}>
                 <Editable value={profile.headline} onSave={v => saveField('headline',v)} placeholder="Your discipline · Your style · Your medium" isOwner={isOwner} editMode={editMode} className={styles.headlineText} />
@@ -432,7 +486,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className={styles.tabsBar}>
         {['work','about','collabs','briefs'].map(tab => (
           <div key={tab} className={`${styles.tab} ${activeTab===tab?styles.active:''}`} onClick={() => setActiveTab(tab)}>
@@ -442,7 +495,6 @@ export default function ProfilePage() {
         <Link href="/my-studios" className={styles.tab}>My Loft Studios</Link>
       </div>
 
-      {/* Body */}
       <div className={styles.profileBody} style={{ flex: 1 }}>
         <div className={styles.profileMain}>
 

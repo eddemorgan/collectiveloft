@@ -85,6 +85,17 @@ export default function DiscoverPage() {
     load()
   }, [authLoading])
 
+  // Build dynamic city list from actual profile data -- city and state columns
+  const cityOptions = useMemo(() => {
+    const cities = new Set()
+    creatives.forEach(c => {
+      if (c.city && c.city.trim()) cities.add(c.city.trim())
+      // Also check state column since some international profiles stored city there
+      if (c.state && c.state.trim() && !c.city) cities.add(c.state.trim())
+    })
+    return Array.from(cities).sort()
+  }, [creatives])
+
   const discCounts = useMemo(() => {
     const counts = { all: creatives.length }
     DISCIPLINES.slice(1).forEach(d => {
@@ -101,7 +112,10 @@ export default function DiscoverPage() {
         if (!(c.compensation || []).some(x => activeComp.includes(x))) return false
       }
       if (location) {
-        if (!locationStr(c).toLowerCase().includes(location.toLowerCase())) return false
+        // Match against both city and state columns
+        const cityMatch  = (c.city || '').toLowerCase().includes(location.toLowerCase())
+        const stateMatch = (c.state || '').toLowerCase().includes(location.toLowerCase())
+        if (!cityMatch && !stateMatch) return false
       }
       if (histCompleted && (c.collabs_count || 0) === 0) return false
       if (search) {
@@ -206,12 +220,9 @@ export default function DiscoverPage() {
             <div className={styles.filterLabel}>Location</div>
             <select className={styles.filterSelect} value={location} onChange={e => setLocation(e.target.value)}>
               <option value="">Anywhere</option>
-              <option value="Chicago">Chicago, IL</option>
-              <option value="New York">New York, NY</option>
-              <option value="Los Angeles">Los Angeles, CA</option>
-              <option value="Atlanta">Atlanta, GA</option>
-              <option value="Brooklyn">Brooklyn, NY</option>
-              <option value="Remote">Remote only</option>
+              {cityOptions.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
           </div>
 
@@ -263,7 +274,6 @@ export default function DiscoverPage() {
                   ...(c.compensation || []).slice(0,1).map(comp => ({ label: comp, cls: comp === 'Paid' ? styles.tagPaid : styles.tagDisc }))
                 ].filter(Boolean)
 
-                // Don't show Reach out on your own card
                 const isMe = user && user.id === c.id
 
                 return (

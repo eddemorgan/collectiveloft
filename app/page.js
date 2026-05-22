@@ -33,9 +33,7 @@ const DISCIPLINES = [
   { id: 'tech',    icon: '💻', label: 'Creative Tech' },
 ]
 
-// Updated skills with all new additions
 const SKILLS = [
-  // Visual Art
   { d: 'visual',  label: 'Oil on canvas' },
   { d: 'visual',  label: 'Watercolour' },
   { d: 'visual',  label: 'Illustration' },
@@ -44,7 +42,6 @@ const SKILLS = [
   { d: 'visual',  label: 'Sculpture' },
   { d: 'visual',  label: 'Mixed media' },
   { d: 'visual',  label: 'Printmaking' },
-  // Music
   { d: 'music',   label: 'Beat production' },
   { d: 'music',   label: 'Mixing & mastering' },
   { d: 'music',   label: 'Co-writing' },
@@ -53,7 +50,6 @@ const SKILLS = [
   { d: 'music',   label: 'Vocals' },
   { d: 'music',   label: 'Sound design' },
   { d: 'music',   label: 'Session musician' },
-  // Writing
   { d: 'writing', label: 'Poetry' },
   { d: 'writing', label: 'Copywriting' },
   { d: 'writing', label: 'Editing' },
@@ -64,47 +60,43 @@ const SKILLS = [
   { d: 'writing', label: 'Writer' },
   { d: 'writing', label: 'Novel' },
   { d: 'writing', label: 'Short Story' },
-  // Design & Web
   { d: 'design',  label: 'Web design' },
   { d: 'design',  label: 'Branding' },
   { d: 'design',  label: 'UX design' },
   { d: 'design',  label: 'Motion design' },
   { d: 'design',  label: 'Typography' },
   { d: 'design',  label: 'Print design' },
-  // Film
   { d: 'film',    label: 'Cinematography' },
   { d: 'film',    label: 'Directing' },
   { d: 'film',    label: 'Film editing' },
   { d: 'film',    label: 'Documentary' },
   { d: 'film',    label: 'Short film' },
-  // Photography
   { d: 'photo',   label: 'Portrait photography' },
   { d: 'photo',   label: 'Fine art photography' },
   { d: 'photo',   label: 'Documentary photography' },
   { d: 'photo',   label: 'Landscape photography' },
-  // Performance
   { d: 'perf',    label: 'Choreography' },
   { d: 'perf',    label: 'Spoken word' },
   { d: 'perf',    label: 'Theatre' },
   { d: 'perf',    label: 'Dance' },
   { d: 'perf',    label: 'Singer' },
   { d: 'perf',    label: 'Acting' },
-  // Creative Tech
   { d: 'tech',    label: 'Creative coding' },
   { d: 'tech',    label: 'Generative art' },
   { d: 'tech',    label: 'Interactive installation' },
   { d: 'tech',    label: 'Audio-visual' },
 ]
 
+// Discipline grid -- discipline key matches profile discipline labels
 const DISC_GRID = [
-  { icon: '🎨', name: 'Visual Art',       count: '2,840 creatives' },
-  { icon: '🎵', name: 'Music',            count: '3,102 creatives' },
-  { icon: '✍️', name: 'Writing & Poetry', count: '1,974 creatives' },
-  { icon: '🖥',  name: 'Design & Web',    count: '1,688 creatives' },
-  { icon: '🎬', name: 'Film',             count: '1,210 creatives' },
-  { icon: '📷', name: 'Photography',      count: '980 creatives' },
-  { icon: '🎭', name: 'Performance',      count: '642 creatives' },
-  { icon: '💻', name: 'Creative Tech',    count: '418 creatives' },
+  { icon: '🎨', name: 'Visual Art',       discipline: 'Visual Art' },
+  { icon: '🎵', name: 'Music',            discipline: 'Music' },
+  { icon: '✍️', name: 'Writing & Poetry', discipline: 'Writing' },
+  { icon: '🖥',  name: 'Design & Web',    discipline: 'Design & Web' },
+  { icon: '🎬', name: 'Film',             discipline: 'Film' },
+  { icon: '📷', name: 'Photography',      discipline: 'Photography' },
+  { icon: '🎭', name: 'Performance',      discipline: 'Performance' },
+  { icon: '💻', name: 'Creative Tech',    discipline: 'Creative Tech' },
 ]
 
 const AV_CLASSES = ['avG', 'avT', 'avR']
@@ -112,11 +104,13 @@ const REQUIRED_FIELDS = ['firstname', 'lastname', 'email', 'bio', 'rightnow', 's
 
 export default function LandingPage() {
   const router = useRouter()
-  const [members,   setMembers]   = useState([])
-  const [authUser,  setAuthUser]  = useState(null)
-  const [myProfile, setMyProfile] = useState(null)
+  const [members,    setMembers]    = useState([])
+  const [authUser,   setAuthUser]   = useState(null)
+  const [myProfile,  setMyProfile]  = useState(null)
+  const [discCounts, setDiscCounts] = useState({})
 
   useEffect(() => {
+    // Recent members for hero
     supabase
       .from('profiles')
       .select('id, firstname, lastname, headline, disciplines, rightnow, compensation, availability, city, state')
@@ -124,6 +118,21 @@ export default function LandingPage() {
       .limit(3)
       .then(({ data }) => setMembers(data || []))
 
+    // Dynamic discipline counts
+    supabase
+      .from('profiles')
+      .select('disciplines')
+      .then(({ data }) => {
+        const counts = {}
+        ;(data || []).forEach(p => {
+          ;(p.disciplines || []).forEach(d => {
+            counts[d] = (counts[d] || 0) + 1
+          })
+        })
+        setDiscCounts(counts)
+      })
+
+    // Auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setAuthUser(session.user)
@@ -186,7 +195,6 @@ export default function LandingPage() {
   function toggleDisc(id) {
     setSelectedDiscs(prev => {
       const next = prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
-      // Remove skills no longer belonging to selected disciplines
       const validSkillLabels = SKILLS.filter(s => next.includes(s.d)).map(s => s.label)
       setSelectedSkills(sk => sk.filter(s => validSkillLabels.includes(s)))
       return next
@@ -222,20 +230,15 @@ export default function LandingPage() {
 
     setSubmitting(true)
     try {
-      // Sign up -- with email confirmation on, user.id is still returned
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
         options: { data: { firstname: form.firstname, lastname: form.lastname } }
       })
       if (authError) throw authError
-
-      // authData.user can be null if the email already exists and is confirmed
       if (!authData.user) {
         throw new Error('An account with this email already exists. Try signing in instead.')
       }
-
-      // Store the profile -- works even before email is confirmed
       const { error: profileError } = await supabase
         .from('profiles')
         .upsert({
@@ -248,8 +251,8 @@ export default function LandingPage() {
           rightnow: form.rightnow,
           seeking: form.seeking,
           country,
-state: countryData?.states ? stateVal : '',
-city: countryData?.states ? city : stateVal,
+          state: countryData?.states ? stateVal : '',
+          city: countryData?.states ? city : stateVal,
           disciplines: selectedDiscs.map(id => {
             const found = DISCIPLINES.find(d => d.id === id)
             return found ? found.label : id
@@ -258,7 +261,6 @@ city: countryData?.states ? city : stateVal,
           compensation: selectedComps,
         })
       if (profileError) throw profileError
-
       setSubmitted(true)
     } catch (err) {
       setFormError(err.message || 'Something went wrong. Please try again.')
@@ -351,13 +353,16 @@ city: countryData?.states ? city : stateVal,
       <div className={styles.discStrip}>
         <div className={styles.stripLbl}>Disciplines on the platform</div>
         <div className={styles.discGrid}>
-          {DISC_GRID.map((d, i) => (
-            <div className={styles.dc} key={i}>
-              <div className={styles.dcIcon}>{d.icon}</div>
-              <div className={styles.dcName}>{d.name}</div>
-              <div className={styles.dcCount}>{d.count}</div>
-            </div>
-          ))}
+          {DISC_GRID.map((d, i) => {
+            const count = discCounts[d.discipline] || 0
+            return (
+              <div className={styles.dc} key={i}>
+                <div className={styles.dcIcon}>{d.icon}</div>
+                <div className={styles.dcName}>{d.name}</div>
+                <div className={styles.dcCount}>{count} {count === 1 ? 'creative' : 'creatives'}</div>
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -434,7 +439,6 @@ city: countryData?.states ? city : stateVal,
                     </div>
                   )}
 
-                  {/* Your identity */}
                   <section>
                     <div className={styles.msl}>Your identity</div>
                     <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>
@@ -507,7 +511,6 @@ city: countryData?.states ? city : stateVal,
                     </div>
                   </section>
 
-                  {/* Discipline & skills */}
                   <section>
                     <div className={styles.msl}>Discipline &amp; skills</div>
                     <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
@@ -535,7 +538,6 @@ city: countryData?.states ? city : stateVal,
                     </div>
                   </section>
 
-                  {/* About you */}
                   <section>
                     <div className={styles.msl}>About you</div>
                     <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
@@ -549,7 +551,6 @@ city: countryData?.states ? city : stateVal,
                     </div>
                   </section>
 
-                  {/* Work samples */}
                   <section>
                     <div className={styles.msl}>Work samples</div>
                     <div className={styles.uz}>
@@ -564,7 +565,6 @@ city: countryData?.states ? city : stateVal,
                     </div>
                   </section>
 
-                  {/* Collaboration */}
                   <section>
                     <div className={styles.msl}>Collaboration</div>
                     <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
@@ -594,7 +594,6 @@ city: countryData?.states ? city : stateVal,
                     </div>
                   </section>
 
-                  {/* Find me elsewhere */}
                   <section>
                     <div className={styles.msl}>Find me elsewhere</div>
                     <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>

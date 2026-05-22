@@ -248,8 +248,8 @@ export default function LandingPage() {
           rightnow: form.rightnow,
           seeking: form.seeking,
           country,
-          state: stateVal,
-          city,
+state: countryData?.states ? stateVal : '',
+city: countryData?.states ? city : stateVal,
           disciplines: selectedDiscs.map(id => {
             const found = DISCIPLINES.find(d => d.id === id)
             return found ? found.label : id

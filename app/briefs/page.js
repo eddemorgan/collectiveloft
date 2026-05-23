@@ -75,12 +75,24 @@ function BriefsInner() {
       .then(({ data }) => { if (data) setAppliedBriefIds(new Set(data.map(a => a.brief_id))) })
   }, [user])
 
-  // Load which briefs already have terms sent (accepted applications)
+  // Load which briefs already have active collab_terms -- from collab_terms table
+  // This is more reliable than checking applications.status because terms
+  // persist even if the application row gets updated
   useEffect(() => {
     if (!user) return
-    // Find briefs I posted that already have an accepted application
-    supabase.from('applications').select('brief_id').eq('status', 'accepted')
-      .then(({ data }) => { if (data) setTermsSentIds(new Set(data.map(a => a.brief_id))) })
+    // Get all my posted briefs first, then check which have pending collab_terms
+    supabase.from('briefs').select('id').eq('poster_id', user.id).eq('status', 'open')
+      .then(({ data: myBriefs }) => {
+        if (!myBriefs || myBriefs.length === 0) return
+        const myBriefIds = myBriefs.map(b => b.id)
+        supabase.from('collab_terms')
+          .select('brief_id')
+          .in('brief_id', myBriefIds)
+          .eq('status', 'pending')
+          .then(({ data }) => {
+            if (data) setTermsSentIds(new Set(data.map(t => t.brief_id).filter(Boolean)))
+          })
+      })
   }, [user])
 
   // Open specific brief from notification link

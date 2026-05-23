@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import Link from 'next/link'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import Nav from '../components/Nav'
@@ -9,37 +10,23 @@ import Footer from '../components/Footer'
 import styles from './briefs.module.css'
 
 const DISC_CLASS = {
-  'Visual Art':   'dtV',
-  'Music':        'dtM',
-  'Writing':      'dtW',
-  'Design & Web': 'dtD',
-  'Film':         'dtF',
-  'Photography':  'dtV',
-  'Performance':  'dtW',
-  'Creative Tech':'dtD',
+  'Visual Art':'dtV','Music':'dtM','Writing':'dtW','Design & Web':'dtD',
+  'Film':'dtF','Photography':'dtV','Performance':'dtW','Creative Tech':'dtD',
 }
 const AV_COLORS = ['avGold','avTeal','avPurp','avBlue','avRose','avGreen']
 const COMP_CLASS = {
-  'Creative exchange': 'ctEx',
-  'Paid':              'ctPd',
-  'Revenue share':     'ctRs',
+  'Creative exchange':'ctEx','Paid':'ctPd','Revenue share':'ctRs',
 }
 const DISC_OPTS = [
-  { icon:'🎨', label:'Visual Art' },
-  { icon:'🎵', label:'Music' },
-  { icon:'✍️', label:'Writing' },
-  { icon:'🖥',  label:'Design & Web' },
-  { icon:'🎬', label:'Film' },
-  { icon:'📷', label:'Photography' },
-  { icon:'🎭', label:'Performance' },
-  { icon:'💻', label:'Creative Tech' },
+  { icon:'🎨', label:'Visual Art' },{ icon:'🎵', label:'Music' },
+  { icon:'✍️', label:'Writing' },{ icon:'🖥', label:'Design & Web' },
+  { icon:'🎬', label:'Film' },{ icon:'📷', label:'Photography' },
+  { icon:'🎭', label:'Performance' },{ icon:'💻', label:'Creative Tech' },
 ]
 
 function daysLeft(deadline) {
   if (!deadline) return null
-  const d = new Date(deadline)
-  const today = new Date()
-  const diff = Math.ceil((d - today) / (1000 * 60 * 60 * 24))
+  const diff = Math.ceil((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24))
   return diff > 0 ? diff : 0
 }
 
@@ -47,28 +34,31 @@ function initials(firstname, lastname) {
   return [(firstname||'?')[0], (lastname||'?')[0]].join('').toUpperCase()
 }
 
-export default function BriefsPage() {
+function BriefsInner() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const openBriefId = searchParams.get('open') // from notification link
+
   const { loading: authLoading, user } = useAuth()
 
-  const [briefs,        setBriefs]        = useState([])
-  const [loading,       setLoading]       = useState(true)
-  const [selectedId,    setSelectedId]    = useState(null)
-  const [activeFilter,  setActiveFilter]  = useState('all')
-  const [postOpen,      setPostOpen]      = useState(false)
-  const [applyOpen,     setApplyOpen]     = useState(false)
-  const [applyMsg,      setApplyMsg]      = useState('')
-  // appliedBriefIds -- loaded from DB, persists across sessions
+  const [briefs,          setBriefs]          = useState([])
+  const [loading,         setLoading]         = useState(true)
+  const [selectedId,      setSelectedId]      = useState(null)
+  const [activeFilter,    setActiveFilter]    = useState('all')
+  const [postOpen,        setPostOpen]        = useState(false)
+  const [applyOpen,       setApplyOpen]       = useState(false)
+  const [applyMsg,        setApplyMsg]        = useState('')
   const [appliedBriefIds, setAppliedBriefIds] = useState(new Set())
-  const [savedIds,      setSavedIds]      = useState([])
-  const [submitting,    setSubmitting]    = useState(false)
-  const [deletingId,    setDeletingId]    = useState(null)
-  // applicants for the currently selected brief (visible to poster)
-  const [applicants,    setApplicants]    = useState([])
-  const [acceptingId,   setAcceptingId]   = useState(null)
+  const [savedIds,        setSavedIds]        = useState([])
+  const [submitting,      setSubmitting]      = useState(false)
+  const [deletingId,      setDeletingId]      = useState(null)
+  const [applicants,      setApplicants]      = useState([])
+  const [acceptingId,     setAcceptingId]     = useState(null)
+  // Track which brief IDs already have terms sent -- blocks double-send
+  const [termsSentIds,    setTermsSentIds]    = useState(new Set())
 
   const [postForm, setPostForm] = useState({
-    title: '', making: '', needing: '', timeline: '',
-    deadline: '', fee_range: '', location_preference: '',
+    title:'', making:'', needing:'', timeline:'', deadline:'', fee_range:'', location_preference:'',
   })
   const [postDiscs, setPostDiscs] = useState([])
   const [postComp,  setPostComp]  = useState('Creative exchange')
@@ -78,29 +68,36 @@ export default function BriefsPage() {
     loadBriefs()
   }, [authLoading])
 
-  // Load applied brief IDs from DB whenever user changes
+  // Load applied brief IDs from DB
   useEffect(() => {
     if (!user) return
-    supabase
-      .from('applications')
-      .select('brief_id')
-      .eq('applicant_id', user.id)
-      .then(({ data }) => {
-        if (data) setAppliedBriefIds(new Set(data.map(a => a.brief_id)))
-      })
+    supabase.from('applications').select('brief_id').eq('applicant_id', user.id)
+      .then(({ data }) => { if (data) setAppliedBriefIds(new Set(data.map(a => a.brief_id))) })
   }, [user])
 
-  // Load applicants when selected brief changes and user is the poster
+  // Load which briefs already have terms sent (accepted applications)
+  useEffect(() => {
+    if (!user) return
+    // Find briefs I posted that already have an accepted application
+    supabase.from('applications').select('brief_id').eq('status', 'accepted')
+      .then(({ data }) => { if (data) setTermsSentIds(new Set(data.map(a => a.brief_id))) })
+  }, [user])
+
+  // Open specific brief from notification link
+  useEffect(() => {
+    if (openBriefId && briefs.length > 0) {
+      setSelectedId(openBriefId)
+    }
+  }, [openBriefId, briefs])
+
+  // Load applicants when selected brief changes
   useEffect(() => {
     if (!selectedId || !user) return
     const brief = briefs.find(b => b.id === selectedId)
     if (!brief || brief.poster_id !== user.id) { setApplicants([]); return }
     supabase
       .from('applications')
-      .select(`
-        id, message, status, created_at,
-        applicant:profiles!applications_applicant_id_fkey(id, firstname, lastname, headline, disciplines)
-      `)
+      .select(`id, message, status, created_at, applicant:profiles!applications_applicant_id_fkey(id, firstname, lastname, headline, disciplines)`)
       .eq('brief_id', selectedId)
       .eq('status', 'pending')
       .order('created_at', { ascending: true })
@@ -115,7 +112,8 @@ export default function BriefsPage() {
       .eq('status', 'open')
       .order('created_at', { ascending: false })
     if (!error && data) setBriefs(data)
-    if (data && data.length > 0) setSelectedId(data[0].id)
+    // If coming from a notification, open that brief; otherwise open first
+    if (data && data.length > 0 && !openBriefId) setSelectedId(data[0].id)
     setLoading(false)
   }
 
@@ -145,33 +143,21 @@ export default function BriefsPage() {
       const { data, error } = await supabase
         .from('briefs')
         .insert({
-          poster_id: u?.id || null,
-          title: postForm.title,
-          disciplines: postDiscs,
-          what_making: postForm.making,
-          who_needed: postForm.needing,
-          timeline: postForm.timeline,
-          deadline: postForm.deadline || null,
-          compensation: postComp,
-          fee_range: postForm.fee_range,
-          location_preference: postForm.location_preference,
-          status: 'open',
+          poster_id: u?.id || null, title: postForm.title, disciplines: postDiscs,
+          what_making: postForm.making, who_needed: postForm.needing,
+          timeline: postForm.timeline, deadline: postForm.deadline || null,
+          compensation: postComp, fee_range: postForm.fee_range,
+          location_preference: postForm.location_preference, status: 'open',
         })
         .select('*, profiles(firstname, lastname, headline, rating, collabs_count)')
         .single()
-      if (!error && data) {
-        setBriefs(prev => [data, ...prev])
-        setSelectedId(data.id)
-      }
+      if (!error && data) { setBriefs(prev => [data, ...prev]); setSelectedId(data.id) }
       setPostOpen(false)
       setPostForm({ title:'', making:'', needing:'', timeline:'', deadline:'', fee_range:'', location_preference:'' })
       setPostDiscs([])
       setPostComp('Creative exchange')
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setSubmitting(false)
-    }
+    } catch (err) { console.error(err) }
+    finally { setSubmitting(false) }
   }
 
   async function submitApplication() {
@@ -179,30 +165,23 @@ export default function BriefsPage() {
     setSubmitting(true)
     try {
       await supabase.from('applications').insert({
-        brief_id: selectedId,
-        applicant_id: user.id,
-        message: applyMsg,
-        status: 'pending',
+        brief_id: selectedId, applicant_id: user.id, message: applyMsg, status: 'pending',
       })
       setAppliedBriefIds(prev => new Set([...prev, selectedId]))
       setApplyOpen(false)
       setApplyMsg('')
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setSubmitting(false)
-    }
+    } catch (err) { console.error(err) }
+    finally { setSubmitting(false) }
   }
 
-  // Poster accepts an applicant -- creates collab_terms and redirects to terms page
   async function acceptApplicant(application) {
     setAcceptingId(application.id)
     try {
-      // Mark application as accepted
       await supabase.from('applications').update({ status: 'accepted' }).eq('id', application.id)
-
-      // Redirect poster to terms page with the applicant as partner
-      // Pre-populate brief data via URL params
+      // Mark this brief as having terms sent so button locks
+      setTermsSentIds(prev => new Set([...prev, selectedId]))
+      // Remove accepted applicant from list
+      setApplicants(prev => prev.filter(a => a.id !== application.id))
       const brief = briefs.find(b => b.id === selectedId)
       const params = new URLSearchParams({
         with: application.applicant.id,
@@ -210,9 +189,7 @@ export default function BriefsPage() {
         title: brief?.title || '',
       })
       window.location.href = `/terms?${params.toString()}`
-    } catch (err) {
-      console.error(err)
-    }
+    } catch (err) { console.error(err) }
     setAcceptingId(null)
   }
 
@@ -235,62 +212,45 @@ export default function BriefsPage() {
       </div>
 
       <div className={styles.filterTabs}>
-        {[
-          ['all','All briefs'],['Visual Art','Visual art'],['Music','Music'],
-          ['Writing','Writing'],['Design & Web','Design & web'],['Film','Film'],['paid','Paid only'],
-        ].map(([key, label]) => (
+        {[['all','All briefs'],['Visual Art','Visual art'],['Music','Music'],['Writing','Writing'],['Design & Web','Design & web'],['Film','Film'],['paid','Paid only']].map(([key, label]) => (
           <div key={key} className={`${styles.ftab} ${activeFilter === key ? styles.active : ''}`}
-            onClick={() => { setActiveFilter(key); setSelectedId(null) }}>
-            {label}
-          </div>
+            onClick={() => { setActiveFilter(key); setSelectedId(null) }}>{label}</div>
         ))}
       </div>
 
-      <div className={styles.bodySplit} style={{ flex: 1 }}>
+      <div className={styles.bodySplit} style={{ flex:1 }}>
         <div className={styles.briefListCol}>
-          {loading ? (
-            <div className={styles.emptyState}>Loading briefs…</div>
-          ) : filtered.length === 0 ? (
-            <div className={styles.emptyState}>No briefs match this filter.</div>
-          ) : (
-            filtered.map(b => {
-              const poster   = b.profiles
-              const ini      = poster ? initials(poster.firstname, poster.lastname) : '??'
-              const avCls    = AV_COLORS[b.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
-              const dl       = daysLeft(b.deadline)
-              const isPoster = user && b.poster_id === user.id
-              const hasApplied = appliedBriefIds.has(b.id)
-              return (
-                <div key={b.id} className={`${styles.briefItem} ${selectedId === b.id ? styles.selected : ''}`}
-                  onClick={() => setSelectedId(b.id)}>
-                  <div className={styles.biTags}>
-                    {(b.disciplines || []).map(d => (
-                      <span key={d} className={`${styles.dtag} ${styles[DISC_CLASS[d] || 'dtV']}`}>{d}</span>
-                    ))}
-                    {b.compensation && (
-                      <span className={`${styles.dtag} ${styles[COMP_CLASS[b.compensation] || 'ctEx']}`}>{b.compensation}</span>
-                    )}
-                    {hasApplied && !isPoster && (
-                      <span className={styles.dtag} style={{ background:'rgba(86,179,156,0.15)', color:'var(--teal)', borderColor:'rgba(86,179,156,0.3)' }}>Applied</span>
-                    )}
-                    {isPoster && (
-                      <button className={styles.biDelete} onClick={e => deleteBrief(e, b.id)}
-                        disabled={deletingId === b.id} title="Delete brief">✕</button>
-                    )}
-                  </div>
-                  <div className={styles.biTitle}>{b.title}</div>
-                  <div className={styles.biExcerpt}>{b.what_making}</div>
-                  <div className={styles.biFooter}>
-                    <div className={styles.biPoster}>
-                      <div className={`${styles.biAv} ${styles[avCls]}`}>{ini}</div>
-                      <span>{poster ? `${poster.firstname} ${poster.lastname}` : 'Anonymous'}</span>
-                    </div>
-                    <span>{b.applicants_count || 0} applicants{dl !== null ? ` · ${dl} days left` : ''}</span>
-                  </div>
+          {loading ? <div className={styles.emptyState}>Loading briefs…</div>
+          : filtered.length === 0 ? <div className={styles.emptyState}>No briefs match this filter.</div>
+          : filtered.map(b => {
+            const poster     = b.profiles
+            const ini        = poster ? initials(poster.firstname, poster.lastname) : '??'
+            const avCls      = AV_COLORS[b.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
+            const dl         = daysLeft(b.deadline)
+            const isPoster   = user && b.poster_id === user.id
+            const hasApplied = appliedBriefIds.has(b.id)
+            const termsSent  = isPoster && termsSentIds.has(b.id)
+            return (
+              <div key={b.id} className={`${styles.briefItem} ${selectedId === b.id ? styles.selected : ''}`} onClick={() => setSelectedId(b.id)}>
+                <div className={styles.biTags}>
+                  {(b.disciplines || []).map(d => <span key={d} className={`${styles.dtag} ${styles[DISC_CLASS[d]||'dtV']}`}>{d}</span>)}
+                  {b.compensation && <span className={`${styles.dtag} ${styles[COMP_CLASS[b.compensation]||'ctEx']}`}>{b.compensation}</span>}
+                  {hasApplied && !isPoster && <span className={styles.dtag} style={{ background:'rgba(86,179,156,0.15)', color:'var(--teal)', borderColor:'rgba(86,179,156,0.3)' }}>Applied</span>}
+                  {termsSent && <span className={styles.dtag} style={{ background:'rgba(201,168,76,0.12)', color:'var(--gold)' }}>Terms sent</span>}
+                  {isPoster && <button className={styles.biDelete} onClick={e => deleteBrief(e, b.id)} disabled={deletingId === b.id} title="Delete brief">✕</button>}
                 </div>
-              )
-            })
-          )}
+                <div className={styles.biTitle}>{b.title}</div>
+                <div className={styles.biExcerpt}>{b.what_making}</div>
+                <div className={styles.biFooter}>
+                  <div className={styles.biPoster}>
+                    <div className={`${styles.biAv} ${styles[avCls]}`}>{ini}</div>
+                    <span>{poster ? `${poster.firstname} ${poster.lastname}` : 'Anonymous'}</span>
+                  </div>
+                  <span>{b.applicants_count || 0} applicants{dl !== null ? ` · ${dl} days left` : ''}</span>
+                </div>
+              </div>
+            )
+          })}
         </div>
 
         <div className={styles.detailPanel}>
@@ -301,24 +261,21 @@ export default function BriefsPage() {
               <div className={styles.deSub}>Click any brief on the left to see the full details, project specs, and who's already applied.</div>
             </div>
           ) : (() => {
-            const poster    = selected.profiles
-            const ini       = poster ? initials(poster.firstname, poster.lastname) : '??'
-            const avCls     = AV_COLORS[selected.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
+            const poster     = selected.profiles
+            const ini        = poster ? initials(poster.firstname, poster.lastname) : '??'
+            const avCls      = AV_COLORS[selected.id?.charCodeAt(0) % AV_COLORS.length] || 'avGold'
             const hasApplied = appliedBriefIds.has(selected.id)
-            const saved     = savedIds.includes(selected.id)
-            const rating    = poster?.rating || 0
-            const stars     = '★'.repeat(Math.floor(rating)) + (rating % 1 ? '½' : '')
-            const isPoster  = user && selected.poster_id === user.id
+            const saved      = savedIds.includes(selected.id)
+            const rating     = poster?.rating || 0
+            const stars      = '★'.repeat(Math.floor(rating)) + (rating % 1 ? '½' : '')
+            const isPoster   = user && selected.poster_id === user.id
+            const termsSent  = isPoster && termsSentIds.has(selected.id)
             return (
               <div className={styles.detailInner}>
                 <div className={styles.detailHdr}>
                   <div className={styles.detailTags}>
-                    {(selected.disciplines || []).map(d => (
-                      <span key={d} className={`${styles.dtag} ${styles[DISC_CLASS[d] || 'dtV']}`}>{d}</span>
-                    ))}
-                    {selected.compensation && (
-                      <span className={`${styles.dtag} ${styles[COMP_CLASS[selected.compensation] || 'ctEx']}`}>{selected.compensation}</span>
-                    )}
+                    {(selected.disciplines || []).map(d => <span key={d} className={`${styles.dtag} ${styles[DISC_CLASS[d]||'dtV']}`}>{d}</span>)}
+                    {selected.compensation && <span className={`${styles.dtag} ${styles[COMP_CLASS[selected.compensation]||'ctEx']}`}>{selected.compensation}</span>}
                   </div>
                   <div className={styles.detailTitle}>{selected.title}</div>
                   <div className={styles.detailActionRow}>
@@ -329,12 +286,12 @@ export default function BriefsPage() {
                         {hasApplied ? 'Application sent ✦' : 'Apply to this brief'}
                       </button>
                     )}
-                    {isPoster ? (
-                      <button className={styles.btnDeleteBrief} onClick={e => deleteBrief(e, selected.id)}
-                        disabled={deletingId === selected.id}>
+                    {isPoster && (
+                      <button className={styles.btnDeleteBrief} onClick={e => deleteBrief(e, selected.id)} disabled={deletingId === selected.id}>
                         {deletingId === selected.id ? 'Deleting…' : '✕ Delete this brief'}
                       </button>
-                    ) : (
+                    )}
+                    {!isPoster && (
                       <button className={styles.btnSave}
                         onClick={() => setSavedIds(prev => prev.includes(selected.id) ? prev.filter(i => i !== selected.id) : [...prev, selected.id])}
                         style={saved ? { color:'var(--teal)', borderColor:'rgba(86,179,156,0.3)' } : {}}>
@@ -350,26 +307,12 @@ export default function BriefsPage() {
                     <div className={styles.posterName}>{poster ? `${poster.firstname} ${poster.lastname}` : 'Anonymous'}</div>
                     <div className={styles.posterRole}>{poster?.headline || 'Creative'} · {poster?.collabs_count || 0} collabs</div>
                   </div>
-                  {rating > 0 && (
-                    <div className={styles.posterRating}>
-                      <div className={styles.stars}>{stars}</div>
-                      <div>{rating} rating</div>
-                    </div>
-                  )}
+                  {rating > 0 && <div className={styles.posterRating}><div className={styles.stars}>{stars}</div><div>{rating} rating</div></div>}
                 </div>
 
-                {selected.what_making && (
-                  <div className={styles.dsec}>
-                    <div className={styles.dsecLabel}>What I'm making</div>
-                    <div className={styles.dsecText}>{selected.what_making}</div>
-                  </div>
-                )}
-                {selected.who_needed && (
-                  <div className={styles.dsec}>
-                    <div className={styles.dsecLabel}>Who I need</div>
-                    <div className={styles.dsecText}>{selected.who_needed}</div>
-                  </div>
-                )}
+                {selected.what_making && <div className={styles.dsec}><div className={styles.dsecLabel}>What I'm making</div><div className={styles.dsecText}>{selected.what_making}</div></div>}
+                {selected.who_needed && <div className={styles.dsec}><div className={styles.dsecLabel}>Who I need</div><div className={styles.dsecText}>{selected.who_needed}</div></div>}
+
                 <div className={styles.dsec}>
                   <div className={styles.dsecLabel}>Project specs</div>
                   <div className={styles.specsGrid}>
@@ -381,83 +324,49 @@ export default function BriefsPage() {
                   </div>
                 </div>
 
-                {/* APPLICANTS LIST -- only visible to the poster */}
+                {/* APPLICANTS -- only visible to poster */}
                 {isPoster && (
                   <div className={styles.dsec}>
                     <div className={styles.dsecLabel}>
-                      {applicants.length === 0 ? 'No applications yet' : `${applicants.length} application${applicants.length > 1 ? 's' : ''}`}
+                      {termsSent ? 'Terms in negotiation' : applicants.length === 0 ? 'No applications yet' : `${applicants.length} application${applicants.length > 1 ? 's' : ''}`}
                     </div>
-                    {applicants.length === 0 ? (
-                      <div style={{ fontSize:'0.72rem', color:'rgba(240,236,227,0.3)', fontStyle:'italic' }}>
-                        Applications will appear here once creatives apply.
+
+                    {termsSent ? (
+                      <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(201,168,76,0.7)', background:'rgba(201,168,76,0.06)', border:'0.5px solid rgba(201,168,76,0.15)', borderRadius:'4px', padding:'0.75rem 1rem', lineHeight:1.6 }}>
+                        Terms have been sent to one applicant and are under negotiation. Other applicants remain available if those terms fall through.
                       </div>
+                    ) : applicants.length === 0 ? (
+                      <div style={{ fontSize:'0.72rem', color:'rgba(240,236,227,0.3)', fontStyle:'italic' }}>Applications will appear here once creatives apply.</div>
                     ) : (
                       <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem', marginTop:'0.5rem' }}>
                         {applicants.map(app => {
-                          const a = app.applicant
+                          const a    = app.applicant
                           const aIni = a ? initials(a.firstname, a.lastname) : '??'
                           const slug = a ? `${a.firstname.toLowerCase()}-${a.lastname.toLowerCase()}` : null
                           return (
-                            <div key={app.id} style={{
-                              background:'rgba(240,236,227,0.03)',
-                              border:'0.5px solid rgba(240,236,227,0.08)',
-                              borderRadius:'4px',
-                              padding:'0.85rem 1rem',
-                            }}>
+                            <div key={app.id} style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.08)', borderRadius:'4px', padding:'0.85rem 1rem' }}>
                               <div style={{ display:'flex', alignItems:'center', gap:'0.65rem', marginBottom:'0.5rem' }}>
-                                <div style={{
-                                  width:'32px', height:'32px', borderRadius:'50%', flexShrink:0,
-                                  background:'rgba(86,179,156,0.2)', color:'var(--teal)',
-                                  display:'flex', alignItems:'center', justifyContent:'center',
-                                  fontSize:'0.72rem', fontWeight:600,
-                                }}>
-                                  {aIni}
-                                </div>
+                                <div style={{ width:'32px', height:'32px', borderRadius:'50%', flexShrink:0, background:'rgba(86,179,156,0.2)', color:'var(--teal)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.72rem', fontWeight:600 }}>{aIni}</div>
                                 <div style={{ flex:1, minWidth:0 }}>
                                   {slug ? (
-                                    <Link href={`/profile/${slug}`} style={{
-                                      fontFamily:'var(--sans)', fontSize:'0.78rem', fontWeight:600,
-                                      color:'var(--cream)', textDecoration:'none',
-                                    }}
-                                      onMouseEnter={e => e.currentTarget.style.color = 'var(--gold)'}
-                                      onMouseLeave={e => e.currentTarget.style.color = 'var(--cream)'}
-                                    >
+                                    <Link href={`/profile/${slug}`} style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', fontWeight:600, color:'var(--cream)', textDecoration:'none' }}
+                                      onMouseEnter={e => e.currentTarget.style.color='var(--gold)'}
+                                      onMouseLeave={e => e.currentTarget.style.color='var(--cream)'}>
                                       {a.firstname} {a.lastname}
                                     </Link>
-                                  ) : (
-                                    <span style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', fontWeight:600, color:'var(--cream)' }}>Anonymous</span>
-                                  )}
-                                  {a?.headline && (
-                                    <div style={{ fontFamily:'var(--sans)', fontSize:'0.65rem', color:'rgba(240,236,227,0.4)', marginTop:'1px' }}>{a.headline}</div>
-                                  )}
+                                  ) : <span style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', fontWeight:600, color:'var(--cream)' }}>Anonymous</span>}
+                                  {a?.headline && <div style={{ fontFamily:'var(--sans)', fontSize:'0.65rem', color:'rgba(240,236,227,0.4)', marginTop:'1px' }}>{a.headline}</div>}
                                 </div>
-                                <span style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', color:'rgba(240,236,227,0.25)' }}>
-                                  {new Date(app.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' })}
-                                </span>
+                                <span style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', color:'rgba(240,236,227,0.25)' }}>{new Date(app.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' })}</span>
                               </div>
                               {app.message && (
-                                <div style={{
-                                  fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(240,236,227,0.55)',
-                                  lineHeight:1.65, marginBottom:'0.65rem',
-                                  borderLeft:'2px solid rgba(240,236,227,0.08)', paddingLeft:'0.65rem',
-                                }}>
+                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(240,236,227,0.55)', lineHeight:1.65, marginBottom:'0.65rem', borderLeft:'2px solid rgba(240,236,227,0.08)', paddingLeft:'0.65rem' }}>
                                   {app.message}
                                 </div>
                               )}
-                              <button
-                                onClick={() => acceptApplicant(app)}
-                                disabled={acceptingId === app.id}
-                                style={{
-                                  background:'var(--gold)', color:'#0D0D0D',
-                                  border:'none', borderRadius:'3px',
-                                  padding:'0.4rem 0.9rem',
-                                  fontFamily:'var(--sans)', fontSize:'0.65rem',
-                                  fontWeight:600, letterSpacing:'0.06em',
-                                  textTransform:'uppercase', cursor:'pointer',
-                                  opacity: acceptingId === app.id ? 0.5 : 1,
-                                }}
-                              >
-                                {acceptingId === app.id ? 'Opening terms…' : 'Accept & set terms ↗'}
+                              <button onClick={() => acceptApplicant(app)} disabled={acceptingId === app.id || termsSent}
+                                style={{ background:'var(--gold)', color:'#0D0D0D', border:'none', borderRadius:'3px', padding:'0.4rem 0.9rem', fontFamily:'var(--sans)', fontSize:'0.65rem', fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', cursor: termsSent ? 'not-allowed' : 'pointer', opacity: acceptingId === app.id || termsSent ? 0.4 : 1 }}>
+                                {acceptingId === app.id ? 'Opening terms…' : termsSent ? 'Terms in progress' : 'Accept & set terms ↗'}
                               </button>
                             </div>
                           )
@@ -497,62 +406,39 @@ export default function BriefsPage() {
                 <label>Disciplines needed</label>
                 <div className={styles.modalDiscGrid}>
                   {DISC_OPTS.map(d => (
-                    <div key={d.label} className={`${styles.mdopt} ${postDiscs.includes(d.label) ? styles.on : ''}`} onClick={() => toggleDisc(d.label)}>
+                    <div key={d.label} className={`${styles.mdopt} ${postDiscs.includes(d.label)?styles.on:''}`} onClick={() => toggleDisc(d.label)}>
                       <div className={styles.mdoptIcon}>{d.icon}</div>
                       <div className={styles.mdoptName}>{d.label}</div>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className={styles.mfield}>
-                <label>What are you making?</label>
-                <textarea placeholder="Describe your project…" rows={3} value={postForm.making} onChange={e => setPostForm(f => ({ ...f, making: e.target.value }))} />
-              </div>
-              <div className={styles.mfield}>
-                <label>Who do you need?</label>
-                <textarea placeholder="Describe the collaborator you want to attract…" rows={3} value={postForm.needing} onChange={e => setPostForm(f => ({ ...f, needing: e.target.value }))} />
-              </div>
+              <div className={styles.mfield}><label>What are you making?</label><textarea placeholder="Describe your project…" rows={3} value={postForm.making} onChange={e => setPostForm(f => ({ ...f, making: e.target.value }))} /></div>
+              <div className={styles.mfield}><label>Who do you need?</label><textarea placeholder="Describe the collaborator you want to attract…" rows={3} value={postForm.needing} onChange={e => setPostForm(f => ({ ...f, needing: e.target.value }))} /></div>
               <div className={styles.msecLabel}>Compensation</div>
               <div className={styles.compTypeOpts}>
                 {['Creative exchange','Paid','Revenue share'].map(c => (
-                  <div key={c} className={`${styles.ctopt} ${postComp === c ? styles.on : ''}`} onClick={() => setPostComp(c)}>
+                  <div key={c} className={`${styles.ctopt} ${postComp===c?styles.on:''}`} onClick={() => setPostComp(c)}>
                     <div className={styles.ctoptTitle}>{c}</div>
-                    <div className={styles.ctoptDesc}>{c === 'Creative exchange' ? 'Trade skills. No money moves.' : c === 'Paid' ? 'Fee agreed upfront.' : 'Split the outcome.'}</div>
+                    <div className={styles.ctoptDesc}>{c==='Creative exchange'?'Trade skills. No money moves.':c==='Paid'?'Fee agreed upfront.':'Split the outcome.'}</div>
                   </div>
                 ))}
               </div>
-              {postComp === 'Paid' && (
-                <div className={styles.mfield}>
-                  <label>Fee range</label>
-                  <input type="text" placeholder="e.g. $500–1,000" value={postForm.fee_range} onChange={e => setPostForm(f => ({ ...f, fee_range: e.target.value }))} />
-                </div>
-              )}
+              {postComp === 'Paid' && <div className={styles.mfield}><label>Fee range</label><input type="text" placeholder="e.g. $500–1,000" value={postForm.fee_range} onChange={e => setPostForm(f => ({ ...f, fee_range: e.target.value }))} /></div>}
               <div className={styles.mfieldRow}>
-                <div className={styles.mfield}>
-                  <label>Timeline</label>
-                  <input type="text" placeholder="e.g. 6–8 weeks" value={postForm.timeline} onChange={e => setPostForm(f => ({ ...f, timeline: e.target.value }))} />
-                </div>
-                <div className={styles.mfield}>
-                  <label>Deadline</label>
-                  <input type="date" value={postForm.deadline} onChange={e => setPostForm(f => ({ ...f, deadline: e.target.value }))} />
-                </div>
+                <div className={styles.mfield}><label>Timeline</label><input type="text" placeholder="e.g. 6–8 weeks" value={postForm.timeline} onChange={e => setPostForm(f => ({ ...f, timeline: e.target.value }))} /></div>
+                <div className={styles.mfield}><label>Deadline</label><input type="date" value={postForm.deadline} onChange={e => setPostForm(f => ({ ...f, deadline: e.target.value }))} /></div>
               </div>
               <div className={styles.mfield}>
                 <label>Location preference</label>
                 <select value={postForm.location_preference} onChange={e => setPostForm(f => ({ ...f, location_preference: e.target.value }))}>
-                  <option value="">Select…</option>
-                  <option>Local only</option>
-                  <option>Remote OK</option>
-                  <option>Remote only</option>
-                  <option>No preference</option>
+                  <option value="">Select…</option><option>Local only</option><option>Remote OK</option><option>Remote only</option><option>No preference</option>
                 </select>
               </div>
             </div>
             <div className={styles.modalFooter}>
               <button className={styles.btnCancelBrief} onClick={() => setPostOpen(false)}>Cancel</button>
-              <button className={styles.btnSubmitBrief} onClick={submitBrief} disabled={submitting}>
-                {submitting ? 'Posting…' : 'Post brief ↗'}
-              </button>
+              <button className={styles.btnSubmitBrief} onClick={submitBrief} disabled={submitting}>{submitting?'Posting…':'Post brief ↗'}</button>
             </div>
           </div>
         </div>
@@ -567,18 +453,23 @@ export default function BriefsPage() {
             <div className={styles.applyBriefRef}><strong>Brief:</strong> {selected.title}</div>
             <div className={styles.mfield}>
               <label>Your message</label>
-              <textarea placeholder="Hi — I came across your brief and I'm really drawn to this project because…"
-                rows={5} value={applyMsg} onChange={e => setApplyMsg(e.target.value)} />
+              <textarea placeholder="Hi — I came across your brief and I'm really drawn to this project because…" rows={5} value={applyMsg} onChange={e => setApplyMsg(e.target.value)} />
             </div>
             <div className={styles.applyFooter}>
               <button className={styles.btnCancelBrief} onClick={() => setApplyOpen(false)}>Cancel</button>
-              <button className={styles.btnSubmitBrief} onClick={submitApplication} disabled={submitting}>
-                {submitting ? 'Sending…' : 'Send application ↗'}
-              </button>
+              <button className={styles.btnSubmitBrief} onClick={submitApplication} disabled={submitting}>{submitting?'Sending…':'Send application ↗'}</button>
             </div>
           </div>
         </div>
       )}
     </div>
+  )
+}
+
+export default function BriefsPage() {
+  return (
+    <Suspense fallback={null}>
+      <BriefsInner />
+    </Suspense>
   )
 }

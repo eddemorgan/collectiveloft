@@ -267,10 +267,10 @@ export default function ProfilePage() {
     let query = supabase.from('profiles').select('*')
     if (isUuid) { query = query.eq('id', username) }
     else {
-      const parts = username.split('-')
+      const parts = username.split('-').map(p => p.trim()).filter(Boolean)
       parts.length >= 2
-        ? query = query.ilike('firstname', parts[0]).ilike('lastname', parts.slice(1).join(' '))
-        : query = query.ilike('firstname', username)
+        ? query = query.ilike('firstname', parts[0].trim()).ilike('lastname', parts.slice(1).join(' ').trim())
+        : query = query.ilike('firstname', username.trim())
     }
     const { data, error } = await query.single()
     if (error || !data) { setNotFound(true); setLoading(false); return }

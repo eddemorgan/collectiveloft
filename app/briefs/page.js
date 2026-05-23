@@ -354,7 +354,7 @@ function BriefsInner() {
                         {applicants.map(app => {
                           const a    = app.applicant
                           const aIni = a ? initials(a.firstname, a.lastname) : '??'
-                          const slug = a ? `${a.firstname.toLowerCase()}-${a.lastname.toLowerCase()}` : null
+                          const slug = a ? `${a.firstname.trim().toLowerCase()}-${a.lastname.trim().toLowerCase()}` : null
                           return (
                             <div key={app.id} style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.08)', borderRadius:'4px', padding:'0.85rem 1rem' }}>
                               <div style={{ display:'flex', alignItems:'center', gap:'0.65rem', marginBottom:'0.5rem' }}>

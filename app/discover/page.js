@@ -46,7 +46,7 @@ function discKey(discipline) {
 }
 
 function profileSlug(p) {
-  return `${(p.firstname || '').toLowerCase()}-${(p.lastname || '').toLowerCase()}`
+  return `${(p.firstname || '').trim().toLowerCase()}-${(p.lastname || '').trim().toLowerCase()}`
 }
 
 function initials(p) {

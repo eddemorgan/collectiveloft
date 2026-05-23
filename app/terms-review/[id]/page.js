@@ -209,7 +209,7 @@ export default function TermsReviewPage() {
       const partner = getPartner(term)
       const profileUser = amInitiator ? term.initiator : term.partner
       if (profileUser) {
-        router.push(`/profile/${profileUser.firstname.toLowerCase()}-${profileUser.lastname.toLowerCase()}`)
+        router.push(`/profile/${profileUser.firstname.trim().toLowerCase()}-${profileUser.lastname.trim().toLowerCase()}`)
       } else {
         router.push('/briefs')
       }
@@ -274,7 +274,7 @@ export default function TermsReviewPage() {
 
   const myTurn  = isMyTurn(term)
   const partner = getPartner(term)
-  const partnerSlug = partner ? `${partner.firstname.toLowerCase()}-${partner.lastname.toLowerCase()}` : null
+  const partnerSlug = partner ? `${partner.firstname.trim().toLowerCase()}-${partner.lastname.trim().toLowerCase()}` : null
 
   const compLabel = term.collab_type === 'exchange' ? 'Creative exchange'
     : term.collab_type === 'paid' ? 'Paid'

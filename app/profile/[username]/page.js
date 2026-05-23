@@ -31,6 +31,14 @@ const SKILLS_BY_DISC = {
   tech:    ['Creative coding','Generative art','Interactive installation','Audio-visual'],
 }
 
+const DISC_CLASS = {
+  'Visual Art':'dtV','Music':'dtM','Writing':'dtW','Design & Web':'dtD',
+  'Film':'dtF','Photography':'dtV','Performance':'dtW','Creative Tech':'dtD',
+}
+const COMP_CLASS = {
+  'Creative exchange':'ctEx','Paid':'ctPd','Revenue share':'ctRs',
+}
+
 function skillsForDiscs(discLabels) {
   return discLabels.flatMap(label => {
     const disc = DISC_OPTS.find(d => d.label === label)
@@ -146,6 +154,125 @@ function Lightbox({ items, startIndex, onClose }) {
   )
 }
 
+// Brief detail modal -- shown when clicking a brief card on profile
+function BriefModal({ brief, isOwner, onClose, onDelete }) {
+  if (!brief) return null
+  return (
+    <div style={{
+      position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:200,
+      display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem',
+    }} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div style={{
+        background:'var(--bg1)', border:'0.5px solid rgba(240,236,227,0.1)',
+        borderRadius:'6px', width:'100%', maxWidth:'560px',
+        maxHeight:'85vh', overflowY:'auto', padding:'2rem',
+        position:'relative',
+      }}>
+        <button onClick={onClose} style={{
+          position:'absolute', top:'1rem', right:'1rem',
+          background:'none', border:'none', color:'rgba(240,236,227,0.35)',
+          fontSize:'1rem', cursor:'pointer', lineHeight:1,
+        }}>✕</button>
+
+        {/* Status tag */}
+        <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap', marginBottom:'0.75rem' }}>
+          {(brief.disciplines || []).map(d => (
+            <span key={d} style={{
+              fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600,
+              letterSpacing:'0.1em', textTransform:'uppercase',
+              padding:'2px 8px', borderRadius:'2px',
+              background:'rgba(201,168,76,0.12)', color:'var(--gold)',
+            }}>{d}</span>
+          ))}
+          {brief.compensation && (
+            <span style={{
+              fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600,
+              letterSpacing:'0.1em', textTransform:'uppercase',
+              padding:'2px 8px', borderRadius:'2px',
+              background:'rgba(86,179,156,0.12)', color:'var(--teal)',
+            }}>{brief.compensation}</span>
+          )}
+          <span style={{
+            fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600,
+            letterSpacing:'0.1em', textTransform:'uppercase',
+            padding:'2px 8px', borderRadius:'2px',
+            background: brief._isApplied ? 'rgba(160,120,208,0.15)' : 'rgba(201,168,76,0.08)',
+            color: brief._isApplied ? '#a078d0' : 'rgba(240,236,227,0.4)',
+          }}>
+            {brief._isApplied ? 'Applied' : 'Active'}
+          </span>
+        </div>
+
+        <div style={{ fontFamily:'var(--serif)', fontSize:'1.4rem', color:'var(--cream)', marginBottom:'1.25rem', lineHeight:1.3 }}>
+          {brief.title}
+        </div>
+
+        {brief.what_making && (
+          <div style={{ marginBottom:'1rem' }}>
+            <div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(240,236,227,0.3)', marginBottom:'0.35rem' }}>What I'm making</div>
+            <div style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', color:'rgba(240,236,227,0.7)', lineHeight:1.7 }}>{brief.what_making}</div>
+          </div>
+        )}
+
+        {brief.who_needed && (
+          <div style={{ marginBottom:'1rem' }}>
+            <div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(240,236,227,0.3)', marginBottom:'0.35rem' }}>Who I need</div>
+            <div style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', color:'rgba(240,236,227,0.7)', lineHeight:1.7 }}>{brief.who_needed}</div>
+          </div>
+        )}
+
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.5rem', marginBottom:'1.5rem' }}>
+          {brief.timeline && (
+            <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Timeline</div>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{brief.timeline}</div>
+            </div>
+          )}
+          {brief.location_preference && (
+            <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Location</div>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{brief.location_preference}</div>
+            </div>
+          )}
+          {brief.fee_range && (
+            <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Fee range</div>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--gold)' }}>{brief.fee_range}</div>
+            </div>
+          )}
+          {brief.deadline && (
+            <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Deadline</div>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{new Date(brief.deadline).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })}</div>
+            </div>
+          )}
+        </div>
+
+        {isOwner && !brief._isApplied && (
+          <button onClick={() => { onDelete(brief.id); onClose() }} style={{
+            background:'none', border:'0.5px solid rgba(194,112,128,0.3)',
+            color:'#c27080', borderRadius:'3px', padding:'0.45rem 1rem',
+            fontFamily:'var(--sans)', fontSize:'0.65rem', letterSpacing:'0.06em',
+            textTransform:'uppercase', cursor:'pointer',
+          }}>
+            ✕ Delete this brief
+          </button>
+        )}
+
+        {brief._isApplied && (
+          <div style={{
+            background:'rgba(160,120,208,0.08)', border:'0.5px solid rgba(160,120,208,0.2)',
+            borderRadius:'4px', padding:'0.75rem 1rem',
+            fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(160,120,208,0.8)',
+          }}>
+            You applied to this brief. The poster will reach out if they want to move forward.
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function ProfilePage() {
   const params   = useParams()
   const router   = useRouter()
@@ -171,6 +298,13 @@ export default function ProfilePage() {
   const [draftDiscs,    setDraftDiscs]    = useState([])
   const [draftSkills,   setDraftSkills]   = useState([])
   const [notifCount,    setNotifCount]    = useState(0)
+
+  // Briefs tab state
+  const [myBriefs,      setMyBriefs]      = useState([])   // briefs I posted
+  const [appliedBriefs, setAppliedBriefs] = useState([])   // briefs I applied to
+  const [briefsLoading, setBriefsLoading] = useState(false)
+  const [selectedBrief, setSelectedBrief] = useState(null) // for modal
+  const [deletingId,    setDeletingId]    = useState(null)
 
   const avatarInputRef    = useRef()
   const coverInputRef     = useRef()
@@ -202,6 +336,7 @@ export default function ProfilePage() {
     if (user && user.id === data.id) {
       setIsOwner(true)
       loadNotifCount(user.id)
+      loadBriefs(user.id)
     }
 
     const { data: studioData } = await supabase
@@ -228,6 +363,36 @@ export default function ProfilePage() {
     setLoading(false)
   }
 
+  async function loadBriefs(userId) {
+    setBriefsLoading(true)
+
+    // My posted briefs (active)
+    const { data: posted } = await supabase
+      .from('briefs')
+      .select('*')
+      .eq('poster_id', userId)
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+    setMyBriefs(posted || [])
+
+    // Briefs I applied to
+    const { data: apps } = await supabase
+      .from('applications')
+      .select('brief_id, status, briefs(*)')
+      .eq('applicant_id', userId)
+      .in('status', ['pending', 'accepted'])
+    setAppliedBriefs((apps || []).map(a => ({ ...a.briefs, _isApplied: true, _appStatus: a.status })).filter(Boolean))
+
+    setBriefsLoading(false)
+  }
+
+  async function deleteBrief(id) {
+    setDeletingId(id)
+    await supabase.from('briefs').update({ status: 'deleted' }).eq('id', id)
+    setMyBriefs(prev => prev.filter(b => b.id !== id))
+    setDeletingId(null)
+  }
+
   async function loadNotifCount(userId) {
     let count = 0
     const { count: pendingTerms } = await supabase
@@ -245,17 +410,17 @@ export default function ProfilePage() {
       .eq('rated', false)
     count += unrated || 0
 
-    const { data: myBriefs } = await supabase
+    const { data: myBriefsForNotif } = await supabase
       .from('briefs')
       .select('id')
       .eq('poster_id', userId)
       .eq('status', 'open')
 
-    if (myBriefs && myBriefs.length > 0) {
+    if (myBriefsForNotif && myBriefsForNotif.length > 0) {
       const { count: apps } = await supabase
         .from('applications')
         .select('id', { count: 'exact', head: true })
-        .in('brief_id', myBriefs.map(b => b.id))
+        .in('brief_id', myBriefsForNotif.map(b => b.id))
         .eq('seen', false)
       count += apps || 0
     }
@@ -362,6 +527,88 @@ export default function ProfilePage() {
     )
   }
 
+  // Brief card for profile briefs tab
+  function BriefCard({ brief, showDelete }) {
+    const isApplied = brief._isApplied
+    return (
+      <div
+        onClick={() => setSelectedBrief(brief)}
+        style={{
+          position:'relative', cursor:'pointer',
+          background:'rgba(240,236,227,0.02)',
+          border:`0.5px solid ${isApplied ? 'rgba(160,120,208,0.2)' : 'rgba(240,236,227,0.08)'}`,
+          borderRadius:'4px', padding:'1rem 1.1rem',
+          transition:'border-color 0.15s, background 0.15s',
+          marginBottom:'0.65rem',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(240,236,227,0.04)'; e.currentTarget.style.borderColor = isApplied ? 'rgba(160,120,208,0.35)' : 'rgba(201,168,76,0.25)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(240,236,227,0.02)'; e.currentTarget.style.borderColor = isApplied ? 'rgba(160,120,208,0.2)' : 'rgba(240,236,227,0.08)' }}
+      >
+        {/* Delete X -- top right, only for active briefs owner posted */}
+        {showDelete && (
+          <button
+            onClick={e => {
+              e.stopPropagation()
+              if (!confirm('Delete this brief? This cannot be undone.')) return
+              deleteBrief(brief.id)
+            }}
+            style={{
+              position:'absolute', top:'0.6rem', right:'0.6rem',
+              background:'none', border:'none',
+              color:'rgba(194,112,128,0.5)', cursor:'pointer',
+              fontSize:'0.72rem', lineHeight:1, padding:'2px 4px',
+              borderRadius:'2px', transition:'color 0.15s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = '#c27080'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(194,112,128,0.5)'}
+            title="Delete brief"
+          >
+            ✕
+          </button>
+        )}
+
+        {/* Tags */}
+        <div style={{ display:'flex', gap:'0.4rem', flexWrap:'wrap', marginBottom:'0.5rem' }}>
+          {(brief.disciplines || []).slice(0,2).map(d => (
+            <span key={d} style={{
+              fontFamily:'var(--sans)', fontSize:'0.55rem', fontWeight:600,
+              letterSpacing:'0.1em', textTransform:'uppercase',
+              padding:'1px 6px', borderRadius:'2px',
+              background:'rgba(201,168,76,0.1)', color:'var(--gold)',
+            }}>{d}</span>
+          ))}
+          {brief.compensation && (
+            <span style={{
+              fontFamily:'var(--sans)', fontSize:'0.55rem', fontWeight:600,
+              letterSpacing:'0.1em', textTransform:'uppercase',
+              padding:'1px 6px', borderRadius:'2px',
+              background:'rgba(86,179,156,0.1)', color:'var(--teal)',
+            }}>{brief.compensation}</span>
+          )}
+          <span style={{
+            fontFamily:'var(--sans)', fontSize:'0.55rem', fontWeight:600,
+            letterSpacing:'0.1em', textTransform:'uppercase',
+            padding:'1px 6px', borderRadius:'2px',
+            background: isApplied ? 'rgba(160,120,208,0.12)' : 'rgba(201,168,76,0.06)',
+            color: isApplied ? '#a078d0' : 'rgba(240,236,227,0.35)',
+          }}>
+            {isApplied ? 'Applied' : 'Active'}
+          </span>
+        </div>
+
+        <div style={{ fontFamily:'var(--sans)', fontSize:'0.82rem', fontWeight:600, color:'var(--cream)', marginBottom:'0.3rem', paddingRight: showDelete ? '1.5rem' : 0 }}>
+          {brief.title}
+        </div>
+        {brief.what_making && (
+          <div style={{ fontFamily:'var(--sans)', fontSize:'0.7rem', color:'rgba(240,236,227,0.45)', lineHeight:1.6,
+            display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+            {brief.what_making}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   if (loading) return <div className={styles.loading}><div className={styles.loadingDot}>✦</div></div>
   if (notFound) return (
     <div className={styles.notFound}>
@@ -441,8 +688,6 @@ export default function ProfilePage() {
                 <Editable value={profile.firstname} onSave={v => saveField('firstname',v)} placeholder="First name" isOwner={isOwner} editMode={editMode} className={styles.nameFirst} />
                 {' '}
                 <Editable value={profile.lastname} onSave={v => saveField('lastname',v)} placeholder="Last name" isOwner={isOwner} editMode={editMode} className={styles.nameLast} />
-
-                {/* Envelope notification badge -- only visible to owner */}
                 {isOwner && (
                   <Link href="/notifications" style={{ position:'relative', display:'inline-flex', alignItems:'center', textDecoration:'none', marginLeft:'0.25rem' }}>
                     <span style={{ fontSize:'1rem', color: notifCount > 0 ? 'var(--gold)' : 'rgba(240,236,227,0.25)', lineHeight:1 }}>✉</span>
@@ -660,18 +905,37 @@ export default function ProfilePage() {
 
           {activeTab === 'briefs' && (
             <div className={styles.contentSection}>
-              <div className={styles.secLabel}>Active briefs</div>
-              {profile.rightnow ? (
-                <div className={styles.briefCard}>
-                  <div className={styles.briefTitle}>{fullName} — {profile.headline}</div>
-                  <div className={styles.briefTags}>
-                    {disciplines.slice(0,3).map(d => <span key={d} className={`${styles.ptag} ${styles.ptagDisc}`}>{d}</span>)}
-                    {(profile.compensation||[]).map(c => <span key={c} className={`${styles.ptag} ${styles.ptagOpen}`}>{c}</span>)}
-                  </div>
-                  <div className={styles.briefDesc}>{profile.rightnow}</div>
-                </div>
+              {briefsLoading ? (
+                <div className={styles.emptyState}>Loading briefs…</div>
               ) : (
-                <div className={styles.emptyState}>No active briefs posted yet.</div>
+                <>
+                  {/* Active briefs I posted */}
+                  <div style={{ marginBottom:'1.5rem' }}>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.75rem' }}>
+                      <div className={styles.secLabel} style={{ margin:0 }}>Active briefs</div>
+                      <Link href="/briefs" style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'var(--gold)', textDecoration:'none', letterSpacing:'0.04em' }}>
+                        + Post a brief
+                      </Link>
+                    </div>
+                    {myBriefs.length === 0 ? (
+                      <div className={styles.emptyState}>No active briefs. Post one to find collaborators.</div>
+                    ) : (
+                      myBriefs.map(b => <BriefCard key={b.id} brief={b} showDelete={isOwner} />)
+                    )}
+                  </div>
+
+                  {/* Briefs I applied to -- only show to owner */}
+                  {isOwner && (
+                    <div>
+                      <div className={styles.secLabel} style={{ marginBottom:'0.75rem' }}>Applied briefs</div>
+                      {appliedBriefs.length === 0 ? (
+                        <div className={styles.emptyState}>No applications sent yet.</div>
+                      ) : (
+                        appliedBriefs.map(b => <BriefCard key={b.id} brief={b} showDelete={false} />)
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -752,6 +1016,16 @@ export default function ProfilePage() {
       </div>
 
       <Footer />
+
+      {/* Brief detail modal */}
+      {selectedBrief && (
+        <BriefModal
+          brief={selectedBrief}
+          isOwner={isOwner}
+          onClose={() => setSelectedBrief(null)}
+          onDelete={id => { deleteBrief(id); setSelectedBrief(null) }}
+        />
+      )}
 
       {lightboxIdx !== null && (
         <Lightbox items={portfolio} startIndex={lightboxIdx} onClose={() => setLightboxIdx(null)} />

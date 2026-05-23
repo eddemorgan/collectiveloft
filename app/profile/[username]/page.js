@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
@@ -31,12 +31,9 @@ const SKILLS_BY_DISC = {
   tech:    ['Creative coding','Generative art','Interactive installation','Audio-visual'],
 }
 
-const DISC_CLASS = {
-  'Visual Art':'dtV','Music':'dtM','Writing':'dtW','Design & Web':'dtD',
-  'Film':'dtF','Photography':'dtV','Performance':'dtW','Creative Tech':'dtD',
-}
-const COMP_CLASS = {
-  'Creative exchange':'ctEx','Paid':'ctPd','Revenue share':'ctRs',
+const RIGHTS_LABELS = {
+  transfer: 'Full transfer on payment', shared: 'Shared credit',
+  license: 'License only', negotiate: 'Negotiate separately',
 }
 
 function skillsForDiscs(discLabels) {
@@ -56,16 +53,16 @@ function detectType(file) {
 }
 
 function bucketForType(type) {
-  if (type === 'image')    return 'portfolio-images'
-  if (type === 'video')    return 'portfolio-video'
-  if (type === 'audio')    return 'portfolio-audio'
+  if (type === 'image') return 'portfolio-images'
+  if (type === 'video') return 'portfolio-video'
+  if (type === 'audio') return 'portfolio-audio'
   return 'portfolio-docs'
 }
 
 function typeIcon(type) {
-  if (type === 'image')    return '🖼'
-  if (type === 'video')    return '▶'
-  if (type === 'audio')    return '🎵'
+  if (type === 'image') return '🖼'
+  if (type === 'video') return '▶'
+  if (type === 'audio') return '🎵'
   if (type === 'document') return '📄'
   return '✦'
 }
@@ -73,36 +70,66 @@ function typeIcon(type) {
 function initials(p) {
   return [(p.firstname||'?')[0],(p.lastname||'?')[0]].join('').toUpperCase()
 }
+function personInitials(first, last) {
+  return `${(first||'?')[0]}${(last||'?')[0]}`.toUpperCase()
+}
 function locationStr(p) {
   return [p.city,p.state,p.country].filter(Boolean).join(', ')
 }
 
+// TermsField MUST be outside any component to avoid focus loss on re-render
+function TermsField({ label, value, original, onChange, type, children, locked }) {
+  const changed = original !== undefined && value !== original && value !== ''
+  return (
+    <div style={{ marginBottom: '0.85rem' }}>
+      <label style={{
+        display:'block', fontFamily:'var(--sans)', fontSize:'0.65rem',
+        letterSpacing:'0.06em', textTransform:'uppercase',
+        color: changed ? 'var(--gold)' : 'rgba(240,236,227,0.4)', marginBottom:'0.3rem',
+      }}>
+        {label} {changed && <span style={{ fontSize:'0.55rem', opacity:0.7 }}>· modified</span>}
+      </label>
+      {locked ? (
+        <div style={{
+          fontFamily:'var(--sans)', fontSize:'0.8rem', color:'rgba(240,236,227,0.5)',
+          padding:'0.5rem 0.75rem', background:'rgba(240,236,227,0.03)',
+          border:'0.5px solid rgba(240,236,227,0.08)', borderRadius:'3px',
+        }}>{value || '—'}</div>
+      ) : children ? children : (
+        <input type={type || 'text'} value={value || ''}
+          onChange={e => onChange(e.target.value)}
+          style={{
+            width:'100%', boxSizing:'border-box', background:'var(--bg1)',
+            border:`0.5px solid ${changed ? 'var(--gold)' : 'rgba(240,236,227,0.12)'}`,
+            borderRadius:'3px', padding:'0.5rem 0.75rem',
+            fontFamily:'var(--sans)', fontSize:'0.8rem', color:'var(--cream)', outline:'none',
+            boxShadow: changed ? '0 0 0 2px rgba(201,168,76,0.1)' : 'none',
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
 function Editable({ value, onSave, placeholder, multiline, isOwner, editMode, className }) {
   const [editing, setEditing] = useState(false)
-  const [draft,   setDraft]   = useState(value || '')
+  const [draft, setDraft] = useState(value || '')
   const ref = useRef()
-
   useEffect(() => { if (editing && ref.current) ref.current.focus() }, [editing])
   useEffect(() => { setDraft(value || '') }, [value])
-
   if (!isOwner || !editMode) return <span className={className}>{value || placeholder}</span>
-
   if (editing) {
     const props = {
-      ref,
-      value: draft,
-      onChange: e => setDraft(e.target.value),
+      ref, value: draft, onChange: e => setDraft(e.target.value),
       onBlur: () => { setEditing(false); if (draft !== value) onSave(draft) },
       onKeyDown: e => {
         if (e.key === 'Enter' && !multiline) { setEditing(false); onSave(draft) }
         if (e.key === 'Escape') { setEditing(false); setDraft(value || '') }
       },
-      className: `${styles.editInput} ${multiline ? styles.editTextarea : ''}`,
-      placeholder,
+      className: `${styles.editInput} ${multiline ? styles.editTextarea : ''}`, placeholder,
     }
     return multiline ? <textarea {...props} rows={4} /> : <input type="text" {...props} />
   }
-
   return (
     <span className={`${className} ${styles.editableField}`} onClick={() => setEditing(true)} title="Click to edit">
       {value || <span className={styles.editPlaceholder}>{placeholder}</span>}
@@ -114,7 +141,6 @@ function Editable({ value, onSave, placeholder, multiline, isOwner, editMode, cl
 function Lightbox({ items, startIndex, onClose }) {
   const [idx, setIdx] = useState(startIndex)
   const item = items[idx]
-
   useEffect(() => {
     function onKey(e) {
       if (e.key === 'Escape') onClose()
@@ -124,7 +150,6 @@ function Lightbox({ items, startIndex, onClose }) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [items, onClose])
-
   return (
     <div className={styles.lightbox} onClick={onClose}>
       <button className={styles.lbClose} onClick={onClose}>✕</button>
@@ -133,141 +158,37 @@ function Lightbox({ items, startIndex, onClose }) {
       <div className={styles.lbContent} onClick={e => e.stopPropagation()}>
         {item.type === 'image' && <img src={item.file_url} alt={item.title || ''} className={styles.lbImage} />}
         {item.type === 'video' && <video src={item.file_url} controls autoPlay className={styles.lbVideo} />}
-        {item.type === 'audio' && (
-          <div className={styles.lbAudio}>
-            <div className={styles.lbAudioIcon}>🎵</div>
-            <div className={styles.lbAudioTitle}>{item.title || 'Audio track'}</div>
-            <audio src={item.file_url} controls autoPlay className={styles.audioPlayer} />
-          </div>
-        )}
-        {item.type === 'document' && (
-          <div className={styles.lbDoc}>
-            <div className={styles.lbDocIcon}>📄</div>
-            <div className={styles.lbDocTitle}>{item.title || 'Document'}</div>
-            <a href={item.file_url} target="_blank" rel="noopener noreferrer" className={styles.lbDocBtn}>Open document ↗</a>
-            <iframe src={item.file_url} className={styles.lbDocFrame} title={item.title || 'Document'} />
-          </div>
-        )}
+        {item.type === 'audio' && <div className={styles.lbAudio}><div className={styles.lbAudioIcon}>🎵</div><div className={styles.lbAudioTitle}>{item.title || 'Audio track'}</div><audio src={item.file_url} controls autoPlay className={styles.audioPlayer} /></div>}
+        {item.type === 'document' && <div className={styles.lbDoc}><div className={styles.lbDocIcon}>📄</div><div className={styles.lbDocTitle}>{item.title || 'Document'}</div><a href={item.file_url} target="_blank" rel="noopener noreferrer" className={styles.lbDocBtn}>Open document ↗</a><iframe src={item.file_url} className={styles.lbDocFrame} title={item.title || 'Document'} /></div>}
         {item.title && <div className={styles.lbCaption}>{item.title}</div>}
       </div>
     </div>
   )
 }
 
-// Brief detail modal -- shown when clicking a brief card on profile
 function BriefModal({ brief, isOwner, onClose, onDelete }) {
   if (!brief) return null
   return (
-    <div style={{
-      position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:200,
-      display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem',
-    }} onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div style={{
-        background:'var(--bg1)', border:'0.5px solid rgba(240,236,227,0.1)',
-        borderRadius:'6px', width:'100%', maxWidth:'560px',
-        maxHeight:'85vh', overflowY:'auto', padding:'2rem',
-        position:'relative',
-      }}>
-        <button onClick={onClose} style={{
-          position:'absolute', top:'1rem', right:'1rem',
-          background:'none', border:'none', color:'rgba(240,236,227,0.35)',
-          fontSize:'1rem', cursor:'pointer', lineHeight:1,
-        }}>✕</button>
-
-        {/* Status tag */}
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'1.5rem' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div style={{ background:'var(--bg1)', border:'0.5px solid rgba(240,236,227,0.1)', borderRadius:'6px', width:'100%', maxWidth:'560px', maxHeight:'85vh', overflowY:'auto', padding:'2rem', position:'relative' }}>
+        <button onClick={onClose} style={{ position:'absolute', top:'1rem', right:'1rem', background:'none', border:'none', color:'rgba(240,236,227,0.35)', fontSize:'1rem', cursor:'pointer', lineHeight:1 }}>✕</button>
         <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap', marginBottom:'0.75rem' }}>
-          {(brief.disciplines || []).map(d => (
-            <span key={d} style={{
-              fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600,
-              letterSpacing:'0.1em', textTransform:'uppercase',
-              padding:'2px 8px', borderRadius:'2px',
-              background:'rgba(201,168,76,0.12)', color:'var(--gold)',
-            }}>{d}</span>
-          ))}
-          {brief.compensation && (
-            <span style={{
-              fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600,
-              letterSpacing:'0.1em', textTransform:'uppercase',
-              padding:'2px 8px', borderRadius:'2px',
-              background:'rgba(86,179,156,0.12)', color:'var(--teal)',
-            }}>{brief.compensation}</span>
-          )}
-          <span style={{
-            fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600,
-            letterSpacing:'0.1em', textTransform:'uppercase',
-            padding:'2px 8px', borderRadius:'2px',
-            background: brief._isApplied ? 'rgba(160,120,208,0.15)' : 'rgba(201,168,76,0.08)',
-            color: brief._isApplied ? '#a078d0' : 'rgba(240,236,227,0.4)',
-          }}>
-            {brief._isApplied ? 'Applied' : 'Active'}
-          </span>
+          {(brief.disciplines || []).map(d => <span key={d} style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', padding:'2px 8px', borderRadius:'2px', background:'rgba(201,168,76,0.12)', color:'var(--gold)' }}>{d}</span>)}
+          {brief.compensation && <span style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', padding:'2px 8px', borderRadius:'2px', background:'rgba(86,179,156,0.12)', color:'var(--teal)' }}>{brief.compensation}</span>}
+          <span style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', padding:'2px 8px', borderRadius:'2px', background: brief._isApplied ? 'rgba(160,120,208,0.15)' : 'rgba(201,168,76,0.08)', color: brief._isApplied ? '#a078d0' : 'rgba(240,236,227,0.4)' }}>{brief._isApplied ? 'Applied' : 'Active'}</span>
         </div>
-
-        <div style={{ fontFamily:'var(--serif)', fontSize:'1.4rem', color:'var(--cream)', marginBottom:'1.25rem', lineHeight:1.3 }}>
-          {brief.title}
-        </div>
-
-        {brief.what_making && (
-          <div style={{ marginBottom:'1rem' }}>
-            <div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(240,236,227,0.3)', marginBottom:'0.35rem' }}>What I'm making</div>
-            <div style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', color:'rgba(240,236,227,0.7)', lineHeight:1.7 }}>{brief.what_making}</div>
-          </div>
-        )}
-
-        {brief.who_needed && (
-          <div style={{ marginBottom:'1rem' }}>
-            <div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(240,236,227,0.3)', marginBottom:'0.35rem' }}>Who I need</div>
-            <div style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', color:'rgba(240,236,227,0.7)', lineHeight:1.7 }}>{brief.who_needed}</div>
-          </div>
-        )}
-
+        <div style={{ fontFamily:'var(--serif)', fontSize:'1.4rem', color:'var(--cream)', marginBottom:'1.25rem', lineHeight:1.3 }}>{brief.title}</div>
+        {brief.what_making && <div style={{ marginBottom:'1rem' }}><div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(240,236,227,0.3)', marginBottom:'0.35rem' }}>What I'm making</div><div style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', color:'rgba(240,236,227,0.7)', lineHeight:1.7 }}>{brief.what_making}</div></div>}
+        {brief.who_needed && <div style={{ marginBottom:'1rem' }}><div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(240,236,227,0.3)', marginBottom:'0.35rem' }}>Who I need</div><div style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', color:'rgba(240,236,227,0.7)', lineHeight:1.7 }}>{brief.who_needed}</div></div>}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.5rem', marginBottom:'1.5rem' }}>
-          {brief.timeline && (
-            <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Timeline</div>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{brief.timeline}</div>
-            </div>
-          )}
-          {brief.location_preference && (
-            <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Location</div>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{brief.location_preference}</div>
-            </div>
-          )}
-          {brief.fee_range && (
-            <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Fee range</div>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--gold)' }}>{brief.fee_range}</div>
-            </div>
-          )}
-          {brief.deadline && (
-            <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Deadline</div>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{new Date(brief.deadline).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })}</div>
-            </div>
-          )}
+          {brief.timeline && <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}><div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Timeline</div><div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{brief.timeline}</div></div>}
+          {brief.location_preference && <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}><div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Location</div><div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{brief.location_preference}</div></div>}
+          {brief.fee_range && <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}><div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Fee range</div><div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--gold)' }}>{brief.fee_range}</div></div>}
+          {brief.deadline && <div style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.07)', borderRadius:'3px', padding:'0.6rem 0.75rem' }}><div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.2rem' }}>Deadline</div><div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{new Date(brief.deadline).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })}</div></div>}
         </div>
-
-        {isOwner && !brief._isApplied && (
-          <button onClick={() => { onDelete(brief.id); onClose() }} style={{
-            background:'none', border:'0.5px solid rgba(194,112,128,0.3)',
-            color:'#c27080', borderRadius:'3px', padding:'0.45rem 1rem',
-            fontFamily:'var(--sans)', fontSize:'0.65rem', letterSpacing:'0.06em',
-            textTransform:'uppercase', cursor:'pointer',
-          }}>
-            ✕ Delete this brief
-          </button>
-        )}
-
-        {brief._isApplied && (
-          <div style={{
-            background:'rgba(160,120,208,0.08)', border:'0.5px solid rgba(160,120,208,0.2)',
-            borderRadius:'4px', padding:'0.75rem 1rem',
-            fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(160,120,208,0.8)',
-          }}>
-            You applied to this brief. The poster will reach out if they want to move forward.
-          </div>
-        )}
+        {isOwner && !brief._isApplied && <button onClick={() => { onDelete(brief.id); onClose() }} style={{ background:'none', border:'0.5px solid rgba(194,112,128,0.3)', color:'#c27080', borderRadius:'3px', padding:'0.45rem 1rem', fontFamily:'var(--sans)', fontSize:'0.65rem', letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer' }}>✕ Delete this brief</button>}
+        {brief._isApplied && <div style={{ background:'rgba(160,120,208,0.08)', border:'0.5px solid rgba(160,120,208,0.2)', borderRadius:'4px', padding:'0.75rem 1rem', fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(160,120,208,0.8)' }}>You applied to this brief. The poster will reach out if they want to move forward.</div>}
       </div>
     </div>
   )
@@ -280,6 +201,7 @@ export default function ProfilePage() {
 
   const [profile,       setProfile]       = useState(null)
   const [profileId,     setProfileId]     = useState(null)
+  const [currentUser,   setCurrentUser]   = useState(null)
   const [studios,       setStudios]       = useState([])
   const [ratings,       setRatings]       = useState([])
   const [portfolio,     setPortfolio]     = useState([])
@@ -299,12 +221,19 @@ export default function ProfilePage() {
   const [draftSkills,   setDraftSkills]   = useState([])
   const [notifCount,    setNotifCount]    = useState(0)
 
-  // Briefs tab state
-  const [myBriefs,      setMyBriefs]      = useState([])   // briefs I posted
-  const [appliedBriefs, setAppliedBriefs] = useState([])   // briefs I applied to
+  // Briefs tab
+  const [myBriefs,      setMyBriefs]      = useState([])
+  const [appliedBriefs, setAppliedBriefs] = useState([])
+  const [termsUnderReview, setTermsUnderReview] = useState([])
   const [briefsLoading, setBriefsLoading] = useState(false)
-  const [selectedBrief, setSelectedBrief] = useState(null) // for modal
+  const [selectedBrief, setSelectedBrief] = useState(null)
   const [deletingId,    setDeletingId]    = useState(null)
+
+  // Terms negotiation state
+  const [actingTerms,  setActingTerms]  = useState({})
+  const [modifyingId,  setModifyingId]  = useState(null)
+  const [modifyDraft,  setModifyDraft]  = useState({})
+  const [originals,    setOriginals]    = useState({})
 
   const avatarInputRef    = useRef()
   const coverInputRef     = useRef()
@@ -326,13 +255,13 @@ export default function ProfilePage() {
     }
     const { data, error } = await query.single()
     if (error || !data) { setNotFound(true); setLoading(false); return }
-
     setProfile(data)
     setProfileId(data.id)
     setDraftDiscs(data.disciplines || [])
     setDraftSkills(data.skills || [])
 
     const { data: { user } } = await supabase.auth.getUser()
+    setCurrentUser(user)
     if (user && user.id === data.id) {
       setIsOwner(true)
       loadNotifCount(user.id)
@@ -366,7 +295,7 @@ export default function ProfilePage() {
   async function loadBriefs(userId) {
     setBriefsLoading(true)
 
-    // My posted briefs (active)
+    // My active posted briefs
     const { data: posted } = await supabase
       .from('briefs')
       .select('*')
@@ -375,13 +304,26 @@ export default function ProfilePage() {
       .order('created_at', { ascending: false })
     setMyBriefs(posted || [])
 
-    // Briefs I applied to
+    // Briefs I applied to (pending application, not yet in terms)
     const { data: apps } = await supabase
       .from('applications')
       .select('brief_id, status, briefs(*)')
       .eq('applicant_id', userId)
-      .in('status', ['pending', 'accepted'])
-    setAppliedBriefs((apps || []).map(a => ({ ...a.briefs, _isApplied: true, _appStatus: a.status })).filter(Boolean))
+      .eq('status', 'pending')
+    setAppliedBriefs((apps || []).map(a => ({ ...a.briefs, _isApplied: true })).filter(Boolean))
+
+    // Terms under review -- pending collab_terms I'm part of
+    const { data: terms } = await supabase
+      .from('collab_terms')
+      .select(`
+        *,
+        initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, disciplines, headline),
+        partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, disciplines, headline)
+      `)
+      .or(`initiator_id.eq.${userId},partner_id.eq.${userId}`)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+    setTermsUnderReview(terms || [])
 
     setBriefsLoading(false)
   }
@@ -393,61 +335,115 @@ export default function ProfilePage() {
     setDeletingId(null)
   }
 
+  // Terms negotiation helpers
+  function isMyTurn(term) {
+    if (!currentUser) return false
+    if (term.current_editor === 'initiator') return term.initiator_id === currentUser.id
+    if (term.current_editor === 'partner')   return term.partner_id   === currentUser.id
+    return false
+  }
+
+  function partnerForTerm(term) {
+    if (!currentUser) return null
+    return term.initiator_id === currentUser.id ? term.partner : term.initiator
+  }
+
+  async function acceptTerms(term) {
+    setActingTerms(prev => ({ ...prev, [term.id]: 'accepting' }))
+    try {
+      await supabase.from('collab_terms').update({ status: 'active', terms_status: 'agreed' }).eq('id', term.id)
+      const ms = term.milestones || []
+      if (ms.length > 0) {
+        await supabase.from('studio_milestones').insert(ms.map((m, i) => ({
+          studio_id: term.id, title: m.desc || m.title || `Milestone ${i + 1}`,
+          due_date: null, done: false, sort_order: i,
+        })))
+      }
+      await supabase.from('studio_notes').upsert({ studio_id: term.id, content: '' }, { onConflict: 'studio_id' })
+      await supabase.from('studio_messages').insert({
+        studio_id: term.id, sender_id: null, type: 'sys',
+        content: `Studio created · ${new Date().toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })}`,
+      })
+      setTermsUnderReview(prev => prev.filter(t => t.id !== term.id))
+      router.push(`/studio/${term.id}`)
+    } catch (e) { console.error(e) }
+    setActingTerms(prev => ({ ...prev, [term.id]: null }))
+  }
+
+  async function declineTerms(term) {
+    setActingTerms(prev => ({ ...prev, [term.id]: 'declining' }))
+    try {
+      const amInitiator = currentUser && term.initiator_id === currentUser.id
+      await supabase.from('collab_terms').update({ status: 'declined' }).eq('id', term.id)
+      if (term.brief_id) {
+        if (amInitiator) {
+          await supabase.from('briefs').update({ status: 'deleted' }).eq('id', term.brief_id)
+        } else {
+          await supabase.from('briefs').update({ status: 'open' }).eq('id', term.brief_id)
+          await supabase.from('applications').update({ status: 'pending' })
+            .eq('brief_id', term.brief_id).eq('applicant_id', currentUser.id)
+        }
+      }
+      setTermsUnderReview(prev => prev.filter(t => t.id !== term.id))
+    } catch (e) { console.error(e) }
+    setActingTerms(prev => ({ ...prev, [term.id]: null }))
+  }
+
+  function startModify(term) {
+    const draft = {
+      collab_type: term.collab_type || 'exchange', timeline: term.timeline || '',
+      deadline: term.deadline || '', location: term.location || '',
+      cadence: term.cadence || '', rights: term.rights || 'transfer',
+      fee_from: term.fee_from || '', fee_to: term.fee_to || '',
+      pay_schedule: term.pay_schedule || '', my_share: term.my_share || '',
+      their_share: term.their_share || '', rev_sources: term.rev_sources || '',
+    }
+    setOriginals(draft)
+    setModifyDraft(draft)
+    setModifyingId(term.id)
+  }
+
+  async function submitModify(term) {
+    setActingTerms(prev => ({ ...prev, [term.id]: 'modifying' }))
+    try {
+      const amInitiator = term.initiator_id === currentUser.id
+      const nextEditor  = amInitiator ? 'partner' : 'initiator'
+      await supabase.from('collab_terms').update({
+        ...modifyDraft, current_editor: nextEditor, terms_status: 'negotiating',
+      }).eq('id', term.id)
+      setTermsUnderReview(prev => prev.map(t => t.id === term.id
+        ? { ...t, ...modifyDraft, current_editor: nextEditor } : t))
+      setModifyingId(null)
+      setModifyDraft({})
+    } catch (e) { console.error(e) }
+    setActingTerms(prev => ({ ...prev, [term.id]: null }))
+  }
+
   async function loadNotifCount(userId) {
     let count = 0
-    const { count: pendingTerms } = await supabase
-      .from('collab_terms')
-      .select('id', { count: 'exact', head: true })
-      .eq('partner_id', userId)
-      .eq('status', 'pending')
+    const { count: pendingTerms } = await supabase.from('collab_terms').select('id', { count:'exact', head:true }).eq('partner_id', userId).eq('status', 'pending')
     count += pendingTerms || 0
-
-    const { count: unrated } = await supabase
-      .from('collab_terms')
-      .select('id', { count: 'exact', head: true })
-      .or(`initiator_id.eq.${userId},partner_id.eq.${userId}`)
-      .eq('status', 'complete')
-      .eq('rated', false)
+    const { count: unrated } = await supabase.from('collab_terms').select('id', { count:'exact', head:true }).or(`initiator_id.eq.${userId},partner_id.eq.${userId}`).eq('status', 'complete').eq('rated', false)
     count += unrated || 0
-
-    const { data: myBriefsForNotif } = await supabase
-      .from('briefs')
-      .select('id')
-      .eq('poster_id', userId)
-      .eq('status', 'open')
-
+    const { data: myBriefsForNotif } = await supabase.from('briefs').select('id').eq('poster_id', userId).eq('status', 'open')
     if (myBriefsForNotif && myBriefsForNotif.length > 0) {
-      const { count: apps } = await supabase
-        .from('applications')
-        .select('id', { count: 'exact', head: true })
-        .in('brief_id', myBriefsForNotif.map(b => b.id))
-        .eq('seen', false)
+      const { count: apps } = await supabase.from('applications').select('id', { count:'exact', head:true }).in('brief_id', myBriefsForNotif.map(b => b.id)).eq('seen', false)
       count += apps || 0
     }
-
     setNotifCount(count)
   }
 
-  async function handleSignOut() {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
+  async function handleSignOut() { await supabase.auth.signOut(); router.push('/') }
 
   async function saveField(field, value) {
     if (!profile) return
     setSaving(true)
-    const { error } = await supabase
-      .from('profiles')
-      .update({ [field]: value, updated_at: new Date().toISOString() })
-      .eq('id', profile.id)
+    const { error } = await supabase.from('profiles').update({ [field]: value, updated_at: new Date().toISOString() }).eq('id', profile.id)
     if (!error) { setProfile(p => ({ ...p, [field]: value })); flashSave() }
     setSaving(false)
   }
 
-  function flashSave() {
-    setSaveMsg('Saved ✦')
-    setTimeout(() => setSaveMsg(''), 2000)
-  }
+  function flashSave() { setSaveMsg('Saved ✦'); setTimeout(() => setSaveMsg(''), 2000) }
 
   function toggleDraftDisc(label) {
     setDraftDiscs(prev => {
@@ -458,21 +454,13 @@ export default function ProfilePage() {
     })
   }
 
-  async function saveDiscs() {
-    await saveField('disciplines', draftDiscs)
-    await saveField('skills', draftSkills)
-    setEditingDiscs(false)
-  }
-
-  async function saveSkills() {
-    await saveField('skills', draftSkills)
-    setEditingSkills(false)
-  }
+  async function saveDiscs() { await saveField('disciplines', draftDiscs); await saveField('skills', draftSkills); setEditingDiscs(false) }
+  async function saveSkills() { await saveField('skills', draftSkills); setEditingSkills(false) }
 
   async function uploadImage(file, bucket, field) {
     if (!file || !profile) return
     setSaving(true)
-    const ext  = file.name.split('.').pop()
+    const ext = file.name.split('.').pop()
     const path = `${profile.id}/${Date.now()}.${ext}`
     const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
     if (uploadError) { console.error(uploadError); setSaving(false); return }
@@ -484,18 +472,15 @@ export default function ProfilePage() {
   async function uploadPortfolioItem(file) {
     if (!file || !profile) return
     setUploading(true)
-    const type   = detectType(file)
+    const type = detectType(file)
     const bucket = bucketForType(type)
-    const ext    = file.name.split('.').pop()
-    const path   = `${profile.id}/${Date.now()}.${ext}`
+    const ext = file.name.split('.').pop()
+    const path = `${profile.id}/${Date.now()}.${ext}`
     const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
     if (uploadError) { console.error(uploadError); setUploading(false); return }
     const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(path)
     const title = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
-    const { data: item, error: insertError } = await supabase
-      .from('portfolio_items')
-      .insert({ profile_id: profile.id, type, title, file_url: publicUrl, sort_order: portfolio.length })
-      .select().single()
+    const { data: item, error: insertError } = await supabase.from('portfolio_items').insert({ profile_id: profile.id, type, title, file_url: publicUrl, sort_order: portfolio.length }).select().single()
     if (!insertError && item) setPortfolio(prev => [...prev, item])
     setUploading(false)
     flashSave()
@@ -527,82 +512,158 @@ export default function ProfilePage() {
     )
   }
 
-  // Brief card for profile briefs tab
   function BriefCard({ brief, showDelete }) {
     const isApplied = brief._isApplied
     return (
-      <div
-        onClick={() => setSelectedBrief(brief)}
-        style={{
-          position:'relative', cursor:'pointer',
-          background:'rgba(240,236,227,0.02)',
-          border:`0.5px solid ${isApplied ? 'rgba(160,120,208,0.2)' : 'rgba(240,236,227,0.08)'}`,
-          borderRadius:'4px', padding:'1rem 1.1rem',
-          transition:'border-color 0.15s, background 0.15s',
-          marginBottom:'0.65rem',
-        }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(240,236,227,0.04)'; e.currentTarget.style.borderColor = isApplied ? 'rgba(160,120,208,0.35)' : 'rgba(201,168,76,0.25)' }}
-        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(240,236,227,0.02)'; e.currentTarget.style.borderColor = isApplied ? 'rgba(160,120,208,0.2)' : 'rgba(240,236,227,0.08)' }}
+      <div onClick={() => setSelectedBrief(brief)} style={{
+        position:'relative', cursor:'pointer', background:'rgba(240,236,227,0.02)',
+        border:`0.5px solid ${isApplied ? 'rgba(160,120,208,0.2)' : 'rgba(240,236,227,0.08)'}`,
+        borderRadius:'4px', padding:'1rem 1.1rem', transition:'border-color 0.15s, background 0.15s', marginBottom:'0.65rem',
+      }}
+        onMouseEnter={e => { e.currentTarget.style.background='rgba(240,236,227,0.04)'; e.currentTarget.style.borderColor=isApplied?'rgba(160,120,208,0.35)':'rgba(201,168,76,0.25)' }}
+        onMouseLeave={e => { e.currentTarget.style.background='rgba(240,236,227,0.02)'; e.currentTarget.style.borderColor=isApplied?'rgba(160,120,208,0.2)':'rgba(240,236,227,0.08)' }}
       >
-        {/* Delete X -- top right, only for active briefs owner posted */}
         {showDelete && (
-          <button
-            onClick={e => {
-              e.stopPropagation()
-              if (!confirm('Delete this brief? This cannot be undone.')) return
-              deleteBrief(brief.id)
-            }}
-            style={{
-              position:'absolute', top:'0.6rem', right:'0.6rem',
-              background:'none', border:'none',
-              color:'rgba(194,112,128,0.5)', cursor:'pointer',
-              fontSize:'0.72rem', lineHeight:1, padding:'2px 4px',
-              borderRadius:'2px', transition:'color 0.15s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.color = '#c27080'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(194,112,128,0.5)'}
-            title="Delete brief"
-          >
-            ✕
-          </button>
+          <button onClick={e => { e.stopPropagation(); if (!confirm('Delete this brief? This cannot be undone.')) return; deleteBrief(brief.id) }}
+            style={{ position:'absolute', top:'0.6rem', right:'0.6rem', background:'none', border:'none', color:'rgba(194,112,128,0.5)', cursor:'pointer', fontSize:'0.72rem', lineHeight:1, padding:'2px 4px', borderRadius:'2px', transition:'color 0.15s' }}
+            onMouseEnter={e => e.currentTarget.style.color='#c27080'}
+            onMouseLeave={e => e.currentTarget.style.color='rgba(194,112,128,0.5)'}
+          >✕</button>
+        )}
+        <div style={{ display:'flex', gap:'0.4rem', flexWrap:'wrap', marginBottom:'0.5rem' }}>
+          {(brief.disciplines || []).slice(0,2).map(d => <span key={d} style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', padding:'1px 6px', borderRadius:'2px', background:'rgba(201,168,76,0.1)', color:'var(--gold)' }}>{d}</span>)}
+          {brief.compensation && <span style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', padding:'1px 6px', borderRadius:'2px', background:'rgba(86,179,156,0.1)', color:'var(--teal)' }}>{brief.compensation}</span>}
+          <span style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', padding:'1px 6px', borderRadius:'2px', background:isApplied?'rgba(160,120,208,0.12)':'rgba(201,168,76,0.06)', color:isApplied?'#a078d0':'rgba(240,236,227,0.35)' }}>{isApplied?'Applied':'Active'}</span>
+        </div>
+        <div style={{ fontFamily:'var(--sans)', fontSize:'0.82rem', fontWeight:600, color:'var(--cream)', marginBottom:'0.3rem', paddingRight:showDelete?'1.5rem':0 }}>{brief.title}</div>
+        {brief.what_making && <div style={{ fontFamily:'var(--sans)', fontSize:'0.7rem', color:'rgba(240,236,227,0.45)', lineHeight:1.6, display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>{brief.what_making}</div>}
+      </div>
+    )
+  }
+
+  // Terms under review card -- full negotiation inline
+  function TermsReviewCard({ term }) {
+    const myTurn      = isMyTurn(term)
+    const partner     = partnerForTerm(term)
+    const partnerSlug = partner ? `${partner.firstname.toLowerCase()}-${partner.lastname.toLowerCase()}` : null
+    const isActing    = actingTerms[term.id]
+    const isModifying = modifyingId === term.id
+
+    const compType = term.collab_type === 'exchange' ? 'Creative exchange'
+      : term.collab_type === 'paid' ? `Paid${term.fee_from ? ` · $${term.fee_from}${term.fee_to?'–'+term.fee_to:''}` : ''}`
+      : 'Revenue share'
+
+    return (
+      <div style={{
+        background:'rgba(240,236,227,0.02)',
+        border:`0.5px solid ${myTurn ? 'rgba(201,168,76,0.3)' : 'rgba(240,236,227,0.08)'}`,
+        borderRadius:'4px', padding:'1.1rem', marginBottom:'0.65rem',
+        boxShadow: myTurn ? '0 0 0 1px rgba(201,168,76,0.08)' : 'none',
+      }}>
+        {/* Header */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.5rem' }}>
+          <span style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', fontWeight:600, letterSpacing:'0.12em', textTransform:'uppercase', padding:'2px 8px', borderRadius:'2px', background:myTurn?'rgba(201,168,76,0.15)':'rgba(240,236,227,0.06)', color:myTurn?'var(--gold)':'rgba(240,236,227,0.35)' }}>
+            {myTurn ? 'Your turn to review' : 'Awaiting their review'}
+          </span>
+          <span style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'rgba(240,236,227,0.3)' }}>{compType}</span>
+        </div>
+
+        <div style={{ fontFamily:'var(--sans)', fontSize:'0.82rem', fontWeight:600, color:'var(--cream)', marginBottom:'0.25rem' }}>{term.project_title || 'Untitled project'}</div>
+
+        <div style={{ fontFamily:'var(--sans)', fontSize:'0.7rem', color:'rgba(240,236,227,0.4)', marginBottom:'0.85rem' }}>
+          With{' '}
+          {partnerSlug
+            ? <Link href={`/profile/${partnerSlug}`} style={{ color:'var(--teal)', textDecoration:'none' }}>{partner?.firstname} {partner?.lastname}</Link>
+            : `${partner?.firstname} ${partner?.lastname}`
+          }
+          {myTurn ? ' · sent you terms to review' : ' · reviewing your terms'}
+        </div>
+
+        {/* Terms summary */}
+        {!isModifying && (
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.35rem', marginBottom:'0.85rem' }}>
+            {[
+              ['Type', compType],
+              term.rights && ['Rights', RIGHTS_LABELS[term.rights] || term.rights],
+              term.timeline && ['Timeline', term.timeline],
+              term.location && ['Location', term.location],
+              term.fee_from && ['Fee', `$${term.fee_from}${term.fee_to?'–'+term.fee_to:''}`],
+              term.deadline && ['Deadline', new Date(term.deadline).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })],
+            ].filter(Boolean).map(([k, v]) => (
+              <div key={k} style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.06)', borderRadius:'2px', padding:'0.4rem 0.6rem' }}>
+                <div style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.15rem' }}>{k}</div>
+                <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--cream)' }}>{v}</div>
+              </div>
+            ))}
+          </div>
         )}
 
-        {/* Tags */}
-        <div style={{ display:'flex', gap:'0.4rem', flexWrap:'wrap', marginBottom:'0.5rem' }}>
-          {(brief.disciplines || []).slice(0,2).map(d => (
-            <span key={d} style={{
-              fontFamily:'var(--sans)', fontSize:'0.55rem', fontWeight:600,
-              letterSpacing:'0.1em', textTransform:'uppercase',
-              padding:'1px 6px', borderRadius:'2px',
-              background:'rgba(201,168,76,0.1)', color:'var(--gold)',
-            }}>{d}</span>
-          ))}
-          {brief.compensation && (
-            <span style={{
-              fontFamily:'var(--sans)', fontSize:'0.55rem', fontWeight:600,
-              letterSpacing:'0.1em', textTransform:'uppercase',
-              padding:'1px 6px', borderRadius:'2px',
-              background:'rgba(86,179,156,0.1)', color:'var(--teal)',
-            }}>{brief.compensation}</span>
-          )}
-          <span style={{
-            fontFamily:'var(--sans)', fontSize:'0.55rem', fontWeight:600,
-            letterSpacing:'0.1em', textTransform:'uppercase',
-            padding:'1px 6px', borderRadius:'2px',
-            background: isApplied ? 'rgba(160,120,208,0.12)' : 'rgba(201,168,76,0.06)',
-            color: isApplied ? '#a078d0' : 'rgba(240,236,227,0.35)',
-          }}>
-            {isApplied ? 'Applied' : 'Active'}
-          </span>
-        </div>
+        {/* Modify form */}
+        {isModifying && (
+          <div style={{ marginTop:'0.5rem', marginBottom:'0.75rem' }}>
+            <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'var(--gold)', marginBottom:'0.85rem', opacity:0.8 }}>
+              Modifying terms — project title is locked
+            </div>
+            <TermsField label="Project title" value={term.project_title} locked />
+            <TermsField label="Timeline" value={modifyDraft.timeline} original={originals.timeline} onChange={v => setModifyDraft(d => ({ ...d, timeline: v }))} />
+            <TermsField label="Deadline" value={modifyDraft.deadline} original={originals.deadline} type="date" onChange={v => setModifyDraft(d => ({ ...d, deadline: v }))} />
+            <TermsField label="Location" value={modifyDraft.location} original={originals.location} onChange={v => setModifyDraft(d => ({ ...d, location: v }))}>
+              <select value={modifyDraft.location || ''} onChange={e => setModifyDraft(d => ({ ...d, location: e.target.value }))}
+                style={{ width:'100%', background:'var(--bg1)', border:`0.5px solid ${modifyDraft.location !== originals.location?'var(--gold)':'rgba(240,236,227,0.12)'}`, borderRadius:'3px', padding:'0.5rem 0.75rem', fontFamily:'var(--sans)', fontSize:'0.8rem', color:'var(--cream)', outline:'none' }}>
+                <option value="">Select…</option><option>Local only</option><option>Remote OK</option><option>Remote only</option><option>No preference</option>
+              </select>
+            </TermsField>
+            {term.collab_type === 'paid' && (
+              <>
+                <TermsField label="Fee from" value={modifyDraft.fee_from} original={originals.fee_from} onChange={v => setModifyDraft(d => ({ ...d, fee_from: v }))} />
+                <TermsField label="Fee to" value={modifyDraft.fee_to} original={originals.fee_to} onChange={v => setModifyDraft(d => ({ ...d, fee_to: v }))} />
+                <TermsField label="Payment schedule" value={modifyDraft.pay_schedule} original={originals.pay_schedule} onChange={v => setModifyDraft(d => ({ ...d, pay_schedule: v }))}>
+                  <select value={modifyDraft.pay_schedule || ''} onChange={e => setModifyDraft(d => ({ ...d, pay_schedule: e.target.value }))}
+                    style={{ width:'100%', background:'var(--bg1)', border:`0.5px solid ${modifyDraft.pay_schedule !== originals.pay_schedule?'var(--gold)':'rgba(240,236,227,0.12)'}`, borderRadius:'3px', padding:'0.5rem 0.75rem', fontFamily:'var(--sans)', fontSize:'0.8rem', color:'var(--cream)', outline:'none' }}>
+                    <option value="">Select…</option><option>50% upfront, 50% on delivery</option><option>Milestone-based</option><option>On delivery</option><option>Monthly retainer</option>
+                  </select>
+                </TermsField>
+              </>
+            )}
+            {term.collab_type === 'revenue' && (
+              <>
+                <TermsField label="My share" value={modifyDraft.my_share} original={originals.my_share} onChange={v => setModifyDraft(d => ({ ...d, my_share: v }))} />
+                <TermsField label="Their share" value={modifyDraft.their_share} original={originals.their_share} onChange={v => setModifyDraft(d => ({ ...d, their_share: v }))} />
+                <TermsField label="Revenue sources" value={modifyDraft.rev_sources} original={originals.rev_sources} onChange={v => setModifyDraft(d => ({ ...d, rev_sources: v }))} />
+              </>
+            )}
+          </div>
+        )}
 
-        <div style={{ fontFamily:'var(--sans)', fontSize:'0.82rem', fontWeight:600, color:'var(--cream)', marginBottom:'0.3rem', paddingRight: showDelete ? '1.5rem' : 0 }}>
-          {brief.title}
-        </div>
-        {brief.what_making && (
-          <div style={{ fontFamily:'var(--sans)', fontSize:'0.7rem', color:'rgba(240,236,227,0.45)', lineHeight:1.6,
-            display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
-            {brief.what_making}
+        {/* Action buttons */}
+        {myTurn && !isModifying && (
+          <div style={{ display:'flex', gap:'0.5rem', flexWrap:'wrap' }}>
+            <button onClick={() => acceptTerms(term)} disabled={!!isActing} style={{ background:'var(--gold)', color:'#0D0D0D', border:'none', borderRadius:'3px', padding:'0.4rem 0.9rem', fontFamily:'var(--sans)', fontSize:'0.62rem', fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', opacity:isActing?0.5:1 }}>
+              {isActing === 'accepting' ? 'Opening…' : 'Accept ↗'}
+            </button>
+            <button onClick={() => startModify(term)} disabled={!!isActing} style={{ background:'none', border:'0.5px solid rgba(201,168,76,0.3)', borderRadius:'3px', padding:'0.4rem 0.9rem', fontFamily:'var(--sans)', fontSize:'0.62rem', color:'var(--gold)', letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer' }}>
+              Modify
+            </button>
+            <button onClick={() => declineTerms(term)} disabled={!!isActing} style={{ background:'none', border:'0.5px solid rgba(194,112,128,0.25)', borderRadius:'3px', padding:'0.4rem 0.9rem', fontFamily:'var(--sans)', fontSize:'0.62rem', color:'#c27080', letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', opacity:isActing?0.5:1 }}>
+              {isActing === 'declining' ? 'Declining…' : 'Decline'}
+            </button>
+          </div>
+        )}
+
+        {myTurn && isModifying && (
+          <div style={{ display:'flex', gap:'0.5rem' }}>
+            <button onClick={() => submitModify(term)} disabled={!!isActing} style={{ background:'var(--gold)', color:'#0D0D0D', border:'none', borderRadius:'3px', padding:'0.4rem 0.9rem', fontFamily:'var(--sans)', fontSize:'0.62rem', fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', opacity:isActing?0.5:1 }}>
+              {isActing === 'modifying' ? 'Sending…' : 'Send modified terms ↗'}
+            </button>
+            <button onClick={() => { setModifyingId(null); setModifyDraft({}) }} style={{ background:'none', border:'0.5px solid rgba(240,236,227,0.15)', borderRadius:'3px', padding:'0.4rem 0.9rem', fontFamily:'var(--sans)', fontSize:'0.62rem', color:'rgba(240,236,227,0.5)', letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer' }}>
+              Cancel
+            </button>
+          </div>
+        )}
+
+        {!myTurn && (
+          <div style={{ fontFamily:'var(--sans)', fontSize:'0.68rem', color:'rgba(240,236,227,0.3)', fontStyle:'italic' }}>
+            Waiting for {partner?.firstname} to review…
           </div>
         )}
       </div>
@@ -619,12 +680,12 @@ export default function ProfilePage() {
     </div>
   )
 
-  const fullName     = `${profile.firstname||''} ${profile.lastname||''}`.trim()
-  const ini          = initials(profile)
-  const location     = locationStr(profile)
-  const disciplines  = profile.disciplines || []
-  const skills       = profile.skills || []
-  const avgRating    = ratings.length ? (ratings.reduce((s,r) => s + r.stars, 0) / ratings.length).toFixed(1) : null
+  const fullName    = `${profile.firstname||''} ${profile.lastname||''}`.trim()
+  const ini         = initials(profile)
+  const location    = locationStr(profile)
+  const disciplines = profile.disciplines || []
+  const skills      = profile.skills || []
+  const avgRating   = ratings.length ? (ratings.reduce((s,r) => s + r.stars, 0) / ratings.length).toFixed(1) : null
   const links = [
     profile.website        && { icon:'🔗', label:profile.website.replace(/^https?:\/\//,''),       href:profile.website },
     profile.instagram      && { icon:'📷', label:`@${profile.instagram.replace('@','')}`,           href:`https://instagram.com/${profile.instagram.replace('@','')}` },
@@ -635,7 +696,7 @@ export default function ProfilePage() {
 
   const GRID_SIZE       = 12
   const emptySlots      = isOwner && editMode ? Math.max(0, GRID_SIZE - portfolio.length) : 0
-  const gridItems       = [...portfolio.map(p => ({ ...p, isEmpty: false })), ...Array(emptySlots).fill(null).map((_, i) => ({ id: `empty-${i}`, isEmpty: true }))]
+  const gridItems       = [...portfolio.map(p => ({ ...p, isEmpty:false })), ...Array(emptySlots).fill(null).map((_,i) => ({ id:`empty-${i}`, isEmpty:true }))]
   const availableSkills = skillsForDiscs(draftDiscs)
 
   return (
@@ -649,37 +710,24 @@ export default function ProfilePage() {
           <Link href="/my-studios">My Loft Studios</Link>
           {isOwner && saving && <span className={styles.saveIndicator}>Saving…</span>}
           {isOwner && saveMsg && !saving && <span className={styles.saveIndicator}>{saveMsg}</span>}
-          {isOwner && (
-            <button className={`${styles.btnEdit} ${editMode ? styles.btnEditActive : ''}`} onClick={() => setEditMode(v => !v)}>
-              {editMode ? 'Done editing' : 'Edit profile'}
-            </button>
-          )}
-          {isOwner && (
-            <button className={styles.btnSignOut} onClick={handleSignOut}>Sign out</button>
-          )}
+          {isOwner && <button className={`${styles.btnEdit} ${editMode?styles.btnEditActive:''}`} onClick={() => setEditMode(v => !v)}>{editMode?'Done editing':'Edit profile'}</button>}
+          {isOwner && <button className={styles.btnSignOut} onClick={handleSignOut}>Sign out</button>}
         </div>
       </nav>
 
       <div className={styles.coverBanner}>
         {profile.cover_url ? <img src={profile.cover_url} alt="Cover" className={styles.coverImg} /> : <div className={styles.coverPattern} />}
-        {isOwner && editMode && (
-          <>
-            <button className={styles.coverUploadBtn} onClick={() => coverInputRef.current?.click()}>
-              {profile.cover_url ? '↑ Change cover' : '+ Add cover image'}
-            </button>
-            <input ref={coverInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={e => uploadImage(e.target.files[0], 'covers', 'cover_url')} />
-          </>
-        )}
+        {isOwner && editMode && (<><button className={styles.coverUploadBtn} onClick={() => coverInputRef.current?.click()}>{profile.cover_url?'↑ Change cover':'+ Add cover image'}</button><input ref={coverInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={e => uploadImage(e.target.files[0],'covers','cover_url')} /></>)}
       </div>
 
       <div className={styles.identityStrip}>
         <div className={styles.avWrap}>
-          <div className={styles.avCircle} onClick={() => isOwner && editMode && avatarInputRef.current?.click()} style={isOwner && editMode ? { cursor:'pointer' } : {}}>
+          <div className={styles.avCircle} onClick={() => isOwner && editMode && avatarInputRef.current?.click()} style={isOwner && editMode?{cursor:'pointer'}:{}}>
             {profile.avatar_url ? <img src={profile.avatar_url} alt={fullName} /> : <span>{ini}</span>}
             {isOwner && editMode && <div className={styles.avOverlay}>↑</div>}
             <div className={styles.onlineDot} />
           </div>
-          <input ref={avatarInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={e => uploadImage(e.target.files[0], 'avatars', 'avatar_url')} />
+          <input ref={avatarInputRef} type="file" accept="image/*" style={{ display:'none' }} onChange={e => uploadImage(e.target.files[0],'avatars','avatar_url')} />
         </div>
         <div className={styles.identityContent}>
           <div className={styles.identityTop}>
@@ -690,18 +738,8 @@ export default function ProfilePage() {
                 <Editable value={profile.lastname} onSave={v => saveField('lastname',v)} placeholder="Last name" isOwner={isOwner} editMode={editMode} className={styles.nameLast} />
                 {isOwner && (
                   <Link href="/notifications" style={{ position:'relative', display:'inline-flex', alignItems:'center', textDecoration:'none', marginLeft:'0.25rem' }}>
-                    <span style={{ fontSize:'1rem', color: notifCount > 0 ? 'var(--gold)' : 'rgba(240,236,227,0.25)', lineHeight:1 }}>✉</span>
-                    {notifCount > 0 && (
-                      <span style={{
-                        position:'absolute', top:'-6px', right:'-8px',
-                        background:'var(--gold)', color:'#0D0D0D',
-                        fontSize:'0.48rem', fontWeight:700, fontFamily:'var(--sans)',
-                        borderRadius:'10px', padding:'1px 4px',
-                        minWidth:'14px', textAlign:'center', lineHeight:'14px',
-                      }}>
-                        {notifCount > 9 ? '9+' : notifCount}
-                      </span>
-                    )}
+                    <span style={{ fontSize:'1rem', color:notifCount>0?'var(--gold)':'rgba(240,236,227,0.25)', lineHeight:1 }}>✉</span>
+                    {notifCount > 0 && <span style={{ position:'absolute', top:'-6px', right:'-8px', background:'var(--gold)', color:'#0D0D0D', fontSize:'0.48rem', fontWeight:700, fontFamily:'var(--sans)', borderRadius:'10px', padding:'1px 4px', minWidth:'14px', textAlign:'center', lineHeight:'14px' }}>{notifCount>9?'9+':notifCount}</span>}
                   </Link>
                 )}
               </div>
@@ -712,9 +750,7 @@ export default function ProfilePage() {
             {!isOwner && (
               <div className={styles.actionBtns}>
                 <button className={styles.btnMessage}>Message</button>
-                <button className={styles.btnConnect} onClick={() => setConnected(true)} style={connected ? { background:'var(--teal)' } : {}}>
-                  {connected ? '✦ Sent' : '+ Connect'}
-                </button>
+                <button className={styles.btnConnect} onClick={() => setConnected(true)} style={connected?{background:'var(--teal)'}:{}}>{connected?'✦ Sent':'+ Connect'}</button>
               </div>
             )}
           </div>
@@ -740,54 +776,41 @@ export default function ProfilePage() {
         <Link href="/my-studios" className={styles.tab}>My Loft Studios</Link>
       </div>
 
-      <div className={styles.profileBody} style={{ flex: 1 }}>
+      <div className={styles.profileBody} style={{ flex:1 }}>
         <div className={styles.profileMain}>
 
           {activeTab === 'work' && (
             <>
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>About</div>
-                <div className={styles.bioText}>
-                  <Editable value={profile.bio} onSave={v => saveField('bio',v)} placeholder={isOwner ? 'Click to add your bio…' : 'No bio added yet.'} multiline isOwner={isOwner} editMode={editMode} className={styles.bioInner} />
-                </div>
+                <div className={styles.bioText}><Editable value={profile.bio} onSave={v => saveField('bio',v)} placeholder={isOwner?'Click to add your bio…':'No bio added yet.'} multiline isOwner={isOwner} editMode={editMode} className={styles.bioInner} /></div>
                 <div className={styles.rightnowCard}>
                   <div className={styles.rnLabel}>Right now</div>
-                  <div className={styles.rnText}>
-                    <Editable value={profile.rightnow} onSave={v => saveField('rightnow',v)} placeholder={isOwner ? 'Click to describe what you\'re actively making…' : 'Nothing listed right now.'} multiline isOwner={isOwner} editMode={editMode} className={styles.rnInner} />
-                  </div>
+                  <div className={styles.rnText}><Editable value={profile.rightnow} onSave={v => saveField('rightnow',v)} placeholder={isOwner?'Click to describe what you\'re actively making…':'Nothing listed right now.'} multiline isOwner={isOwner} editMode={editMode} className={styles.rnInner} /></div>
                 </div>
               </div>
 
               <div className={styles.contentSection}>
                 <div className={styles.secLabelRow}>
                   <div className={styles.secLabel}>Portfolio</div>
-                  {isOwner && editMode && (
-                    <div className={styles.portfolioHint}>{uploading ? 'Uploading…' : 'Click any slot to upload — images, video, audio, or PDF'}</div>
-                  )}
+                  {isOwner && editMode && <div className={styles.portfolioHint}>{uploading?'Uploading…':'Click any slot to upload — images, video, audio, or PDF'}</div>}
                 </div>
-                <input ref={portfolioInputRef} type="file" accept="image/*,video/*,audio/*,.pdf" style={{ display:'none' }}
-                  onChange={e => { if (e.target.files[0]) uploadPortfolioItem(e.target.files[0]); e.target.value = '' }} />
+                <input ref={portfolioInputRef} type="file" accept="image/*,video/*,audio/*,.pdf" style={{ display:'none' }} onChange={e => { if (e.target.files[0]) uploadPortfolioItem(e.target.files[0]); e.target.value='' }} />
                 {portfolio.length === 0 && !isOwner ? (
                   <div className={styles.emptyState}>No portfolio items yet.</div>
                 ) : (
                   <div className={styles.portfolioGrid}>
-                    {gridItems.map((item) => {
-                      if (item.isEmpty) {
-                        return (
-                          <div key={item.id} className={`${styles.portfolioSlot} ${styles.emptySlot}`} onClick={() => !uploading && portfolioInputRef.current?.click()}>
-                            <div className={styles.slotPlus}>+</div>
-                          </div>
-                        )
-                      }
+                    {gridItems.map(item => {
+                      if (item.isEmpty) return <div key={item.id} className={`${styles.portfolioSlot} ${styles.emptySlot}`} onClick={() => !uploading && portfolioInputRef.current?.click()}><div className={styles.slotPlus}>+</div></div>
                       return (
                         <div key={item.id} className={styles.portfolioSlot} onClick={() => setLightboxIdx(portfolio.findIndex(p => p.id === item.id))}>
                           {item.type === 'image' && <img src={item.file_url} alt={item.title||''} className={styles.slotImage} />}
                           {item.type === 'video' && <div className={styles.slotVideo}><video src={item.file_url} className={styles.slotVideoEl} muted /><div className={styles.slotPlayBtn}>▶</div></div>}
                           {item.type === 'audio' && <div className={styles.slotAudio}><div className={styles.slotAudioIcon}>🎵</div><div className={styles.slotAudioWave}>{Array(12).fill(0).map((_,j) => <div key={j} className={styles.waveBar} style={{ height:`${20+Math.random()*60}%` }} />)}</div></div>}
-                          {item.type === 'document' && <div className={styles.slotDoc}><div className={styles.slotDocIcon}>📄</div><div className={styles.slotDocTitle}>{item.title || 'Document'}</div></div>}
+                          {item.type === 'document' && <div className={styles.slotDoc}><div className={styles.slotDocIcon}>📄</div><div className={styles.slotDocTitle}>{item.title||'Document'}</div></div>}
                           <div className={styles.slotOverlay}>
                             <div className={styles.slotTypeIcon}>{typeIcon(item.type)}</div>
-                            <div className={styles.slotTitle}>{item.title || item.type}</div>
+                            <div className={styles.slotTitle}>{item.title||item.type}</div>
                             {isOwner && editMode && <button className={styles.slotDelete} onClick={e => { e.stopPropagation(); deletePortfolioItem(item.id) }}>✕</button>}
                           </div>
                         </div>
@@ -808,26 +831,14 @@ export default function ProfilePage() {
             <>
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Bio</div>
-                <div className={styles.bioText}>
-                  <Editable value={profile.bio} onSave={v => saveField('bio',v)} placeholder={isOwner ? 'Click to add your bio…' : 'No bio.'} multiline isOwner={isOwner} editMode={editMode} className={styles.bioInner} />
-                </div>
+                <div className={styles.bioText}><Editable value={profile.bio} onSave={v => saveField('bio',v)} placeholder={isOwner?'Click to add your bio…':'No bio.'} multiline isOwner={isOwner} editMode={editMode} className={styles.bioInner} /></div>
               </div>
-
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Disciplines &amp; skills</div>
                 {editingDiscs ? (
                   <div>
-                    <div className={styles.discEditGrid}>
-                      {DISC_OPTS.map(d => (
-                        <div key={d.id} className={`${styles.discEditOpt} ${draftDiscs.includes(d.label) ? styles.on : ''}`} onClick={() => toggleDraftDisc(d.label)}>
-                          <span>{d.icon}</span> {d.label}
-                        </div>
-                      ))}
-                    </div>
-                    <div className={styles.editActions}>
-                      <button className={styles.saveBtn} onClick={saveDiscs}>Save disciplines</button>
-                      <button className={styles.cancelBtn} onClick={() => { setEditingDiscs(false); setDraftDiscs(disciplines); setDraftSkills(skills) }}>Cancel</button>
-                    </div>
+                    <div className={styles.discEditGrid}>{DISC_OPTS.map(d => <div key={d.id} className={`${styles.discEditOpt} ${draftDiscs.includes(d.label)?styles.on:''}`} onClick={() => toggleDraftDisc(d.label)}><span>{d.icon}</span> {d.label}</div>)}</div>
+                    <div className={styles.editActions}><button className={styles.saveBtn} onClick={saveDiscs}>Save disciplines</button><button className={styles.cancelBtn} onClick={() => { setEditingDiscs(false); setDraftDiscs(disciplines); setDraftSkills(skills) }}>Cancel</button></div>
                   </div>
                 ) : (
                   <div className={styles.discTags} style={{ marginBottom:'1rem' }}>
@@ -837,58 +848,26 @@ export default function ProfilePage() {
                 )}
                 {editingSkills ? (
                   <div>
-                    {availableSkills.length === 0 ? (
-                      <div className={styles.emptyState}>Select at least one discipline above to see available skills.</div>
-                    ) : (
-                      <div className={styles.skillEditGrid}>
-                        {availableSkills.map(s => (
-                          <div key={s} className={`${styles.skillEditOpt} ${draftSkills.includes(s) ? styles.on : ''}`}
-                            onClick={() => setDraftSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}>
-                            {s}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    <div className={styles.editActions}>
-                      <button className={styles.saveBtn} onClick={saveSkills}>Save skills</button>
-                      <button className={styles.cancelBtn} onClick={() => { setEditingSkills(false); setDraftSkills(skills) }}>Cancel</button>
-                    </div>
+                    {availableSkills.length === 0 ? <div className={styles.emptyState}>Select at least one discipline above to see available skills.</div> : <div className={styles.skillEditGrid}>{availableSkills.map(s => <div key={s} className={`${styles.skillEditOpt} ${draftSkills.includes(s)?styles.on:''}`} onClick={() => setDraftSkills(prev => prev.includes(s)?prev.filter(x => x!==s):[...prev,s])}>{s}</div>)}</div>}
+                    <div className={styles.editActions}><button className={styles.saveBtn} onClick={saveSkills}>Save skills</button><button className={styles.cancelBtn} onClick={() => { setEditingSkills(false); setDraftSkills(skills) }}>Cancel</button></div>
                   </div>
                 ) : (
                   <div className={styles.skillList}>
-                    {skills.slice(0,8).map((s,i) => (
-                      <div key={s} className={styles.skillRow}>
-                        <span className={styles.skillName}>{s}</span>
-                        <div className={styles.skillBarBg}><div className={styles.skillBarFill} style={{ width:`${SKILL_WIDTHS[i]||40}%` }} /></div>
-                      </div>
-                    ))}
+                    {skills.slice(0,8).map((s,i) => <div key={s} className={styles.skillRow}><span className={styles.skillName}>{s}</span><div className={styles.skillBarBg}><div className={styles.skillBarFill} style={{ width:`${SKILL_WIDTHS[i]||40}%` }} /></div></div>)}
                     {isOwner && editMode && <button className={styles.editTagsBtn} onClick={() => { setDraftSkills(skills); setEditingSkills(true) }}>✎ Edit skills</button>}
                   </div>
                 )}
               </div>
-
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Collaboration preferences</div>
-                <div className={styles.prefText}>
-                  <Editable value={profile.seeking} onSave={v => saveField('seeking',v)} placeholder={isOwner ? 'Click to describe who you\'re looking for…' : 'Not specified.'} multiline isOwner={isOwner} editMode={editMode} className={styles.prefInner} />
-                </div>
+                <div className={styles.prefText}><Editable value={profile.seeking} onSave={v => saveField('seeking',v)} placeholder={isOwner?'Click to describe who you\'re looking for…':'Not specified.'} multiline isOwner={isOwner} editMode={editMode} className={styles.prefInner} /></div>
               </div>
-
               {isOwner && editMode && (
                 <div className={styles.contentSection}>
                   <div className={styles.secLabel}>Links &amp; social</div>
                   <div className={styles.linksEditGrid}>
-                    {[
-                      ['website','Personal website','https://yoursite.com'],
-                      ['instagram','Instagram','@yourhandle'],
-                      ['soundcloud','SoundCloud / Spotify','https://soundcloud.com/…'],
-                      ['portfolio_link','Portfolio link','https://behance.net/…'],
-                      ['other_link','Other link','https://…'],
-                    ].map(([field,label,ph]) => (
-                      <div key={field} className={styles.linkEditRow}>
-                        <span className={styles.linkLabel}>{label}</span>
-                        <Editable value={profile[field]} onSave={v => saveField(field,v)} placeholder={ph} isOwner={isOwner} editMode={editMode} className={styles.linkValue} />
-                      </div>
+                    {[['website','Personal website','https://yoursite.com'],['instagram','Instagram','@yourhandle'],['soundcloud','SoundCloud / Spotify','https://soundcloud.com/…'],['portfolio_link','Portfolio link','https://behance.net/…'],['other_link','Other link','https://…']].map(([field,label,ph]) => (
+                      <div key={field} className={styles.linkEditRow}><span className={styles.linkLabel}>{label}</span><Editable value={profile[field]} onSave={v => saveField(field,v)} placeholder={ph} isOwner={isOwner} editMode={editMode} className={styles.linkValue} /></div>
                     ))}
                   </div>
                 </div>
@@ -909,30 +888,37 @@ export default function ProfilePage() {
                 <div className={styles.emptyState}>Loading briefs…</div>
               ) : (
                 <>
-                  {/* Active briefs I posted */}
-                  <div style={{ marginBottom:'1.5rem' }}>
+                  {/* ACTIVE BRIEFS */}
+                  <div style={{ marginBottom:'1.75rem' }}>
                     <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.75rem' }}>
                       <div className={styles.secLabel} style={{ margin:0 }}>Active briefs</div>
-                      <Link href="/briefs" style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'var(--gold)', textDecoration:'none', letterSpacing:'0.04em' }}>
-                        + Post a brief
-                      </Link>
+                      <Link href="/briefs" style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'var(--gold)', textDecoration:'none', letterSpacing:'0.04em' }}>+ Post a brief</Link>
                     </div>
-                    {myBriefs.length === 0 ? (
-                      <div className={styles.emptyState}>No active briefs. Post one to find collaborators.</div>
-                    ) : (
-                      myBriefs.map(b => <BriefCard key={b.id} brief={b} showDelete={isOwner} />)
-                    )}
+                    {myBriefs.length === 0
+                      ? <div className={styles.emptyState}>No active briefs. Post one to find collaborators.</div>
+                      : myBriefs.map(b => <BriefCard key={b.id} brief={b} showDelete={isOwner} />)
+                    }
                   </div>
 
-                  {/* Briefs I applied to -- only show to owner */}
+                  {/* TERMS UNDER REVIEW -- only show to owner */}
+                  {isOwner && (
+                    <div style={{ marginBottom:'1.75rem' }}>
+                      <div className={styles.secLabel} style={{ marginBottom:'0.75rem' }}>Terms under review</div>
+                      {termsUnderReview.length === 0
+                        ? <div className={styles.emptyState}>No terms in negotiation right now.</div>
+                        : termsUnderReview.map(t => <TermsReviewCard key={t.id} term={t} />)
+                      }
+                    </div>
+                  )}
+
+                  {/* APPLIED BRIEFS -- only show to owner */}
                   {isOwner && (
                     <div>
                       <div className={styles.secLabel} style={{ marginBottom:'0.75rem' }}>Applied briefs</div>
-                      {appliedBriefs.length === 0 ? (
-                        <div className={styles.emptyState}>No applications sent yet.</div>
-                      ) : (
-                        appliedBriefs.map(b => <BriefCard key={b.id} brief={b} showDelete={false} />)
-                      )}
+                      {appliedBriefs.length === 0
+                        ? <div className={styles.emptyState}>No applications sent yet.</div>
+                        : appliedBriefs.map(b => <BriefCard key={b.id} brief={b} showDelete={false} />)
+                      }
                     </div>
                   )}
                 </>
@@ -951,65 +937,35 @@ export default function ProfilePage() {
               <div className={styles.statCard}><div className={styles.statNum}>{ratings.length}</div><div className={styles.statLbl}>Reviews</div></div>
             </div>
           </div>
-
           {(profile.seeking || profile.compensation?.length) && (
             <div className={styles.availCard}>
               <div className={styles.availTitle}>Open to collaborate</div>
-              <div className={styles.availText}>
-                {[profile.seeking && `Seeking ${profile.seeking}.`, profile.location_preference, profile.compensation?.length && `${profile.compensation.join(' or ')}.`].filter(Boolean).join(' ')}
-              </div>
+              <div className={styles.availText}>{[profile.seeking&&`Seeking ${profile.seeking}.`,profile.location_preference,profile.compensation?.length&&`${profile.compensation.join(' or ')}.`].filter(Boolean).join(' ')}</div>
             </div>
           )}
-
-          {disciplines.length > 0 && (
-            <div>
-              <div className={styles.sbLabel}>Disciplines</div>
-              <div className={styles.discTags}>{disciplines.map(d => <span key={d} className={styles.discTag}>{d}</span>)}</div>
-            </div>
-          )}
-
+          {disciplines.length > 0 && <div><div className={styles.sbLabel}>Disciplines</div><div className={styles.discTags}>{disciplines.map(d => <span key={d} className={styles.discTag}>{d}</span>)}</div></div>}
           {skills.length > 0 && (
             <div>
               <div className={styles.sbLabel}>Skills</div>
-              <div className={styles.skillList}>
-                {skills.slice(0,6).map((s,i) => (
-                  <div key={s} className={styles.skillRow}>
-                    <span className={styles.skillName}>{s}</span>
-                    <div className={styles.skillBarBg}><div className={styles.skillBarFill} style={{ width:`${SKILL_WIDTHS[i]||40}%` }} /></div>
-                  </div>
-                ))}
-              </div>
+              <div className={styles.skillList}>{skills.slice(0,6).map((s,i) => <div key={s} className={styles.skillRow}><span className={styles.skillName}>{s}</span><div className={styles.skillBarBg}><div className={styles.skillBarFill} style={{ width:`${SKILL_WIDTHS[i]||40}%` }} /></div></div>)}</div>
             </div>
           )}
-
           {ratings.length > 0 && (
             <div>
               <div className={styles.sbLabel}>Community voice</div>
               <div className={styles.endorsements}>
                 {ratings.slice(0,3).map(r => {
                   const rater = r.rater
-                  const raterName = rater ? `${rater.firstname} ${rater.lastname}` : 'Collaborator'
-                  return r.review ? (
-                    <div key={r.id} className={styles.endorse}>
-                      <div className={styles.endorseText}>"{r.review}"</div>
-                      <div className={styles.endorseBy}>— {raterName}{rater?.headline ? `, ${rater.headline}` : ''}</div>
-                    </div>
-                  ) : null
+                  const raterName = rater?`${rater.firstname} ${rater.lastname}`:'Collaborator'
+                  return r.review ? <div key={r.id} className={styles.endorse}><div className={styles.endorseText}>"{r.review}"</div><div className={styles.endorseBy}>— {raterName}{rater?.headline?`, ${rater.headline}`:''}</div></div> : null
                 }).filter(Boolean)}
               </div>
             </div>
           )}
-
           {links.length > 0 && (
             <div>
               <div className={styles.sbLabel}>Links</div>
-              <div className={styles.profileLinks}>
-                {links.map((l,i) => (
-                  <a key={i} href={l.href} target="_blank" rel="noopener noreferrer" className={styles.profileLink}>
-                    <span className={styles.linkIcon}>{l.icon}</span><span>{l.label}</span>
-                  </a>
-                ))}
-              </div>
+              <div className={styles.profileLinks}>{links.map((l,i) => <a key={i} href={l.href} target="_blank" rel="noopener noreferrer" className={styles.profileLink}><span className={styles.linkIcon}>{l.icon}</span><span>{l.label}</span></a>)}</div>
             </div>
           )}
         </aside>
@@ -1017,19 +973,8 @@ export default function ProfilePage() {
 
       <Footer />
 
-      {/* Brief detail modal */}
-      {selectedBrief && (
-        <BriefModal
-          brief={selectedBrief}
-          isOwner={isOwner}
-          onClose={() => setSelectedBrief(null)}
-          onDelete={id => { deleteBrief(id); setSelectedBrief(null) }}
-        />
-      )}
-
-      {lightboxIdx !== null && (
-        <Lightbox items={portfolio} startIndex={lightboxIdx} onClose={() => setLightboxIdx(null)} />
-      )}
+      {selectedBrief && <BriefModal brief={selectedBrief} isOwner={isOwner} onClose={() => setSelectedBrief(null)} onDelete={id => { deleteBrief(id); setSelectedBrief(null) }} />}
+      {lightboxIdx !== null && <Lightbox items={portfolio} startIndex={lightboxIdx} onClose={() => setLightboxIdx(null)} />}
     </div>
   )
 }

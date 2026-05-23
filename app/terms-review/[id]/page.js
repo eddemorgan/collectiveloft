@@ -160,6 +160,11 @@ export default function TermsReviewPage() {
 
       await supabase.from('collab_terms').update({ status: 'active', terms_status: 'agreed' }).eq('id', term.id)
 
+      // Close the brief -- the Loft Studio is the golden ticket, brief is done
+      if (term.brief_id) {
+        await supabase.from('briefs').update({ status: 'closed' }).eq('id', term.brief_id)
+      }
+
       const ms = term.milestones || []
       if (ms.length > 0) {
         await supabase.from('studio_milestones').insert(

@@ -471,6 +471,8 @@ export default function ProfilePage() {
   async function acceptTerms(term) {
     setActingTerms(prev => ({ ...prev, [term.id]: 'accepting' }))
     try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
       await supabase.from('collab_terms').update({ status: 'active', terms_status: 'agreed' }).eq('id', term.id)
       const ms = term.milestones || []
       if (ms.length > 0) {
@@ -487,14 +489,16 @@ export default function ProfilePage() {
   async function declineTerms(term) {
     setActingTerms(prev => ({ ...prev, [term.id]: 'declining' }))
     try {
-      const amInitiator = currentUserId && term.initiator_id === currentUserId
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const amInitiator = term.initiator_id === user.id
       await supabase.from('collab_terms').update({ status: 'declined' }).eq('id', term.id)
       if (term.brief_id) {
         if (amInitiator) {
           await supabase.from('briefs').update({ status: 'deleted' }).eq('id', term.brief_id)
         } else {
           await supabase.from('briefs').update({ status: 'open' }).eq('id', term.brief_id)
-          await supabase.from('applications').update({ status: 'pending' }).eq('brief_id', term.brief_id).eq('applicant_id', currentUserId)
+          await supabase.from('applications').update({ status: 'pending' }).eq('brief_id', term.brief_id).eq('applicant_id', user.id)
         }
       }
       setTermsUnderReview(prev => prev.filter(t => t.id !== term.id))
@@ -519,9 +523,15 @@ export default function ProfilePage() {
   async function submitModify(term) {
     setActingTerms(prev => ({ ...prev, [term.id]: 'modifying' }))
     try {
-      const amInitiator = term.initiator_id === currentUserId
+      // Always fetch fresh user -- stale currentUserId state caused current_editor bug
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const amInitiator = term.initiator_id === user.id
       const nextEditor  = amInitiator ? 'partner' : 'initiator'
-      await supabase.from('collab_terms').update({ ...modifyDraft, current_editor: nextEditor, terms_status: 'negotiating' }).eq('id', term.id)
+      const { error } = await supabase.from('collab_terms').update({
+        ...modifyDraft, current_editor: nextEditor, terms_status: 'negotiating',
+      }).eq('id', term.id)
+      if (error) { console.error('submitModify error:', error); return }
       setTermsUnderReview(prev => prev.map(t => t.id === term.id ? { ...t, ...modifyDraft, current_editor: nextEditor } : t))
       setModifyingId(null)
       setModifyDraft({})

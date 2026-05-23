@@ -1,4 +1,4 @@
- 'use client'
+'use client'
 
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
@@ -29,7 +29,9 @@ const DEFAULT_DELIVERABLES = [
 function TermsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const partnerId = searchParams.get('with')
+  const partnerId  = searchParams.get('with')
+  const briefId    = searchParams.get('brief')
+  const briefTitle = searchParams.get('title')
 
   const [myProfile,    setMyProfile]    = useState(null)
   const [partner,      setPartner]      = useState(null)
@@ -43,35 +45,35 @@ function TermsPage() {
     { desc: 'Development complete',   pct: '50' },
     { desc: 'Final delivery',         pct: '20' },
   ])
-  const [feeFrom,       setFeeFrom]       = useState('')
-  const [feeTo,         setFeeTo]         = useState('')
-  const [paySchedule,   setPaySchedule]   = useState('')
-  const [myShare,       setMyShare]       = useState('')
-  const [theirShare,    setTheirShare]    = useState('')
-  const [revSources,    setRevSources]    = useState('')
-  const [timeline,      setTimeline]      = useState('')
-  const [deadline,      setDeadline]      = useState('')
-  const [location,      setLocation]      = useState('')
-  const [cadence,       setCadence]       = useState('')
-  const [projectTitle,  setProjectTitle]  = useState('')
-  const [submitted,     setSubmitted]     = useState(false)
-  const [saving,        setSaving]        = useState(false)
+  const [feeFrom,      setFeeFrom]      = useState('')
+  const [feeTo,        setFeeTo]        = useState('')
+  const [paySchedule,  setPaySchedule]  = useState('')
+  const [myShare,      setMyShare]      = useState('')
+  const [theirShare,   setTheirShare]   = useState('')
+  const [revSources,   setRevSources]   = useState('')
+  const [timeline,     setTimeline]     = useState('')
+  const [deadline,     setDeadline]     = useState('')
+  const [location,     setLocation]     = useState('')
+  const [cadence,      setCadence]      = useState('')
+  const [projectTitle, setProjectTitle] = useState(briefTitle || '')
+  const [submitted,    setSubmitted]    = useState(false)
+  const [saving,       setSaving]       = useState(false)
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      if (user) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-        setMyProfile(data)
-      }
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      setMyProfile(data)
       if (partnerId) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', partnerId).single()
-        setPartner(data)
+        const { data: p } = await supabase.from('profiles').select('*').eq('id', partnerId).single()
+        setPartner(p)
       }
+      // Pre-fill title from brief if provided
+      if (briefTitle) setProjectTitle(decodeURIComponent(briefTitle))
     }
     load()
-  }, [partnerId])
+  }, [partnerId, briefTitle])
 
   function addDeliverable() {
     if (!newDel.trim()) return
@@ -96,25 +98,29 @@ function TermsPage() {
     setSaving(true)
     try {
       const termsData = {
-        initiator_id: myProfile?.id,
-        partner_id:   partner?.id,
-        collab_type:  collabType,
+        initiator_id:  myProfile?.id,
+        partner_id:    partner?.id,
+        collab_type:   collabType,
         project_title: projectTitle,
         rights,
-        deliverables: deliverables.filter((_, i) => delChecked[i]),
-        milestones:   collabType === 'paid' ? milestones : [],
-        fee_from:     collabType === 'paid' ? feeFrom : null,
-        fee_to:       collabType === 'paid' ? feeTo : null,
-        pay_schedule: collabType === 'paid' ? paySchedule : null,
-        my_share:     collabType === 'revenue' ? myShare : null,
-        their_share:  collabType === 'revenue' ? theirShare : null,
-        rev_sources:  collabType === 'revenue' ? revSources : null,
+        deliverables:  deliverables.filter((_, i) => delChecked[i]),
+        milestones:    collabType === 'paid' ? milestones : [],
+        fee_from:      collabType === 'paid' ? feeFrom : null,
+        fee_to:        collabType === 'paid' ? feeTo : null,
+        pay_schedule:  collabType === 'paid' ? paySchedule : null,
+        my_share:      collabType === 'revenue' ? myShare : null,
+        their_share:   collabType === 'revenue' ? theirShare : null,
+        rev_sources:   collabType === 'revenue' ? revSources : null,
         timeline,
-        deadline: deadline || null,
+        deadline:      deadline || null,
         location,
         cadence,
-        status: 'pending',
+        status:        'pending',
+        terms_status:  'negotiating',
+        current_editor: 'partner', // partner reviews first
+        brief_id:      briefId || null,
       }
+
       const { data: inserted } = await supabase
         .from('collab_terms')
         .insert(termsData)
@@ -141,45 +147,27 @@ function TermsPage() {
 
   return (
     <div className={styles.page} style={{ display:'flex', flexDirection:'column', minHeight:'100vh' }}>
-      {/* NAV */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navStep}>
-          <div className={`${styles.step} ${styles.stepDone}`}>
-            <div className={styles.stepNum}>1</div>
-            <span className={styles.stepLabel}>Discover</span>
-          </div>
+          <div className={`${styles.step} ${styles.stepDone}`}><div className={styles.stepNum}>1</div><span className={styles.stepLabel}>Discover</span></div>
           <div className={styles.stepDivider} />
-          <div className={`${styles.step} ${styles.stepDone}`}>
-            <div className={styles.stepNum}>2</div>
-            <span className={styles.stepLabel}>Brief</span>
-          </div>
+          <div className={`${styles.step} ${styles.stepDone}`}><div className={styles.stepNum}>2</div><span className={styles.stepLabel}>Brief</span></div>
           <div className={styles.stepDivider} />
-          <div className={`${styles.step} ${styles.stepActive}`}>
-            <div className={styles.stepNum}>3</div>
-            <span className={styles.stepLabel}>Terms</span>
-          </div>
+          <div className={`${styles.step} ${styles.stepActive}`}><div className={styles.stepNum}>3</div><span className={styles.stepLabel}>Terms</span></div>
           <div className={styles.stepDivider} />
-          <div className={`${styles.step} ${styles.stepUpcoming}`}>
-            <div className={styles.stepNum}>4</div>
-            <span className={styles.stepLabel}>Studio</span>
-          </div>
+          <div className={`${styles.step} ${styles.stepUpcoming}`}><div className={styles.stepNum}>4</div><span className={styles.stepLabel}>Studio</span></div>
         </div>
       </nav>
 
       <div className={styles.pageLayout} style={{ flex: 1 }}>
-        {/* FORM SIDE */}
         <div className={styles.formSide}>
 
           {(myProfile || partner) && (
             <div className={styles.contextBar}>
               <div className={styles.ctxAvs}>
-                <div className={`${styles.ctxAv} ${styles.avGold}`}>
-                  {myProfile ? `${myProfile.firstname?.[0]}${myProfile.lastname?.[0]}` : '?'}
-                </div>
-                <div className={`${styles.ctxAv} ${styles.avTeal}`}>
-                  {partner ? `${partner.firstname?.[0]}${partner.lastname?.[0]}` : '?'}
-                </div>
+                <div className={`${styles.ctxAv} ${styles.avGold}`}>{myProfile ? `${myProfile.firstname?.[0]}${myProfile.lastname?.[0]}` : '?'}</div>
+                <div className={`${styles.ctxAv} ${styles.avTeal}`}>{partner ? `${partner.firstname?.[0]}${partner.lastname?.[0]}` : '?'}</div>
               </div>
               <div className={styles.ctxInfo}>
                 <div className={styles.ctxTitle}>{myFirst} + {partnerFirst}</div>
@@ -283,9 +271,7 @@ function TermsPage() {
             <div className={styles.delList}>
               {deliverables.map((d, i) => (
                 <div key={i} className={styles.delRow}>
-                  <div className={`${styles.delChk} ${delChecked[i] ? styles.delChkOn : ''}`} onClick={() => toggleDel(i)}>
-                    {delChecked[i] ? '✓' : ''}
-                  </div>
+                  <div className={`${styles.delChk} ${delChecked[i] ? styles.delChkOn : ''}`} onClick={() => toggleDel(i)}>{delChecked[i] ? '✓' : ''}</div>
                   <span className={`${styles.delText} ${delChecked[i] ? styles.delTextOn : ''}`}>{d}</span>
                 </div>
               ))}
@@ -373,7 +359,6 @@ function TermsPage() {
           </div>
         </div>
 
-        {/* SUMMARY SIDEBAR */}
         <aside className={styles.summarySide}>
           <div className={styles.summaryHeader}>Live agreement summary</div>
           <div className={`${styles.summaryCard} ${projectTitle || collabType ? styles.hasContent : ''}`}>
@@ -407,13 +392,7 @@ function TermsPage() {
 
           <div className={styles.summaryHeader} style={{ marginTop: '0.5rem' }}>What Collective Loft protects</div>
           <div className={styles.protectionList}>
-            {[
-              'Terms stored on record — both parties can reference at any time',
-              'Milestone payments only release when both parties confirm',
-              'Deliverables list locks once accepted — no scope creep',
-              'Rights terms timestamped and cannot be altered retroactively',
-              'Disputes can be flagged to the Collective Loft team for mediation',
-            ].map((item, i) => <div key={i} className={styles.protectionItem}>{item}</div>)}
+            {['Terms stored on record — both parties can reference at any time','Milestone payments only release when both parties confirm','Deliverables list locks once accepted — no scope creep','Rights terms timestamped and cannot be altered retroactively','Disputes can be flagged to the Collective Loft team for mediation'].map((item, i) => <div key={i} className={styles.protectionItem}>{item}</div>)}
           </div>
 
           <button className={styles.btnSidebarSend} onClick={handleSubmit} disabled={saving}>

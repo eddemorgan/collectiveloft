@@ -1,518 +1,1191 @@
-'use client'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Collective Loft — The Professional Network for the Creative Class</title>
+  <meta name="description" content="The platform where artists, musicians, writers, designers, and filmmakers find each other, agree on terms, and make something real. Built for how creative collaboration actually works." />
+  <meta property="og:title" content="Collective Loft" />
+  <meta property="og:description" content="Building the infrastructure the creative class was never supposed to have." />
+  <meta property="og:url" content="https://collectiveloft.com" />
 
-import { useState } from 'react'
-import Link from 'next/link'
-import styles from './landing.module.css'
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-// ── Data ─────────────────────────────────────────────────────────────────────
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-const LOCATION_DATA = {
-  US: { states: { IL: { l: 'Illinois', c: ['Chicago','Aurora','Springfield'] }, NY: { l: 'New York', c: ['New York City','Brooklyn','Buffalo'] }, CA: { l: 'California', c: ['Los Angeles','San Francisco','San Diego'] }, TX: { l: 'Texas', c: ['Houston','Austin','Dallas'] }, GA: { l: 'Georgia', c: ['Atlanta','Savannah'] }, TN: { l: 'Tennessee', c: ['Nashville','Memphis'] }, WA: { l: 'Washington', c: ['Seattle','Spokane'] }, MA: { l: 'Massachusetts', c: ['Boston','Cambridge'] }, FL: { l: 'Florida', c: ['Miami','Orlando','Tampa'] } } },
-  CA: { states: { ON: { l: 'Ontario', c: ['Toronto','Ottawa'] }, BC: { l: 'British Columbia', c: ['Vancouver','Victoria'] }, QC: { l: 'Quebec', c: ['Montreal','Quebec City'] } } },
-  GB: { r: ['London','Manchester','Birmingham','Bristol','Edinburgh'] },
-  AU: { r: ['Sydney','Melbourne','Brisbane','Perth'] },
-  DE: { r: ['Berlin','Munich','Hamburg','Cologne'] },
-  FR: { r: ['Paris','Lyon','Marseille','Bordeaux'] },
-  JP: { r: ['Tokyo','Osaka','Kyoto','Fukuoka'] },
-  BR: { r: ['São Paulo','Rio de Janeiro','Brasília'] },
-  MX: { r: ['Mexico City','Guadalajara','Monterrey'] },
-  NG: { r: ['Lagos','Abuja','Ibadan'] },
-  ZA: { r: ['Cape Town','Johannesburg','Durban'] },
-  IN: { r: ['Mumbai','Delhi','Bangalore','Chennai'] },
-  OTHER: { r: ['Remote / Online only','Other location'] },
-}
-
-const DISCIPLINES = [
-  { id: 'visual',  icon: '🎨', label: 'Visual Art' },
-  { id: 'music',   icon: '🎵', label: 'Music' },
-  { id: 'writing', icon: '✍️', label: 'Writing' },
-  { id: 'design',  icon: '🖥',  label: 'Design & Web' },
-  { id: 'film',    icon: '🎬', label: 'Film' },
-  { id: 'photo',   icon: '📷', label: 'Photography' },
-  { id: 'perf',    icon: '🎭', label: 'Performance' },
-  { id: 'tech',    icon: '💻', label: 'Creative Tech' },
-]
-
-const SKILLS = [
-  { d: 'visual',  label: 'Oil on canvas' },
-  { d: 'visual',  label: 'Watercolour' },
-  { d: 'visual',  label: 'Illustration' },
-  { d: 'visual',  label: 'Large format' },
-  { d: 'visual',  label: 'Art direction' },
-  { d: 'music',   label: 'Beat production' },
-  { d: 'music',   label: 'Mixing & mastering' },
-  { d: 'music',   label: 'Co-writing' },
-  { d: 'music',   label: 'Film scoring' },
-  { d: 'music',   label: 'Songwriting' },
-  { d: 'writing', label: 'Poetry' },
-  { d: 'writing', label: 'Copywriting' },
-  { d: 'writing', label: 'Editing' },
-  { d: 'design',  label: 'Web design' },
-  { d: 'design',  label: 'Branding' },
-  { d: 'design',  label: 'UX design' },
-  { d: 'film',    label: 'Cinematography' },
-  { d: 'film',    label: 'Directing' },
-  { d: 'photo',   label: 'Fine art photography' },
-  { d: 'photo',   label: 'Portrait photography' },
-  { d: 'perf',    label: 'Choreography' },
-  { d: 'perf',    label: 'Spoken word' },
-  { d: 'tech',    label: 'Generative art' },
-  { d: 'tech',    label: 'Creative coding' },
-]
-
-const DISC_GRID = [
-  { icon: '🎨', name: 'Visual Art',      count: '2,840 creatives' },
-  { icon: '🎵', name: 'Music',           count: '3,102 creatives' },
-  { icon: '✍️', name: 'Writing & Poetry', count: '1,974 creatives' },
-  { icon: '🖥',  name: 'Design & Web',   count: '1,688 creatives' },
-  { icon: '🎬', name: 'Film',            count: '1,210 creatives' },
-  { icon: '📷', name: 'Photography',     count: '980 creatives' },
-  { icon: '🎭', name: 'Performance',     count: '642 creatives' },
-  { icon: '💻', name: 'Creative Tech',   count: '418 creatives' },
-]
-
-const MEMBERS = [
-  { initials: 'MV', avClass: 'avG', dotColor: 'var(--teal)', name: 'Marisol Vega', role: 'Visual Artist · Canvas & Oil', text: 'Looking for a web designer and composer to build a portfolio site for gallery submissions.', tags: [{ label: 'Open to Collab', cls: 'tagG' }, { label: 'Chicago', cls: '' }] },
-  { initials: 'JD', avClass: 'avT', dotColor: 'rgba(240,236,227,0.15)', name: 'James Delacroix', role: 'Poet · Spoken Word', text: 'Finishing a debut collection. Need a developmental editor and a visual artist for the cover.', tags: [{ label: 'Open to Collab', cls: 'tagG' }, { label: 'Remote', cls: '' }] },
-  { initials: 'SA', avClass: 'avR', dotColor: 'var(--gold)', name: 'Simone Adeyemi', role: 'Singer-Songwriter · R&B / Soul', text: 'Searching for a beat producer for a neo-soul and pop hybrid EP.', tags: [{ label: 'Paid Collab', cls: 'tagG' }, { label: 'NYC', cls: '' }] },
-]
-
-// ── Required fields for progress bar ────────────────────────────────────────
-const REQUIRED_FIELDS = ['firstname', 'lastname', 'email', 'bio', 'rightnow', 'seeking', 'headline']
-
-// ── Component ────────────────────────────────────────────────────────────────
-
-export default function LandingPage() {
-  // Modal open/closed
-  const [modalOpen, setModalOpen]   = useState(false)
-  const [submitted, setSubmitted]   = useState(false)
-
-  // Form fields
-  const [form, setForm] = useState({
-    firstname: '', lastname: '', email: '', headline: '',
-    bio: '', rightnow: '', seeking: '',
-  })
-
-  // Location
-  const [country, setCountry]   = useState('')
-  const [stateVal, setStateVal] = useState('')
-  const [city, setCity]         = useState('')
-
-  // Discipline & skill toggles
-  const [selectedDiscs,   setSelectedDiscs]   = useState([])
-  const [selectedSkills,  setSelectedSkills]  = useState([])
-  const [selectedComps,   setSelectedComps]   = useState(['Creative exchange'])
-
-  // ── Derived state ──────────────────────────────────────────────────────────
-  const progress = Math.round(
-    REQUIRED_FIELDS.filter(k => (form[k] || '').trim().length > 1).length /
-    REQUIRED_FIELDS.length * 100
-  )
-
-  // Visible skills depend on selected disciplines
-  const visibleSkills = selectedDiscs.length === 0
-    ? SKILLS
-    : SKILLS.filter(s => selectedDiscs.includes(s.d))
-
-  // Location derived options
-  const countryData  = LOCATION_DATA[country]
-  const stateOptions = countryData?.states
-    ? Object.entries(countryData.states).map(([k, v]) => ({ value: k, label: v.l }))
-    : countryData?.r?.map(r => ({ value: r, label: r })) ?? []
-  const cityOptions  = (country && LOCATION_DATA[country]?.states?.[stateVal]?.c) ?? []
-
-  // ── Handlers ───────────────────────────────────────────────────────────────
-  function toggleDisc(id) {
-    setSelectedDiscs(prev =>
-      prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
-    )
-  }
-
-  function toggleSkill(label) {
-    setSelectedSkills(prev =>
-      prev.includes(label) ? prev.filter(s => s !== label) : [...prev, label]
-    )
-  }
-
-  function toggleComp(label) {
-    setSelectedComps(prev =>
-      prev.includes(label) ? prev.filter(c => c !== label) : [...prev, label]
-    )
-  }
-
-  function handleCountryChange(val) {
-    setCountry(val)
-    setStateVal('')
-    setCity('')
-  }
-
-  function handleSubmit() {
-    const profile = {
-      ...form,
-      disciplines: selectedDiscs,
-      skills: selectedSkills,
-      compensation: selectedComps,
-      country,
-      state: stateVal,
-      city,
-      createdAt: new Date().toISOString(),
+    :root {
+      --bg0:    #F0ECE3;
+      --bg1:    #E8E3D9;
+      --bg2:    #DDD8CE;
+      --cream:  #1A1814;
+      --gold:   #8B6914;
+      --gold2:  #A07C1A;
+      --teal:   #2A7A68;
+      --muted:  rgba(26,24,20,0.55);
+      --faint:  rgba(26,24,20,0.1);
+      --serif:  'Cormorant Garamond', Georgia, serif;
+      --sans:   'DM Sans', system-ui, sans-serif;
     }
-    try {
-      localStorage.setItem('cl_profile', JSON.stringify(profile))
-    } catch {
-      window._clProfile = profile
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg1);
+      color: var(--cream);
+      font-family: var(--sans);
+      font-weight: 300;
+      line-height: 1.6;
+      overflow-x: hidden;
     }
-    setSubmitted(true)
-  }
 
-  function closeModal() {
-    setModalOpen(false)
-    setSubmitted(false)
-  }
+    /* ── NOISE TEXTURE ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.25;
+    }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
-  return (
-    <>
-      {/* ── Nav ─────────────────────────────────────────────────────────── */}
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.logo}>
-          Collective <span>Loft</span>
-        </Link>
-        <div className={styles.navLinks}>
-          <Link href="/discover">Discover</Link>
-          <Link href="/briefs">Collabs</Link>
-          <Link href="/studio">Loft Studio</Link>
-          <button className={styles.btnJoin} onClick={() => setModalOpen(true)}>
-            Join
-          </button>
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 3rem;
+      border-bottom: 0.5px solid var(--faint);
+      background: rgba(240,236,227,0.92);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      color: var(--cream);
+      text-decoration: none;
+    }
+    .logo span { color: var(--gold); }
+
+    .nav-cta {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--bg0);
+      background: var(--gold);
+      border: none;
+      padding: 0.55rem 1.25rem;
+      border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .nav-cta:hover { background: var(--gold2); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 6rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(139,105,20,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139,105,20,0.06) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 0%, transparent 100%);
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(139,105,20,0.06) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      font-family: var(--sans);
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.8;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      color: var(--cream);
+      margin-bottom: 1rem;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .hero-sub {
+      font-family: var(--sans);
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      font-weight: 300;
+      color: rgba(26,24,20,0.55);
+      max-width: 560px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.75;
+      animation: fadeUp 0.8s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.8s 0.3s ease both;
+    }
+
+    .btn-primary {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--bg0);
+      background: var(--gold);
+      border: none;
+      padding: 0.8rem 2rem;
+      border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover { background: var(--gold2); transform: translateY(-1px); }
+
+    .btn-ghost {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: none;
+      border: 0.5px solid rgba(26,24,20,0.2);
+      padding: 0.8rem 2rem;
+      border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: rgba(26,24,20,0.4); color: var(--cream); }
+
+    .discipline-scroll {
+      margin-top: 4rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeUp 0.8s 0.4s ease both;
+    }
+
+    .disc-tag {
+      font-family: var(--sans);
+      font-size: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(26,24,20,0.4);
+      border: 0.5px solid rgba(26,24,20,0.15);
+      padding: 0.3rem 0.75rem;
+      border-radius: 2px;
+    }
+
+    /* ── STATS ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-top: 0.5px solid var(--faint);
+      border-bottom: 0.5px solid var(--faint);
+    }
+
+    .stat {
+      padding: 3.5rem 2rem;
+      text-align: center;
+      border-right: 0.5px solid var(--faint);
+      position: relative;
+    }
+    .stat:last-child { border-right: none; }
+
+    .stat-num {
+      font-family: var(--serif);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 300;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-family: var(--sans);
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* ── SECTIONS ── */
+    section { padding: 7rem 2rem; }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.58rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.75;
+      margin-bottom: 1.25rem;
+    }
+
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--cream);
+      margin-bottom: 1.5rem;
+    }
+    .section-title em { font-style: italic; color: var(--gold); }
+
+    .section-body {
+      font-family: var(--sans);
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 600px;
+      line-height: 1.8;
+    }
+
+    /* ── PROBLEM SECTION ── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--faint);
+      border: 0.5px solid var(--faint);
+      margin-top: 4rem;
+    }
+
+    .problem-card {
+      background: var(--bg2);
+      padding: 2.5rem;
+      position: relative;
+    }
+
+    .problem-platform {
+      font-family: var(--sans);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(26,24,20,0.4);
+      margin-bottom: 0.75rem;
+    }
+
+    .problem-title {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 0.5rem;
+    }
+
+    .problem-text {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .problem-x {
+      position: absolute;
+      top: 2rem;
+      right: 2rem;
+      font-size: 0.9rem;
+      color: rgba(160,60,70,0.5);
+    }
+
+    /* ── FLOW SECTION ── */
+    .flow-section {
+      background: var(--bg2);
+      border-top: 0.5px solid var(--faint);
+      border-bottom: 0.5px solid var(--faint);
+    }
+
+    .flow-intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+      margin-bottom: 5rem;
+    }
+
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .flow-step {
+      display: grid;
+      grid-template-columns: 3rem 1fr;
+      gap: 1.5rem;
+      padding: 2rem 0;
+      border-bottom: 0.5px solid var(--faint);
+      align-items: start;
+    }
+    .flow-step:last-child { border-bottom: none; }
+
+    .flow-num {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--gold);
+      opacity: 0.4;
+      line-height: 1;
+      padding-top: 0.15rem;
+    }
+
+    .flow-title {
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--cream);
+      margin-bottom: 0.35rem;
+    }
+
+    .flow-desc {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── PLATFORM MOCKUP ── */
+    .mockup-wrap {
+      position: relative;
+      border: 0.5px solid rgba(201,168,76,0.15);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--bg2);
+    }
+
+    .mockup-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 0.5px solid var(--faint);
+      background: var(--bg1);
+    }
+
+    .mockup-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+
+    .mockup-screen {
+      padding: 1.5rem;
+    }
+
+    .mock-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 0.5px solid var(--faint);
+    }
+
+    .mock-logo {
+      font-family: var(--serif);
+      font-size: 0.9rem;
+      color: var(--cream);
+    }
+    .mock-logo span { color: var(--gold); }
+
+    .mock-links {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .mock-link {
+      font-family: var(--sans);
+      font-size: 0.6rem;
+      color: rgba(26,24,20,0.35);
+      letter-spacing: 0.06em;
+    }
+
+    .mock-brief {
+      background: rgba(240,236,227,0.02);
+      border: 0.5px solid rgba(240,236,227,0.08);
+      border-radius: 4px;
+      padding: 1rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .mock-tags {
+      display: flex;
+      gap: 0.35rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .mock-tag {
+      font-family: var(--sans);
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+
+    .mock-tag-gold { background: rgba(139,105,20,0.1); color: var(--gold); }
+    .mock-tag-teal { background: rgba(42,122,104,0.1); color: var(--teal); }
+
+    .mock-brief-title {
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--cream);
+      margin-bottom: 0.25rem;
+    }
+
+    .mock-brief-sub {
+      font-family: var(--sans);
+      font-size: 0.62rem;
+      color: rgba(26,24,20,0.5);
+      line-height: 1.5;
+    }
+
+    .mock-studio {
+      background: rgba(201,168,76,0.05);
+      border: 0.5px solid rgba(201,168,76,0.2);
+      border-radius: 4px;
+      padding: 1rem;
+      margin-top: 0.75rem;
+    }
+
+    .mock-studio-label {
+      font-family: var(--sans);
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.35rem;
+      opacity: 0.7;
+    }
+
+    .mock-studio-title {
+      font-family: var(--sans);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--cream);
+      margin-bottom: 0.2rem;
+    }
+
+    .mock-progress {
+      height: 2px;
+      background: rgba(240,236,227,0.08);
+      border-radius: 1px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .mock-progress-fill {
+      height: 100%;
+      width: 35%;
+      background: var(--gold);
+      border-radius: 1px;
+    }
+
+    /* ── FLYWHEEL ── */
+    .flywheel-section { background: var(--bg1); }
+
+    .flywheel-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--faint);
+      border: 0.5px solid var(--faint);
+      margin-top: 4rem;
+    }
+
+    .flywheel-card {
+      background: var(--bg1);
+      padding: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flywheel-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+    }
+
+    .fw-01::before { background: linear-gradient(90deg, var(--gold), transparent); }
+    .fw-02::before { background: linear-gradient(90deg, var(--teal), transparent); }
+    .fw-03::before { background: linear-gradient(90deg, #a078d0, transparent); }
+    .fw-04::before { background: linear-gradient(90deg, #568cc3, transparent); }
+
+    .fw-num {
+      font-family: var(--serif);
+      font-size: 4rem;
+      font-weight: 300;
+      line-height: 1;
+      margin-bottom: 1.5rem;
+      opacity: 0.12;
+      color: var(--cream);
+    }
+
+    .fw-status {
+      display: inline-block;
+      font-family: var(--sans);
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 2px;
+      margin-bottom: 1rem;
+    }
+
+    .fw-status-live { background: rgba(86,179,156,0.15); color: var(--teal); }
+    .fw-status-planned { background: rgba(26,24,20,0.08); color: rgba(26,24,20,0.45); border: 0.5px solid rgba(26,24,20,0.15); }
+
+    .fw-title {
+      font-family: var(--serif);
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+
+    .fw-sub {
+      font-family: var(--sans);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .fw-desc {
+      font-family: var(--sans);
+      font-size: 0.78rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    /* ── QUOTE ── */
+    .quote-section {
+      background: var(--bg1);
+      border-top: 0.5px solid var(--faint);
+      border-bottom: 0.5px solid var(--faint);
+      text-align: center;
+      padding: 6rem 2rem;
+    }
+
+    blockquote {
+      font-family: var(--serif);
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--cream);
+      max-width: 800px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.4;
+    }
+
+    blockquote em { color: var(--gold); font-style: normal; }
+
+    .quote-attr {
+      font-family: var(--sans);
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(26,24,20,0.4);
+    }
+
+    /* ── WAITLIST ── */
+    .waitlist-section {
+      background: var(--bg1);
+      text-align: center;
+      padding: 8rem 2rem;
+    }
+
+    .waitlist-inner {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .waitlist-mark {
+      font-size: 1.5rem;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      display: block;
+    }
+
+    .waitlist-section .section-title {
+      margin-bottom: 1rem;
+    }
+
+    .waitlist-section .section-body {
+      max-width: 100%;
+      margin: 0 auto 2.5rem;
+    }
+
+    .waitlist-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .form-input {
+      background: var(--bg2);
+      border: 0.5px solid rgba(240,236,227,0.12);
+      border-radius: 3px;
+      padding: 0.85rem 1rem;
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .form-input::placeholder { color: rgba(240,236,227,0.25); }
+    .form-input:focus { border-color: rgba(201,168,76,0.4); }
+
+    .form-select {
+      background: var(--bg2);
+      border: 0.5px solid rgba(240,236,227,0.12);
+      border-radius: 3px;
+      padding: 0.85rem 1rem;
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--cream);
+      outline: none;
+      width: 100%;
+      cursor: pointer;
+      -webkit-appearance: none;
+    }
+    .form-select:focus { border-color: rgba(201,168,76,0.4); }
+
+    .form-submit {
+      background: var(--gold);
+      color: var(--bg0);
+      border: none;
+      border-radius: 3px;
+      padding: 0.9rem 2rem;
+      font-family: var(--sans);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .form-submit:hover { background: var(--gold2); transform: translateY(-1px); }
+
+    .waitlist-fine {
+      font-family: var(--sans);
+      font-size: 0.65rem;
+      color: rgba(26,24,20,0.3);
+      margin-top: 1rem;
+      letter-spacing: 0.04em;
+    }
+
+    .success-msg {
+      display: none;
+      background: rgba(86,179,156,0.08);
+      border: 0.5px solid rgba(86,179,156,0.25);
+      border-radius: 4px;
+      padding: 1.5rem;
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      color: var(--teal);
+      line-height: 1.6;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 0.5px solid var(--faint);
+      padding: 2.5rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-logo {
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      color: var(--cream);
+      text-decoration: none;
+    }
+    .footer-logo span { color: var(--gold); }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .footer-link {
+      font-family: var(--sans);
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: rgba(26,24,20,0.4);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-link:hover { color: rgba(26,24,20,0.7); }
+
+    .footer-copy {
+      font-family: var(--sans);
+      font-size: 0.62rem;
+      color: rgba(26,24,20,0.25);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .stats { grid-template-columns: 1fr; }
+      .stat { border-right: none; border-bottom: 0.5px solid var(--faint); }
+      .problem-grid { grid-template-columns: 1fr; }
+      .flow-intro { grid-template-columns: 1fr; gap: 3rem; }
+      .flywheel-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="logo">Collective <span>Loft</span></a>
+    <a href="#waitlist" class="nav-cta">Request early access</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+
+    <div class="eyebrow">Collective Loft · Est. 2026 · Chicago</div>
+
+    <h1>
+      Building the infrastructure<br/>
+      the creative class was<br/>
+      <em>never supposed to have.</em>
+    </h1>
+
+    <p class="hero-sub">
+      The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and open a Loft Studio — a shared workspace built around the work.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#waitlist" class="btn-primary">Request early access ↗</a>
+      <a href="#how-it-works" class="btn-ghost">See how it works</a>
+    </div>
+
+    <div class="discipline-scroll">
+      <span class="disc-tag">Visual Art</span>
+      <span class="disc-tag">Music</span>
+      <span class="disc-tag">Writing</span>
+      <span class="disc-tag">Design & Web</span>
+      <span class="disc-tag">Film</span>
+      <span class="disc-tag">Photography</span>
+      <span class="disc-tag">Performance</span>
+      <span class="disc-tag">Creative Tech</span>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats reveal">
+    <div class="stat">
+      <div class="stat-num">165M+</div>
+      <div class="stat-label">Independent creative professionals<br/>worldwide</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Platforms built around how creative<br/>collaboration actually works</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">8</div>
+      <div class="stat-label">Disciplines. One network.<br/>One place to make something real.</div>
+    </div>
+  </div>
+
+  <!-- PROBLEM -->
+  <section>
+    <div class="container">
+      <div class="reveal">
+        <div class="section-eyebrow">The problem</div>
+        <h2 class="section-title">Every platform built "for" creatives<br/><em>treats them as something else.</em></h2>
+        <p class="section-body">Service workers. Content producers. Portfolio holders. Generic professionals. None of them are built for what actually drives creative output: the relationship between complementary disciplines that produces work neither party could make alone.</p>
+      </div>
+
+      <div class="problem-grid reveal">
+        <div class="problem-card">
+          <div class="problem-x">✕</div>
+          <div class="problem-platform">LinkedIn</div>
+          <div class="problem-title">Built for corporate professionals.</div>
+          <div class="problem-text">Treats a musician's profile like a résumé. Optimizes for job applications, not creative relationships.</div>
         </div>
-      </nav>
+        <div class="problem-card">
+          <div class="problem-x">✕</div>
+          <div class="problem-platform">Upwork</div>
+          <div class="problem-title">Client-worker hierarchy.</div>
+          <div class="problem-text">Race to the bottom on price. Not a creative relationship. Not a collaboration. A transaction that extracts value from the creative.</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-x">✕</div>
+          <div class="problem-platform">Behance</div>
+          <div class="problem-title">Work sits waiting to be found.</div>
+          <div class="problem-text">Passive. Beautiful. No path from profile to project. No terms. No workspace. No way to actually work together.</div>
+        </div>
+        <div class="problem-card">
+          <div class="problem-x">✕</div>
+          <div class="problem-platform">Instagram</div>
+          <div class="problem-title">Optimizes for attention.</div>
+          <div class="problem-text">Engagement is the metric. Not completed work. Not creative relationships. Not shared projects that outlast the algorithm.</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <div className={styles.hero}>
-        <div className={styles.heroLeft}>
-          <div className={styles.eyebrow}>Where Creatives Find Each Other</div>
-          <div className={styles.headline}>
-            Make<br /><em>something</em><br />together.
-          </div>
-          <div className={styles.sub}>
-            Collective Loft is a professional network built for artists, musicians,
-            writers, poets, designers, and makers. Find collaborators who match your vision.
-          </div>
-          <div className={styles.heroBtns}>
-            <button className={styles.btnP} onClick={() => setModalOpen(true)}>
-              Build Your Profile
-            </button>
-            <Link href="/discover" className={styles.btnS}>
-              Browse Creatives
-            </Link>
-          </div>
+  <!-- HOW IT WORKS -->
+  <section class="flow-section" id="how-it-works">
+    <div class="container">
+      <div class="flow-intro">
+        <div class="reveal">
+          <div class="section-eyebrow">How it works</div>
+          <h2 class="section-title">From first discovery<br/>to <em>Loft Studio.</em></h2>
+          <p class="section-body">Every step from finding the right collaborator to opening a shared workspace is built into the platform. No cold DMs into the void. No contract templates from Google. No shared Notion page held together with hope.</p>
         </div>
 
-        <div className={styles.heroRight}>
-          {MEMBERS.map((m, i) => (
-            <div className={styles.mc} key={i}>
-              <div className={`${styles.mcAv} ${styles[m.avClass]}`}>
-                {m.initials}
-                <div className={styles.dot} style={{ background: m.dotColor }} />
-              </div>
-              <div>
-                <div className={styles.mcName}>{m.name}</div>
-                <div className={styles.mcRole}>{m.role}</div>
-                <div className={styles.mcText}>{m.text}</div>
-                <div className={styles.mcTags}>
-                  {m.tags.map((t, j) => (
-                    <span key={j} className={`${styles.tag} ${t.cls ? styles[t.cls] : ''}`}>
-                      {t.label}
-                    </span>
-                  ))}
-                </div>
+        <!-- Platform Mockup -->
+        <div class="mockup-wrap reveal">
+          <div class="mockup-bar">
+            <div class="mockup-dot" style="background:#ff5f57"></div>
+            <div class="mockup-dot" style="background:#febc2e"></div>
+            <div class="mockup-dot" style="background:#28c840"></div>
+          </div>
+          <div class="mockup-screen">
+            <div class="mock-nav">
+              <div class="mock-logo">Collective <span>Loft</span></div>
+              <div class="mock-links">
+                <span class="mock-link">Discover</span>
+                <span class="mock-link">Collabs</span>
+                <span class="mock-link" style="color:var(--gold)">My Studios</span>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
 
-      {/* ── Discipline strip ─────────────────────────────────────────────── */}
-      <div className={styles.discStrip}>
-        <div className={styles.stripLbl}>Disciplines on the platform</div>
-        <div className={styles.discGrid}>
-          {DISC_GRID.map((d, i) => (
-            <Link href="/discover" className={styles.dc} key={i}>
-              <div className={styles.dcIcon}>{d.icon}</div>
-              <div className={styles.dcName}>{d.name}</div>
-              <div className={styles.dcCount}>{d.count}</div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Manifesto ────────────────────────────────────────────────────── */}
-      <div className={styles.manifesto}>
-        <div className={styles.manifestoTxt}>
-          Not a marketplace. Not a portfolio dump.{' '}
-          A <strong>living network</strong> of people making real things together.
-        </div>
-      </div>
-
-      {/* ── How it works ─────────────────────────────────────────────────── */}
-      <div className={styles.how}>
-        {[
-          { num: '01', title: 'Build your creative identity', desc: 'Show your work, your influences, what you\'re making right now, and what kind of collaborators you\'re looking for.' },
-          { num: '02', title: 'Post a Collab Brief',         desc: 'Describe your project and who you need. Creatives apply or reach out directly. The brief lives on your profile and in the public feed.' },
-          { num: '03', title: 'Create in the Loft Studio',   desc: 'Your shared Studio holds your brief, files, messages, and milestones — a home for the work as it comes to life.' },
-        ].map((h, i) => (
-          <div className={styles.hi} key={i}>
-            <div className={styles.hiNum}>{h.num}</div>
-            <div className={styles.hiTitle}>{h.title}</div>
-            <div className={styles.hiDesc}>{h.desc}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Modal overlay ────────────────────────────────────────────────── */}
-      {modalOpen && (
-        <div className={styles.mo} onClick={(e) => { if (e.target === e.currentTarget) closeModal() }}>
-          <div className={styles.modal}>
-
-            {/* Header */}
-            <div className={styles.mhdr}>
-              <div>
-                <div className={styles.mey}>Join Collective Loft</div>
-                <div className={styles.mt}>Build your creative profile.</div>
-                <div className={styles.ms}>One form. Everything a collaborator needs to know about you.</div>
+            <div class="mock-brief">
+              <div class="mock-tags">
+                <span class="mock-tag mock-tag-gold">Music</span>
+                <span class="mock-tag mock-tag-teal">Paid</span>
               </div>
-              <button className={styles.mcl} onClick={closeModal}>✕</button>
+              <div class="mock-brief-title">Looking for a film composer for a short documentary</div>
+              <div class="mock-brief-sub">18-minute doc on Chicago muralists. Need an original score that sits between ambient and jazz.</div>
             </div>
 
-            {/* Progress bar */}
-            <div className={styles.pbWrap}>
-              <div className={styles.pb} style={{ width: `${progress}%` }} />
+            <div class="mock-brief" style="opacity:0.5">
+              <div class="mock-tags">
+                <span class="mock-tag mock-tag-gold">Visual Art</span>
+              </div>
+              <div class="mock-brief-title">Painter seeking musician for gallery installation</div>
+              <div class="mock-brief-sub">Looking for someone to score a 4-panel immersive oil work. Creative exchange.</div>
             </div>
 
-            {submitted ? (
-              /* Success screen */
-              <div className={styles.scs}>
-                <div className={styles.scM}>✦</div>
-                <div className={styles.scT}>Welcome to <span>Collective Loft</span>.</div>
-                <div className={styles.scS}>
-                  Your profile is live. Keep your "Right Now" field current — that's what makes people reach out.
-                </div>
-                <div className={styles.scA}>
-                  <Link href="/profile" className={styles.bvp}>View my profile</Link>
-                  <button className={styles.bbh} onClick={closeModal}>Done</button>
-                </div>
+            <div class="mock-studio">
+              <div class="mock-studio-label">✦ Loft Studio · Active</div>
+              <div class="mock-studio-title">Documentary Score · Chicago Muralists</div>
+              <div style="font-family:var(--sans);font-size:0.58rem;color:rgba(26,24,20,0.5);margin-top:0.15rem">With Jordan Kim · 1 of 3 milestones complete</div>
+              <div class="mock-progress">
+                <div class="mock-progress-fill"></div>
               </div>
-            ) : (
-              <>
-                <div className={styles.mbody}>
-
-                  {/* ── Your identity ─────────────────────────────────── */}
-                  <section>
-                    <div className={styles.msl}>Your identity</div>
-                    <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>
-                      <div className={styles.mf}>
-                        <label>First name</label>
-                        <input type="text" value={form.firstname} onChange={e => setForm(f => ({ ...f, firstname: e.target.value }))} />
-                      </div>
-                      <div className={styles.mf}>
-                        <label>Last name</label>
-                        <input type="text" value={form.lastname} onChange={e => setForm(f => ({ ...f, lastname: e.target.value }))} />
-                      </div>
-                    </div>
-                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
-                      <label>Email</label>
-                      <input type="email" placeholder="you@example.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
-                    </div>
-                    <div className={styles.mf}>
-                      <label>Location</label>
-                      <div className={styles.locRow}>
-                        <select value={country} onChange={e => handleCountryChange(e.target.value)}>
-                          <option value="">Country…</option>
-                          {Object.keys(LOCATION_DATA).filter(k => k !== 'OTHER').map(k => (
-                            <option key={k} value={k}>{k === 'US' ? 'United States' : k === 'CA' ? 'Canada' : k === 'GB' ? 'United Kingdom' : k === 'AU' ? 'Australia' : k === 'DE' ? 'Germany' : k === 'FR' ? 'France' : k === 'JP' ? 'Japan' : k === 'BR' ? 'Brazil' : k === 'MX' ? 'Mexico' : k === 'NG' ? 'Nigeria' : k === 'ZA' ? 'South Africa' : k === 'IN' ? 'India' : k}</option>
-                          ))}
-                          <option value="OTHER">Other</option>
-                        </select>
-                        {stateOptions.length > 0 && (
-                          <select value={stateVal} onChange={e => { setStateVal(e.target.value); setCity('') }}>
-                            <option value="">State…</option>
-                            {stateOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                          </select>
-                        )}
-                        {cityOptions.length > 0 && (
-                          <select value={city} onChange={e => setCity(e.target.value)}>
-                            <option value="">City…</option>
-                            {cityOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                          </select>
-                        )}
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* ── Discipline & skills ───────────────────────────── */}
-                  <section>
-                    <div className={styles.msl}>Discipline &amp; skills</div>
-                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
-                      <label>Primary discipline(s)</label>
-                      <div className={styles.mdg}>
-                        {DISCIPLINES.map(d => (
-                          <div
-                            key={d.id}
-                            className={`${styles.mdo} ${selectedDiscs.includes(d.id) ? styles.on : ''}`}
-                            onClick={() => toggleDisc(d.id)}
-                          >
-                            <span className={styles.mdoI}>{d.icon}</span>
-                            <div className={styles.mdoN}>{d.label}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
-                      <label>Your headline</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Oil painter · Large format canvas · Abstract realism"
-                        maxLength={100}
-                        value={form.headline}
-                        onChange={e => setForm(f => ({ ...f, headline: e.target.value }))}
-                      />
-                    </div>
-                    <div className={styles.mf}>
-                      <label>Specific skills</label>
-                      <div className={styles.stags}>
-                        {visibleSkills.map(s => (
-                          <button
-                            key={s.label}
-                            className={`${styles.stag} ${selectedSkills.includes(s.label) ? styles.on : ''}`}
-                            onClick={() => toggleSkill(s.label)}
-                          >
-                            {s.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* ── About you ─────────────────────────────────────── */}
-                  <section>
-                    <div className={styles.msl}>About you</div>
-                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
-                      <label>Your bio</label>
-                      <textarea
-                        placeholder="Tell other creatives who you are, what drives your practice…"
-                        rows={3}
-                        value={form.bio}
-                        onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
-                      />
-                    </div>
-                    <div className={styles.mf}>
-                      <label>Right now — what are you actively making?</label>
-                      <textarea
-                        placeholder="e.g. Completing a 12-piece oil series. Looking for a web designer for gallery submissions — deadline Sept 2025."
-                        rows={3}
-                        value={form.rightnow}
-                        onChange={e => setForm(f => ({ ...f, rightnow: e.target.value }))}
-                      />
-                      <div className={styles.hint}>The most important field on your profile.</div>
-                    </div>
-                  </section>
-
-                  {/* ── Work samples ──────────────────────────────────── */}
-                  <section>
-                    <div className={styles.msl}>Work samples</div>
-                    <div className={styles.uz}>
-                      <input type="file" multiple accept="image/*,audio/*,video/*,.pdf" />
-                      <div className={styles.uzI}>↑</div>
-                      <div className={styles.uzT}>Drop files here or click to browse</div>
-                      <div className={styles.uzS}>JPG, PNG, MP3, MP4, PDF · Max 20MB · <span>Up to 12 files</span></div>
-                    </div>
-                    <div className={styles.mf} style={{ marginTop: '0.85rem' }}>
-                      <label>Portfolio link <span style={{ color: 'rgba(240,236,227,0.25)', fontSize: '0.65rem' }}>— optional</span></label>
-                      <input type="url" placeholder="https://yoursite.com · SoundCloud · Behance" />
-                    </div>
-                  </section>
-
-                  {/* ── Collaboration ─────────────────────────────────── */}
-                  <section>
-                    <div className={styles.msl}>Collaboration</div>
-                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
-                      <label>Who are you looking for right now?</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Web designer, ambient composer, beat producer…"
-                        value={form.seeking}
-                        onChange={e => setForm(f => ({ ...f, seeking: e.target.value }))}
-                      />
-                    </div>
-                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
-                      <label>Compensation type</label>
-                      <div className={styles.co}>
-                        {['Creative exchange', 'Paid', 'Revenue share'].map(c => (
-                          <div
-                            key={c}
-                            className={`${styles.coo} ${selectedComps.includes(c) ? styles.on : ''}`}
-                            onClick={() => toggleComp(c)}
-                          >
-                            <div className={styles.cooT}>{c}</div>
-                            <div className={styles.cooD}>
-                              {c === 'Creative exchange' ? 'Trade skills. No money moves.' : c === 'Paid' ? 'Fee agreed upfront.' : 'Split the outcome.'}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className={styles.mfRow}>
-                      <div className={styles.mf}>
-                        <label>Location preference</label>
-                        <select>
-                          <option value="">Select…</option>
-                          <option>Local only</option>
-                          <option>Remote OK</option>
-                          <option>Remote preferred</option>
-                          <option>No preference</option>
-                        </select>
-                      </div>
-                      <div className={styles.mf}>
-                        <label>Availability</label>
-                        <select>
-                          <option value="">Select…</option>
-                          <option>Open to collabs now</option>
-                          <option>Available in 1–2 months</option>
-                          <option>Not available right now</option>
-                        </select>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* ── Find me elsewhere ─────────────────────────────── */}
-                  <section>
-                    <div className={styles.msl}>Find me elsewhere</div>
-                    <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>
-                      <div className={styles.mf}><label>Personal website</label><input type="url" placeholder="https://yoursite.com" /></div>
-                      <div className={styles.mf}><label>Instagram</label><input type="text" placeholder="@yourhandle" /></div>
-                    </div>
-                    <div className={styles.mfRow}>
-                      <div className={styles.mf}><label>SoundCloud / Spotify</label><input type="url" placeholder="https://soundcloud.com/…" /></div>
-                      <div className={styles.mf}><label>Other link</label><input type="url" placeholder="Behance, Vimeo, LinkedIn…" /></div>
-                    </div>
-                  </section>
-
-                </div>
-
-                {/* Footer */}
-                <div className={styles.mftr}>
-                  <div className={styles.fnote}>You can edit everything from your profile at any time.</div>
-                  <div className={styles.fbtns}>
-                    <button className={styles.bcn} onClick={closeModal}>Cancel</button>
-                    <button className={styles.bsp} onClick={handleSubmit}>Create my profile ↗</button>
-                  </div>
-                </div>
-              </>
-            )}
+            </div>
           </div>
         </div>
-      )}
-    </>
-  )
-}
+      </div>
+
+      <!-- Steps -->
+      <div class="flow-steps reveal">
+        <div class="flow-step">
+          <div class="flow-num">01</div>
+          <div>
+            <div class="flow-title">Post a Collab Brief</div>
+            <div class="flow-desc">Write what you're making and who you need — in creative language, not a job listing. Filtered by discipline, compensation type, and location. Creatives find each other here.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">02</div>
+          <div>
+            <div class="flow-title">Review applications</div>
+            <div class="flow-desc">Applicants send a message explaining why they're drawn to the project. You review, read their profile and portfolio, and accept who you want to move forward with.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">03</div>
+          <div>
+            <div class="flow-title">Agree on Collab Terms</div>
+            <div class="flow-desc">Creative exchange, paid, or revenue share. Rights, deliverables, milestones, timeline. Both parties review, modify, and accept before any work begins. Terms are timestamped.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">04</div>
+          <div>
+            <div class="flow-title">The Loft Studio opens</div>
+            <div class="flow-desc">The golden ticket. A shared workspace with the original brief pinned at the top, milestones, files, and persistent messaging. The collaboration has a home now.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <div class="quote-section reveal">
+    <blockquote>
+      "The creative class has never had a professional network, a structured agreement layer, or a shared workspace built around how they actually work. <em>Collective Loft builds all three.</em>"
+    </blockquote>
+    <div class="quote-attr">Edde Morgan · CEO & Founder, Morgan Collective Group</div>
+  </div>
+
+  <!-- FLYWHEEL -->
+  <section class="flywheel-section">
+    <div class="container">
+      <div class="reveal">
+        <div class="section-eyebrow">The ecosystem</div>
+        <h2 class="section-title">Four divisions.<br/><em>One flywheel.</em></h2>
+        <p class="section-body">Collective Loft is the flagship of Morgan Collective Group. The platform finds the talent. The studio gives them a home. The label releases their work. Publishing protects everything they create. Each division makes every other division stronger.</p>
+      </div>
+
+      <div class="flywheel-grid reveal">
+        <div class="flywheel-card fw-01">
+          <div class="fw-num">01</div>
+          <div class="fw-status fw-status-live">Live now · Year 1</div>
+          <div class="fw-title">Collective Loft Platform</div>
+          <div class="fw-sub">Digital Network · Chicago & Remote</div>
+          <div class="fw-desc">The professional network for the creative class. Profiles, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio. Where creatives find each other and manage real projects together. The foundation everything else grows from.</div>
+        </div>
+        <div class="flywheel-card fw-02">
+          <div class="fw-num">02</div>
+          <div class="fw-status fw-status-planned">Planned · Year 2</div>
+          <div class="fw-title">Collective Loft Studios</div>
+          <div class="fw-sub">Recording Studio · Chicago</div>
+          <div class="fw-desc">Professional recording infrastructure built for independent artists. Multiple rooms, professional equipment, accessible rates. Priority booking and discounted rates for platform members. The physical home of the community the platform builds.</div>
+        </div>
+        <div class="flywheel-card fw-03">
+          <div class="fw-num">03</div>
+          <div class="fw-status fw-status-planned">Planned · Year 3</div>
+          <div class="fw-title">Collective Loft Records</div>
+          <div class="fw-sub">Independent Label</div>
+          <div class="fw-desc">Artist-first independent label built on the network and studio. Signing artists already known from the platform. Starting royalty splits at 50/50. Shorter contracts. More ownership retained by artists. The label where careers are built, not extracted.</div>
+        </div>
+        <div class="flywheel-card fw-04">
+          <div class="fw-num">04</div>
+          <div class="fw-status fw-status-planned">Planned · Year 3–4</div>
+          <div class="fw-title">Collective Loft Publishing</div>
+          <div class="fw-sub">Music · Literary · Art · Collaborative</div>
+          <div class="fw-desc">A full creative publishing house. Music publishing and sync licensing. Literary publishing for writers and poets. Art books and monographs for visual artists. Collaborative works that cross disciplines — unique to the Collective Loft ecosystem.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAITLIST -->
+  <section class="waitlist-section" id="waitlist">
+    <div class="waitlist-inner">
+      <span class="waitlist-mark">✦</span>
+      <div class="section-eyebrow" style="text-align:center;margin-bottom:1.25rem">Early access</div>
+      <h2 class="section-title">The platform is built.<br/><em>We're selecting founding members.</em></h2>
+      <p class="section-body">We're not doing an open beta. We're building the founding cohort by hand — across disciplines, across cities, with people who are actively making work right now. Founding members shape the platform.</p>
+
+      <div style="margin-top:2.5rem">
+        <form class="waitlist-form" id="waitlistForm">
+          <div class="form-row">
+            <input class="form-input" type="text" name="firstname" placeholder="First name" required />
+            <input class="form-input" type="text" name="lastname" placeholder="Last name" required />
+          </div>
+          <input class="form-input" type="email" name="email" placeholder="Your email" required />
+          <select class="form-select" name="discipline" required>
+            <option value="" disabled selected>Your primary discipline</option>
+            <option>Visual Artist</option>
+            <option>Musician / Producer</option>
+            <option>Writer / Poet</option>
+            <option>Designer / Web</option>
+            <option>Filmmaker</option>
+            <option>Photographer</option>
+            <option>Performance</option>
+            <option>Creative Tech</option>
+            <option>Other</option>
+          </select>
+          <input class="form-input" type="text" name="city" placeholder="Your city" />
+          <button class="form-submit" type="submit">Request early access ↗</button>
+        </form>
+
+        <div class="success-msg" id="successMsg">
+          <strong style="color:var(--teal)">You're in.</strong><br/>
+          Founding member request received. We'll be in touch with next steps before anyone else hears about it.
+        </div>
+
+        <div class="waitlist-fine">500 founding spots. We read every application. · <a href="mailto:help@collectiveloft.com" style="color:inherit">help@collectiveloft.com</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="/" class="footer-logo">Collective <span>Loft</span></a>
+    <div class="footer-links">
+      <a href="#how-it-works" class="footer-link">How it works</a>
+      <a href="#waitlist" class="footer-link">Early access</a>
+      <a href="https://www.instagram.com/the.collective.loft" target="_blank" class="footer-link">Instagram</a>
+      <a href="mailto:help@collectiveloft.com" class="footer-link">Contact</a>
+    </div>
+    <div class="footer-copy">© 2026 Morgan Collective Group LLC</div>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal')
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible')
+          observer.unobserve(e.target)
+        }
+      })
+    }, { threshold: 0.1 })
+    reveals.forEach(r => observer.observe(r))
+
+    // Waitlist form
+    const form = document.getElementById('waitlistForm')
+    const success = document.getElementById('successMsg')
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault()
+      const btn = form.querySelector('.form-submit')
+      btn.textContent = 'Sending…'
+      btn.disabled = true
+
+      const data = {
+        firstname:  form.firstname.value.trim(),
+        lastname:   form.lastname.value.trim(),
+        email:      form.email.value.trim(),
+        discipline: form.discipline.value,
+        city:       form.city.value.trim(),
+      }
+
+      // Send to Formspree or your own endpoint
+      // Replace YOUR_FORM_ID with your Formspree form ID
+      try {
+        const res = await fetch('https://formspree.io/f/YOUR_FORM_ID', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(data),
+        })
+        if (res.ok) {
+          form.style.display = 'none'
+          success.style.display = 'block'
+        } else {
+          btn.textContent = 'Request early access ↗'
+          btn.disabled = false
+          alert('Something went wrong. Email us directly at help@collectiveloft.com')
+        }
+      } catch {
+        btn.textContent = 'Request early access ↗'
+        btn.disabled = false
+        alert('Something went wrong. Email us directly at help@collectiveloft.com')
+      }
+    })
+  </script>
+</body>
+</html>

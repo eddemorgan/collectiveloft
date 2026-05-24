@@ -306,7 +306,7 @@ function BriefsInner() {
                         </button>
                         {fromProfile && (
                           <Link href={`/profile/${fromProfile}#briefs`} style={{fontFamily:'var(--sans)',fontSize:'0.65rem',color:'rgba(240,236,227,0.4)',textDecoration:'none',letterSpacing:'0.04em',whiteSpace:'nowrap'}}>
-                            ← Back to my briefs
+                            ← Back to My Profile
                           </Link>
                         )}
                       </div>

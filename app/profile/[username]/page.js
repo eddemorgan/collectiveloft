@@ -150,9 +150,10 @@ function BriefModal({ brief, isOwner, onClose, onDelete }) {
 }
 
 // Active brief card -- clickable, has red X delete
-function ActiveBriefCard({ brief, onSelect, onDelete }) {
+function ActiveBriefCard({ brief, onDelete, profileSlug }) {
   return (
-    <div onClick={() => onSelect(brief)} style={{position:'relative',cursor:'pointer',background:'rgba(240,236,227,0.02)',border:'0.5px solid rgba(240,236,227,0.08)',borderRadius:'4px',padding:'1rem 1.1rem',marginBottom:'0.65rem',transition:'border-color 0.15s, background 0.15s'}}
+    <Link href={`/briefs?open=${brief.id}&from=${profileSlug}`} style={{textDecoration:'none',display:'block'}}>
+    <div style={{position:'relative',cursor:'pointer',background:'rgba(240,236,227,0.02)',border:'0.5px solid rgba(240,236,227,0.08)',borderRadius:'4px',padding:'1rem 1.1rem',marginBottom:'0.65rem',transition:'border-color 0.15s, background 0.15s'}}
       onMouseEnter={e=>{e.currentTarget.style.background='rgba(240,236,227,0.04)';e.currentTarget.style.borderColor='rgba(201,168,76,0.25)'}}
       onMouseLeave={e=>{e.currentTarget.style.background='rgba(240,236,227,0.02)';e.currentTarget.style.borderColor='rgba(240,236,227,0.08)'}}>
       <button onClick={e=>{e.stopPropagation();if(!confirm('Delete this brief? This cannot be undone.'))return;onDelete(brief.id)}}
@@ -167,6 +168,7 @@ function ActiveBriefCard({ brief, onSelect, onDelete }) {
       <div style={{fontFamily:'var(--sans)',fontSize:'0.82rem',fontWeight:600,color:'var(--cream)',marginBottom:'0.3rem',paddingRight:'1.5rem'}}>{brief.title}</div>
       {brief.what_making&&<div style={{fontFamily:'var(--sans)',fontSize:'0.7rem',color:'rgba(240,236,227,0.45)',lineHeight:1.6,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{brief.what_making}</div>}
     </div>
+    </Link>
   )
 }
 
@@ -668,7 +670,7 @@ export default function ProfilePage() {
                     </div>
                     {activeBriefs.length===0
                       ?<div className={styles.emptyState}>No active briefs. Post one to find collaborators.</div>
-                      :activeBriefs.map(b=><ActiveBriefCard key={b.id} brief={b} onSelect={setSelectedBrief} onDelete={deleteBrief}/>)
+                      :activeBriefs.map(b=><ActiveBriefCard key={b.id} brief={b} onDelete={deleteBrief} profileSlug={username}/>)
                     }
                   </div>
 

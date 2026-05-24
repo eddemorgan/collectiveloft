@@ -37,7 +37,8 @@ function initials(firstname, lastname) {
 function BriefsInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const openBriefId = searchParams.get('open') // from notification link
+  const openBriefId  = searchParams.get('open')  // from notification link or profile
+  const fromProfile  = searchParams.get('from')  // profile slug to go back to
 
   const { loading: authLoading, user } = useAuth()
 
@@ -299,9 +300,16 @@ function BriefsInner() {
                       </button>
                     )}
                     {isPoster && (
-                      <button className={styles.btnDeleteBrief} onClick={e => deleteBrief(e, selected.id)} disabled={deletingId === selected.id}>
-                        {deletingId === selected.id ? 'Deleting…' : '✕ Delete this brief'}
-                      </button>
+                      <div style={{display:'flex', gap:'0.65rem', alignItems:'center', flexWrap:'wrap'}}>
+                        <button className={styles.btnDeleteBrief} onClick={e => deleteBrief(e, selected.id)} disabled={deletingId === selected.id}>
+                          {deletingId === selected.id ? 'Deleting…' : '✕ Delete this brief'}
+                        </button>
+                        {fromProfile && (
+                          <Link href={`/profile/${fromProfile}#briefs`} style={{fontFamily:'var(--sans)',fontSize:'0.65rem',color:'rgba(240,236,227,0.4)',textDecoration:'none',letterSpacing:'0.04em',whiteSpace:'nowrap'}}>
+                            ← Back to my briefs
+                          </Link>
+                        )}
+                      </div>
                     )}
                     {!isPoster && (
                       <button className={styles.btnSave}

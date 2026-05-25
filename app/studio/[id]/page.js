@@ -65,17 +65,35 @@ export default function StudioPage() {
   // Realtime chat subscription
   useEffect(() => {
     if (!studioId) return
+
     const channel = supabase
-      .channel(`studio-chat-${studioId}`)
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'studio_messages',
-        filter: `studio_id=eq.${studioId}`,
-      }, payload => {
-        setMessages(prev => [...prev, payload.new])
-        scrollChat()
+      .channel(`studio-chat-${studioId}`, {
+        config: { broadcast: { self: true } }
       })
-      .subscribe()
-    return () => supabase.removeChannel(channel)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'studio_messages',
+          filter: `studio_id=eq.${studioId}`,
+        },
+        payload => {
+          setMessages(prev => {
+            // Avoid duplicates
+            if (prev.some(m => m.id === payload.new.id)) return prev
+            return [...prev, payload.new]
+          })
+          setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+        }
+      )
+      .subscribe(status => {
+        console.log('Realtime status:', status)
+      })
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [studioId])
 
   function scrollChat() {

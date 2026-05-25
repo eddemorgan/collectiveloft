@@ -317,6 +317,7 @@ export default function StudioPage() {
     setStudio(prev => ({ ...prev, status: 'complete' }))
     setShowComplete(true)
     sys(`${myName()} confirmed this Loft Studio complete. Great work.`)
+    sys(`⭐ Rate your collaboration → /rating?studio=${studioId}`)
   }
 
   async function withdrawClose() {
@@ -963,12 +964,19 @@ export default function StudioPage() {
           </div>
           <div className={styles.chatMsgs}>
             {messages.map((msg, i) => {
-              const isMe  = msg.sender_id === myProfile?.id
-              const isSys = msg.type === 'sys'
+              const isMe    = msg.sender_id === myProfile?.id
+              const isSys   = msg.type === 'sys'
+              const isRating = isSys && msg.content?.includes('/rating?studio=')
               return (
                 <div key={msg.id||i} className={`${styles.msg} ${isSys?styles.msgSys:isMe?styles.msgMine:styles.msgTheirs}`}>
                   {!isMe && !isSys && <div className={styles.msgSender}>{partnerFirst}</div>}
-                  <div className={styles.msgBubble}>{msg.content}</div>
+                  <div className={styles.msgBubble}>
+                    {isRating ? (
+                      <Link href={`/rating?studio=${studioId}`} className={styles.ratingLink}>
+                        ⭐ Rate your collaboration →
+                      </Link>
+                    ) : msg.content}
+                  </div>
                   {msg.created_at && (
                     <div className={styles.msgTime}>
                       {isSys

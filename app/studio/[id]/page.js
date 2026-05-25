@@ -24,6 +24,15 @@ function initials(first, last) {
 function timeStr(d) {
   return new Date(d).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
 }
+function msgTimeStr(d, alwaysFull = false) {
+  if (!d) return ''
+  const date = new Date(d)
+  const now  = new Date()
+  const isToday = date.toDateString() === now.toDateString()
+  const time = date.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
+  if (!alwaysFull && isToday) return time
+  return date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) + ' · ' + time
+}
 function dateStr(d) {
   return new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric' })
 }
@@ -79,7 +88,8 @@ export default function StudioPage() {
 
   const [myProfile,      setMyProfile]      = useState(null)
   const [studio,         setStudio]         = useState(null)
-  const [partner,        setPartner]        = useState(null)
+  const [owner,          setOwner]          = useState(null)   // brief creator = collab owner
+  const [contributor,    setContributor]    = useState(null)   // the other party
   const [allStudios,     setAllStudios]     = useState([])
   const [milestones,     setMilestones]     = useState([])
   const [files,          setFiles]          = useState([])
@@ -142,12 +152,14 @@ export default function StudioPage() {
 
     const { data: term } = await supabase
       .from('collab_terms')
-      .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, headline, disciplines), partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, headline, disciplines)`)
+      .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, headline, disciplines, username), partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, headline, disciplines, username)`)
       .eq('id', studioId).single()
 
     if (term) {
       setStudio(term)
-      setPartner(term.initiator_id === user.id ? term.partner : term.initiator)
+      // initiator = brief creator = collab owner
+      setOwner(term.initiator)
+      setContributor(term.partner)
       setCloseProposed(term.close_proposed || false)
       setShowComplete(term.status === 'complete')
       setRatingDone(term.rated || false)
@@ -176,14 +188,34 @@ export default function StudioPage() {
     setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior:'smooth' }), 300)
   }
 
+  // Central system message sender -- the activity trail
+  async function sys(text) {
+    await supabase.from('studio_messages').insert({
+      studio_id: studioId,
+      sender_id: null,
+      type: 'sys',
+      content: text,
+    })
+  }
+
+  function myName() {
+    if (!myProfile) return 'Someone'
+    return `${myProfile.firstname} ${myProfile.lastname}`
+  }
+
   async function toggleMilestone(ms) {
     const done = !ms.done
     await supabase.from('studio_milestones').update({ done }).eq('id', ms.id)
     const updated = milestones.map(m => m.id === ms.id ? { ...m, done } : m)
     setMilestones(sortByDate(updated))
-    if (done) sendSystemMessage(`Milestone complete: ${ms.title}`)
-    if (updated.every(m => m.done) && !closeProposed) {
-      sendSystemMessage('All milestones complete. Either party can now propose closing this Loft Studio.')
+
+    if (done) {
+      sys(`${myName()} marked "${ms.title}" as complete.`)
+      if (updated.every(m => m.done) && !closeProposed) {
+        sys('All milestones complete. Either party can now propose closing this Loft Studio.')
+      }
+    } else {
+      sys(`${myName()} marked "${ms.title}" as incomplete.`)
     }
   }
 
@@ -194,24 +226,38 @@ export default function StudioPage() {
 
   async function saveEditMs(ms) {
     if (!editMsDraft.title.trim()) return
+    const newTitle   = editMsDraft.title.trim()
+    const newDueDate = editMsDraft.due_date || null
+
     await supabase.from('studio_milestones').update({
-      title: editMsDraft.title.trim(),
-      due_date: editMsDraft.due_date || null,
+      title: newTitle,
+      due_date: newDueDate,
     }).eq('id', ms.id)
+
     setMilestones(prev => sortByDate(
-      prev.map(m => m.id === ms.id
-        ? { ...m, title: editMsDraft.title.trim(), due_date: editMsDraft.due_date || null }
-        : m
-      )
+      prev.map(m => m.id === ms.id ? { ...m, title: newTitle, due_date: newDueDate } : m)
     ))
     setEditingMs(null)
     setEditMsDraft({})
+
+    // Build a meaningful trail message
+    const changes = []
+    if (newTitle !== ms.title) changes.push(`renamed to "${newTitle}"`)
+    if (newDueDate !== ms.due_date) {
+      if (newDueDate) changes.push(`due date set to ${fullDateStr(newDueDate)}`)
+      else changes.push('due date removed')
+    }
+    if (changes.length > 0) {
+      sys(`${myName()} updated milestone "${ms.title}": ${changes.join(', ')}.`)
+    }
   }
 
   async function deleteMs(id) {
     if (!confirm('Delete this milestone?')) return
+    const ms = milestones.find(m => m.id === id)
     await supabase.from('studio_milestones').delete().eq('id', id)
     setMilestones(prev => prev.filter(m => m.id !== id))
+    if (ms) sys(`${myName()} deleted milestone "${ms.title}".`)
   }
 
   async function addMilestone() {
@@ -223,27 +269,32 @@ export default function StudioPage() {
       done: false,
       sort_order: 0,
     }).select().single()
-    if (data) setMilestones(prev => sortByDate([...prev, data]))
+    if (data) {
+      setMilestones(prev => sortByDate([...prev, data]))
+      const dateNote = newMs.due_date ? ` due ${fullDateStr(newMs.due_date)}` : ''
+      sys(`${myName()} added milestone "${newMs.title.trim()}"${dateNote}.`)
+    }
     setNewMs({ title:'', due_date:'' })
     setAddingMs(false)
-  }
-
-  async function sendSystemMessage(text) {
-    await supabase.from('studio_messages').insert({ studio_id: studioId, sender_id: null, type:'sys', content: text })
   }
 
   async function sendChat() {
     if (!chatInput.trim() || !myProfile) return
     const text = chatInput.trim()
     setChatInput('')
-    await supabase.from('studio_messages').insert({ studio_id: studioId, sender_id: myProfile.id, type:'message', content: text })
+    await supabase.from('studio_messages').insert({
+      studio_id: studioId,
+      sender_id: myProfile.id,
+      type: 'message',
+      content: text,
+    })
   }
 
   async function proposeClose() {
     if (closeProposed) return
     setCloseProposed(true)
     await supabase.from('collab_terms').update({ close_proposed: true }).eq('id', studioId)
-    sendSystemMessage(`${myProfile.firstname} has proposed closing this Loft Studio. Both parties must agree to close.`)
+    sys(`${myName()} has proposed closing this Loft Studio. Both parties must agree to close.`)
   }
 
   async function confirmClose() {
@@ -251,13 +302,13 @@ export default function StudioPage() {
     setStudio(prev => ({ ...prev, status:'complete' }))
     setCloseProposed(false)
     setShowComplete(true)
-    sendSystemMessage('Both parties have agreed. This Loft Studio is now complete.')
+    sys('Both parties have agreed. This Loft Studio is now complete.')
   }
 
   async function withdrawClose() {
     setCloseProposed(false)
     await supabase.from('collab_terms').update({ close_proposed: false }).eq('id', studioId)
-    sendSystemMessage(`${myProfile.firstname} has withdrawn the Studio close proposal.`)
+    sys(`${myName()} has withdrawn the Studio close proposal.`)
   }
 
   async function uploadFile(file) {
@@ -268,9 +319,17 @@ export default function StudioPage() {
     const { error } = await supabase.storage.from('studio-files').upload(path, file, { upsert: true })
     if (!error) {
       const { data: { publicUrl } } = supabase.storage.from('studio-files').getPublicUrl(path)
-      const { data: f } = await supabase.from('studio_files').insert({ studio_id: studioId, name: file.name, url: publicUrl, size: file.size, type: file.type }).select().single()
-      if (f) setFiles(prev => [f, ...prev])
-      sendSystemMessage(`${myProfile.firstname} uploaded ${file.name}`)
+      const { data: f } = await supabase.from('studio_files').insert({
+        studio_id: studioId,
+        name: file.name,
+        url: publicUrl,
+        size: file.size,
+        type: file.type,
+      }).select().single()
+      if (f) {
+        setFiles(prev => [f, ...prev])
+        sys(`${myName()} uploaded "${file.name}" (${formatBytes(file.size)}).`)
+      }
     }
     setUploading(false)
   }
@@ -287,25 +346,40 @@ export default function StudioPage() {
 
   async function submitRating() {
     if (!ratingStars || reviewText.trim().length < 20) return
-    await supabase.from('ratings').insert({ rater_id: myProfile.id, ratee_id: partner?.id, studio_id: studioId, stars: ratingStars, endorsed, review: reviewText.trim(), submitted: true })
+    await supabase.from('ratings').insert({
+      rater_id: myProfile.id,
+      ratee_id: contributor?.id === myProfile.id ? owner?.id : contributor?.id,
+      studio_id: studioId,
+      stars: ratingStars,
+      endorsed,
+      review: reviewText.trim(),
+      submitted: true,
+    })
     await supabase.from('collab_terms').update({ rated: true }).eq('id', studioId)
     setRatingDone(true)
     setShowRating(false)
-    sendSystemMessage(`${myProfile.firstname} has submitted their review.`)
+    sys(`${myName()} submitted their collaboration review.`)
   }
 
   const done  = milestones.filter(m => m.done).length
   const total = milestones.length
   const pct   = total ? Math.round(done / total * 100) : 0
-  const myInit      = myProfile ? initials(myProfile.firstname, myProfile.lastname) : '?'
-  const partnerInit = partner   ? initials(partner.firstname, partner.lastname) : '?'
-  const partnerFirst = partner?.firstname || 'collaborator'
-  const displayStars = hoverStar || ratingStars
+
+  const myInit         = myProfile    ? initials(myProfile.firstname, myProfile.lastname) : '?'
+  const ownerInit      = owner        ? initials(owner.firstname, owner.lastname) : '?'
+  const contributorInit = contributor ? initials(contributor.firstname, contributor.lastname) : '?'
+  const ownerName      = owner        ? `${owner.firstname} ${owner.lastname}` : 'Collab Owner'
+  const contributorName = contributor ? `${contributor.firstname} ${contributor.lastname}` : 'Collab Contributor'
+  const partnerFirst   = myProfile?.id === owner?.id
+    ? contributor?.firstname || 'collaborator'
+    : owner?.firstname || 'collaborator'
+
+  const displayStars   = hoverStar || ratingStars
 
   // Timeline data
-  const studioStart = studio?.created_at
+  const studioStart    = studio?.created_at
   const studioDeadline = studio?.deadline
-  const msWithDates = milestones.filter(m => m.due_date)
+  const msWithDates    = milestones.filter(m => m.due_date)
 
   if (loading) return <div className={styles.loading}><div className={styles.loadingDot}>✦</div></div>
   if (!studio) return <div className={styles.notFound}><div>Studio not found.</div><Link href="/my-studios">Back to My Studios</Link></div>
@@ -365,6 +439,33 @@ export default function StudioPage() {
           <div className={styles.mainHdr}>
             <div className={styles.mainHdrLeft}>
               <div className={styles.studioTitle}>{studio.project_title||'Untitled project'}</div>
+
+              {/* Owner + Contributor under title */}
+              <div className={styles.collabParties}>
+                <Link
+                  href={owner?.username ? `/profile/${owner.username}` : '#'}
+                  className={styles.partyRow}
+                  title={`View ${ownerName}'s profile`}
+                >
+                  <div className={`${styles.partyAv} ${styles.avGold}`}>{ownerInit}</div>
+                  <div className={styles.partyInfo}>
+                    <span className={styles.partyName}>{ownerName}</span>
+                    <span className={styles.partyRole}>Collab Owner</span>
+                  </div>
+                </Link>
+                <Link
+                  href={contributor?.username ? `/profile/${contributor.username}` : '#'}
+                  className={styles.partyRow}
+                  title={`View ${contributorName}'s profile`}
+                >
+                  <div className={`${styles.partyAv} ${styles.avTeal}`}>{contributorInit}</div>
+                  <div className={styles.partyInfo}>
+                    <span className={styles.partyName}>{contributorName}</span>
+                    <span className={styles.partyRole}>Collab Contributor</span>
+                  </div>
+                </Link>
+              </div>
+
               <div className={styles.studioMeta}>
                 <span className={`${styles.statusPill} ${studio.status==='complete'?styles.pillComplete:styles.pillActive}`}>
                   {studio.status==='complete'?'Complete':'In progress'}
@@ -377,11 +478,8 @@ export default function StudioPage() {
                 <span>{done}/{total} milestones</span>
               </div>
             </div>
+
             <div className={styles.mainHdrRight}>
-              <div className={styles.collabAvs}>
-                <div className={`${styles.collabAv} ${styles.avGold}`}>{myInit}</div>
-                <div className={`${styles.collabAv} ${styles.avTeal}`}>{partnerInit}</div>
-              </div>
               {studio.status !== 'complete' && (
                 <button className={styles.btnProposeClose} onClick={proposeClose}>Propose close</button>
               )}
@@ -513,7 +611,6 @@ export default function StudioPage() {
                   <div className={styles.emptyState}>No milestones yet. Add one to start tracking progress.</div>
                 ) : (
                   <div className={styles.msTable}>
-                    {/* Table header */}
                     <div className={styles.msTableHdr}>
                       <div className={styles.msColNum}>#</div>
                       <div className={styles.msColTitle}>Milestone</div>
@@ -522,7 +619,6 @@ export default function StudioPage() {
                       <div className={styles.msColActions}>Actions</div>
                     </div>
 
-                    {/* Table rows -- ordered by due_date automatically */}
                     {milestones.map((ms, index) => {
                       const status = msStatus(ms.due_date, ms.done)
                       const d = ms.due_date ? daysLeft(ms.due_date) : null
@@ -531,7 +627,6 @@ export default function StudioPage() {
                         <div key={ms.id} className={`${styles.msTableRow} ${ms.done ? styles.msRowDone : ''}`}>
                           <div className={styles.msColNum}>{index + 1}</div>
 
-                          {/* Title cell -- inline edit */}
                           <div className={styles.msColTitle}>
                             {isEditing ? (
                               <input
@@ -546,7 +641,6 @@ export default function StudioPage() {
                             )}
                           </div>
 
-                          {/* Due date cell -- inline edit */}
                           <div className={styles.msColDate}>
                             {isEditing ? (
                               <input
@@ -568,7 +662,6 @@ export default function StudioPage() {
                             )}
                           </div>
 
-                          {/* Status checkbox */}
                           <div className={styles.msColStatus}>
                             <div
                               className={`${styles.msTableChk} ${ms.done ? styles.msTableChkDone : ''}`}
@@ -579,7 +672,6 @@ export default function StudioPage() {
                             </div>
                           </div>
 
-                          {/* Actions -- no up/down, date drives order */}
                           <div className={styles.msColActions}>
                             {isEditing ? (
                               <>
@@ -597,7 +689,6 @@ export default function StudioPage() {
                       )
                     })}
 
-                    {/* Add new row */}
                     {addingMs && (
                       <div className={styles.msTableRow} style={{background:'rgba(201,168,76,0.04)',borderColor:'rgba(201,168,76,0.2)'}}>
                         <div className={styles.msColNum} style={{color:'var(--gold)',opacity:0.5}}>+</div>
@@ -640,7 +731,6 @@ export default function StudioPage() {
                   <div className={styles.emptyState}>Add due dates to milestones to see your timeline.</div>
                 ) : (
                   <>
-                    {/* Timeline header info */}
                     <div className={styles.timelineHeader}>
                       <div className={styles.tlHeaderItem}>
                         <div className={styles.tlHeaderLabel}>Studio opened</div>
@@ -666,13 +756,10 @@ export default function StudioPage() {
                       </div>
                     </div>
 
-                    {/* Visual timeline bar */}
                     {studioDeadline && studioStart && (
                       <div className={styles.timelineBar}>
                         <div className={styles.tlBarBg}>
-                          {/* Overall progress fill */}
                           <div className={styles.tlBarFill} style={{ width:`${pct}%` }}/>
-                          {/* Today marker */}
                           {(() => {
                             const start = new Date(studioStart).getTime()
                             const end   = new Date(studioDeadline).getTime()
@@ -680,7 +767,6 @@ export default function StudioPage() {
                             const todayPct = Math.min(100, Math.max(0, ((now - start) / (end - start)) * 100))
                             return <div className={styles.tlTodayMarker} style={{ left:`${todayPct}%` }}><div className={styles.tlTodayLabel}>Today</div></div>
                           })()}
-                          {/* Milestone markers */}
                           {msWithDates.map(ms => {
                             const start = new Date(studioStart).getTime()
                             const end   = new Date(studioDeadline).getTime()
@@ -701,7 +787,6 @@ export default function StudioPage() {
                       </div>
                     )}
 
-                    {/* Milestone list with dates -- already sorted by date in state */}
                     <div className={styles.secLbl}>Milestone schedule</div>
                     {milestones.length === 0 ? (
                       <div className={styles.emptyState}>No milestones added yet.</div>
@@ -887,7 +972,14 @@ export default function StudioPage() {
                 <div key={msg.id||i} className={`${styles.msg} ${isSys?styles.msgSys:isMe?styles.msgMine:styles.msgTheirs}`}>
                   {!isMe && !isSys && <div className={styles.msgSender}>{partnerFirst}</div>}
                   <div className={styles.msgBubble}>{msg.content}</div>
-                  {msg.created_at && !isSys && <div className={styles.msgTime}>{timeStr(msg.created_at)}</div>}
+                  {msg.created_at && (
+                    <div className={styles.msgTime}>
+                      {isSys
+                        ? msgTimeStr(msg.created_at, true)
+                        : msgTimeStr(msg.created_at, false)
+                      }
+                    </div>
+                  )}
                 </div>
               )
             })}
@@ -909,7 +1001,7 @@ export default function StudioPage() {
             <div className={styles.rmHdr}>
               <div className={styles.rmEy}>Loft Studio · Collab complete</div>
               <div className={styles.rmTitle}>Rate your collaboration</div>
-              <div className={styles.rmSub}>How was working with <strong>{partner?`${partner.firstname} ${partner.lastname}`:'your collaborator'}</strong>?</div>
+              <div className={styles.rmSub}>How was working with <strong>{owner?.id === myProfile?.id ? contributorName : ownerName}</strong>?</div>
             </div>
             <div className={styles.rmBody}>
               <div>

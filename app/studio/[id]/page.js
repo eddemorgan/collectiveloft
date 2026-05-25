@@ -297,12 +297,26 @@ export default function StudioPage() {
     sys(`${myName()} has proposed closing this Loft Studio. Both parties must agree to close.`)
   }
 
-  async function confirmClose() {
-    await supabase.from('collab_terms').update({ status:'complete', close_proposed: false, completed_at: new Date().toISOString() }).eq('id', studioId)
-    setStudio(prev => ({ ...prev, status:'complete' }))
-    setCloseProposed(false)
+  async function confirmComplete() {
+    await supabase.from('collab_terms').update({
+      status: 'complete',
+      close_proposed: false,
+      completed_at: new Date().toISOString(),
+    }).eq('id', studioId)
+
+    // Increment collabs_count on both profiles
+    if (owner?.id) {
+      const { data: ownerProfile } = await supabase.from('profiles').select('collabs_count').eq('id', owner.id).single()
+      await supabase.from('profiles').update({ collabs_count: (ownerProfile?.collabs_count || 0) + 1 }).eq('id', owner.id)
+    }
+    if (contributor?.id) {
+      const { data: contribProfile } = await supabase.from('profiles').select('collabs_count').eq('id', contributor.id).single()
+      await supabase.from('profiles').update({ collabs_count: (contribProfile?.collabs_count || 0) + 1 }).eq('id', contributor.id)
+    }
+
+    setStudio(prev => ({ ...prev, status: 'complete' }))
     setShowComplete(true)
-    sys('Both parties have agreed. This Loft Studio is now complete.')
+    sys(`${myName()} confirmed this Loft Studio complete. Great work.`)
   }
 
   async function withdrawClose() {
@@ -468,9 +482,11 @@ export default function StudioPage() {
             </div>
 
             <div className={styles.mainHdrRight}>
-              {studio.status !== 'complete' && (
-                <button className={styles.btnProposeClose} onClick={proposeClose}>Propose close</button>
-              )}
+              {studio.status === 'complete' ? (
+                <span className={styles.completedLabel}>✦ Completed Collab</span>
+              ) : pct === 100 && myProfile?.id === owner?.id ? (
+                <button className={styles.btnConfirmComplete} onClick={confirmComplete}>Confirm Complete</button>
+              ) : null}
             </div>
           </div>
 
@@ -488,16 +504,6 @@ export default function StudioPage() {
             {/* OVERVIEW */}
             {activeTab === 'overview' && (
               <div className={styles.tabPanel}>
-                {closeProposed && (
-                  <div className={styles.closeProposalCard}>
-                    <div className={styles.cpTitle}>⚑ Studio close proposed</div>
-                    <div className={styles.cpText}>You've proposed closing this Loft Studio. {partnerFirst} needs to agree before the Studio closes.</div>
-                    <div className={styles.cpBtns}>
-                      <button className={styles.btnConfirmClose} onClick={confirmClose}>Confirm close</button>
-                      <button className={styles.btnDeclineClose} onClick={withdrawClose}>Withdraw proposal</button>
-                    </div>
-                  </div>
-                )}
                 {showComplete && !ratingDone && (
                   <div className={styles.completionPrompt}>
                     <div className={styles.cpGoldTitle}>✦ This Loft Studio is complete.</div>

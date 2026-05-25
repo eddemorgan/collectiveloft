@@ -65,7 +65,61 @@ function locationStr(p) {
   return [p.city,p.state,p.country].filter(Boolean).join(', ')
 }
 
-// ─── TOP-LEVEL COMPONENTS (must be outside ProfilePage) ──────────────────────
+// ─── COMPLETED COLLAB CARD -- clickable link to studio ───────────────────────
+function CompletedCollabCard({ studio, profileId }) {
+  const collab = studio.initiator_id === profileId ? studio.partner : studio.initiator
+  const collabName = collab ? `${collab.firstname} ${collab.lastname}` : 'Collaborator'
+  const collabInit = collab ? `${(collab.firstname||'?')[0]}${(collab.lastname||'?')[0]}`.toUpperCase() : '??'
+  const typeLabel = studio.collab_type === 'exchange' ? 'Creative exchange'
+    : studio.collab_type === 'paid' ? 'Paid'
+    : 'Revenue share'
+
+  return (
+    <Link href={`/studio/${studio.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+      <div
+        style={{
+          background: 'rgba(240,236,227,0.02)',
+          border: '0.5px solid rgba(240,236,227,0.08)',
+          borderRadius: '4px',
+          padding: '1rem 1.1rem',
+          marginBottom: '0.65rem',
+          cursor: 'pointer',
+          transition: 'border-color 0.15s, background 0.15s',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '1rem',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(240,236,227,0.04)'; e.currentTarget.style.borderColor = 'rgba(201,168,76,0.25)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(240,236,227,0.02)'; e.currentTarget.style.borderColor = 'rgba(240,236,227,0.08)' }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+          <div style={{
+            width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
+            background: 'rgba(86,179,156,0.15)', color: 'var(--teal)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'var(--serif)', fontSize: '0.7rem', fontWeight: 700,
+          }}>{collabInit}</div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontFamily: 'var(--sans)', fontSize: '0.82rem', fontWeight: 600, color: 'var(--cream)', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {studio.project_title || 'Untitled project'}
+            </div>
+            <div style={{ fontFamily: 'var(--sans)', fontSize: '0.68rem', color: 'rgba(240,236,227,0.4)' }}>
+              With {collabName} · {typeLabel}
+            </div>
+          </div>
+        </div>
+        <span style={{
+          fontFamily: 'var(--sans)', fontSize: '0.58rem', fontWeight: 600,
+          letterSpacing: '0.08em', textTransform: 'uppercase',
+          color: 'var(--gold)', flexShrink: 0,
+        }}>✦ Completed</span>
+      </div>
+    </Link>
+  )
+}
+
+// ─── TOP-LEVEL COMPONENTS ────────────────────────────────────────────────────
 
 function Editable({ value, onSave, placeholder, multiline, isOwner, editMode, className }) {
   const [editing, setEditing] = useState(false)
@@ -149,7 +203,6 @@ function BriefModal({ brief, isOwner, onClose, onDelete }) {
   )
 }
 
-// Active brief card -- clickable, has red X delete
 function ActiveBriefCard({ brief, onDelete, profileSlug }) {
   return (
     <Link href={`/briefs?open=${brief.id}&from=${profileSlug}`} style={{textDecoration:'none',display:'block'}}>
@@ -172,7 +225,6 @@ function ActiveBriefCard({ brief, onDelete, profileSlug }) {
   )
 }
 
-// Negotiation card -- click goes to /terms-review/[id], no delete
 function NegotiationCard({ term, currentUserId }) {
   let myTurn = false
   if (currentUserId) {
@@ -204,7 +256,6 @@ function NegotiationCard({ term, currentUserId }) {
   )
 }
 
-// Applied brief card -- click opens modal, read only
 function AppliedBriefCard({ brief, onSelect }) {
   return (
     <div onClick={() => onSelect(brief)} style={{cursor:'pointer',background:'rgba(240,236,227,0.02)',border:'0.5px solid rgba(160,120,208,0.15)',borderRadius:'4px',padding:'1rem 1.1rem',marginBottom:'0.65rem',transition:'border-color 0.15s, background 0.15s'}}
@@ -250,10 +301,9 @@ export default function ProfilePage() {
   const [draftSkills,      setDraftSkills]      = useState([])
   const [notifCount,       setNotifCount]       = useState(0)
 
-  // Briefs tab -- three sections
-  const [activeBriefs,     setActiveBriefs]     = useState([]) // I posted, open
-  const [negotiations,     setNegotiations]     = useState([]) // pending collab_terms
-  const [appliedBriefs,    setAppliedBriefs]    = useState([]) // I applied to
+  const [activeBriefs,     setActiveBriefs]     = useState([])
+  const [negotiations,     setNegotiations]     = useState([])
+  const [appliedBriefs,    setAppliedBriefs]    = useState([])
   const [briefsLoading,    setBriefsLoading]    = useState(false)
   const [selectedBrief,    setSelectedBrief]    = useState(null)
 
@@ -296,7 +346,7 @@ export default function ProfilePage() {
       .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, headline), partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, headline)`)
       .or(`initiator_id.eq.${data.id},partner_id.eq.${data.id}`)
       .eq('status', 'complete')
-      .order('created_at', { ascending: false })
+      .order('completed_at', { ascending: false })
     setStudios(studioData || [])
 
     const { data: ratingData } = await supabase
@@ -317,9 +367,6 @@ export default function ProfilePage() {
 
   async function loadBriefs(userId) {
     setBriefsLoading(true)
-
-    // Section 1: Active briefs I posted with no terms in flight
-    // First get all my open briefs
     const { data: posted } = await supabase
       .from('briefs')
       .select('*')
@@ -327,24 +374,17 @@ export default function ProfilePage() {
       .eq('status', 'open')
       .order('created_at', { ascending: false })
 
-    // Section 2: Pending negotiations I'm part of
     const { data: terms } = await supabase
       .from('collab_terms')
-      .select(`
-        *,
-        initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, disciplines, headline),
-        partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, disciplines, headline)
-      `)
+      .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, disciplines, headline), partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, disciplines, headline)`)
       .or(`initiator_id.eq.${userId},partner_id.eq.${userId}`)
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
     setNegotiations(terms || [])
 
-    // Brief IDs that are already in negotiation -- exclude from active
     const negotiatingBriefIds = new Set((terms || []).map(t => t.brief_id).filter(Boolean))
     setActiveBriefs((posted || []).filter(b => !negotiatingBriefIds.has(b.id)))
 
-    // Section 3: Briefs I applied to (pending only -- accepted ones are in negotiations)
     const { data: apps } = await supabase
       .from('applications')
       .select('brief_id, status, briefs(*)')
@@ -362,7 +402,6 @@ export default function ProfilePage() {
 
   async function loadNotifCount(userId) {
     let count = 0
-    // Terms where it's my turn
     const { data: myTerms } = await supabase
       .from('collab_terms')
       .select('id, current_editor, initiator_id, partner_id')
@@ -524,7 +563,7 @@ export default function ProfilePage() {
           <div className={styles.metaRow}>
             {location&&<div className={styles.metaItem}><span>📍</span><span>{location}</span></div>}
             <div className={styles.metaItem}><span>⊞</span><span>{profile.connections_count||0} connections</span></div>
-            <div className={styles.metaItem}><span>◎</span><span>{profile.collabs_count||0} collabs completed</span></div>
+            <div className={styles.metaItem}><span>◎</span><span>{studios.length} collabs completed</span></div>
           </div>
           <div className={styles.profileTags}>
             {profile.availability==='open'&&<span className={`${styles.ptag} ${styles.ptagOpen}`}>Open to collabs</span>}
@@ -585,12 +624,10 @@ export default function ProfilePage() {
               </div>
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Past collaborations</div>
-                {studios.length===0?<div className={styles.emptyState}>No completed collaborations yet.</div>:studios.map(s=>{
-                  const collab=s.initiator_id===profileId?s.partner:s.initiator
-                  const cn=collab?`${collab.firstname} ${collab.lastname}`:'Collaborator'
-                  const ci=collab?`${collab.firstname[0]}${collab.lastname[0]}`:'??'
-                  return(<div key={s.id} className={styles.collabItem}><div className={`${styles.collabAv} ${styles.avTeal}`}>{ci}</div><div className={styles.collabInfo}><div className={styles.collabName}>{cn} · {collab?.headline}</div><div className={styles.collabRole}>{s.project_title||'Collaboration'}</div></div><span className={styles.collabStatus}>Completed</span></div>)
-                })}
+                {studios.length===0
+                  ? <div className={styles.emptyState}>No completed collaborations yet.</div>
+                  : studios.map(s => <CompletedCollabCard key={s.id} studio={s} profileId={profileId}/>)
+                }
               </div>
             </>
           )}
@@ -646,12 +683,10 @@ export default function ProfilePage() {
           {activeTab==='collabs'&&(
             <div className={styles.contentSection}>
               <div className={styles.secLabel}>Collaboration history</div>
-              {studios.length===0?<div className={styles.emptyState}>Once you complete a collab through Collective Loft, it will appear here.</div>:studios.map(s=>{
-                const collab=s.initiator_id===profileId?s.partner:s.initiator
-                const cn=collab?`${collab.firstname} ${collab.lastname}`:'Collaborator'
-                const ci=collab?`${collab.firstname[0]}${collab.lastname[0]}`:'??'
-                return(<div key={s.id} className={styles.collabItem}><div className={`${styles.collabAv} ${styles.avTeal}`}>{ci}</div><div className={styles.collabInfo}><div className={styles.collabName}>{cn} · {collab?.headline}</div><div className={styles.collabRole}>{s.project_title||'Collaboration'}</div></div><span className={styles.collabStatus}>Completed</span></div>)
-              })}
+              {studios.length === 0
+                ? <div className={styles.emptyState}>Once you complete a collab through Collective Loft, it will appear here.</div>
+                : studios.map(s => <CompletedCollabCard key={s.id} studio={s} profileId={profileId}/>)
+              }
             </div>
           )}
 
@@ -659,7 +694,6 @@ export default function ProfilePage() {
             <div className={styles.contentSection}>
               {briefsLoading?<div className={styles.emptyState}>Loading…</div>:(
                 <>
-                  {/* ── SECTION 1: ACTIVE BRIEFS ── */}
                   <div style={{marginBottom:'2rem'}}>
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'0.75rem'}}>
                       <div className={styles.secLabel} style={{margin:0}}>
@@ -674,7 +708,6 @@ export default function ProfilePage() {
                     }
                   </div>
 
-                  {/* ── SECTION 2: IN NEGOTIATION ── */}
                   {isOwner&&(
                     <div style={{marginBottom:'2rem'}}>
                       <div className={styles.secLabel} style={{marginBottom:'0.75rem'}}>
@@ -688,7 +721,6 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* ── SECTION 3: APPLIED BRIEFS ── */}
                   {isOwner&&(
                     <div>
                       <div className={styles.secLabel} style={{marginBottom:'0.75rem'}}>

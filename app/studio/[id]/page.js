@@ -442,27 +442,15 @@ export default function StudioPage() {
 
               {/* Owner + Contributor under title */}
               <div className={styles.collabParties}>
-                <Link
-                  href={owner?.id ? `/profile/${owner.id}` : '#'}
-                  className={styles.partyRow}
-                  title={`View ${ownerName}'s profile`}
-                >
-                  <div className={`${styles.partyAv} ${styles.avGold}`}>{ownerInit}</div>
-                  <div className={styles.partyInfo}>
-                    <span className={styles.partyName}>{ownerName}</span>
-                    <span className={styles.partyRole}>Collab Owner</span>
-                  </div>
+                <Link href={owner?.id ? `/profile/${owner.id}` : '#'} className={styles.partyRow}>
+                  <div className={`${styles.collabAv} ${styles.avGold}`}>{ownerInit}</div>
+                  <span className={styles.partyName}>{ownerName}</span>
+                  <span className={styles.partyLabel}>Collab Owner</span>
                 </Link>
-                <Link
-                  href={contributor?.id ? `/profile/${contributor.id}` : '#'}
-                  className={styles.partyRow}
-                  title={`View ${contributorName}'s profile`}
-                >
-                  <div className={`${styles.partyAv} ${styles.avTeal}`}>{contributorInit}</div>
-                  <div className={styles.partyInfo}>
-                    <span className={styles.partyName}>{contributorName}</span>
-                    <span className={styles.partyRole}>Collab Contributor</span>
-                  </div>
+                <Link href={contributor?.id ? `/profile/${contributor.id}` : '#'} className={styles.partyRow}>
+                  <div className={`${styles.collabAv} ${styles.avTeal}`}>{contributorInit}</div>
+                  <span className={styles.partyName}>{contributorName}</span>
+                  <span className={styles.partyLabel}>Collab Contributor</span>
                 </Link>
               </div>
 

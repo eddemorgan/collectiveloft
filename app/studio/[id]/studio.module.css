@@ -92,14 +92,45 @@
 .dotPaused { background: rgba(255,255,255,0.2); }
 
 .studioMain { display: flex; flex-direction: column; overflow: hidden; border-right: 0.5px solid rgba(255,255,255,0.06); }
-.mainHdr { padding: 0.85rem 1.25rem; border-bottom: 0.5px solid rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.mainHdr { padding: 0.85rem 1.25rem; border-bottom: 0.5px solid rgba(255,255,255,0.06); display: flex; align-items: flex-start; justify-content: space-between; flex-shrink: 0; }
 .mainHdrLeft { flex: 1; min-width: 0; }
-.studioTitle { font-family: var(--serif); font-size: 1rem; font-weight: 700; color: var(--cream); margin-bottom: 0.18rem; }
+.studioTitle { font-family: var(--serif); font-size: 1rem; font-weight: 700; color: var(--cream); margin-bottom: 0.45rem; }
+
+/* ── COLLAB PARTIES -- owner + contributor under title ── */
+.collabParties {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.55rem;
+}
+.partyRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-decoration: none;
+  color: inherit;
+}
+.partyRow:hover .partyName {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.partyName {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.7);
+  font-weight: 400;
+}
+.partyLabel {
+  font-size: 0.58rem;
+  color: rgba(255,255,255,0.25);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
 .studioMeta { display: flex; align-items: center; gap: 0.65rem; font-size: 0.6rem; color: var(--faint); flex-wrap: wrap; }
 .statusPill { font-size: 0.54rem; padding: 0.12rem 0.5rem; border-radius: 2px; letter-spacing: 0.04em; text-transform: uppercase; }
 .pillActive   { background: rgba(86,179,156,0.1);  border: 0.5px solid rgba(86,179,156,0.28);  color: var(--teal); }
 .pillComplete { background: rgba(201,168,76,0.1);  border: 0.5px solid rgba(201,168,76,0.28);  color: var(--gold); }
-.mainHdrRight { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+.mainHdrRight { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; padding-top: 0.15rem; }
 .collabAvs { display: flex; }
 .collabAv { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; font-weight: 500; border: 2px solid var(--bg); margin-left: -5px; }
 .collabAv:first-child { margin-left: 0; }

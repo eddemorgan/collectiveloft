@@ -51,6 +51,16 @@ function fileIcon(type) {
   return '📋'
 }
 
+// Sort milestones by due_date ascending; undated milestones float to bottom
+function sortByDate(arr) {
+  return [...arr].sort((a, b) => {
+    if (!a.due_date && !b.due_date) return 0
+    if (!a.due_date) return 1
+    if (!b.due_date) return -1
+    return new Date(a.due_date) - new Date(b.due_date)
+  })
+}
+
 // Milestone due date status
 function msStatus(due_date, done) {
   if (done) return 'done'
@@ -82,7 +92,7 @@ export default function StudioPage() {
   const [savingNotes,    setSavingNotes]    = useState(false)
 
   // Milestone management
-  const [editingMs,      setEditingMs]      = useState(null) // milestone id being edited
+  const [editingMs,      setEditingMs]      = useState(null)
   const [editMsDraft,    setEditMsDraft]    = useState({})
   const [addingMs,       setAddingMs]       = useState(false)
   const [newMs,          setNewMs]          = useState({ title:'', due_date:'' })
@@ -150,8 +160,8 @@ export default function StudioPage() {
       .in('status', ['active','paused'])
     setAllStudios(allTerms || [])
 
-    const { data: ms } = await supabase.from('studio_milestones').select('*').eq('studio_id', studioId).order('sort_order')
-    setMilestones(ms || [])
+    const { data: ms } = await supabase.from('studio_milestones').select('*').eq('studio_id', studioId)
+    setMilestones(sortByDate(ms || []))
 
     const { data: fs } = await supabase.from('studio_files').select('*').eq('studio_id', studioId).order('created_at', { ascending: false })
     setFiles(fs || [])
@@ -169,9 +179,9 @@ export default function StudioPage() {
   async function toggleMilestone(ms) {
     const done = !ms.done
     await supabase.from('studio_milestones').update({ done }).eq('id', ms.id)
-    setMilestones(prev => prev.map(m => m.id === ms.id ? { ...m, done } : m))
-    if (done) sendSystemMessage(`Milestone complete: ${ms.title}`)
     const updated = milestones.map(m => m.id === ms.id ? { ...m, done } : m)
+    setMilestones(sortByDate(updated))
+    if (done) sendSystemMessage(`Milestone complete: ${ms.title}`)
     if (updated.every(m => m.done) && !closeProposed) {
       sendSystemMessage('All milestones complete. Either party can now propose closing this Loft Studio.')
     }
@@ -188,7 +198,12 @@ export default function StudioPage() {
       title: editMsDraft.title.trim(),
       due_date: editMsDraft.due_date || null,
     }).eq('id', ms.id)
-    setMilestones(prev => prev.map(m => m.id === ms.id ? { ...m, title: editMsDraft.title.trim(), due_date: editMsDraft.due_date || null } : m))
+    setMilestones(prev => sortByDate(
+      prev.map(m => m.id === ms.id
+        ? { ...m, title: editMsDraft.title.trim(), due_date: editMsDraft.due_date || null }
+        : m
+      )
+    ))
     setEditingMs(null)
     setEditMsDraft({})
   }
@@ -201,34 +216,16 @@ export default function StudioPage() {
 
   async function addMilestone() {
     if (!newMs.title.trim()) return
-    const sort_order = milestones.length
     const { data } = await supabase.from('studio_milestones').insert({
       studio_id: studioId,
       title: newMs.title.trim(),
       due_date: newMs.due_date || null,
       done: false,
-      sort_order,
+      sort_order: 0,
     }).select().single()
-    if (data) setMilestones(prev => [...prev, data])
+    if (data) setMilestones(prev => sortByDate([...prev, data]))
     setNewMs({ title:'', due_date:'' })
     setAddingMs(false)
-  }
-
-  async function moveMs(index, direction) {
-    const newMs = [...milestones]
-    const swapIndex = index + direction
-    if (swapIndex < 0 || swapIndex >= newMs.length) return
-    // Swap in local state
-    const temp = newMs[index]
-    newMs[index] = newMs[swapIndex]
-    newMs[swapIndex] = temp
-    // Update sort_order values
-    newMs[index].sort_order = index
-    newMs[swapIndex].sort_order = swapIndex
-    setMilestones(newMs)
-    // Persist both to DB
-    await supabase.from('studio_milestones').update({ sort_order: index }).eq('id', newMs[index].id)
-    await supabase.from('studio_milestones').update({ sort_order: swapIndex }).eq('id', newMs[swapIndex].id)
   }
 
   async function sendSystemMessage(text) {
@@ -444,7 +441,6 @@ export default function StudioPage() {
                     <div className={styles.upcomingList}>
                       {milestones
                         .filter(m => !m.done && m.due_date)
-                        .sort((a,b) => new Date(a.due_date) - new Date(b.due_date))
                         .slice(0, 3)
                         .map(ms => {
                           const d = daysLeft(ms.due_date)
@@ -526,7 +522,7 @@ export default function StudioPage() {
                       <div className={styles.msColActions}>Actions</div>
                     </div>
 
-                    {/* Table rows */}
+                    {/* Table rows -- ordered by due_date automatically */}
                     {milestones.map((ms, index) => {
                       const status = msStatus(ms.due_date, ms.done)
                       const d = ms.due_date ? daysLeft(ms.due_date) : null
@@ -583,7 +579,7 @@ export default function StudioPage() {
                             </div>
                           </div>
 
-                          {/* Actions */}
+                          {/* Actions -- no up/down, date drives order */}
                           <div className={styles.msColActions}>
                             {isEditing ? (
                               <>
@@ -592,8 +588,6 @@ export default function StudioPage() {
                               </>
                             ) : (
                               <>
-                                <button className={styles.msActBtn} onClick={() => moveMs(index, -1)} disabled={index === 0} title="Move up">↑</button>
-                                <button className={styles.msActBtn} onClick={() => moveMs(index, 1)} disabled={index === milestones.length - 1} title="Move down">↓</button>
                                 <button className={styles.msActBtn} onClick={() => startEditMs(ms)} title="Edit">✎</button>
                                 <button className={`${styles.msActBtn} ${styles.msActDelete}`} onClick={() => deleteMs(ms.id)} title="Delete">✕</button>
                               </>
@@ -606,7 +600,7 @@ export default function StudioPage() {
                     {/* Add new row */}
                     {addingMs && (
                       <div className={styles.msTableRow} style={{background:'rgba(201,168,76,0.04)',borderColor:'rgba(201,168,76,0.2)'}}>
-                        <div className={styles.msColNum} style={{color:'var(--gold)',opacity:0.5}}>{milestones.length + 1}</div>
+                        <div className={styles.msColNum} style={{color:'var(--gold)',opacity:0.5}}>+</div>
                         <div className={styles.msColTitle}>
                           <input
                             className={styles.msCellInput}
@@ -707,18 +701,13 @@ export default function StudioPage() {
                       </div>
                     )}
 
-                    {/* Milestone list with dates */}
+                    {/* Milestone list with dates -- already sorted by date in state */}
                     <div className={styles.secLbl}>Milestone schedule</div>
                     {milestones.length === 0 ? (
                       <div className={styles.emptyState}>No milestones added yet.</div>
                     ) : (
                       <div className={styles.tlMilestoneList}>
-                        {[...milestones].sort((a,b) => {
-                          if (!a.due_date && !b.due_date) return 0
-                          if (!a.due_date) return 1
-                          if (!b.due_date) return -1
-                          return new Date(a.due_date) - new Date(b.due_date)
-                        }).map((ms, i) => {
+                        {milestones.map((ms, i) => {
                           const d = ms.due_date ? daysLeft(ms.due_date) : null
                           const status = msStatus(ms.due_date, ms.done)
                           return (

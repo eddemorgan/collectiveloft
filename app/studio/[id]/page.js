@@ -406,7 +406,10 @@ export default function StudioPage() {
           <Link href="/discover">Discover</Link>
           <Link href="/briefs">Collabs</Link>
           <Link href="/matching">Matching</Link>
-          <Link href="/my-studios" className={styles.active}>My Loft Studios</Link>
+          <Link href="/my-studios">My Loft Studios</Link>
+          {myProfile && (
+            <Link href={`/profile/${myProfile.id}`}>My Profile</Link>
+          )}
         </div>
       </nav>
 

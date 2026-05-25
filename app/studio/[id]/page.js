@@ -152,7 +152,7 @@ export default function StudioPage() {
 
     const { data: term } = await supabase
       .from('collab_terms')
-      .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, headline, disciplines, username), partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, headline, disciplines, username)`)
+      .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, headline, disciplines), partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, headline, disciplines)`)
       .eq('id', studioId).single()
 
     if (term) {
@@ -443,7 +443,7 @@ export default function StudioPage() {
               {/* Owner + Contributor under title */}
               <div className={styles.collabParties}>
                 <Link
-                  href={owner?.username ? `/profile/${owner.username}` : '#'}
+                  href={owner?.id ? `/profile/${owner.id}` : '#'}
                   className={styles.partyRow}
                   title={`View ${ownerName}'s profile`}
                 >
@@ -454,7 +454,7 @@ export default function StudioPage() {
                   </div>
                 </Link>
                 <Link
-                  href={contributor?.username ? `/profile/${contributor.username}` : '#'}
+                  href={contributor?.id ? `/profile/${contributor.id}` : '#'}
                   className={styles.partyRow}
                   title={`View ${contributorName}'s profile`}
                 >

@@ -214,6 +214,23 @@ export default function StudioPage() {
     setAddingMs(false)
   }
 
+  async function moveMs(index, direction) {
+    const newMs = [...milestones]
+    const swapIndex = index + direction
+    if (swapIndex < 0 || swapIndex >= newMs.length) return
+    // Swap in local state
+    const temp = newMs[index]
+    newMs[index] = newMs[swapIndex]
+    newMs[swapIndex] = temp
+    // Update sort_order values
+    newMs[index].sort_order = index
+    newMs[swapIndex].sort_order = swapIndex
+    setMilestones(newMs)
+    // Persist both to DB
+    await supabase.from('studio_milestones').update({ sort_order: index }).eq('id', newMs[index].id)
+    await supabase.from('studio_milestones').update({ sort_order: swapIndex }).eq('id', newMs[swapIndex].id)
+  }
+
   async function sendSystemMessage(text) {
     await supabase.from('studio_messages').insert({ studio_id: studioId, sender_id: null, type:'sys', content: text })
   }
@@ -482,87 +499,141 @@ export default function StudioPage() {
             {activeTab === 'milestones' && (
               <div className={styles.tabPanel}>
                 <div className={styles.secLblRow}>
-                  <div className={styles.secLbl} style={{marginTop:0}}>Milestones</div>
+                  <div className={styles.secLbl} style={{marginTop:0}}>
+                    Milestones
+                    {total > 0 && <span style={{marginLeft:'0.5rem',color:'var(--gold)',fontFamily:'var(--sans)',fontSize:'0.65rem',letterSpacing:'normal',textTransform:'none',fontWeight:500}}>{pct}% complete</span>}
+                  </div>
                   <button className={styles.btnAddMsTop} onClick={() => setAddingMs(true)}>+ Add milestone</button>
                 </div>
 
-                {milestones.length === 0 && !addingMs && (
-                  <div className={styles.emptyState}>No milestones yet. Add one to start tracking progress.</div>
+                {/* Progress bar */}
+                {total > 0 && (
+                  <div className={styles.msPogBar}>
+                    <div className={styles.msPogFill} style={{width:`${pct}%`}}/>
+                  </div>
                 )}
 
-                <div className={styles.milestoneList}>
-                  {milestones.map(ms => {
-                    const status = msStatus(ms.due_date, ms.done)
-                    const d = ms.due_date ? daysLeft(ms.due_date) : null
-                    const isEditing = editingMs === ms.id
-                    return (
-                      <div key={ms.id} className={`${styles.msItem} ${ms.done?styles.msDone:''}`}>
-                        {isEditing ? (
-                          <div className={styles.msEditRow}>
-                            <input
-                              className={styles.msEditInput}
-                              value={editMsDraft.title}
-                              onChange={e => setEditMsDraft(d => ({ ...d, title: e.target.value }))}
-                              placeholder="Milestone title"
-                              autoFocus
-                            />
-                            <input
-                              className={styles.msEditDate}
-                              type="date"
-                              value={editMsDraft.due_date}
-                              onChange={e => setEditMsDraft(d => ({ ...d, due_date: e.target.value }))}
-                            />
-                            <button className={styles.msSaveBtn} onClick={() => saveEditMs(ms)}>Save</button>
-                            <button className={styles.msCancelBtn} onClick={() => { setEditingMs(null); setEditMsDraft({}) }}>✕</button>
+                {milestones.length === 0 && !addingMs ? (
+                  <div className={styles.emptyState}>No milestones yet. Add one to start tracking progress.</div>
+                ) : (
+                  <div className={styles.msTable}>
+                    {/* Table header */}
+                    <div className={styles.msTableHdr}>
+                      <div className={styles.msColNum}>#</div>
+                      <div className={styles.msColTitle}>Milestone</div>
+                      <div className={styles.msColDate}>Due date</div>
+                      <div className={styles.msColStatus}>Status</div>
+                      <div className={styles.msColActions}>Actions</div>
+                    </div>
+
+                    {/* Table rows */}
+                    {milestones.map((ms, index) => {
+                      const status = msStatus(ms.due_date, ms.done)
+                      const d = ms.due_date ? daysLeft(ms.due_date) : null
+                      const isEditing = editingMs === ms.id
+                      return (
+                        <div key={ms.id} className={`${styles.msTableRow} ${ms.done ? styles.msRowDone : ''}`}>
+                          <div className={styles.msColNum}>{index + 1}</div>
+
+                          {/* Title cell -- inline edit */}
+                          <div className={styles.msColTitle}>
+                            {isEditing ? (
+                              <input
+                                className={styles.msCellInput}
+                                value={editMsDraft.title}
+                                onChange={e => setEditMsDraft(d => ({ ...d, title: e.target.value }))}
+                                autoFocus
+                                onKeyDown={e => e.key === 'Enter' && saveEditMs(ms)}
+                              />
+                            ) : (
+                              <span className={ms.done ? styles.msTitleDone : styles.msTitleText}>{ms.title}</span>
+                            )}
                           </div>
-                        ) : (
-                          <>
-                            <div className={`${styles.msChk} ${ms.done?styles.msChkDone:''}`} onClick={() => toggleMilestone(ms)}>
+
+                          {/* Due date cell -- inline edit */}
+                          <div className={styles.msColDate}>
+                            {isEditing ? (
+                              <input
+                                className={styles.msCellDateInput}
+                                type="date"
+                                value={editMsDraft.due_date}
+                                onChange={e => setEditMsDraft(d => ({ ...d, due_date: e.target.value }))}
+                              />
+                            ) : (
+                              <span className={`${styles.msDateText} ${styles[`ms_${status}`]}`}>
+                                {ms.due_date
+                                  ? ms.done
+                                    ? fullDateStr(ms.due_date)
+                                    : d === 0 ? 'Today'
+                                    : d < 0 ? `${Math.abs(d)}d overdue`
+                                    : `${fullDateStr(ms.due_date)}`
+                                  : '—'}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Status checkbox */}
+                          <div className={styles.msColStatus}>
+                            <div
+                              className={`${styles.msTableChk} ${ms.done ? styles.msTableChkDone : ''}`}
+                              onClick={() => !isEditing && toggleMilestone(ms)}
+                              title={ms.done ? 'Mark incomplete' : 'Mark complete'}
+                            >
                               {ms.done ? '✓' : ''}
                             </div>
-                            <div className={styles.msBody}>
-                              <div className={styles.msTitle}>{ms.title}</div>
-                              {ms.due_date && (
-                                <div className={`${styles.msDueLabel} ${styles[`ms_${status}`]}`}>
-                                  {ms.done ? `Completed · Due was ${fullDateStr(ms.due_date)}`
-                                    : d < 0 ? `${Math.abs(d)} days overdue — was ${fullDateStr(ms.due_date)}`
-                                    : d === 0 ? 'Due today'
-                                    : `${d} days left · ${fullDateStr(ms.due_date)}`}
-                                </div>
-                              )}
-                            </div>
-                            <div className={styles.msActions}>
-                              <button className={styles.msEditBtn} onClick={() => startEditMs(ms)} title="Edit">✎</button>
-                              <button className={styles.msDeleteBtn} onClick={() => deleteMs(ms.id)} title="Delete">✕</button>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    )
-                  })}
+                          </div>
 
-                  {/* Add milestone form */}
-                  {addingMs && (
-                    <div className={styles.addMsForm}>
-                      <input
-                        className={styles.msEditInput}
-                        value={newMs.title}
-                        onChange={e => setNewMs(d => ({ ...d, title: e.target.value }))}
-                        placeholder="Milestone title"
-                        autoFocus
-                        onKeyDown={e => e.key === 'Enter' && addMilestone()}
-                      />
-                      <input
-                        className={styles.msEditDate}
-                        type="date"
-                        value={newMs.due_date}
-                        onChange={e => setNewMs(d => ({ ...d, due_date: e.target.value }))}
-                      />
-                      <button className={styles.msSaveBtn} onClick={addMilestone}>Add</button>
-                      <button className={styles.msCancelBtn} onClick={() => { setAddingMs(false); setNewMs({ title:'', due_date:'' }) }}>✕</button>
-                    </div>
-                  )}
-                </div>
+                          {/* Actions */}
+                          <div className={styles.msColActions}>
+                            {isEditing ? (
+                              <>
+                                <button className={styles.msActSave} onClick={() => saveEditMs(ms)}>Save</button>
+                                <button className={styles.msActCancel} onClick={() => { setEditingMs(null); setEditMsDraft({}) }}>✕</button>
+                              </>
+                            ) : (
+                              <>
+                                <button className={styles.msActBtn} onClick={() => moveMs(index, -1)} disabled={index === 0} title="Move up">↑</button>
+                                <button className={styles.msActBtn} onClick={() => moveMs(index, 1)} disabled={index === milestones.length - 1} title="Move down">↓</button>
+                                <button className={styles.msActBtn} onClick={() => startEditMs(ms)} title="Edit">✎</button>
+                                <button className={`${styles.msActBtn} ${styles.msActDelete}`} onClick={() => deleteMs(ms.id)} title="Delete">✕</button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {/* Add new row */}
+                    {addingMs && (
+                      <div className={styles.msTableRow} style={{background:'rgba(201,168,76,0.04)',borderColor:'rgba(201,168,76,0.2)'}}>
+                        <div className={styles.msColNum} style={{color:'var(--gold)',opacity:0.5}}>{milestones.length + 1}</div>
+                        <div className={styles.msColTitle}>
+                          <input
+                            className={styles.msCellInput}
+                            value={newMs.title}
+                            onChange={e => setNewMs(d => ({ ...d, title: e.target.value }))}
+                            placeholder="Milestone title"
+                            autoFocus
+                            onKeyDown={e => e.key === 'Enter' && addMilestone()}
+                          />
+                        </div>
+                        <div className={styles.msColDate}>
+                          <input
+                            className={styles.msCellDateInput}
+                            type="date"
+                            value={newMs.due_date}
+                            onChange={e => setNewMs(d => ({ ...d, due_date: e.target.value }))}
+                          />
+                        </div>
+                        <div className={styles.msColStatus}/>
+                        <div className={styles.msColActions}>
+                          <button className={styles.msActSave} onClick={addMilestone}>Add</button>
+                          <button className={styles.msActCancel} onClick={() => { setAddingMs(false); setNewMs({ title:'', due_date:'' }) }}>✕</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 

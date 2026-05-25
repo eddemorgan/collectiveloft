@@ -412,10 +412,10 @@ function TermsPage() {
             <div className={styles.successSub}>
               The agreement has been sent to {partnerFirst} for review. Once they confirm, the Loft Studio opens and your collaboration officially begins.
             </div>
-            <div className={styles.successActions}>
-              <Link href="/my-studios" className={styles.btnOpenStudio}>Open Loft Studio</Link>
-              <Link href="/my-studios" className={styles.btnBackLink}>My Studios</Link>
-            </div>
+<div className={styles.successActions}>
+  <Link href={`/profile/${myProfile?.firstname?.trim().toLowerCase()}-${myProfile?.lastname?.trim().toLowerCase()}`} className={styles.btnOpenStudio}>Open my profile</Link>
+  <Link href="/briefs" className={styles.btnBackLink}>Back to Collabs</Link>
+</div>
           </div>
         </div>
       )}

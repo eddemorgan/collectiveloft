@@ -370,13 +370,13 @@ export default function StudioPage() {
   async function submitRating() {
     if (!ratingStars || reviewText.trim().length < 20) return
     await supabase.from('ratings').insert({
-      rater_id: myProfile.id,
-      ratee_id: contributor?.id === myProfile.id ? owner?.id : contributor?.id,
-      studio_id: studioId,
-      stars: ratingStars,
-      endorsed,
-      review: reviewText.trim(),
-      submitted: true,
+      rater_id:     myProfile.id,
+      ratee_id:     contributor?.id === myProfile.id ? owner?.id : contributor?.id,
+      studio_id:    studioId,
+      stars:        ratingStars,
+      endorsements: endorsed,
+      review:       reviewText.trim(),
+      submitted:    true,
     })
     await supabase.from('collab_terms').update({ rated: true }).eq('id', studioId)
     setRatingDone(true)

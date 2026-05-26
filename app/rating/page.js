@@ -90,13 +90,13 @@ function RatingForm() {
     setSaving(true)
     try {
       await supabase.from('ratings').insert({
-        rater_id:  myProfile.id,
-        ratee_id:  partner?.id,
-        studio_id: studioId,
+        rater_id:     myProfile.id,
+        ratee_id:     partner?.id,
+        studio_id:    studioId,
         stars,
-        endorsed,
-        review:    review.trim(),
-        submitted: true,
+        endorsements: endorsed,
+        review:       review.trim(),
+        submitted:    true,
       })
       await supabase.from('collab_terms').update({ rated: true }).eq('id', studioId)
     } catch (e) {

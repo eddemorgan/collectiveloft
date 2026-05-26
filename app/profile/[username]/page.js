@@ -727,9 +727,9 @@ export default function ProfilePage() {
                           <div className={styles.cvReview}>"{r.review}"</div>
                         )}
 
-                        {(r.endorsed||[]).length > 0 && (
+                        {(r.endorsements||[]).length > 0 && (
                           <div className={styles.cvTags}>
-                            {r.endorsed.map(tag => (
+                            {r.endorsements.map(tag => (
                               <span key={tag} className={styles.cvTag}>{tag}</span>
                             ))}
                           </div>

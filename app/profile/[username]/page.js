@@ -354,6 +354,7 @@ export default function ProfilePage() {
       .select('*, rater:profiles!ratings_rater_id_fkey(firstname, lastname, headline)')
       .eq('ratee_id', data.id)
       .eq('submitted', true)
+      .order('created_at', { ascending: false })
     setRatings(ratingData || [])
 
     const { data: portfolioData } = await supabase
@@ -574,9 +575,9 @@ export default function ProfilePage() {
       </div>
 
       <div className={styles.tabsBar}>
-        {['work','about','collabs','briefs'].map(tab=>(
+        {['work','about','collabs','community','briefs'].map(tab=>(
           <div key={tab} className={`${styles.tab} ${activeTab===tab?styles.active:''}`} onClick={()=>setActiveTab(tab)}>
-            {tab.charAt(0).toUpperCase()+tab.slice(1)}
+            {tab === 'community' ? 'Community Voice' : tab.charAt(0).toUpperCase()+tab.slice(1)}
           </div>
         ))}
         <Link href="/my-studios" className={styles.tab}>My Loft Studios</Link>
@@ -687,6 +688,57 @@ export default function ProfilePage() {
                 ? <div className={styles.emptyState}>Once you complete a collab through Collective Loft, it will appear here.</div>
                 : studios.map(s => <CompletedCollabCard key={s.id} studio={s} profileId={profileId}/>)
               }
+            </div>
+          )}
+
+          {activeTab==='community'&&(
+            <div className={styles.contentSection}>
+              <div className={styles.secLabel}>
+                Community Voice
+                {ratings.length > 0 && <span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'rgba(240,236,227,0.3)',letterSpacing:'normal',textTransform:'none'}}>({ratings.length} {ratings.length === 1 ? 'review' : 'reviews'})</span>}
+              </div>
+
+              {ratings.length === 0 ? (
+                <div className={styles.emptyState}>No reviews yet. Completed collabs will appear here.</div>
+              ) : (
+                <div className={styles.cvList}>
+                  {ratings.map(r => {
+                    const rater = r.rater
+                    const raterName = rater ? `${rater.firstname} ${rater.lastname}` : 'Collaborator'
+                    const raterInit = rater ? `${(rater.firstname||'?')[0]}${(rater.lastname||'?')[0]}`.toUpperCase() : '??'
+                    return (
+                      <div key={r.id} className={styles.cvCard}>
+                        <div className={styles.cvCardTop}>
+                          <div className={styles.cvRaterRow}>
+                            <div className={styles.cvAv}>{raterInit}</div>
+                            <div className={styles.cvRaterInfo}>
+                              <div className={styles.cvRaterName}>{raterName}</div>
+                              {rater?.headline && <div className={styles.cvRaterHeadline}>{rater.headline}</div>}
+                            </div>
+                            <div className={styles.cvStars}>
+                              {[1,2,3,4,5].map(n => (
+                                <span key={n} className={r.stars >= n ? styles.cvStarLit : styles.cvStarDim}>★</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        {r.review && (
+                          <div className={styles.cvReview}>"{r.review}"</div>
+                        )}
+
+                        {(r.endorsed||[]).length > 0 && (
+                          <div className={styles.cvTags}>
+                            {r.endorsed.map(tag => (
+                              <span key={tag} className={styles.cvTag}>{tag}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )}
 

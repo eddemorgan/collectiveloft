@@ -51,7 +51,7 @@
 .profileTags { display:flex; flex-direction:column; gap:0.4rem; margin-top:0.25rem; }
 .tagRow { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
 .tagRowLabel { font-size:0.58rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:rgba(240,236,227,0.45); flex-shrink:0; min-width:72px; }
-.ptag { font-size:0.6rem; padding:0.15rem 0.55rem; border-radius:2px; border:0.5px solid rgba(240,236,227,0.1); color:var(--faint); letter-spacing:0.04em; text-transform:uppercase; }
+.ptag { display:inline-block; font-size:0.6rem; padding:0.15rem 0.55rem; border-radius:2px; border:0.5px solid rgba(240,236,227,0.1); color:var(--faint); letter-spacing:0.04em; text-transform:uppercase; white-space:nowrap; }
 .ptagOpen { border-color:rgba(86,179,156,0.35); color:var(--teal); }
 .ptagDisc { border-color:rgba(201,168,76,0.18); color:rgba(201,168,76,0.65); }
 

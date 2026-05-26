@@ -530,15 +530,15 @@ export default function StudioPage() {
                   </div>
                 )}
 
-                {/* Upcoming milestones */}
-                {milestones.filter(m => !m.done && m.due_date).length > 0 && (
-                  <>
-                    <div className={styles.secLbl}>Upcoming</div>
-                    <div className={styles.upcomingList}>
-                      {milestones
-                        .filter(m => !m.done && m.due_date)
-                        .slice(0, 3)
-                        .map(ms => {
+                {/* Upcoming milestones -- reads from live studio_milestones state */}
+                {(() => {
+                  const upcoming = milestones.filter(m => !m.done && m.due_date)
+                  if (upcoming.length === 0) return null
+                  return (
+                    <>
+                      <div className={styles.secLbl}>Upcoming</div>
+                      <div className={styles.upcomingList}>
+                        {upcoming.map(ms => {
                           const d = daysLeft(ms.due_date)
                           const status = msStatus(ms.due_date, ms.done)
                           return (
@@ -549,11 +549,11 @@ export default function StudioPage() {
                               </div>
                             </div>
                           )
-                        })
-                      }
-                    </div>
-                  </>
-                )}
+                        })}
+                      </div>
+                    </>
+                  )
+                })()}
 
                 {/* Brief summary */}
                 <div className={styles.secLbl}>Project brief</div>

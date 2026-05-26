@@ -142,6 +142,21 @@ export default function StudioPage() {
     return () => supabase.removeChannel(channel)
   }, [studioId])
 
+  // Realtime notes
+  useEffect(() => {
+    if (!studioId) return
+    const channel = supabase
+      .channel(`studio-notes-${studioId}`)
+      .on('postgres_changes', { event:'*', schema:'public', table:'studio_notes', filter:`studio_id=eq.${studioId}` },
+        payload => {
+          if (payload.new?.content !== undefined) {
+            setNotes(payload.new.content || '')
+          }
+        })
+      .subscribe()
+    return () => supabase.removeChannel(channel)
+  }, [studioId])
+
   async function load() {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()

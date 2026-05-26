@@ -43,7 +43,7 @@ function computeScore(profile, myProfile) {
   if (crossDisc) score += 20
   const overlap = mySkills.filter(s => theirSkills.includes(s)).length
   score += Math.min(overlap * 5, 20)
-  if (profile.open_to_collab) score += 5
+  if (profile.availability === 'open') score += 5
   if ((profile.collabs_count || 0) > 0) score += 5
   return Math.min(score, 99)
 }
@@ -88,12 +88,11 @@ export default function MatchingPage() {
       }
       let query = supabase
         .from('profiles')
-        .select('id, firstname, lastname, headline, disciplines, skills, city, state, country, avatar_url, open_to_collab, collabs_count, compensation, seeking, bio')
+        .select('id, firstname, lastname, headline, disciplines, skills, city, state, country, avatar_url, availability, collabs_count, compensation, seeking, bio')
         .order('created_at', { ascending: false })
       if (user) query = query.neq('id', user.id)
       const { data: all } = await query
       setProfiles(all || [])
-      console.log('profiles loaded:', all?.length, all?.[0])
       setLoading(false)
     }
     load()
@@ -108,7 +107,7 @@ export default function MatchingPage() {
       if (activeDisc !== 'all') {
         if (!(p.disciplines || []).includes(activeDisc)) return false
       }
-      if (toggles.open && !p.open_to_collab) return false
+      if (toggles.open && p.availability !== 'open') return false
       if (toggles.collabs && !(p.collabs_count > 0)) return false
       const comp = p.compensation || []
       if (toggles.exchange && !toggles.paid) {
@@ -287,7 +286,7 @@ export default function MatchingPage() {
                         ) : (
                           <div className={`${styles.mcAv} ${styles.mcAvInitials}`}>
                             {inits}
-                            <div className={`${styles.mcOnline} ${p.open_to_collab ? styles.dotOn : styles.dotOff}`} />
+                            <div className={`${styles.mcOnline} ${p.availability === 'open' ? styles.dotOn : styles.dotOff}`} />
                           </div>
                         )}
                       </div>
@@ -304,7 +303,7 @@ export default function MatchingPage() {
                             {p.disciplines.map(d => (
                               <div key={d} className={styles.mcReason}>Discipline: {d}</div>
                             ))}
-                            {p.open_to_collab && <div className={styles.mcReason}>Open to collaborate now</div>}
+                            {p.availability === 'open' && <div className={styles.mcReason}>Open to collaborate now</div>}
                           </div>
                         )}
                         {(p.skills || []).length > 0 && (

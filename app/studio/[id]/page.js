@@ -157,12 +157,10 @@ export default function StudioPage() {
 
     if (term) {
       setStudio(term)
-      // initiator = brief creator = collab owner
       setOwner(term.initiator)
       setContributor(term.partner)
       setCloseProposed(term.close_proposed || false)
       setShowComplete(term.status === 'complete')
-      setRatingDone(term.rated || false)
     }
 
     const { data: allTerms } = await supabase
@@ -174,6 +172,16 @@ export default function StudioPage() {
 
     const { data: ms } = await supabase.from('studio_milestones').select('*').eq('studio_id', studioId)
     setMilestones(sortByDate(ms || []))
+
+    // Check if THIS user has already submitted a rating for this studio
+    const { data: existingRating } = await supabase
+      .from('ratings')
+      .select('id')
+      .eq('studio_id', studioId)
+      .eq('rater_id', user.id)
+      .eq('submitted', true)
+      .single()
+    setRatingDone(!!existingRating)
 
     const { data: fs } = await supabase.from('studio_files').select('*').eq('studio_id', studioId).order('created_at', { ascending: false })
     setFiles(fs || [])

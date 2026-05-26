@@ -88,20 +88,22 @@ function RatingForm() {
   async function handleSubmit() {
     if (!validate()) return
     setSaving(true)
-    try {
-      await supabase.from('ratings').insert({
-        rater_id:     myProfile.id,
-        ratee_id:     partner?.id,
-        studio_id:    studioId,
-        stars,
-        endorsements: endorsed,
-        review:       review.trim(),
-        submitted:    true,
-      })
-      await supabase.from('collab_terms').update({ rated: true }).eq('id', studioId)
-    } catch (e) {
-      console.error(e)
+    const { error } = await supabase.from('ratings').insert({
+      rater_id:     myProfile.id,
+      ratee_id:     partner?.id,
+      studio_id:    studioId,
+      stars,
+      endorsements: endorsed,
+      review:       review.trim(),
+      submitted:    true,
+    })
+    if (error) {
+      console.error('RATING INSERT ERROR:', error)
+      alert(`Insert failed: ${error.message} (${error.code})`)
+      setSaving(false)
+      return
     }
+    await supabase.from('collab_terms').update({ rated: true }).eq('id', studioId)
     setSaving(false)
     setSubmitted(true)
   }

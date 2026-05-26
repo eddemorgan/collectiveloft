@@ -93,6 +93,7 @@ export default function MatchingPage() {
       if (user) query = query.neq('id', user.id)
       const { data: all } = await query
       setProfiles(all || [])
+      console.log('profiles loaded:', all?.length, all?.[0])
       setLoading(false)
     }
     load()

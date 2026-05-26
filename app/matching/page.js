@@ -44,7 +44,7 @@ function computeScore(profile, myProfile) {
   const overlap = mySkills.filter(s => theirSkills.includes(s)).length
   score += Math.min(overlap * 5, 20)
   if (profile.open_to_collab) score += 5
-  if ((profile.collab_count || 0) > 0) score += 5
+  if ((profile.collabs_count || 0) > 0) score += 5
   return Math.min(score, 99)
 }
 
@@ -86,11 +86,11 @@ export default function MatchingPage() {
         const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
         setMyProfile(data)
       }
-      const query = supabase
+      let query = supabase
         .from('profiles')
-        .select('id, firstname, lastname, headline, disciplines, skills, location, avatar_url, open_to_collab, collab_count, compensation, seeking, bio')
+        .select('id, firstname, lastname, headline, disciplines, skills, city, state, country, avatar_url, open_to_collab, collabs_count, compensation, seeking, bio')
         .order('created_at', { ascending: false })
-      if (user) query.neq('id', user.id)
+      if (user) query = query.neq('id', user.id)
       const { data: all } = await query
       setProfiles(all || [])
       setLoading(false)
@@ -108,7 +108,7 @@ export default function MatchingPage() {
         if (!(p.disciplines || []).includes(activeDisc)) return false
       }
       if (toggles.open && !p.open_to_collab) return false
-      if (toggles.collabs && !(p.collab_count > 0)) return false
+      if (toggles.collabs && !(p.collabs_count > 0)) return false
       const comp = p.compensation || []
       if (toggles.exchange && !toggles.paid) {
         if (!comp.includes('Creative exchange')) return false
@@ -118,7 +118,7 @@ export default function MatchingPage() {
       }
       return true
     })
-    if (sortMode === 'collabs') list.sort((a, b) => (b.collab_count || 0) - (a.collab_count || 0))
+    if (sortMode === 'collabs') list.sort((a, b) => (b.collabs_count || 0) - (a.collabs_count || 0))
     else if (sortMode === 'recent') list.sort(() => 0)
     else list.sort((a, b) => b.score - a.score)
     return list
@@ -313,8 +313,8 @@ export default function MatchingPage() {
                         )}
                         <div className={styles.mcFooter}>
                           <div className={styles.mcMeta}>
-                            {p.location && <span>📍 {p.location}</span>}
-                            <span>◎ {p.collab_count || 0} collabs</span>
+                            {(p.city || p.country) && <span>📍 {[p.city, p.country].filter(Boolean).join(', ')}</span>}
+                            <span>◎ {p.collabs_count || 0} collabs</span>
                           </div>
                           <button className={styles.btnReachOut} onClick={e => handleReachOut(e, p.id)}>
                             Reach out

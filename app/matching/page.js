@@ -55,11 +55,12 @@ function scoreClass(s) {
 }
 
 function avatarInitials(first, last) {
-  return `${(first || '')[0] || ''}${(last || '')[0] || ''}`.toUpperCase()
+  return `${(first || '?')[0]}${(last || '?')[0]}`.toUpperCase()
 }
 
 function slugify(first, last) {
-  return `${(first || '').toLowerCase()}-${(last || '').toLowerCase()}`
+  if (!first || !last) return 'unknown'
+  return `${first.toLowerCase()}-${last.toLowerCase()}`
 }
 
 export default function MatchingPage() {
@@ -266,7 +267,7 @@ export default function MatchingPage() {
             </div>
           ) : (
             <div className={styles.matchGrid}>
-              {filtered.map((p, i) => {
+              {filtered.filter(p => p.firstname && p.lastname).map((p, i) => {
                 const discKey = (p.disciplines || [])[0]
                 const dk      = DISC_KEY_MAP[discKey] || 'visual'
                 const slug    = slugify(p.firstname, p.lastname)

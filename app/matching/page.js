@@ -35,9 +35,9 @@ const DISC_KEY_MAP = {
 function computeScore(profile, myProfile) {
   if (!myProfile) return Math.floor(Math.random() * 40) + 50
   const myDiscs     = myProfile.disciplines || []
-  const mySkills    = (myProfile.skills || []).map(s => s.toLowerCase())
+  const mySkills    = (myProfile.skills || []).filter(s => typeof s === 'string').map(s => s.toLowerCase())
   const theirDiscs  = profile.disciplines || []
-  const theirSkills = (profile.skills || []).map(s => s.toLowerCase())
+  const theirSkills = (profile.skills || []).filter(s => typeof s === 'string').map(s => s.toLowerCase())
   let score = 50
   const crossDisc = theirDiscs.some(d => !myDiscs.includes(d))
   if (crossDisc) score += 20

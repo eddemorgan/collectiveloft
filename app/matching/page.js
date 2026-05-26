@@ -73,7 +73,7 @@ export default function MatchingPage() {
   const [sortMode,   setSortMode]   = useState('score')
 
   const [toggles, setToggles] = useState({
-    open: true, collabs: false, remote: false,
+    open: false, collabs: false, remote: false,
     exchange: true, paid: true, revshare: false,
   })
 
@@ -224,7 +224,7 @@ export default function MatchingPage() {
 
           <button className={styles.clearBtn} onClick={() => {
             setActiveDisc('all')
-            setToggles({ open: true, collabs: false, remote: false, exchange: true, paid: true, revshare: false })
+            setToggles({ open: false, collabs: false, remote: false, exchange: true, paid: true, revshare: false })
           }}>
             Clear all filters
           </button>

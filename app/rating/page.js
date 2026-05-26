@@ -3,9 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { supabase } from '../../../lib/supabase'
-import Footer from '../../components/Footer'
-import styles from './profile.module.css'
+import { supabase } from '../../lib/supabase'
 
 const SKILL_WIDTHS = [95, 88, 78, 65, 55, 48, 42, 38]
 

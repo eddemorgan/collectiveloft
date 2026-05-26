@@ -563,13 +563,23 @@ export default function ProfilePage() {
           </div>
           <div className={styles.metaRow}>
             {location&&<div className={styles.metaItem}><span>📍</span><span>{location}</span></div>}
-            <div className={styles.metaItem}><span>⊞</span><span>{profile.connections_count||0} connections</span></div>
+            <div className={styles.metaItem}><span>⊞</span><span>{profile.connections_count||0} collaborators</span></div>
             <div className={styles.metaItem}><span>◎</span><span>{studios.length} collabs completed</span></div>
           </div>
           <div className={styles.profileTags}>
             {profile.availability==='open'&&<span className={`${styles.ptag} ${styles.ptagOpen}`}>Open to collabs</span>}
-            {disciplines.slice(0,2).map(d=><span key={d} className={`${styles.ptag} ${styles.ptagDisc}`}>{d}</span>)}
-            {skills.slice(0,2).map(s=><span key={s} className={styles.ptag}>{s}</span>)}
+            {disciplines.length > 0 && (
+              <div className={styles.tagRow}>
+                <span className={styles.tagRowLabel} style={{color:'var(--gold)'}}>Disciplines</span>
+                {disciplines.slice(0,3).map(d=><span key={d} className={`${styles.ptag} ${styles.ptagDisc}`}>{d}</span>)}
+              </div>
+            )}
+            {skills.length > 0 && (
+              <div className={styles.tagRow}>
+                <span className={styles.tagRowLabel}>Skills</span>
+                {skills.slice(0,3).map(s=><span key={s} className={styles.ptag}>{s}</span>)}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -796,7 +806,7 @@ export default function ProfilePage() {
             <div className={styles.sbLabel}>Activity</div>
             <div className={styles.statGrid}>
               <div className={styles.statCard}><div className={styles.statNum}>{studios.length}</div><div className={styles.statLbl}>Collabs</div></div>
-              <div className={styles.statCard}><div className={styles.statNum}>{profile.connections_count||0}</div><div className={styles.statLbl}>Connections</div></div>
+              <div className={styles.statCard}><div className={styles.statNum}>{profile.connections_count||0}</div><div className={styles.statLbl}>Collaborators</div></div>
               <div className={styles.statCard}><div className={styles.statNum}>{avgRating||'—'}</div><div className={styles.statLbl}>Rating</div></div>
               <div className={styles.statCard}><div className={styles.statNum}>{ratings.length}</div><div className={styles.statLbl}>Reviews</div></div>
             </div>

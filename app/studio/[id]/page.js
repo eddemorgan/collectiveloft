@@ -327,14 +327,30 @@ export default function StudioPage() {
       completed_at: new Date().toISOString(),
     }).eq('id', studioId)
 
-    // Increment collabs_count on both profiles
+    // Check if these two have completed a studio together before (excluding this one)
+    const { data: priorStudios } = await supabase
+      .from('collab_terms')
+      .select('id')
+      .neq('id', studioId)
+      .eq('status', 'complete')
+      .or(`and(initiator_id.eq.${owner?.id},partner_id.eq.${contributor?.id}),and(initiator_id.eq.${contributor?.id},partner_id.eq.${owner?.id})`)
+
+    const firstTimeCollaborators = !priorStudios || priorStudios.length === 0
+
+    // Increment collabs_count on both profiles always
     if (owner?.id) {
-      const { data: ownerProfile } = await supabase.from('profiles').select('collabs_count').eq('id', owner.id).single()
-      await supabase.from('profiles').update({ collabs_count: (ownerProfile?.collabs_count || 0) + 1 }).eq('id', owner.id)
+      const { data: ownerProfile } = await supabase.from('profiles').select('collabs_count, connections_count').eq('id', owner.id).single()
+      await supabase.from('profiles').update({
+        collabs_count: (ownerProfile?.collabs_count || 0) + 1,
+        connections_count: firstTimeCollaborators ? (ownerProfile?.connections_count || 0) + 1 : (ownerProfile?.connections_count || 0),
+      }).eq('id', owner.id)
     }
     if (contributor?.id) {
-      const { data: contribProfile } = await supabase.from('profiles').select('collabs_count').eq('id', contributor.id).single()
-      await supabase.from('profiles').update({ collabs_count: (contribProfile?.collabs_count || 0) + 1 }).eq('id', contributor.id)
+      const { data: contribProfile } = await supabase.from('profiles').select('collabs_count, connections_count').eq('id', contributor.id).single()
+      await supabase.from('profiles').update({
+        collabs_count: (contribProfile?.collabs_count || 0) + 1,
+        connections_count: firstTimeCollaborators ? (contribProfile?.connections_count || 0) + 1 : (contribProfile?.connections_count || 0),
+      }).eq('id', contributor.id)
     }
 
     setStudio(prev => ({ ...prev, status: 'complete' }))

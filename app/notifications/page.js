@@ -78,7 +78,7 @@ export default function NotificationsPage() {
       const actions = []
       const updates = []
 
-      // 1. Terms waiting for my review -- link directly to profile briefs tab
+      // 1. Terms waiting for my review
       const { data: pendingTerms } = await supabase
         .from('collab_terms')
         .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(firstname, lastname)`)
@@ -99,7 +99,6 @@ export default function NotificationsPage() {
             title: isInitiator ? `Your modified terms are back` : `${other} sent you collab terms`,
             sub: t.project_title ? `Project: ${t.project_title} · Review on your profile Briefs tab` : 'Review the terms on your profile Briefs tab.',
             meta: timeAgo(t.created_at),
-            // Link to profile briefs tab -- user will see Terms under review section
             href: `/profile/${user.id}#briefs`,
             tag: 'Action required',
             tagColor: '#C9A84C',
@@ -107,16 +106,24 @@ export default function NotificationsPage() {
         }
       }
 
-      // 2. Completed studios I haven't rated
-      const { data: unrated } = await supabase
+      // 2. Completed studios I haven't rated -- check ratings table per-user, not rated flag
+      const { data: completedStudios } = await supabase
         .from('collab_terms')
         .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(firstname, lastname), partner:profiles!collab_terms_partner_id_fkey(firstname, lastname)`)
         .or(`initiator_id.eq.${user.id},partner_id.eq.${user.id}`)
         .eq('status', 'complete')
-        .eq('rated', false)
         .order('updated_at', { ascending: false })
 
-      for (const t of unrated || []) {
+      const { data: myRatings } = await supabase
+        .from('ratings')
+        .select('studio_id')
+        .eq('rater_id', user.id)
+        .eq('submitted', true)
+
+      const ratedStudioIds = new Set((myRatings || []).map(r => r.studio_id))
+
+      for (const t of completedStudios || []) {
+        if (ratedStudioIds.has(t.id)) continue
         const other = t.initiator_id === user.id ? t.partner : t.initiator
         const name  = other ? `${other.firstname} ${other.lastname}` : 'your collaborator'
         actions.push({
@@ -132,7 +139,7 @@ export default function NotificationsPage() {
         })
       }
 
-      // 3. Applications to my briefs -- link directly to that brief
+      // 3. Applications to my briefs
       const { data: myBriefs } = await supabase
         .from('briefs')
         .select('id, title')
@@ -162,7 +169,6 @@ export default function NotificationsPage() {
             title: `${name} applied to your brief`,
             sub: `"${title}" · Click to open the brief and review their application`,
             meta: timeAgo(a.created_at),
-            // Link directly to briefs page with the specific brief selected via query param
             href: `/briefs?open=${a.brief_id}`,
             tag: 'New application',
             tagColor: '#a078d0',

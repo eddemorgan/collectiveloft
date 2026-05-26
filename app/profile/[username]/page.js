@@ -413,23 +413,19 @@ export default function ProfilePage() {
                      (t.current_editor === 'partner'   && t.partner_id   === userId)
       if (myTurn) count++
     }
-const { data: completedStudios } = await supabase
-  .from('collab_terms')
-  .select('id')
-  .or(`initiator_id.eq.${userId},partner_id.eq.${userId}`)
-  .eq('status', 'complete')
-
-const studioIds = (completedStudios || []).map(s => s.id)
-if (studioIds.length > 0) {
-  const { data: myRatings } = await supabase
-    .from('ratings')
-    .select('studio_id')
-    .eq('rater_id', userId)
-    .eq('submitted', true)
-  const ratedIds = new Set((myRatings || []).map(r => r.studio_id))
-  const unratedCount = studioIds.filter(id => !ratedIds.has(id)).length
-  count += unratedCount
-}
+    const { data: completedForRating } = await supabase
+      .from('collab_terms')
+      .select('id')
+      .or(`initiator_id.eq.${userId},partner_id.eq.${userId}`)
+      .eq('status', 'complete')
+    const { data: mySubmittedRatings } = await supabase
+      .from('ratings')
+      .select('studio_id')
+      .eq('rater_id', userId)
+      .eq('submitted', true)
+    const ratedSet = new Set((mySubmittedRatings || []).map(r => r.studio_id))
+    const unratedCount = (completedForRating || []).filter(s => !ratedSet.has(s.id)).length
+    count += unratedCount
     const { data: mb } = await supabase.from('briefs').select('id').eq('poster_id', userId).eq('status', 'open')
     if (mb && mb.length > 0) {
       const { count: apps } = await supabase.from('applications').select('id', { count:'exact', head:true }).in('brief_id', mb.map(b => b.id)).eq('seen', false)

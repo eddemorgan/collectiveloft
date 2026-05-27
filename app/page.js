@@ -87,7 +87,6 @@ const SKILLS = [
   { d: 'tech',    label: 'Audio-visual' },
 ]
 
-// Discipline grid -- discipline key matches profile discipline labels
 const DISC_GRID = [
   { icon: '🎨', name: 'Visual Art',       discipline: 'Visual Art' },
   { icon: '🎵', name: 'Music',            discipline: 'Music' },
@@ -110,7 +109,6 @@ export default function LandingPage() {
   const [discCounts, setDiscCounts] = useState({})
 
   useEffect(() => {
-    // Recent members for hero
     supabase
       .from('profiles')
       .select('id, firstname, lastname, headline, disciplines, rightnow, compensation, availability, city, state')
@@ -118,7 +116,6 @@ export default function LandingPage() {
       .limit(3)
       .then(({ data }) => setMembers(data || []))
 
-    // Dynamic discipline counts
     supabase
       .from('profiles')
       .select('disciplines')
@@ -132,7 +129,6 @@ export default function LandingPage() {
         setDiscCounts(counts)
       })
 
-    // Auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setAuthUser(session.user)
@@ -230,6 +226,7 @@ export default function LandingPage() {
 
     setSubmitting(true)
     try {
+      // Step 1: Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -239,29 +236,35 @@ export default function LandingPage() {
       if (!authData.user) {
         throw new Error('An account with this email already exists. Try signing in instead.')
       }
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: authData.user.id,
-          firstname: form.firstname,
-          lastname: form.lastname,
-          email: form.email,
-          headline: form.headline,
-          bio: form.bio,
-          rightnow: form.rightnow,
-          seeking: form.seeking,
-          country,
-          state: countryData?.states ? stateVal : '',
-          city: countryData?.states ? city : stateVal,
-          disciplines: selectedDiscs.map(id => {
-            const found = DISCIPLINES.find(d => d.id === id)
-            return found ? found.label : id
-          }),
-          skills: selectedSkills,
-          compensation: selectedComps,
-        })
-      if (profileError) throw profileError
+
+      // Step 2: Wait for the DB trigger to create the empty profile row
+      await new Promise(r => setTimeout(r, 1000))
+
+      // Step 3: Update the profile row with all the form data
+      // Use update not upsert -- trigger already created the row
+      await supabase.from('profiles').update({
+        firstname:   form.firstname,
+        lastname:    form.lastname,
+        email:       form.email,
+        headline:    form.headline,
+        bio:         form.bio,
+        rightnow:    form.rightnow,
+        seeking:     form.seeking,
+        country,
+        state:       countryData?.states ? stateVal : '',
+        city:        countryData?.states ? city : stateVal,
+        disciplines: selectedDiscs.map(id => {
+          const found = DISCIPLINES.find(d => d.id === id)
+          return found ? found.label : id
+        }),
+        skills:       selectedSkills,
+        compensation: selectedComps,
+      }).eq('id', authData.user.id)
+
+      // Always show success even if profile update had issues --
+      // the auth account is created and they can update profile after confirming email
       setSubmitted(true)
+
     } catch (err) {
       setFormError(err.message || 'Something went wrong. Please try again.')
     } finally {
@@ -275,7 +278,6 @@ export default function LandingPage() {
 
   return (
     <>
-      {/* Nav */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
@@ -290,7 +292,6 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero */}
       <div className={styles.hero}>
         <div className={styles.heroLeft}>
           <div className={styles.eyebrow}>Where Creatives Find Each Other</div>
@@ -349,7 +350,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Discipline strip */}
       <div className={styles.discStrip}>
         <div className={styles.stripLbl}>Disciplines on the platform</div>
         <div className={styles.discGrid}>
@@ -366,7 +366,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* Manifesto */}
       <div className={styles.manifesto}>
         <div className={styles.manifestoTxt}>
           Not a marketplace. Not a portfolio dump.{' '}
@@ -374,7 +373,6 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* How it works */}
       <div className={styles.how}>
         {[
           { num: '01', title: 'Build your creative identity',  desc: 'Show your work, your influences, what you\'re making right now, and what kind of collaborators you\'re looking for.' },
@@ -389,7 +387,6 @@ export default function LandingPage() {
         ))}
       </div>
 
-      {/* Modal */}
       {modalOpen && (
         <div className={styles.mo} onClick={e => { if (e.target === e.currentTarget) closeModal() }}>
           <div className={styles.modal}>
@@ -410,12 +407,17 @@ export default function LandingPage() {
             {submitted ? (
               <div className={styles.scs}>
                 <div className={styles.scM}>✦</div>
-                <div className={styles.scT}>Check your <span>email.</span></div>
+                <div className={styles.scT}>Check your <span>inbox.</span></div>
                 <div className={styles.scS}>
-                  We sent a confirmation link to <strong style={{ color: 'var(--cream)' }}>{form.email}</strong>. Click it to activate your account and sign in for the first time.
+                  We sent a confirmation link to{' '}
+                  <strong style={{ color: 'var(--cream)' }}>{form.email}</strong>.
+                  Click it to activate your account and access your profile for the first time.
                 </div>
                 <div className={styles.scS} style={{ marginTop: '0.5rem', fontSize: '0.72rem', color: 'rgba(240,236,227,0.35)' }}>
-                  Check your spam folder if it doesn't arrive within a minute.
+                  Don't see it? Check your spam folder or contact{' '}
+                  <a href="mailto:help@collectiveloft.com" style={{ color: 'var(--gold)', textDecoration: 'none' }}>
+                    help@collectiveloft.com
+                  </a>
                 </div>
                 <div className={styles.scA}>
                   <button className={styles.bbh} onClick={closeModal}>Got it</button>

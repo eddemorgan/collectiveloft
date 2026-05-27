@@ -567,7 +567,7 @@ export default function ProfilePage() {
             </div>
             {!isOwner&&(
               <div className={styles.actionBtns}>
-  <Link href={`/terms?with=${profile.id}`} className={styles.btnConnect}>Reach Out ↗</Link>
+  <Link href={`/terms?with=${profile.id}`} className={styles.btnConnect}>Reach Out with Terms ↗</Link>
 </div>
             )}
           </div>

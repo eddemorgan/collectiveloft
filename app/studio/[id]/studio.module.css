@@ -138,6 +138,8 @@
 .avTeal { background: rgba(86,179,156,0.2); color: var(--teal); }
 .btnProposeClose { font-size: 0.58rem; padding: 0.3rem 0.75rem; border-radius: 2px; background: transparent; border: 0.5px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.28); cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.15s; white-space: nowrap; }
 .btnProposeClose:hover { border-color: rgba(194,112,128,0.4); color: #c27080; }
+.btnExport { background:transparent; border:0.5px solid rgba(240,236,227,0.15); color:var(--faint); padding:0.4rem 0.85rem; font-family:var(--sans); font-size:0.62rem; letter-spacing:0.07em; text-transform:uppercase; border-radius:2px; cursor:pointer; transition:all 0.15s; }
+.btnExport:hover { border-color:rgba(240,236,227,0.3); color:var(--cream); }
 .btnConfirmComplete { font-size: 0.62rem; padding: 0.35rem 1rem; border-radius: 2px; background: transparent; border: 1.5px solid var(--gold); color: var(--gold); cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.15s; white-space: nowrap; font-family: var(--sans); font-weight: 600; }
 .btnConfirmComplete:hover { background: rgba(201,168,76,0.1); }
 .completedLabel { font-size: 0.62rem; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; font-family: var(--sans); }

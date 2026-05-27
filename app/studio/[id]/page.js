@@ -221,7 +221,108 @@ export default function StudioPage() {
     })
   }
 
-  function myName() {
+  function exportStudio() {
+    const date = (d) => d ? new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : 'Not set'
+    const datetime = (d) => d ? new Date(d).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' }) : ''
+
+    const lines = []
+
+    // Header
+    lines.push(`# ${studio.project_title || 'Untitled Project'}`)
+    lines.push(`**Collective Loft Studio Export** · ${datetime(new Date())}`)
+    lines.push('')
+    lines.push(`**Status:** ${studio.status === 'complete' ? 'Completed' : 'In Progress'}`)
+    lines.push(`**Collab Owner:** ${ownerName}`)
+    lines.push(`**Collab Contributor:** ${contributorName}`)
+    lines.push(`**Collab Type:** ${studio.collab_type || 'Not specified'}`)
+    if (studio.deadline) lines.push(`**Deadline:** ${date(studio.deadline)}`)
+    if (studio.completed_at) lines.push(`**Completed:** ${date(studio.completed_at)}`)
+    lines.push('')
+
+    // Terms summary
+    lines.push('---')
+    lines.push('## Agreed Terms')
+    lines.push('')
+    if (studio.collab_type === 'paid') {
+      lines.push(`**Fee:** ${studio.fee_from || ''}${studio.fee_to ? ` – ${studio.fee_to}` : ''}`)
+      lines.push(`**Payment schedule:** ${studio.pay_schedule || 'Not specified'}`)
+    } else if (studio.collab_type === 'revenue') {
+      lines.push(`**Revenue split:** ${studio.my_share || '?'}% / ${studio.their_share || '?'}%`)
+    } else {
+      lines.push(`**Arrangement:** Creative exchange`)
+    }
+    lines.push(`**Rights:** ${studio.rights || 'Not specified'}`)
+    if ((studio.deliverables || []).length > 0) {
+      lines.push('')
+      lines.push('**Deliverables:**')
+      studio.deliverables.forEach(d => lines.push(`- ${d}`))
+    }
+    lines.push('')
+
+    // Milestones
+    lines.push('---')
+    lines.push('## Milestones')
+    lines.push('')
+    if (milestones.length === 0) {
+      lines.push('No milestones added.')
+    } else {
+      milestones.forEach((m, i) => {
+        const status = m.done ? '✓' : '○'
+        const due = m.due_date ? ` · Due ${date(m.due_date)}` : ''
+        lines.push(`${status} **${m.title}**${due}`)
+      })
+    }
+    lines.push('')
+
+    // Files
+    lines.push('---')
+    lines.push('## Files')
+    lines.push('')
+    if (files.length === 0) {
+      lines.push('No files uploaded.')
+    } else {
+      files.forEach(f => {
+        const size = f.size ? ` (${(f.size / 1024).toFixed(0)} KB)` : ''
+        lines.push(`- **${f.name}**${size} · ${datetime(f.created_at)}`)
+      })
+    }
+    lines.push('')
+
+    // Notes
+    lines.push('---')
+    lines.push('## Shared Notes')
+    lines.push('')
+    lines.push(notes || 'No notes.')
+    lines.push('')
+
+    // Chat log
+    lines.push('---')
+    lines.push('## Activity & Chat Log')
+    lines.push('')
+    messages.forEach(m => {
+      const time = datetime(m.created_at)
+      if (m.type === 'sys') {
+        lines.push(`_[${time}] ${m.content}_`)
+      } else {
+        const sender = m.sender_id === owner?.id ? ownerName : contributorName
+        lines.push(`**${sender}** · ${time}`)
+        lines.push(m.content)
+      }
+      lines.push('')
+    })
+
+    // Footer
+    lines.push('---')
+    lines.push(`_Exported from Collective Loft · collectiveloft.com_`)
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `${(studio.project_title || 'studio').replace(/\s+/g, '-').toLowerCase()}-export.md`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
     if (!myProfile) return 'Someone'
     return `${myProfile.firstname} ${myProfile.lastname}`
   }
@@ -525,6 +626,7 @@ export default function StudioPage() {
             </div>
 
             <div className={styles.mainHdrRight}>
+              <button className={styles.btnExport} onClick={exportStudio}>↓ Export</button>
               {studio.status === 'complete' ? (
                 <span className={styles.completedLabel}>✦ Completed Collab</span>
               ) : pct === 100 && myProfile?.id === owner?.id ? (

@@ -596,7 +596,7 @@ export default function ProfilePage() {
       </div>
 
       <div className={styles.tabsBar}>
-        {['work','about','collabs','community','briefs'].map(tab=>(
+        {['about','work','briefs','collabs','community'].map(tab=>(
           <div key={tab} className={`${styles.tab} ${activeTab===tab?styles.active:''}`} onClick={()=>setActiveTab(tab)}>
             {tab === 'community' ? 'Community Voice' : tab.charAt(0).toUpperCase()+tab.slice(1)}
           </div>
@@ -773,7 +773,7 @@ export default function ProfilePage() {
                         Active briefs
                         {activeBriefs.length>0&&<span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'rgba(240,236,227,0.3)'}}>({activeBriefs.length})</span>}
                       </div>
-                      <Link href="/briefs" style={{fontFamily:'var(--sans)',fontSize:'0.62rem',color:'var(--gold)',textDecoration:'none',letterSpacing:'0.04em'}}>+ Post a brief</Link>
+                      <Link href="/briefs?post=true" style={{fontFamily:'var(--sans)',fontSize:'0.62rem',color:'var(--gold)',textDecoration:'none',letterSpacing:'0.04em'}}>+ Post a brief</Link>
                     </div>
                     {activeBriefs.length===0
                       ?<div className={styles.emptyState}>No active briefs. Post one to find collaborators.</div>

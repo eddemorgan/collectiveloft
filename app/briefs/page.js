@@ -37,8 +37,9 @@ function initials(firstname, lastname) {
 function BriefsInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const openBriefId  = searchParams.get('open')  // from notification link or profile
-  const fromProfile  = searchParams.get('from')  // profile slug to go back to
+  const openBriefId  = searchParams.get('open')
+  const fromProfile  = searchParams.get('from')
+  const autoPost     = searchParams.get('post') === 'true'
 
   const { loading: authLoading, user } = useAuth()
 
@@ -55,7 +56,6 @@ function BriefsInner() {
   const [deletingId,      setDeletingId]      = useState(null)
   const [applicants,      setApplicants]      = useState([])
   const [acceptingId,     setAcceptingId]     = useState(null)
-  // Track which brief IDs already have terms sent -- blocks double-send
   const [termsSentIds,    setTermsSentIds]    = useState(new Set())
 
   const [postForm, setPostForm] = useState({
@@ -69,6 +69,11 @@ function BriefsInner() {
     loadBriefs()
   }, [authLoading])
 
+  // Auto-open post modal when ?post=true
+  useEffect(() => {
+    if (autoPost) setPostOpen(true)
+  }, [autoPost])
+
   // Load applied brief IDs from DB
   useEffect(() => {
     if (!user) return
@@ -76,12 +81,8 @@ function BriefsInner() {
       .then(({ data }) => { if (data) setAppliedBriefIds(new Set(data.map(a => a.brief_id))) })
   }, [user])
 
-  // Load which briefs already have active collab_terms -- from collab_terms table
-  // This is more reliable than checking applications.status because terms
-  // persist even if the application row gets updated
   useEffect(() => {
     if (!user) return
-    // Get all my posted briefs first, then check which have pending collab_terms
     supabase.from('briefs').select('id').eq('poster_id', user.id).eq('status', 'open')
       .then(({ data: myBriefs }) => {
         if (!myBriefs || myBriefs.length === 0) return
@@ -125,7 +126,6 @@ function BriefsInner() {
       .eq('status', 'open')
       .order('created_at', { ascending: false })
     if (!error && data) setBriefs(data)
-    // If coming from a notification, open that brief; otherwise open first
     if (data && data.length > 0 && !openBriefId) setSelectedId(data[0].id)
     setLoading(false)
   }
@@ -191,9 +191,7 @@ function BriefsInner() {
     setAcceptingId(application.id)
     try {
       await supabase.from('applications').update({ status: 'accepted' }).eq('id', application.id)
-      // Mark this brief as having terms sent so button locks
       setTermsSentIds(prev => new Set([...prev, selectedId]))
-      // Remove accepted applicant from list
       setApplicants(prev => prev.filter(a => a.id !== application.id))
       const brief = briefs.find(b => b.id === selectedId)
       const params = new URLSearchParams({
@@ -344,13 +342,11 @@ function BriefsInner() {
                   </div>
                 </div>
 
-                {/* APPLICANTS -- only visible to poster */}
                 {isPoster && (
                   <div className={styles.dsec}>
                     <div className={styles.dsecLabel}>
                       {termsSent ? 'Terms in negotiation' : applicants.length === 0 ? 'No applications yet' : `${applicants.length} application${applicants.length > 1 ? 's' : ''}`}
                     </div>
-
                     {termsSent ? (
                       <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(201,168,76,0.7)', background:'rgba(201,168,76,0.06)', border:'0.5px solid rgba(201,168,76,0.15)', borderRadius:'4px', padding:'0.75rem 1rem', lineHeight:1.6 }}>
                         Terms have been sent to one applicant and are under negotiation. Other applicants remain available if those terms fall through.
@@ -403,7 +399,6 @@ function BriefsInner() {
 
       <Footer />
 
-      {/* POST BRIEF MODAL */}
       {postOpen && (
         <div className={styles.modalOverlay} onClick={e => { if (e.target === e.currentTarget) setPostOpen(false) }}>
           <div className={styles.modal}>
@@ -464,7 +459,6 @@ function BriefsInner() {
         </div>
       )}
 
-      {/* APPLY MODAL */}
       {applyOpen && selected && (
         <div className={styles.applyModal} onClick={e => { if (e.target === e.currentTarget) setApplyOpen(false) }}>
           <div className={styles.applyInner}>

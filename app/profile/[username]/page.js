@@ -567,9 +567,8 @@ export default function ProfilePage() {
             </div>
             {!isOwner&&(
               <div className={styles.actionBtns}>
-                <button className={styles.btnMessage}>Message</button>
-                <button className={styles.btnConnect} onClick={()=>setConnected(true)} style={connected?{background:'var(--teal)'}:{}}>{connected?'✦ Sent':'+ Connect'}</button>
-              </div>
+  <Link href={`/terms?with=${profile.id}`} className={styles.btnConnect}>Reach Out ↗</Link>
+</div>
             )}
           </div>
           <div className={styles.metaRow}>

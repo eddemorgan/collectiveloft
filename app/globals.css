@@ -3,17 +3,17 @@
 @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
 
 :root {
-  --gold:   #A07828;
-  --gold-d: #8A6420;
+  --gold:   #C9A84C;
+  --gold-d: #B8922E;
   --ink:    #0D0D0D;
-  --bg:     #EDEAE3;
-  --bg1:    #E4E0D8;
-  --bg2:    #D8D4CB;
-  --cream:  #1C1A16;
-  --dim:    rgba(28,26,22,0.82);
-  --faint:  rgba(28,26,22,0.55);
-  --rule:   rgba(28,26,22,0.1);
-  --teal:   #2E7D65;
+  --bg:     #1A1714;
+  --bg1:    #211E1A;
+  --bg2:    #272320;
+  --cream:  #F5F2ED;
+  --dim:    rgba(245,242,237,0.82);
+  --faint:  rgba(245,242,237,0.55);
+  --rule:   rgba(245,242,237,0.07);
+  --teal:   #56b39c;
   --serif:  'EB Garamond', Georgia, serif;
   --sans:   'DM Sans', system-ui, sans-serif;
 }
@@ -33,6 +33,6 @@ body {
 ::-webkit-scrollbar { width: 4px }
 ::-webkit-scrollbar-track { background: transparent }
 ::-webkit-scrollbar-thumb {
-  background: rgba(160,120,40,0.2);
+  background: rgba(201,168,76,0.2);
   border-radius: 2px;
 }

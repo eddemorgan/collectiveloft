@@ -274,8 +274,8 @@ function TermsPage() {
             </div>
             <div className={styles.field} style={{ marginTop: '0.75rem' }}>
               <input type="text" placeholder="Add a deliverable…" value={newDel} onChange={e => setNewDel(e.target.value)} onKeyDown={e => e.key === 'Enter' && addDeliverable()} />
-              <div className={styles.hint}>Once both parties accept, this list locks. No  Milestones can be updated, if needed, in the Loft Studio.
-            </div>
+              <div className={styles.hint}>Once both parties accept, this list locks. No 
+          </div>
           </div>
 
           <div className={styles.formSection}>

@@ -7,7 +7,7 @@ export default function Home() {
         <title>Collective Loft — The Professional Network for the Creative Class</title>
         <meta name="description" content="The platform where artists, musicians, writers, designers, and filmmakers find each other, agree on terms, and make something real." />
         <meta property="og:title" content="Collective Loft" />
-        <meta property="og:description" content="Building the infrastructure the creative class was never supposed to have." />
+        <meta property="og:description" content="Building the infrastructure meant for the creative class." />
         <meta property="og:url" content="https://collectiveloft.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -779,8 +779,8 @@ export default function Home() {
         <div className="eyebrow">Collective Loft · Est. 2026 · Chicago</div>
         <h1>
           Building the infrastructure<br/>
-          the creative class was<br/>
-          <em>never supposed to have.</em>
+          meant for the<br/>
+          <em>creative class.</em>
         </h1>
         <p className="hero-sub">
           The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and open a Loft Studio — a shared workspace built around the work.

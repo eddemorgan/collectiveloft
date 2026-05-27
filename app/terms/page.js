@@ -175,6 +175,27 @@ function TermsPage() {
             <div className={styles.pageSub}>Set the terms before the work starts. Clear agreements make better collaborations — and protect both sides if things get complicated.</div>
           </div>
 
+          <div className={styles.exampleStrip}>
+            <div className={styles.exampleCard}>
+              <div className={styles.exLabel}>Creative exchange example</div>
+              <div className={styles.exTitle}>Poet + cover artist</div>
+              <div className={styles.exPeople}>James Delacroix & Marisol Vega</div>
+              <div className={styles.exTerms}>James gets a <strong>painting for his book cover</strong>. Marisol gets a <strong>poem about one of her works</strong>. No money moves.</div>
+            </div>
+            <div className={styles.exampleCard}>
+              <div className={styles.exLabel}>Paid example</div>
+              <div className={styles.exTitle}>Singer + producer</div>
+              <div className={styles.exPeople}>Simone Adeyemi & Tariq Osman</div>
+              <div className={styles.exTerms}>Simone pays <strong>$1,500 across 3 milestones</strong>. Rights transfer fully on final payment.</div>
+            </div>
+            <div className={styles.exampleCard}>
+              <div className={styles.exLabel}>Revenue share example</div>
+              <div className={styles.exTitle}>Filmmaker + composer</div>
+              <div className={styles.exPeople}>Leila Mora & René Pellegrini</div>
+              <div className={styles.exTerms}>No upfront fee. René scores the film and receives <strong>15% of festival prize money and streaming revenue</strong>.</div>
+            </div>
+          </div>
+
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Project</div>
             <div className={styles.field}>
@@ -326,27 +347,6 @@ function TermsPage() {
                   <option>Daily updates</option>
                 </select>
               </div>
-            </div>
-          </div>
-
-          <div className={styles.exampleStrip}>
-            <div className={styles.exampleCard}>
-              <div className={styles.exLabel}>Creative exchange example</div>
-              <div className={styles.exTitle}>Poet + cover artist</div>
-              <div className={styles.exPeople}>James Delacroix & Marisol Vega</div>
-              <div className={styles.exTerms}>James gets a <strong>painting for his book cover</strong>. Marisol gets a <strong>poem about one of her works</strong>. No money moves.</div>
-            </div>
-            <div className={styles.exampleCard}>
-              <div className={styles.exLabel}>Paid example</div>
-              <div className={styles.exTitle}>Singer + producer</div>
-              <div className={styles.exPeople}>Simone Adeyemi & Tariq Osman</div>
-              <div className={styles.exTerms}>Simone pays <strong>$1,500 across 3 milestones</strong>. Rights transfer fully on final payment.</div>
-            </div>
-            <div className={styles.exampleCard}>
-              <div className={styles.exLabel}>Revenue share example</div>
-              <div className={styles.exTitle}>Filmmaker + composer</div>
-              <div className={styles.exPeople}>Leila Mora & René Pellegrini</div>
-              <div className={styles.exTerms}>No upfront fee. René scores the film and receives <strong>15% of festival prize money and streaming revenue</strong>.</div>
             </div>
           </div>
 

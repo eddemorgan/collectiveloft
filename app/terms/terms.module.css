@@ -152,7 +152,7 @@
 
 /* MILESTONES */
 .msBuilder { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.4rem; }
-.msRow { display: flex; align-items: center; gap: 0.4rem; }
+.msRow { display: flex; align-items: center; gap: 0.5rem; }
 .msNum {
   width: 18px; height: 18px; border-radius: 50%;
   border: 0.5px solid rgba(255,255,255,0.12);
@@ -174,7 +174,7 @@
 .msInp:focus { border-color: rgba(201,168,76,0.35); }
 .msInp::placeholder { color: rgba(255,255,255,0.15); }
 .msPct {
-  width: 52px;
+  width: 60px;
   background: var(--bg2);
   border: 0.5px solid rgba(255,255,255,0.08);
   border-radius: 3px;
@@ -184,9 +184,47 @@
   color: rgba(201,168,76,0.65);
   text-align: center;
   outline: none;
+  flex-shrink: 0;
   transition: border-color 0.15s;
 }
 .msPct:focus { border-color: rgba(201,168,76,0.35); }
+.msPct::-webkit-inner-spin-button,
+.msPct::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.msInpReadonly {
+  flex: 1;
+  font-size: 0.75rem;
+  color: var(--dim);
+  padding: 0.38rem 0.6rem;
+  background: rgba(255,255,255,0.02);
+  border: 0.5px solid rgba(255,255,255,0.06);
+  border-radius: 3px;
+}
+.msPctHeader {
+  width: 60px;
+  flex-shrink: 0;
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+}
+.msDescHeader {
+  flex: 1;
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+}
+.msTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  border: 0.5px solid;
+  border-radius: 3px;
+  font-size: 0.72rem;
+  transition: color 0.2s, border-color 0.2s;
+}
 .btnAddMs {
   background: transparent;
   border: 0.5px dashed rgba(255,255,255,0.1);
@@ -266,7 +304,7 @@
 .rightsDesc { font-size: 0.58rem; color: rgba(255,255,255,0.25); line-height: 1.45; font-weight: 300; }
 
 /* EXAMPLES */
-.exampleStrip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 2rem; }
+.exampleStrip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 2rem; }
 .exampleCard { background: var(--bg1); border: 0.5px solid rgba(255,255,255,0.06); border-radius: 4px; padding: 0.85rem; }
 .exLabel { font-size: 0.52rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255,255,255,0.2); margin-bottom: 0.45rem; }
 .exTitle { font-family: var(--serif); font-size: 0.85rem; color: var(--cream); margin-bottom: 0.22rem; }

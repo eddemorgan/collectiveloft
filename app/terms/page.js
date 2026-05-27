@@ -34,11 +34,7 @@ function TermsPage() {
   const [deliverables, setDeliverables] = useState([])
   const [delChecked,   setDelChecked]   = useState([])
   const [newDel,       setNewDel]       = useState('')
-  const [milestones,   setMilestones]   = useState([
-    { desc: 'Design mockup approved', pct: '30' },
-    { desc: 'Development complete',   pct: '50' },
-    { desc: 'Final delivery',         pct: '20' },
-  ])
+  const [msPcts,       setMsPcts]       = useState({})
   const [feeFrom,      setFeeFrom]      = useState('')
   const [feeTo,        setFeeTo]        = useState('')
   const [paySchedule,  setPaySchedule]  = useState('')
@@ -79,25 +75,29 @@ function TermsPage() {
     setDelChecked(prev => prev.map((v, idx) => idx === i ? !v : v))
   }
 
-  function updateMilestone(i, field, val) {
-    setMilestones(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: val } : m))
-  }
+  // Active deliverables (checked ones)
+  const activeDeliverables = deliverables.filter((_, i) => delChecked[i])
 
-  function addMilestone() {
-    setMilestones(prev => [...prev, { desc: '', pct: '' }])
-  }
+  // Total percentage allocated across milestone payments
+  const totalPct = activeDeliverables.reduce((sum, d) => sum + (parseFloat(msPcts[d]) || 0), 0)
+  const pctComplete = totalPct === 100
+  const pctOver = totalPct > 100
 
   async function handleSubmit() {
     setSaving(true)
     try {
+      const milestonesData = paySchedule === 'Milestone-based'
+        ? activeDeliverables.map(d => ({ desc: d, pct: msPcts[d] || '' }))
+        : []
+
       const termsData = {
         initiator_id:  myProfile?.id,
         partner_id:    partner?.id,
         collab_type:   collabType,
         project_title: projectTitle,
         rights,
-        deliverables:  deliverables.filter((_, i) => delChecked[i]),
-        milestones:    collabType === 'paid' ? milestones : [],
+        deliverables:  activeDeliverables,
+        milestones:    collabType === 'paid' ? milestonesData : [],
         fee_from:      collabType === 'paid' ? feeFrom : null,
         fee_to:        collabType === 'paid' ? feeTo : null,
         pay_schedule:  collabType === 'paid' ? paySchedule : null,
@@ -169,12 +169,7 @@ function TermsPage() {
             </div>
           )}
 
-          <div className={styles.pageHdr}>
-            <div className={styles.pageEyebrow}>Collective Loft</div>
-            <div className={styles.pageTitle}>Collab Terms</div>
-            <div className={styles.pageSub}>Set the terms before the work starts. Clear agreements make better collaborations — and protect both sides if things get complicated.</div>
-          </div>
-
+          {/* EXAMPLES -- shown at top for context */}
           <div className={styles.exampleStrip}>
             <div className={styles.exampleCard}>
               <div className={styles.exLabel}>Creative exchange example</div>
@@ -196,6 +191,13 @@ function TermsPage() {
             </div>
           </div>
 
+          <div className={styles.pageHdr}>
+            <div className={styles.pageEyebrow}>Collective Loft</div>
+            <div className={styles.pageTitle}>Collab Terms</div>
+            <div className={styles.pageSub}>Set the terms before the work starts. Clear agreements make better collaborations — and protect both sides if things get complicated.</div>
+          </div>
+
+          {/* PROJECT */}
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Project</div>
             <div className={styles.field}>
@@ -204,6 +206,7 @@ function TermsPage() {
             </div>
           </div>
 
+          {/* COLLAB TYPE */}
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Collaboration type</div>
             <div className={styles.typeChooser}>
@@ -218,6 +221,7 @@ function TermsPage() {
             </div>
           </div>
 
+          {/* PAID -- fee and schedule */}
           {collabType === 'paid' && (
             <div className={styles.formSection}>
               <div className={styles.fsecLabel}>Payment</div>
@@ -240,37 +244,21 @@ function TermsPage() {
                   <option>Monthly retainer</option>
                 </select>
               </div>
-              <div className={styles.field}>
-                <label>Milestones</label>
-                <div className={styles.msBuilder}>
-                  {milestones.map((m, i) => (
-                    <div key={i} className={styles.msRow}>
-                      <div className={styles.msNum}>{i + 1}</div>
-                      <input className={styles.msInp} type="text" placeholder="Milestone description" value={m.desc} onChange={e => updateMilestone(i, 'desc', e.target.value)} />
-                      <input className={styles.msPct} type="text" placeholder="%" value={m.pct} onChange={e => updateMilestone(i, 'pct', e.target.value)} />
-                    </div>
-                  ))}
-                </div>
-                <button className={styles.btnAddMs} onClick={addMilestone}>+ Add milestone</button>
-              </div>
             </div>
           )}
 
+          {/* REVENUE SHARE */}
           {collabType === 'revenue' && (
             <div className={styles.formSection}>
               <div className={styles.fsecLabel}>Revenue split</div>
               <div className={styles.fieldRow}>
                 <div className={styles.field}>
                   <label>My share</label>
-                  <div className={styles.amountRow}>
-                    <input className={styles.amtInput} type="text" placeholder="e.g. 85%" value={myShare} onChange={e => setMyShare(e.target.value)} />
-                  </div>
+                  <input className={styles.amtInput} type="text" placeholder="e.g. 85%" value={myShare} onChange={e => setMyShare(e.target.value)} />
                 </div>
                 <div className={styles.field}>
                   <label>Their share</label>
-                  <div className={styles.amountRow}>
-                    <input className={styles.amtInput} type="text" placeholder="e.g. 15%" value={theirShare} onChange={e => setTheirShare(e.target.value)} />
-                  </div>
+                  <input className={styles.amtInput} type="text" placeholder="e.g. 15%" value={theirShare} onChange={e => setTheirShare(e.target.value)} />
                 </div>
               </div>
               <div className={styles.field}>
@@ -280,6 +268,7 @@ function TermsPage() {
             </div>
           )}
 
+          {/* DELIVERABLES */}
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Deliverables</div>
             <div className={styles.delList}>
@@ -302,6 +291,46 @@ function TermsPage() {
             </div>
           </div>
 
+          {/* MILESTONE PAYMENTS -- only when paid + milestone-based + deliverables exist */}
+          {collabType === 'paid' && paySchedule === 'Milestone-based' && activeDeliverables.length > 0 && (
+            <div className={styles.formSection}>
+              <div className={styles.fsecLabel}>Milestone payments</div>
+              <div className={styles.hint} style={{ marginBottom: '0.85rem' }}>
+                Set what percentage of the total fee releases when each deliverable is confirmed complete. Must total 100%.
+              </div>
+              <div className={styles.msBuilder}>
+                <div className={styles.msHeaderRow}>
+                  <div className={styles.msNum} style={{ opacity: 0 }}>0</div>
+                  <div className={styles.msPctHeader}>Pay %</div>
+                  <div className={styles.msDescHeader}>Deliverable</div>
+                </div>
+                {activeDeliverables.map((d, i) => (
+                  <div key={i} className={styles.msRow}>
+                    <div className={styles.msNum}>{i + 1}</div>
+                    <input
+                      className={styles.msPct}
+                      type="number"
+                      min="0"
+                      max="100"
+                      placeholder="%"
+                      value={msPcts[d] || ''}
+                      onChange={e => setMsPcts(prev => ({ ...prev, [d]: e.target.value }))}
+                    />
+                    <div className={styles.msInpReadonly}>{d}</div>
+                  </div>
+                ))}
+              </div>
+              <div className={styles.msTotalRow} style={{
+                color: pctComplete ? 'var(--teal)' : pctOver ? '#c27080' : 'var(--faint)',
+                borderColor: pctComplete ? 'rgba(86,179,156,0.3)' : pctOver ? 'rgba(194,112,128,0.3)' : 'rgba(245,242,237,0.08)',
+              }}>
+                <span>{pctComplete ? '✓ Fully allocated' : pctOver ? '✕ Over 100%' : 'Total allocated'}</span>
+                <span style={{ fontWeight: 600 }}>{totalPct}% of 100%</span>
+              </div>
+            </div>
+          )}
+
+          {/* RIGHTS */}
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Rights & credit</div>
             <div className={styles.rightsGrid}>
@@ -314,6 +343,7 @@ function TermsPage() {
             </div>
           </div>
 
+          {/* TIMELINE */}
           <div className={styles.formSection}>
             <div className={styles.fsecLabel}>Timeline</div>
             <div className={styles.fieldRow}>
@@ -358,6 +388,7 @@ function TermsPage() {
           </div>
         </div>
 
+        {/* SUMMARY SIDEBAR */}
         <aside className={styles.summarySide}>
           <div className={styles.summaryHeader}>Live agreement summary</div>
           <div className={`${styles.summaryCard} ${projectTitle || collabType ? styles.hasContent : ''}`}>

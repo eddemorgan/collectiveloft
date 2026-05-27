@@ -20,11 +20,7 @@ const RIGHTS_OPTS = [
   { key: 'negotiate', title: 'Negotiate separately',     desc: 'Terms to be added to the Studio before work begins.' },
 ]
 
-const DEFAULT_DELIVERABLES = [
-  'Live portfolio website, mobile-responsive',
-  'CMS access so artist can update independently',
-  'Source files transferred on final payment',
-]
+const [deliverables, setDeliverables] = useState([])
 
 function TermsPage() {
   const router = useRouter()
@@ -278,7 +274,7 @@ function TermsPage() {
             </div>
             <div className={styles.field} style={{ marginTop: '0.75rem' }}>
               <input type="text" placeholder="Add a deliverable…" value={newDel} onChange={e => setNewDel(e.target.value)} onKeyDown={e => e.key === 'Enter' && addDeliverable()} />
-              <div className={styles.hint}>Once both parties accept, this list locks. No scope creep.</div>
+              <div className={styles.hint}>Once both parties accept, this list locks. No  Milestones can be updated, if needed, in the Loft Studio.
             </div>
           </div>
 

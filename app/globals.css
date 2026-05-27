@@ -3,19 +3,19 @@
 @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
 
 :root {
-  --gold: #C9A84C;
-  --gold-d: #B8922E;
-  --ink: #0D0D0D;
-  --bg: #1A1A2E;
-  --bg1: #222236;
-  --bg2: #2A2A40;
-  --cream: #F5F2ED;
-  --dim: rgba(255,255,255,0.92);
-  --faint: rgba(255,255,255,0.72);
-  --rule: rgba(201,168,76,0.28);
-  --teal: #56b39c;
-  --serif: 'EB Garamond', Georgia, serif;
-  --sans: 'DM Sans', system-ui, sans-serif;
+  --gold:   #A07828;
+  --gold-d: #8A6420;
+  --ink:    #0D0D0D;
+  --bg:     #EDEAE3;
+  --bg1:    #E4E0D8;
+  --bg2:    #D8D4CB;
+  --cream:  #1C1A16;
+  --dim:    rgba(28,26,22,0.82);
+  --faint:  rgba(28,26,22,0.55);
+  --rule:   rgba(28,26,22,0.1);
+  --teal:   #2E7D65;
+  --serif:  'EB Garamond', Georgia, serif;
+  --sans:   'DM Sans', system-ui, sans-serif;
 }
 
 html { scroll-behavior: smooth }
@@ -33,6 +33,6 @@ body {
 ::-webkit-scrollbar { width: 4px }
 ::-webkit-scrollbar-track { background: transparent }
 ::-webkit-scrollbar-thumb {
-  background: rgba(201,168,76,0.2);
+  background: rgba(160,120,40,0.2);
   border-radius: 2px;
 }

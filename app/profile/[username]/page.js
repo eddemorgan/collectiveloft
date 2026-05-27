@@ -272,6 +272,97 @@ function AppliedBriefCard({ brief, onSelect }) {
   )
 }
 
+function SeekingEditor({ seekingDiscs, seekingSkills, onSave }) {
+  const [discs,  setDiscs]  = useState(seekingDiscs || [])
+  const [skills, setSkills] = useState(seekingSkills || [])
+  const [saving, setSaving] = useState(false)
+
+  const availableSkills = discs.length === 0
+    ? Object.values(SKILLS_BY_DISC).flat()
+    : discs.flatMap(d => {
+        const opt = DISC_OPTS.find(o => o.label === d)
+        return opt ? (SKILLS_BY_DISC[opt.id] || []) : []
+      })
+
+  function toggleDisc(label) {
+    setDiscs(prev => {
+      const next = prev.includes(label) ? prev.filter(d => d !== label) : [...prev, label]
+      // Remove skills that no longer belong to selected discs
+      const validSkills = next.flatMap(d => {
+        const opt = DISC_OPTS.find(o => o.label === d)
+        return opt ? (SKILLS_BY_DISC[opt.id] || []) : []
+      })
+      setSkills(sk => sk.filter(s => validSkills.includes(s)))
+      return next
+    })
+  }
+
+  function toggleSkill(label) {
+    setSkills(prev => prev.includes(label) ? prev.filter(s => s !== label) : [...prev, label])
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    await onSave(discs, skills)
+    setSaving(false)
+  }
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
+      <div>
+        <div style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'rgba(240,236,227,0.4)', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'0.6rem' }}>I'm looking to collaborate with</div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'0.4rem' }}>
+          {DISC_OPTS.map(d => (
+            <div key={d.id}
+              onClick={() => toggleDisc(d.label)}
+              style={{
+                border: discs.includes(d.label) ? '0.5px solid var(--gold)' : '0.5px solid rgba(240,236,227,0.1)',
+                background: discs.includes(d.label) ? 'rgba(201,168,76,0.08)' : 'var(--bg1)',
+                borderRadius:'3px', padding:'0.55rem 0.5rem', textAlign:'center',
+                cursor:'pointer', transition:'all 0.15s', userSelect:'none',
+              }}>
+              <div style={{ fontSize:'1rem', marginBottom:'0.2rem' }}>{d.icon}</div>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', color: discs.includes(d.label) ? 'var(--gold)' : 'rgba(240,236,227,0.4)' }}>{d.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {availableSkills.length > 0 && (
+        <div>
+          <div style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'rgba(240,236,227,0.4)', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'0.6rem' }}>Specific skills I need</div>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'0.4rem' }}>
+            {availableSkills.map(s => (
+              <button key={s}
+                onClick={() => toggleSkill(s)}
+                style={{
+                  fontFamily:'var(--sans)', fontSize:'0.68rem',
+                  padding:'0.22rem 0.68rem', borderRadius:'2px',
+                  border: skills.includes(s) ? '0.5px solid var(--gold)' : '0.5px solid rgba(240,236,227,0.1)',
+                  background: skills.includes(s) ? 'rgba(201,168,76,0.1)' : 'transparent',
+                  color: skills.includes(s) ? 'var(--gold)' : 'rgba(240,236,227,0.4)',
+                  cursor:'pointer', transition:'all 0.15s',
+                }}>
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <button onClick={handleSave} disabled={saving} style={{
+        alignSelf:'flex-start', background:'var(--gold)', color:'var(--ink)',
+        border:'none', borderRadius:'2px', padding:'0.45rem 1.1rem',
+        fontFamily:'var(--sans)', fontSize:'0.65rem', fontWeight:500,
+        letterSpacing:'0.07em', textTransform:'uppercase', cursor:'pointer',
+        opacity: saving ? 0.6 : 1,
+      }}>
+        {saving ? 'Saving…' : 'Save preferences'}
+      </button>
+    </div>
+  )
+}
+
 // ─── MAIN PAGE ───────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
@@ -567,8 +658,9 @@ export default function ProfilePage() {
             </div>
             {!isOwner&&(
               <div className={styles.actionBtns}>
-  <Link href={`/terms?with=${profile.id}`} className={styles.btnConnect}>Reach Out with Terms ↗</Link>
-</div>
+                <button className={styles.btnMessage}>Message</button>
+                <button className={styles.btnConnect} onClick={()=>setConnected(true)} style={connected?{background:'var(--teal)'}:{}}>{connected?'✦ Sent':'+ Connect'}</button>
+              </div>
             )}
           </div>
           <div className={styles.metaRow}>
@@ -686,7 +778,41 @@ export default function ProfilePage() {
               </div>
               <div className={styles.contentSection}>
                 <div className={styles.secLabel}>Collaboration preferences</div>
-                <div className={styles.prefText}><Editable value={profile.seeking} onSave={v=>saveField('seeking',v)} placeholder={isOwner?'Click to describe who you\'re looking for…':'Not specified.'} multiline isOwner={isOwner} editMode={editMode} className={styles.prefInner}/></div>
+                {isOwner && editMode ? (
+                  <SeekingEditor
+                    seekingDiscs={profile.seeking_disciplines || []}
+                    seekingSkills={profile.seeking_skills || []}
+                    onSave={async (discs, skills) => {
+                      await saveField('seeking_disciplines', discs)
+                      await saveField('seeking_skills', skills)
+                    }}
+                  />
+                ) : (
+                  <div className={styles.seekingView}>
+                    {(profile.seeking_disciplines||[]).length === 0 && (profile.seeking_skills||[]).length === 0 ? (
+                      <span className={styles.prefInner}>{isOwner ? 'Enter edit mode to set your collaboration preferences.' : 'Not specified.'}</span>
+                    ) : (
+                      <>
+                        {(profile.seeking_disciplines||[]).length > 0 && (
+                          <div className={styles.seekingRow}>
+                            <span className={styles.seekingRowLabel}>Disciplines</span>
+                            <div className={styles.seekingTags}>
+                              {(profile.seeking_disciplines||[]).map(d => <span key={d} className={styles.seekingTag}>{d}</span>)}
+                            </div>
+                          </div>
+                        )}
+                        {(profile.seeking_skills||[]).length > 0 && (
+                          <div className={styles.seekingRow}>
+                            <span className={styles.seekingRowLabel}>Skills</span>
+                            <div className={styles.seekingTags}>
+                              {(profile.seeking_skills||[]).map(s => <span key={s} className={`${styles.seekingTag} ${styles.seekingTagSkill}`}>{s}</span>)}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
               {isOwner&&editMode&&(
                 <div className={styles.contentSection}>

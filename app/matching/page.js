@@ -32,20 +32,75 @@ const DISC_KEY_MAP = {
   'Creative Tech': 'tech',
 }
 
+// Discipline affinity map -- which disciplines naturally collaborate
+const DISC_AFFINITY = {
+  'Visual Art':    { strong: ['Music','Film','Writing','Design & Web','Photography'], moderate: ['Creative Tech','Performance'] },
+  'Music':         { strong: ['Film','Visual Art','Performance','Writing'],           moderate: ['Design & Web','Creative Tech'] },
+  'Writing':       { strong: ['Visual Art','Performance','Film','Design & Web'],      moderate: ['Music','Photography'] },
+  'Design & Web':  { strong: ['Visual Art','Writing','Music','Creative Tech'],        moderate: ['Photography','Film'] },
+  'Film':          { strong: ['Music','Writing','Visual Art','Photography'],           moderate: ['Performance','Design & Web'] },
+  'Photography':   { strong: ['Visual Art','Film','Design & Web'],                    moderate: ['Music','Writing'] },
+  'Performance':   { strong: ['Music','Writing','Film'],                              moderate: ['Visual Art','Photography'] },
+  'Creative Tech': { strong: ['Music','Visual Art','Design & Web','Film'],            moderate: ['Writing','Photography'] },
+}
+
 function computeScore(profile, myProfile) {
-  if (!myProfile) return Math.floor(Math.random() * 40) + 50
-  const myDiscs     = myProfile.disciplines || []
-  const mySkills    = (myProfile.skills || []).filter(s => typeof s === 'string').map(s => s.toLowerCase())
+  if (!myProfile) return Math.floor(Math.random() * 30) + 50
+
+  const myDiscs    = myProfile.disciplines || []
+  const mySkills   = (myProfile.skills || []).map(s => s.toLowerCase())
+  const mySeeking  = myProfile.seeking_disciplines || []
+  const mySeekSkills = (myProfile.seeking_skills || []).map(s => s.toLowerCase())
+
   const theirDiscs  = profile.disciplines || []
-  const theirSkills = (profile.skills || []).filter(s => typeof s === 'string').map(s => s.toLowerCase())
-  let score = 50
-  const crossDisc = theirDiscs.some(d => !myDiscs.includes(d))
-  if (crossDisc) score += 20
-  const overlap = mySkills.filter(s => theirSkills.includes(s)).length
-  score += Math.min(overlap * 5, 20)
+  const theirSkills = (profile.skills || []).map(s => s.toLowerCase())
+  const theirSeeking = profile.seeking_disciplines || []
+  const theirSeekSkills = (profile.seeking_skills || []).map(s => s.toLowerCase())
+
+  let score = 40
+
+  // ── INTENT MATCHING (highest weight) ────────────────────────────────────────
+  // I'm looking for their discipline
+  const iWantThem = theirDiscs.some(d => mySeeking.includes(d))
+  if (iWantThem) score += 20
+
+  // I'm looking for their specific skills
+  const iWantTheirSkills = theirSkills.some(s => mySeekSkills.includes(s))
+  if (iWantTheirSkills) score += 15
+
+  // They're looking for my discipline (bidirectional)
+  const theyWantMe = myDiscs.some(d => theirSeeking.includes(d))
+  if (theyWantMe) score += 20
+
+  // They're looking for my specific skills (bidirectional)
+  const theyWantMySkills = mySkills.some(s => theirSeekSkills.includes(s))
+  if (theyWantMySkills) score += 10
+
+  // ── DISCIPLINE AFFINITY ──────────────────────────────────────────────────────
+  // Only apply affinity if no seeking data -- prevents double-counting
+  if (!iWantThem && !theyWantMe) {
+    let affinityBonus = 0
+    myDiscs.forEach(myDisc => {
+      const affinity = DISC_AFFINITY[myDisc]
+      if (!affinity) return
+      theirDiscs.forEach(theirDisc => {
+        if (myDisc === theirDisc) return // same discipline -- no bonus
+        if (affinity.strong.includes(theirDisc))    affinityBonus = Math.max(affinityBonus, 12)
+        if (affinity.moderate.includes(theirDisc))  affinityBonus = Math.max(affinityBonus, 6)
+      })
+    })
+    score += affinityBonus
+  }
+
+  // ── ACTIVITY SIGNALS ─────────────────────────────────────────────────────────
   if (profile.availability === 'open') score += 5
   if ((profile.collabs_count || 0) > 0) score += 5
-  return Math.min(score, 99)
+
+  // ── PENALTY: same discipline only, no seeking overlap ────────────────────────
+  const allSame = theirDiscs.every(d => myDiscs.includes(d)) && theirDiscs.length > 0
+  if (allSame && !iWantThem && !theyWantMe) score -= 10
+
+  return Math.min(Math.max(score, 20), 99)
 }
 
 function scoreClass(s) {
@@ -84,12 +139,12 @@ export default function MatchingPage() {
       setLoading(true)
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+        const { data } = await supabase.from('profiles').select('*, seeking_disciplines, seeking_skills').eq('id', user.id).single()
         setMyProfile(data)
       }
       let query = supabase
         .from('profiles')
-        .select('id, firstname, lastname, headline, disciplines, skills, city, state, country, avatar_url, availability, collabs_count, compensation, seeking, bio')
+        .select('id, firstname, lastname, headline, disciplines, skills, city, state, country, avatar_url, availability, collabs_count, compensation, seeking, seeking_disciplines, seeking_skills, bio')
         .order('created_at', { ascending: false })
       if (user) query = query.neq('id', user.id)
       const { data: all } = await query

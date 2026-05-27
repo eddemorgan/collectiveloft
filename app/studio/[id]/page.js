@@ -323,6 +323,8 @@ export default function StudioPage() {
     a.click()
     URL.revokeObjectURL(url)
   }
+
+  function myName() {
     if (!myProfile) return 'Someone'
     return `${myProfile.firstname} ${myProfile.lastname}`
   }

@@ -20,8 +20,6 @@ const RIGHTS_OPTS = [
   { key: 'negotiate', title: 'Negotiate separately',     desc: 'Terms to be added to the Studio before work begins.' },
 ]
 
-const [deliverables, setDeliverables] = useState([])
-
 function TermsPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -33,8 +31,8 @@ function TermsPage() {
   const [partner,      setPartner]      = useState(null)
   const [collabType,   setCollabType]   = useState('exchange')
   const [rights,       setRights]       = useState('transfer')
-  const [deliverables, setDeliverables] = useState(DEFAULT_DELIVERABLES)
-  const [delChecked,   setDelChecked]   = useState([true, true, true])
+  const [deliverables, setDeliverables] = useState([])
+  const [delChecked,   setDelChecked]   = useState([])
   const [newDel,       setNewDel]       = useState('')
   const [milestones,   setMilestones]   = useState([
     { desc: 'Design mockup approved', pct: '30' },
@@ -65,7 +63,6 @@ function TermsPage() {
         const { data: p } = await supabase.from('profiles').select('*').eq('id', partnerId).single()
         setPartner(p)
       }
-      // Pre-fill title from brief if provided
       if (briefTitle) setProjectTitle(decodeURIComponent(briefTitle))
     }
     load()
@@ -113,7 +110,7 @@ function TermsPage() {
         cadence,
         status:        'pending',
         terms_status:  'negotiating',
-        current_editor: 'partner', // partner reviews first
+        current_editor: 'partner',
         brief_id:      briefId || null,
       }
 
@@ -273,9 +270,15 @@ function TermsPage() {
               ))}
             </div>
             <div className={styles.field} style={{ marginTop: '0.75rem' }}>
-              <input type="text" placeholder="Add a deliverable…" value={newDel} onChange={e => setNewDel(e.target.value)} onKeyDown={e => e.key === 'Enter' && addDeliverable()} />
-              <div className={styles.hint}>Once both parties accept, this list locks. No 
-          </div>
+              <input
+                type="text"
+                placeholder="Add a deliverable…"
+                value={newDel}
+                onChange={e => setNewDel(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && addDeliverable()}
+              />
+              <div className={styles.hint}>Milestones can be updated, if needed, in the Loft Studio.</div>
+            </div>
           </div>
 
           <div className={styles.formSection}>
@@ -388,7 +391,13 @@ function TermsPage() {
 
           <div className={styles.summaryHeader} style={{ marginTop: '0.5rem' }}>What Collective Loft protects</div>
           <div className={styles.protectionList}>
-            {['Terms stored on record — both parties can reference at any time','Milestone payments only release when both parties confirm','Deliverables list locks once accepted — no scope creep','Rights terms timestamped and cannot be altered retroactively','Disputes can be flagged to the Collective Loft team for mediation'].map((item, i) => <div key={i} className={styles.protectionItem}>{item}</div>)}
+            {[
+              'Terms stored on record — both parties can reference at any time',
+              'Milestone payments only release when both parties confirm',
+              'Milestones can be updated, if needed, in the Loft Studio',
+              'Rights terms timestamped and cannot be altered retroactively',
+              'Disputes can be flagged to the Collective Loft team for mediation',
+            ].map((item, i) => <div key={i} className={styles.protectionItem}>{item}</div>)}
           </div>
 
           <button className={styles.btnSidebarSend} onClick={handleSubmit} disabled={saving}>
@@ -408,10 +417,10 @@ function TermsPage() {
             <div className={styles.successSub}>
               The agreement has been sent to {partnerFirst} for review. Once they confirm, the Loft Studio opens and your collaboration officially begins.
             </div>
-<div className={styles.successActions}>
-  <Link href={`/profile/${myProfile?.firstname?.trim().toLowerCase()}-${myProfile?.lastname?.trim().toLowerCase()}`} className={styles.btnOpenStudio}>Open my profile</Link>
-  <Link href="/briefs" className={styles.btnBackLink}>Back to Collabs</Link>
-</div>
+            <div className={styles.successActions}>
+              <Link href={`/profile/${myProfile?.firstname?.trim().toLowerCase()}-${myProfile?.lastname?.trim().toLowerCase()}`} className={styles.btnOpenStudio}>Open my profile</Link>
+              <Link href="/briefs" className={styles.btnBackLink}>Back to Collabs</Link>
+            </div>
           </div>
         </div>
       )}

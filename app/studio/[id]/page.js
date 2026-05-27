@@ -491,6 +491,15 @@ export default function StudioPage() {
     setUploading(false)
   }
 
+  async function deleteFile(file) {
+    if (!confirm(`Delete "${file.name}"? This cannot be undone.`)) return
+    const pathPart = file.url.split('/studio-files/')[1]
+    if (pathPart) await supabase.storage.from('studio-files').remove([pathPart])
+    await supabase.from('studio_files').delete().eq('id', file.id)
+    setFiles(prev => prev.filter(f => f.id !== file.id))
+    sys(`${myName()} deleted file "${file.name}".`)
+  }
+
   function handleNotesChange(val) {
     setNotes(val)
     clearTimeout(notesTimer.current)
@@ -1073,11 +1082,30 @@ export default function StudioPage() {
                 ) : (
                   <div className={styles.filesGrid} style={{marginBottom:'0.85rem'}}>
                     {files.map(f => (
-                      <a key={f.id} href={f.url} target="_blank" rel="noopener noreferrer" className={styles.fileCard}>
-                        <div className={styles.fileIcon}>{fileIcon(f.type)}</div>
-                        <div className={styles.fileName}>{f.name}</div>
-                        <div className={styles.fileMeta}>{formatBytes(f.size)} · {dateStr(f.created_at)}</div>
-                      </a>
+                      <div key={f.id} className={styles.fileCard} style={{position:'relative'}}>
+                        <a href={f.url} target="_blank" rel="noopener noreferrer" style={{display:'contents',textDecoration:'none',color:'inherit'}}>
+                          <div className={styles.fileIcon}>{fileIcon(f.type)}</div>
+                          <div className={styles.fileName}>{f.name}</div>
+                          <div className={styles.fileMeta}>{formatBytes(f.size)} · {dateStr(f.created_at)}</div>
+                        </a>
+                        <button
+                          onClick={() => deleteFile(f)}
+                          style={{
+                            position:'absolute', top:'0.4rem', right:'0.4rem',
+                            background:'rgba(194,112,128,0.15)',
+                            border:'0.5px solid rgba(194,112,128,0.3)',
+                            color:'#c27080',
+                            borderRadius:'50%',
+                            width:'20px', height:'20px',
+                            display:'flex', alignItems:'center', justifyContent:'center',
+                            fontSize:'0.6rem', cursor:'pointer',
+                            transition:'all 0.15s',
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.background='rgba(194,112,128,0.35)'; e.currentTarget.style.borderColor='#c27080' }}
+                          onMouseLeave={e => { e.currentTarget.style.background='rgba(194,112,128,0.15)'; e.currentTarget.style.borderColor='rgba(194,112,128,0.3)' }}
+                          title="Delete file"
+                        >✕</button>
+                      </div>
                     ))}
                   </div>
                 )}

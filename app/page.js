@@ -52,6 +52,72 @@ export default function Home() {
           opacity: 0.25;
         }
 
+        /* ── DEMO MODAL ─────────────────────────────────────────────────── */
+        .demo-modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(10,8,6,0.92);
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.4s ease;
+          backdrop-filter: blur(8px);
+        }
+        .demo-modal-overlay.open {
+          opacity: 1;
+          pointer-events: all;
+        }
+        .demo-modal-inner {
+          width: 100%;
+          max-width: 1100px;
+          height: 85vh;
+          position: relative;
+          border: 0.5px solid rgba(139,105,20,0.3);
+          border-radius: 6px;
+          overflow: hidden;
+          transform: translateY(20px) scale(0.98);
+          transition: transform 0.4s ease;
+          box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+        }
+        .demo-modal-overlay.open .demo-modal-inner {
+          transform: translateY(0) scale(1);
+        }
+        .demo-modal-inner iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+          display: block;
+        }
+        .demo-modal-close {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background: rgba(26,23,20,0.85);
+          border: 0.5px solid rgba(139,105,20,0.3);
+          color: rgba(240,236,227,0.6);
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          font-size: 0.85rem;
+          z-index: 10;
+          transition: all 0.15s;
+          font-family: var(--sans);
+          line-height: 1;
+        }
+        .demo-modal-close:hover {
+          background: rgba(139,105,20,0.3);
+          color: #F0ECE3;
+          border-color: rgba(139,105,20,0.5);
+        }
+
         nav {
           position: fixed;
           top: 0; left: 0; right: 0;
@@ -765,8 +831,22 @@ export default function Home() {
           footer { flex-direction: column; gap: 1.5rem; text-align: center; }
           .footer-links { flex-wrap: wrap; justify-content: center; }
           .form-row { grid-template-columns: 1fr; }
+          .demo-modal-inner { height: 70vh; }
         }
       `}</style>
+
+      {/* ── DEMO MODAL ──────────────────────────────────────────────────── */}
+      <div className="demo-modal-overlay" id="demoModal">
+        <div className="demo-modal-inner">
+          <button className="demo-modal-close" id="demoClose" aria-label="Close demo">✕</button>
+          <iframe
+            id="demoFrame"
+            src=""
+            title="Collective Loft Platform Demo"
+            allow="autoplay"
+          />
+        </div>
+      </div>
 
       <nav>
         <a href="/" className="logo">Collective <span>Loft</span></a>
@@ -777,17 +857,17 @@ export default function Home() {
         <div className="hero-grid"></div>
         <div className="hero-glow"></div>
         <div className="eyebrow">Collective Loft · Est. 2026 · Chicago</div>
-<h1>
-  Building the infrastructure<br/>
-  <em>meant</em> for the<br/>
-  <em>creative class.</em>
-</h1>
+        <h1>
+          Building the infrastructure<br/>
+          <em>meant</em> for the<br/>
+          <em>creative class.</em>
+        </h1>
         <p className="hero-sub">
           The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and open a Loft Studio — a shared workspace built around the work.
         </p>
         <div className="hero-actions">
           <a href="#waitlist" className="btn-primary">Request early access ↗</a>
-          <a href="#how-it-works" className="btn-ghost">See how it works</a>
+          <button className="btn-ghost" id="btnSeeHowItWorks">See how it works</button>
         </div>
         <div className="discipline-scroll">
           {['Visual Art','Music','Writing','Design & Web','Film','Photography','Performance','Creative Tech'].map(d => (
@@ -1000,7 +1080,42 @@ export default function Home() {
       </footer>
 
       <script dangerouslySetInnerHTML={{__html: `
-        // Scroll reveal
+        // ── DEMO MODAL ──────────────────────────────────────────────────
+        const modal      = document.getElementById('demoModal');
+        const demoFrame  = document.getElementById('demoFrame');
+        const btnOpen    = document.getElementById('btnSeeHowItWorks');
+        const btnClose   = document.getElementById('demoClose');
+
+        function openDemo() {
+          // Load the demo src only when opened -- prevents autoplay on page load
+          if (!demoFrame.src || demoFrame.src === window.location.href) {
+            demoFrame.src = '/demo.html';
+          }
+          modal.classList.add('open');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeDemo() {
+          modal.classList.remove('open');
+          document.body.style.overflow = '';
+          // Reset iframe so demo restarts fresh next time
+          setTimeout(() => { demoFrame.src = ''; }, 400);
+        }
+
+        btnOpen.addEventListener('click', openDemo);
+        btnClose.addEventListener('click', closeDemo);
+
+        // Close on overlay click
+        modal.addEventListener('click', e => {
+          if (e.target === modal) closeDemo();
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', e => {
+          if (e.key === 'Escape' && modal.classList.contains('open')) closeDemo();
+        });
+
+        // ── SCROLL REVEAL ───────────────────────────────────────────────
         const reveals = document.querySelectorAll('.reveal');
         const observer = new IntersectionObserver(entries => {
           entries.forEach(e => {
@@ -1009,7 +1124,7 @@ export default function Home() {
         }, { threshold: 0.1 });
         reveals.forEach(r => observer.observe(r));
 
-        // Waitlist form
+        // ── WAITLIST FORM ───────────────────────────────────────────────
         const form = document.getElementById('waitlistForm');
         const success = document.getElementById('successMsg');
         if (form) {

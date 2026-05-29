@@ -770,7 +770,7 @@ export default function LandingPage() {
               }}
             >
               <iframe
-                src="/Collective_Loft_Terms_and_Conditions.html"
+                src="/terms.html"
                 style={{ width:'100%', height:'2400px', border:'none', background:'transparent' }}
                 title="Terms and Conditions"
               />
@@ -852,7 +852,7 @@ export default function LandingPage() {
               }}
             >
               <iframe
-                src="/Collective_Loft_Privacy_Policy.html"
+                src="/privacy.html"
                 style={{ width:'100%', height:'2400px', border:'none', background:'transparent' }}
                 title="Privacy Policy"
               />

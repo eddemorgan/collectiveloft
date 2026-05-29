@@ -183,7 +183,11 @@ export default function LandingPage() {
   const [city,           setCity]           = useState('')
   const [selectedDiscs,  setSelectedDiscs]  = useState([])
   const [selectedSkills, setSelectedSkills] = useState([])
-  const [selectedComps,  setSelectedComps]  = useState(['Creative exchange'])
+  const [selectedComps,    setSelectedComps]    = useState(['Creative exchange'])
+  const [seekingDiscs,     setSeekingDiscs]     = useState([])
+  const [seekingSkills,    setSeekingSkills]    = useState([])
+  const [seekingOpen,      setSeekingOpen]      = useState(false)
+  const [skillRatings,     setSkillRatings]     = useState({}) // { "Film scoring": 4, ... }
 
   // Required fields for profile creation
   const REQUIRED = [
@@ -283,8 +287,11 @@ export default function LandingPage() {
           const found = DISCIPLINES.find(d => d.id === id)
           return found ? found.label : id
         }),
-        skills:       selectedSkills,
-        compensation: selectedComps,
+        skills:               selectedSkills,
+        compensation:         selectedComps,
+        seeking_disciplines:  seekingDiscs,
+        seeking_skills:       seekingSkills,
+        skill_ratings:        Object.keys(skillRatings).length > 0 ? skillRatings : null,
       }).eq('id', authData.user.id)
 
       // Always show success even if profile update had issues --
@@ -564,6 +571,44 @@ export default function LandingPage() {
                         ))}
                       </div>
                     </div>
+
+                    {/* ── SKILL RATINGS ──────────────────────────────────── */}
+                    {selectedSkills.length > 0 && (
+                      <div style={{ marginTop:'1rem' }}>
+                        <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(245,242,237,0.3)', marginBottom:'0.6rem' }}>
+                          Rate your proficiency <span style={{ color:'rgba(245,242,237,0.2)', letterSpacing:'0', textTransform:'none', fontSize:'0.6rem' }}>— optional</span>
+                        </div>
+                        {selectedSkills.map(skill => {
+                          const rating = skillRatings[skill] || 0
+                          return (
+                            <div key={skill} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.5rem', gap:'0.75rem' }}>
+                              <span style={{ fontSize:'0.72rem', color:'rgba(245,242,237,0.6)', fontWeight:300, minWidth:'120px', flexShrink:0 }}>{skill}</span>
+                              <div style={{ display:'flex', gap:'0.3rem', alignItems:'center' }}>
+                                {[1,2,3,4,5].map(n => (
+                                  <button
+                                    key={n}
+                                    type="button"
+                                    onClick={() => setSkillRatings(prev => ({
+                                      ...prev,
+                                      [skill]: prev[skill] === n ? 0 : n
+                                    }))}
+                                    style={{
+                                      width:'28px', height:'6px', borderRadius:'1px',
+                                      border:'none', cursor:'pointer', transition:'all 0.15s',
+                                      background: n <= rating ? 'var(--gold)' : 'rgba(245,242,237,0.1)',
+                                    }}
+                                    title={['','Beginner','Developing','Proficient','Advanced','Expert'][n]}
+                                  />
+                                ))}
+                                <span style={{ fontSize:'0.58rem', color:'rgba(245,242,237,0.25)', marginLeft:'0.35rem', minWidth:'54px' }}>
+                                  {rating === 0 ? 'not set' : ['','Beginner','Developing','Proficient','Advanced','Expert'][rating]}
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
                   </section>
 
                   <section>
@@ -596,10 +641,6 @@ export default function LandingPage() {
                   <section>
                     <div className={styles.msl}>Collaboration</div>
                     <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
-                      <label>Who are you looking for right now?</label>
-                      <input type="text" placeholder="e.g. Web designer, ambient composer, beat producer…" value={form.seeking} onChange={e => setForm(f => ({ ...f, seeking: e.target.value }))} />
-                    </div>
-                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
                       <label>Compensation type</label>
                       <div className={styles.co}>
                         {['Creative exchange', 'Paid', 'Revenue share'].map(c => (
@@ -619,6 +660,108 @@ export default function LandingPage() {
                         <label>Availability</label>
                         <select><option value="">Select…</option><option>Open to collabs now</option><option>Available in 1–2 months</option><option>Not available right now</option></select>
                       </div>
+                    </div>
+
+                    {/* ── COLLAPSIBLE SEEKING SECTION ───────────────────── */}
+                    <div style={{ marginTop:'1rem', border:'0.5px solid rgba(245,242,237,0.08)', borderRadius:'4px', overflow:'hidden' }}>
+                      <button
+                        type="button"
+                        onClick={() => setSeekingOpen(v => !v)}
+                        style={{
+                          width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between',
+                          padding:'0.75rem 1rem', background:'rgba(245,242,237,0.03)',
+                          border:'none', cursor:'pointer', textAlign:'left',
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontFamily:'var(--sans)', fontSize:'0.7rem', fontWeight:500, color:'var(--cream)', marginBottom:'0.1rem' }}>
+                            Who are you looking to collaborate with?
+                          </div>
+                          <div style={{ fontSize:'0.62rem', color:'rgba(245,242,237,0.35)', fontWeight:300 }}>
+                            {seekingDiscs.length === 0 && seekingSkills.length === 0
+                              ? 'Optional — helps the matching algorithm find the right people for you'
+                              : `${seekingDiscs.length} discipline${seekingDiscs.length !== 1 ? 's' : ''} · ${seekingSkills.length} skill${seekingSkills.length !== 1 ? 's' : ''} selected`
+                            }
+                          </div>
+                        </div>
+                        <span style={{ color:'var(--gold)', fontSize:'0.75rem', transform: seekingOpen ? 'rotate(180deg)' : 'none', transition:'transform 0.2s', flexShrink:0, marginLeft:'0.5rem' }}>▼</span>
+                      </button>
+
+                      {seekingOpen && (
+                        <div style={{ padding:'1rem', borderTop:'0.5px solid rgba(245,242,237,0.06)' }}>
+                          {/* Discipline grid */}
+                          <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(245,242,237,0.3)', marginBottom:'0.6rem' }}>
+                            I'm looking to work with
+                          </div>
+                          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'0.4rem', marginBottom:'1rem' }}>
+                            {DISC_GRID.map(d => (
+                              <div
+                                key={d.id}
+                                onClick={() => {
+                                  setSeekingDiscs(prev => {
+                                    const next = prev.includes(d.discipline)
+                                      ? prev.filter(x => x !== d.discipline)
+                                      : [...prev, d.discipline]
+                                    // Remove skills that no longer match selected discs
+                                    const validSkills = SKILLS.filter(s => {
+                                      const disc = DISCIPLINES.find(dd => dd.label === next.find(n => n === dd.label))
+                                      return next.some(n => {
+                                        const found = DISCIPLINES.find(dd => dd.label === n)
+                                        return found && s.d === found.id
+                                      })
+                                    }).map(s => s.label)
+                                    setSeekingSkills(sk => sk.filter(s => validSkills.includes(s)))
+                                    return next
+                                  })
+                                }}
+                                style={{
+                                  border: seekingDiscs.includes(d.discipline) ? '0.5px solid var(--gold)' : '0.5px solid rgba(245,242,237,0.1)',
+                                  background: seekingDiscs.includes(d.discipline) ? 'rgba(201,168,76,0.08)' : 'var(--bg1)',
+                                  borderRadius:'3px', padding:'0.5rem 0.35rem', textAlign:'center',
+                                  cursor:'pointer', transition:'all 0.15s', userSelect:'none',
+                                }}
+                              >
+                                <div style={{ fontSize:'0.9rem', marginBottom:'0.15rem' }}>{d.icon}</div>
+                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', color: seekingDiscs.includes(d.discipline) ? 'var(--gold)' : 'rgba(245,242,237,0.4)', lineHeight:1.2 }}>{d.name}</div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Skill tags — filtered to selected disciplines */}
+                          {seekingDiscs.length > 0 && (() => {
+                            const availSkills = SKILLS.filter(s =>
+                              seekingDiscs.some(disc => {
+                                const found = DISCIPLINES.find(d => d.label === disc)
+                                return found && s.d === found.id
+                              })
+                            ).map(s => s.label)
+                            return availSkills.length > 0 ? (
+                              <>
+                                <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(245,242,237,0.3)', marginBottom:'0.6rem' }}>
+                                  Specific skills I need
+                                </div>
+                                <div style={{ display:'flex', flexWrap:'wrap', gap:'0.35rem' }}>
+                                  {availSkills.map(s => (
+                                    <button
+                                      key={s}
+                                      type="button"
+                                      onClick={() => setSeekingSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+                                      style={{
+                                        fontFamily:'var(--sans)', fontSize:'0.65rem',
+                                        padding:'0.2rem 0.6rem', borderRadius:'2px',
+                                        border: seekingSkills.includes(s) ? '0.5px solid var(--gold)' : '0.5px solid rgba(245,242,237,0.1)',
+                                        background: seekingSkills.includes(s) ? 'rgba(201,168,76,0.1)' : 'transparent',
+                                        color: seekingSkills.includes(s) ? 'var(--gold)' : 'rgba(245,242,237,0.4)',
+                                        cursor:'pointer', transition:'all 0.15s',
+                                      }}
+                                    >{s}</button>
+                                  ))}
+                                </div>
+                              </>
+                            ) : null
+                          })()}
+                        </div>
+                      )}
                     </div>
                   </section>
 

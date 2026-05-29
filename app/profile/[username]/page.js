@@ -7,7 +7,7 @@ import { supabase } from '../../../lib/supabase'
 import Footer from '../../components/Footer'
 import styles from './profile.module.css'
 
-const SKILL_WIDTHS = [95, 88, 78, 65, 55, 48, 42, 38]
+const SKILL_LEVEL_LABELS = ['', 'Beginner', 'Developing', 'Proficient', 'Advanced', 'Expert']
 
 const DISC_OPTS = [
   { id:'visual',  icon:'🎨', label:'Visual Art' },
@@ -771,7 +771,33 @@ export default function ProfilePage() {
                   </div>
                 ):(
                   <div className={styles.skillList}>
-                    {skills.slice(0,8).map((s,i)=><div key={s} className={styles.skillRow}><span className={styles.skillName}>{s}</span><div className={styles.skillBarBg}><div className={styles.skillBarFill} style={{width:`${SKILL_WIDTHS[i]||40}%`}}/></div></div>)}
+                    {skills.slice(0,8).map((s) => {
+                      const rating = (profile.skill_ratings || {})[s] || 0
+                      return (
+                        <div key={s} className={styles.skillRow}>
+                          <span className={styles.skillName}>{s}</span>
+                          {isOwner && editMode ? (
+                            <div style={{ display:'flex', gap:'0.2rem', alignItems:'center' }}>
+                              {[1,2,3,4,5].map(n => (
+                                <button key={n} type="button"
+                                  onClick={async () => {
+                                    const newR = { ...(profile.skill_ratings || {}), [s]: profile.skill_ratings?.[s] === n ? 0 : n }
+                                    await saveField('skill_ratings', newR)
+                                  }}
+                                  style={{ width:'22px', height:'5px', borderRadius:'1px', border:'none', cursor:'pointer', transition:'all 0.15s', background: n <= rating ? 'var(--gold)' : 'rgba(240,236,227,0.12)' }}
+                                  title={SKILL_LEVEL_LABELS[n]}
+                                />
+                              ))}
+                              {rating > 0 && <span style={{ fontSize:'0.52rem', color:'rgba(240,236,227,0.3)', marginLeft:'0.25rem' }}>{SKILL_LEVEL_LABELS[rating]}</span>}
+                            </div>
+                          ) : (
+                            <div className={styles.skillBarBg}>
+                              <div className={styles.skillBarFill} style={{ width: rating > 0 ? `${(rating/5)*100}%` : '22%', opacity: rating > 0 ? 1 : 0.3 }}/>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
                     {isOwner&&editMode&&<button className={styles.editTagsBtn} onClick={()=>{setDraftSkills(skills);setEditingSkills(true)}}>✎ Edit skills</button>}
                   </div>
                 )}
@@ -957,7 +983,17 @@ export default function ProfilePage() {
           {skills.length>0&&(
             <div>
               <div className={styles.sbLabel}>Skills</div>
-              <div className={styles.skillList}>{skills.slice(0,6).map((s,i)=><div key={s} className={styles.skillRow}><span className={styles.skillName}>{s}</span><div className={styles.skillBarBg}><div className={styles.skillBarFill} style={{width:`${SKILL_WIDTHS[i]||40}%`}}/></div></div>)}</div>
+              <div className={styles.skillList}>{skills.slice(0,6).map((s)=>{
+                const rating = (profile.skill_ratings || {})[s] || 0
+                return (
+                  <div key={s} className={styles.skillRow}>
+                    <span className={styles.skillName}>{s}</span>
+                    <div className={styles.skillBarBg}>
+                      <div className={styles.skillBarFill} style={{ width: rating > 0 ? `${(rating/5)*100}%` : '22%', opacity: rating > 0 ? 1 : 0.3 }}/>
+                    </div>
+                  </div>
+                )
+              })}</div>
             </div>
           )}
           {ratings.length>0&&(

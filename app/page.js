@@ -164,6 +164,16 @@ export default function LandingPage() {
   const [showPw,     setShowPw]     = useState(false)
   const [showConfPw, setShowConfPw] = useState(false)
 
+  // Legal acknowledgement state
+  const [showTcDoc,   setShowTcDoc]   = useState(false)  // TC doc reader open
+  const [showPpDoc,   setShowPpDoc]   = useState(false)  // PP doc reader open
+  const [tcScrolled,  setTcScrolled]  = useState(false)  // user scrolled to bottom of TC
+  const [ppScrolled,  setPpScrolled]  = useState(false)  // user scrolled to bottom of PP
+  const [tcAccepted,  setTcAccepted]  = useState(false)  // user accepted TC
+  const [ppAccepted,  setPpAccepted]  = useState(false)  // user accepted PP
+  const [tcChecked,   setTcChecked]   = useState(false)  // checkbox ticked
+  const [ppChecked,   setPpChecked]   = useState(false)  // checkbox ticked
+
   const [form, setForm] = useState({
     firstname: '', lastname: '', email: '', headline: '',
     bio: '', rightnow: '', seeking: '', password: '', confirmPassword: '',
@@ -175,10 +185,22 @@ export default function LandingPage() {
   const [selectedSkills, setSelectedSkills] = useState([])
   const [selectedComps,  setSelectedComps]  = useState(['Creative exchange'])
 
-  const progress = Math.round(
-    REQUIRED_FIELDS.filter(k => (form[k] || '').trim().length > 1).length /
-    REQUIRED_FIELDS.length * 100
-  )
+  // Required fields for profile creation
+  const REQUIRED = [
+    form.firstname.trim().length > 0,
+    form.lastname.trim().length > 0,
+    form.email.trim().length > 0,
+    form.password.length >= 8,
+    form.confirmPassword === form.password && form.confirmPassword.length > 0,
+    selectedDiscs.length > 0,
+    selectedSkills.length > 0,
+    form.headline.trim().length > 0,
+    form.bio.trim().length > 0,
+  ]
+  const requiredComplete = REQUIRED.every(Boolean)
+  const canSubmit = requiredComplete && tcChecked && ppChecked && !submitting
+
+  const progress = Math.round(REQUIRED.filter(Boolean).length / REQUIRED.length * 100)
   const visibleSkills = selectedDiscs.length === 0
     ? SKILLS : SKILLS.filter(s => selectedDiscs.includes(s.d))
 
@@ -207,6 +229,10 @@ export default function LandingPage() {
   }
   function closeModal() {
     setModalOpen(false); setSubmitted(false); setFormError('')
+    setShowTcDoc(false); setShowPpDoc(false)
+    setTcScrolled(false); setPpScrolled(false)
+    setTcAccepted(false); setPpAccepted(false)
+    setTcChecked(false); setPpChecked(false)
   }
 
   async function handleSubmit() {
@@ -611,16 +637,252 @@ export default function LandingPage() {
                 </div>
 
                 <div className={styles.mftr}>
-                  <div className={styles.fnote}>You can edit everything from your profile at any time.</div>
+                  {/* Legal acknowledgement section */}
+                  <div style={{ width:'100%', marginBottom:'1rem' }}>
+                    <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(245,242,237,0.3)', marginBottom:'0.75rem' }}>
+                      Required acknowledgements
+                    </div>
+
+                    {/* Terms & Conditions row */}
+                    <div style={{ display:'flex', alignItems:'center', gap:'0.65rem', marginBottom:'0.5rem' }}>
+                      <div
+                        onClick={() => { if (tcAccepted) setTcChecked(v => !v) }}
+                        style={{
+                          width:'18px', height:'18px', borderRadius:'3px', flexShrink:0,
+                          border: tcChecked ? '0.5px solid var(--gold)' : '0.5px solid rgba(245,242,237,0.2)',
+                          background: tcChecked ? 'rgba(201,168,76,0.15)' : 'transparent',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          cursor: tcAccepted ? 'pointer' : 'not-allowed',
+                          opacity: tcAccepted ? 1 : 0.4,
+                          transition:'all 0.15s',
+                          color:'var(--gold)', fontSize:'0.65rem',
+                        }}
+                      >{tcChecked ? '✓' : ''}</div>
+                      <span style={{ fontSize:'0.72rem', color:'rgba(245,242,237,0.55)', fontWeight:300 }}>
+                        I have read and agree to the{' '}
+                        <button
+                          type="button"
+                          onClick={() => setShowTcDoc(true)}
+                          style={{ background:'none', border:'none', color:'var(--gold)', cursor:'pointer', fontSize:'0.72rem', fontFamily:'var(--sans)', textDecoration:'underline', padding:0 }}
+                        >Terms & Conditions</button>
+                        {!tcAccepted && <span style={{ fontSize:'0.6rem', color:'rgba(245,242,237,0.3)', marginLeft:'0.4rem' }}>(must read to enable)</span>}
+                        {tcAccepted && !tcChecked && <span style={{ fontSize:'0.6rem', color:'var(--teal)', marginLeft:'0.4rem' }}>✓ read — check to confirm</span>}
+                      </span>
+                    </div>
+
+                    {/* Privacy Policy row */}
+                    <div style={{ display:'flex', alignItems:'center', gap:'0.65rem' }}>
+                      <div
+                        onClick={() => { if (ppAccepted) setPpChecked(v => !v) }}
+                        style={{
+                          width:'18px', height:'18px', borderRadius:'3px', flexShrink:0,
+                          border: ppChecked ? '0.5px solid var(--gold)' : '0.5px solid rgba(245,242,237,0.2)',
+                          background: ppChecked ? 'rgba(201,168,76,0.15)' : 'transparent',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          cursor: ppAccepted ? 'pointer' : 'not-allowed',
+                          opacity: ppAccepted ? 1 : 0.4,
+                          transition:'all 0.15s',
+                          color:'var(--gold)', fontSize:'0.65rem',
+                        }}
+                      >{ppChecked ? '✓' : ''}</div>
+                      <span style={{ fontSize:'0.72rem', color:'rgba(245,242,237,0.55)', fontWeight:300 }}>
+                        I have read and agree to the{' '}
+                        <button
+                          type="button"
+                          onClick={() => setShowPpDoc(true)}
+                          style={{ background:'none', border:'none', color:'var(--gold)', cursor:'pointer', fontSize:'0.72rem', fontFamily:'var(--sans)', textDecoration:'underline', padding:0 }}
+                        >Privacy Policy</button>
+                        {!ppAccepted && <span style={{ fontSize:'0.6rem', color:'rgba(245,242,237,0.3)', marginLeft:'0.4rem' }}>(must read to enable)</span>}
+                        {ppAccepted && !ppChecked && <span style={{ fontSize:'0.6rem', color:'var(--teal)', marginLeft:'0.4rem' }}>✓ read — check to confirm</span>}
+                      </span>
+                    </div>
+
+                    {/* Required fields status */}
+                    {!requiredComplete && (
+                      <div style={{ marginTop:'0.75rem', fontSize:'0.62rem', color:'rgba(245,242,237,0.28)', fontWeight:300, lineHeight:1.5 }}>
+                        Required to create profile: First name, Last name, Email, Password (8+ chars), at least one Discipline, at least one Skill, Headline, and Bio.
+                      </div>
+                    )}
+                  </div>
+
                   <div className={styles.fbtns}>
                     <button className={styles.bcn} onClick={closeModal}>Cancel</button>
-                    <button className={styles.bsp} onClick={handleSubmit} disabled={submitting}>
+                    <button
+                      className={styles.bsp}
+                      onClick={handleSubmit}
+                      disabled={!canSubmit}
+                      title={!requiredComplete ? 'Complete all required fields' : !tcChecked || !ppChecked ? 'Read and accept both legal documents' : ''}
+                      style={{ opacity: canSubmit ? 1 : 0.4, cursor: canSubmit ? 'pointer' : 'not-allowed' }}
+                    >
                       {submitting ? 'Creating profile…' : 'Create my profile ↗'}
                     </button>
                   </div>
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+      {/* TERMS & CONDITIONS DOCUMENT READER */}
+      {showTcDoc && (
+        <div style={{
+          position:'fixed', inset:0, background:'rgba(0,0,0,0.92)',
+          zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center',
+          padding:'1.5rem',
+        }}>
+          <div style={{
+            background:'#1A1714', border:'0.5px solid rgba(201,168,76,0.3)',
+            borderRadius:'6px', width:'100%', maxWidth:'780px',
+            height:'88vh', display:'flex', flexDirection:'column',
+            overflow:'hidden', boxShadow:'0 40px 80px rgba(0,0,0,0.6)',
+          }}>
+            {/* Doc header */}
+            <div style={{
+              padding:'1.25rem 1.5rem', borderBottom:'0.5px solid rgba(245,242,237,0.08)',
+              display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0,
+            }}>
+              <div>
+                <div style={{ fontSize:'0.55rem', letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--gold)', opacity:0.8, marginBottom:'0.2rem' }}>Legal Document</div>
+                <div style={{ fontFamily:'var(--serif)', fontSize:'1.3rem', fontWeight:700, color:'var(--cream)' }}>Terms & Conditions</div>
+              </div>
+              <button onClick={() => setShowTcDoc(false)} style={{
+                background:'transparent', border:'0.5px solid rgba(245,242,237,0.15)',
+                color:'rgba(245,242,237,0.4)', width:'30px', height:'30px', borderRadius:'50%',
+                cursor:'pointer', fontSize:'0.85rem', display:'flex', alignItems:'center', justifyContent:'center',
+              }}>✕</button>
+            </div>
+
+            {/* Scroll hint */}
+            {!tcScrolled && (
+              <div style={{ background:'rgba(201,168,76,0.08)', borderBottom:'0.5px solid rgba(201,168,76,0.2)', padding:'0.65rem 1.5rem', fontSize:'0.68rem', color:'rgba(201,168,76,0.8)', flexShrink:0 }}>
+                ↓ Scroll to the bottom to read the full document and enable acceptance.
+              </div>
+            )}
+
+            {/* Scrollable content */}
+            <div
+              style={{ flex:1, overflowY:'auto', padding:'1.5rem' }}
+              onScroll={e => {
+                const el = e.currentTarget
+                if (!tcScrolled && el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+                  setTcScrolled(true)
+                }
+              }}
+            >
+              <iframe
+                src="/Collective_Loft_Terms_and_Conditions.html"
+                style={{ width:'100%', height:'2400px', border:'none', background:'transparent' }}
+                title="Terms and Conditions"
+              />
+            </div>
+
+            {/* Accept footer */}
+            <div style={{
+              padding:'1rem 1.5rem', borderTop:'0.5px solid rgba(245,242,237,0.08)',
+              display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0,
+              background:'#211E1A',
+            }}>
+              <div style={{ fontSize:'0.7rem', color:'rgba(245,242,237,0.4)', fontWeight:300, maxWidth:'420px', lineHeight:1.5 }}>
+                By clicking I Agree, you confirm you have read and agree to Collective Loft's Terms & Conditions and that you are 18 years of age or older.
+              </div>
+              <button
+                onClick={() => { setTcAccepted(true); setTcChecked(true); setShowTcDoc(false) }}
+                disabled={!tcScrolled}
+                style={{
+                  background: tcScrolled ? 'var(--gold)' : 'rgba(201,168,76,0.3)',
+                  color: tcScrolled ? '#0D0D0D' : 'rgba(245,242,237,0.3)',
+                  border:'none', borderRadius:'2px', padding:'0.6rem 1.5rem',
+                  fontFamily:'var(--sans)', fontSize:'0.72rem', fontWeight:500,
+                  letterSpacing:'0.08em', textTransform:'uppercase',
+                  cursor: tcScrolled ? 'pointer' : 'not-allowed',
+                  transition:'all 0.2s', whiteSpace:'nowrap', flexShrink:0, marginLeft:'1rem',
+                }}
+              >
+                {tcScrolled ? 'I Agree ✓' : 'Read to continue ↓'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PRIVACY POLICY DOCUMENT READER */}
+      {showPpDoc && (
+        <div style={{
+          position:'fixed', inset:0, background:'rgba(0,0,0,0.92)',
+          zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center',
+          padding:'1.5rem',
+        }}>
+          <div style={{
+            background:'#1A1714', border:'0.5px solid rgba(201,168,76,0.3)',
+            borderRadius:'6px', width:'100%', maxWidth:'780px',
+            height:'88vh', display:'flex', flexDirection:'column',
+            overflow:'hidden', boxShadow:'0 40px 80px rgba(0,0,0,0.6)',
+          }}>
+            {/* Doc header */}
+            <div style={{
+              padding:'1.25rem 1.5rem', borderBottom:'0.5px solid rgba(245,242,237,0.08)',
+              display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0,
+            }}>
+              <div>
+                <div style={{ fontSize:'0.55rem', letterSpacing:'0.18em', textTransform:'uppercase', color:'var(--gold)', opacity:0.8, marginBottom:'0.2rem' }}>Legal Document</div>
+                <div style={{ fontFamily:'var(--serif)', fontSize:'1.3rem', fontWeight:700, color:'var(--cream)' }}>Privacy Policy</div>
+              </div>
+              <button onClick={() => setShowPpDoc(false)} style={{
+                background:'transparent', border:'0.5px solid rgba(245,242,237,0.15)',
+                color:'rgba(245,242,237,0.4)', width:'30px', height:'30px', borderRadius:'50%',
+                cursor:'pointer', fontSize:'0.85rem', display:'flex', alignItems:'center', justifyContent:'center',
+              }}>✕</button>
+            </div>
+
+            {/* Scroll hint */}
+            {!ppScrolled && (
+              <div style={{ background:'rgba(201,168,76,0.08)', borderBottom:'0.5px solid rgba(201,168,76,0.2)', padding:'0.65rem 1.5rem', fontSize:'0.68rem', color:'rgba(201,168,76,0.8)', flexShrink:0 }}>
+                ↓ Scroll to the bottom to read the full document and enable acceptance.
+              </div>
+            )}
+
+            {/* Scrollable content */}
+            <div
+              style={{ flex:1, overflowY:'auto', padding:'1.5rem' }}
+              onScroll={e => {
+                const el = e.currentTarget
+                if (!ppScrolled && el.scrollTop + el.clientHeight >= el.scrollHeight - 40) {
+                  setPpScrolled(true)
+                }
+              }}
+            >
+              <iframe
+                src="/Collective_Loft_Privacy_Policy.html"
+                style={{ width:'100%', height:'2400px', border:'none', background:'transparent' }}
+                title="Privacy Policy"
+              />
+            </div>
+
+            {/* Accept footer */}
+            <div style={{
+              padding:'1rem 1.5rem', borderTop:'0.5px solid rgba(245,242,237,0.08)',
+              display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0,
+              background:'#211E1A',
+            }}>
+              <div style={{ fontSize:'0.7rem', color:'rgba(245,242,237,0.4)', fontWeight:300, maxWidth:'420px', lineHeight:1.5 }}>
+                By clicking I Agree, you confirm you have read and agree to Collective Loft's Privacy Policy.
+              </div>
+              <button
+                onClick={() => { setPpAccepted(true); setPpChecked(true); setShowPpDoc(false) }}
+                disabled={!ppScrolled}
+                style={{
+                  background: ppScrolled ? 'var(--gold)' : 'rgba(201,168,76,0.3)',
+                  color: ppScrolled ? '#0D0D0D' : 'rgba(245,242,237,0.3)',
+                  border:'none', borderRadius:'2px', padding:'0.6rem 1.5rem',
+                  fontFamily:'var(--sans)', fontSize:'0.72rem', fontWeight:500,
+                  letterSpacing:'0.08em', textTransform:'uppercase',
+                  cursor: ppScrolled ? 'pointer' : 'not-allowed',
+                  transition:'all 0.2s', whiteSpace:'nowrap', flexShrink:0, marginLeft:'1rem',
+                }}
+              >
+                {ppScrolled ? 'I Agree ✓' : 'Read to continue ↓'}
+              </button>
+            </div>
           </div>
         </div>
       )}

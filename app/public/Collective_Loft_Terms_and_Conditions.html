@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms & Conditions — Collective Loft</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #042C53;
+    --blue: #185FA5;
+    --rose: #993556;
+    --ice: #E8EDF3;
+    --gold: #C9A84C;
+    --nearblack: #0D0D0D;
+    --cream: #F5F0E8;
+    --stone: #6B7280;
+    --white: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--navy);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .site-header {
+    background: var(--nearblack);
+    border-bottom: 1px solid rgba(201,168,76,0.25);
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .wordmark {
+    font-family: 'EB Garamond', serif;
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    color: var(--cream);
+    text-transform: uppercase;
+  }
+
+  .wordmark span {
+    color: var(--gold);
+  }
+
+  .doc-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.4);
+    padding: 4px 12px;
+    border-radius: 2px;
+  }
+
+  /* Hero band */
+  .doc-hero {
+    background: var(--nearblack);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    padding: 64px 48px 48px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .doc-type {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 16px;
+  }
+
+  .doc-title {
+    font-family: 'EB Garamond', serif;
+    font-size: 52px;
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+
+  .doc-subtitle {
+    font-family: 'EB Garamond', serif;
+    font-size: 20px;
+    font-style: italic;
+    color: var(--gold);
+    margin-bottom: 32px;
+  }
+
+  .doc-meta {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .meta-label {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--stone);
+  }
+
+  .meta-value {
+    font-size: 13px;
+    color: var(--cream);
+    opacity: 0.8;
+  }
+
+  /* Layout */
+  .doc-layout {
+    max-width: 960px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+    min-height: 80vh;
+  }
+
+  /* TOC Sidebar */
+  .toc {
+    padding: 48px 32px 48px 48px;
+    border-right: 1px solid rgba(201,168,76,0.12);
+    position: sticky;
+    top: 65px;
+    height: calc(100vh - 65px);
+    overflow-y: auto;
+  }
+
+  .toc-label {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+
+  .toc a {
+    display: block;
+    font-size: 11px;
+    color: rgba(245,240,232,0.5);
+    text-decoration: none;
+    padding: 5px 0;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+
+  .toc a:hover {
+    color: var(--cream);
+    border-left-color: var(--gold);
+  }
+
+  /* Main content */
+  .doc-content {
+    padding: 48px 48px 96px;
+  }
+
+  /* Sections */
+  .section {
+    margin-bottom: 56px;
+    padding-bottom: 56px;
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+  }
+
+  .section:last-child {
+    border-bottom: none;
+  }
+
+  .section-number {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-family: 'EB Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--cream);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 28px 0 12px;
+  }
+
+  p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(245,240,232,0.8);
+    margin-bottom: 16px;
+  }
+
+  ul {
+    list-style: none;
+    margin: 16px 0;
+  }
+
+  ul li {
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(245,240,232,0.75);
+    padding: 5px 0 5px 20px;
+    position: relative;
+  }
+
+  ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 5px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  /* Callout boxes */
+  .callout {
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-left: 3px solid var(--gold);
+    padding: 20px 24px;
+    margin: 24px 0;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .callout p {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(245,240,232,0.7);
+  }
+
+  .callout strong {
+    color: var(--cream);
+    font-weight: 500;
+  }
+
+  /* Price block */
+  .price-block {
+    background: rgba(153,53,86,0.12);
+    border: 1px solid rgba(153,53,86,0.3);
+    padding: 20px 24px;
+    margin: 20px 0;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .price-amount {
+    font-family: 'EB Garamond', serif;
+    font-size: 36px;
+    color: var(--cream);
+  }
+
+  .price-period {
+    font-size: 13px;
+    color: var(--rose);
+    letter-spacing: 0.05em;
+  }
+
+  /* Caps warning */
+  .caps-warning {
+    background: rgba(4,44,83,0.6);
+    border: 1px solid rgba(24,95,165,0.3);
+    padding: 20px 24px;
+    margin: 20px 0;
+    border-radius: 2px;
+  }
+
+  .caps-warning p {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.7;
+    color: rgba(245,240,232,0.65);
+    margin: 0;
+  }
+
+  /* Contact block */
+  .contact-block {
+    background: var(--nearblack);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 28px 32px;
+    margin-top: 24px;
+  }
+
+  .contact-block p {
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: rgba(245,240,232,0.7);
+  }
+
+  .contact-block a {
+    color: var(--gold);
+    text-decoration: none;
+  }
+
+  /* Acknowledgment footer */
+  .ack-footer {
+    background: var(--nearblack);
+    border-top: 1px solid rgba(201,168,76,0.25);
+    padding: 40px 48px;
+    position: sticky;
+    bottom: 0;
+  }
+
+  .ack-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .ack-text {
+    font-size: 13px;
+    color: rgba(245,240,232,0.55);
+    max-width: 520px;
+    line-height: 1.6;
+  }
+
+  .ack-text strong {
+    color: var(--cream);
+  }
+
+  .ack-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .btn-decline {
+    background: transparent;
+    border: 1px solid rgba(245,240,232,0.2);
+    color: rgba(245,240,232,0.4);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-decline:hover {
+    border-color: rgba(245,240,232,0.4);
+    color: rgba(245,240,232,0.7);
+  }
+
+  .btn-accept {
+    background: var(--rose);
+    border: 1px solid var(--rose);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 32px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-accept:hover {
+    background: #7A2843;
+    border-color: #7A2843;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--navy); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .doc-layout { grid-template-columns: 1fr; }
+    .toc { display: none; }
+    .site-header { padding: 16px 24px; }
+    .doc-hero { padding: 40px 24px 32px; }
+    .doc-content { padding: 32px 24px 80px; }
+    .doc-title { font-size: 36px; }
+    .ack-footer { padding: 24px; }
+    .ack-inner { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wordmark">Collective <span>LOFT</span></div>
+  <div class="doc-badge">Legal Document</div>
+</header>
+
+<div style="background: var(--nearblack);">
+  <div class="doc-hero">
+    <div class="doc-type">Morgan Collective Group LLC</div>
+    <div class="doc-title">Terms &amp; Conditions</div>
+    <div class="doc-subtitle">Creator Platform Subscription Agreement</div>
+    <div class="doc-meta">
+      <div class="meta-item">
+        <div class="meta-label">Effective Date</div>
+        <div class="meta-value">[Insert Date Before Publishing]</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Last Updated</div>
+        <div class="meta-value">[Insert Date Before Publishing]</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Platform</div>
+        <div class="meta-value">collectiveloft.com</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Contact</div>
+        <div class="meta-value">hello@collectiveloft.com</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="doc-layout">
+
+  <!-- Sidebar TOC -->
+  <nav class="toc">
+    <div class="toc-label">Contents</div>
+    <a href="#s1">1. Platform Overview</a>
+    <a href="#s2">2. Eligibility</a>
+    <a href="#s3">3. Subscription &amp; Billing</a>
+    <a href="#s4">4. Creator Profiles &amp; Identity</a>
+    <a href="#s5">5. Collaboration Briefs &amp; Matching</a>
+    <a href="#s6">6. Loft Studios</a>
+    <a href="#s7">7. Collab Terms &amp; Creative Agreements</a>
+    <a href="#s8">8. Types of Collaboration</a>
+    <a href="#s9">9. Content Ownership &amp; License</a>
+    <a href="#s10">10. Community Voice &amp; Reputation</a>
+    <a href="#s11">11. Email Communications</a>
+    <a href="#s12">12. Acceptable Use</a>
+    <a href="#s13">13. Intellectual Property</a>
+    <a href="#s14">14. Copyright &amp; DMCA</a>
+    <a href="#s15">15. Privacy &amp; Data</a>
+    <a href="#s16">16. Disclaimers</a>
+    <a href="#s17">17. Limitation of Liability</a>
+    <a href="#s18">18. Termination</a>
+    <a href="#s19">19. Governing Law</a>
+    <a href="#s20">20. User Disputes &amp; Platform Non-Liability</a>
+    <a href="#s21">21. Mandatory Arbitration</a>
+    <a href="#s22">22. Creator Verification Disclaimer</a>
+    <a href="#s23">23. Collaborative Works &amp; Rights Ownership</a>
+    <a href="#s24">24. Changes to Terms</a>
+    <a href="#s25">25. Contact Information</a>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="doc-content">
+
+    <div class="callout" style="margin-bottom: 40px;">
+      <p>Welcome to Collective Loft. These Terms &amp; Conditions govern your access to and use of the Collective Loft platform, website, applications, services, collaboration systems, creator tools, community features, and subscription offerings (collectively, the "Platform"). By accessing or using the Platform, you agree to be bound by these Terms. If you do not agree, you may not use the Platform.</p>
+    </div>
+
+    <div class="section" id="s1">
+      <div class="section-number">Section 01</div>
+      <h2>Platform Overview</h2>
+      <p>Collective Loft is not a traditional freelance marketplace, portfolio site, job board, or social media feed. The Platform exists to facilitate creative collaboration through creator identity profiles, collaboration briefs, discipline matching, Loft Studios, and structured collaboration terms.</p>
+      <p>The Platform includes:</p>
+      <ul>
+        <li>Creative Profiles and Right Now project cards</li>
+        <li>Collaboration Briefs and application systems</li>
+        <li>Discipline Matching systems</li>
+        <li>Loft Studios — shared project workspaces</li>
+        <li>Shared files, notes, and milestone tracking</li>
+        <li>Community Voice ratings and reviews</li>
+        <li>Messaging and communication tools</li>
+        <li>Collaboration term agreements</li>
+        <li>Subscription services</li>
+      </ul>
+    </div>
+
+    <div class="section" id="s2">
+      <div class="section-number">Section 02</div>
+      <h2>Eligibility</h2>
+      <p>You must be at least 18 years old to use the Platform. Collective Loft is designed for working creative professionals. We do not permit use by individuals under 18 under any circumstances, including with parental consent. By creating an account, you represent and warrant that you are 18 years of age or older and have the full legal authority to enter into binding agreements.</p>
+      <p>Your use of the Platform must comply with all applicable local, state, national, and international laws and regulations.</p>
+    </div>
+
+    <div class="section" id="s3">
+      <div class="section-number">Section 03</div>
+      <h2>Subscription &amp; Billing</h2>
+
+      <div class="price-block">
+        <span class="price-amount">$15</span>
+        <span class="price-period">USD / month</span>
+      </div>
+
+      <p>Collective Loft operates on a monthly subscription model.</p>
+
+      <h3>3.1 Billing</h3>
+      <p>By subscribing, you authorize Collective Loft and its payment processors (currently Stripe, and subject to change with advance notice) to automatically charge your selected payment method on a recurring monthly basis at the then-current subscription rate.</p>
+
+      <h3>3.2 Renewal &amp; Cancellation</h3>
+      <ul>
+        <li>Subscriptions automatically renew each month unless canceled before the next billing cycle.</li>
+        <li>You may cancel at any time through your account settings.</li>
+        <li>Upon cancellation, your access to the Platform continues through the end of your current paid billing period. Access is not terminated immediately upon cancellation.</li>
+        <li>No partial-month refunds will be issued unless required by applicable law.</li>
+      </ul>
+
+      <h3>3.3 Price Changes</h3>
+      <p>Collective Loft reserves the right to modify subscription pricing. We will provide at least 30 days advance notice of any pricing changes via email to your registered address. Continued use of the Platform after the effective date of a price change constitutes acceptance of the new pricing.</p>
+
+      <h3>3.4 Payment Processor Terms</h3>
+      <p>Payment processing is handled by Stripe and subject to Stripe's own terms of service and privacy policy. Collective Loft is not responsible for payment processing errors, disputes, or issues that arise from Stripe's systems. By subscribing, you agree to Stripe's terms as they apply to payment processing.</p>
+    </div>
+
+    <div class="section" id="s4">
+      <div class="section-number">Section 04</div>
+      <h2>Creator Profiles &amp; Identity</h2>
+      <p>Collective Loft profiles are designed as creative professional identities rather than traditional résumés. Users may upload portfolios, project histories, work samples, links, media, biographies, and discipline-specific materials.</p>
+      <p>You are solely responsible for all information and content submitted to your profile. You agree not to:</p>
+      <ul>
+        <li>Impersonate another individual or entity</li>
+        <li>Submit false collaboration history or fabricated credentials</li>
+        <li>Manipulate ratings, reviews, or trust systems</li>
+        <li>Use automated bots, scripts, or fake engagement systems</li>
+        <li>Create multiple accounts to circumvent platform rules or suspensions</li>
+      </ul>
+    </div>
+
+    <div class="section" id="s5">
+      <div class="section-number">Section 05</div>
+      <h2>Collaboration Briefs &amp; Matching</h2>
+      <p>Users may create or respond to Collaboration Briefs describing creative projects, collaborator needs, compensation arrangements, timelines, and project goals.</p>
+      <p>Collective Loft does not guarantee:</p>
+      <ul>
+        <li>Project completion or successful collaboration outcomes</li>
+        <li>Collaboration compatibility between users</li>
+        <li>Financial outcomes or revenue generation</li>
+        <li>Match quality or algorithm accuracy</li>
+      </ul>
+      <p>Discipline Matching systems are algorithmic recommendation tools only and should not be interpreted as endorsements, certifications, or guarantees of any kind.</p>
+    </div>
+
+    <div class="section" id="s6">
+      <div class="section-number">Section 06</div>
+      <h2>Loft Studios</h2>
+      <p>A Loft Studio is a shared collaboration workspace that opens when users mutually agree to collaborate by accepting Collab Terms. Loft Studios include shared milestones, deliverable tracking, shared files, shared notes, chat history, timestamped activity records, and collaboration terms.</p>
+      <p>Users acknowledge that activity history and collaboration records may remain associated with completed projects as part of the Platform's trust and reputation infrastructure, even after a subscription is canceled or an account is closed. Because a collaboration belongs to both parties, the active member retains access to shared work, files, and records tied to projects they participated in. When a user departs the Platform and requests removal of their data, Collective Loft will handle such requests on a case-by-case basis. Where feasible, Collective Loft may facilitate the transfer or download of applicable project files to the remaining active collaborator before removing the departed user's personal data. Collective Loft will make reasonable efforts to honor such requests in a manner that protects the legitimate interests of all parties, subject to applicable law.</p>
+    </div>
+
+    <div class="section" id="s7">
+      <div class="section-number">Section 07</div>
+      <h2>Collab Terms &amp; Creative Agreements</h2>
+      <p>Before beginning work, collaborating parties may negotiate and agree upon deliverables, timelines, rights transfer terms, revenue share percentages, milestone structures, compensation arrangements, and creative exchange terms through the Platform's Collab Terms system.</p>
+      <div class="callout">
+        <p><strong>Important:</strong> Collective Loft is not a legal representative, employer, talent agency, escrow service, or contracting party to agreements between users. Users are solely responsible for ensuring their agreements meet their legal and professional needs. Collective Loft strongly encourages users to seek independent legal counsel for high-value or complex collaboration agreements.</p>
+      </div>
+    </div>
+
+    <div class="section" id="s8">
+      <div class="section-number">Section 08</div>
+      <h2>Types of Collaboration</h2>
+      <p>The Platform supports multiple collaboration structures:</p>
+      <ul>
+        <li><strong style="color: var(--cream);">Creative Exchange</strong> — skills traded between parties, no money changes hands</li>
+        <li><strong style="color: var(--cream);">Paid Collaboration</strong> — fee agreed upfront between parties</li>
+        <li><strong style="color: var(--cream);">Revenue Share</strong> — parties split revenue generated by the work</li>
+      </ul>
+      <p>Collective Loft does not process escrow services, guarantee payment enforcement, or act as intermediary in financial transactions between users. Users assume all risks associated with collaborative arrangements and any payments made outside the Platform.</p>
+    </div>
+
+    <div class="section" id="s9">
+      <div class="section-number">Section 09</div>
+      <h2>Content Ownership &amp; License</h2>
+      <p>Creators retain full ownership of the content they upload to the Platform, including artwork, music, writing, photography, film, design assets, and project materials.</p>
+      <p>By uploading content, you grant Collective Loft a worldwide, non-exclusive, royalty-free license to host, display, store, and technically process your content solely as necessary to operate the Platform and deliver its features to you and your collaborators. This license does not permit Collective Loft to sell your content or license it to third parties for commercial purposes unrelated to Platform operation.</p>
+      <p>This license terminates when content is removed from the Platform, except where retention is required for:</p>
+      <ul>
+        <li>System backups (typically purged within 90 days)</li>
+        <li>Active dispute resolution</li>
+        <li>Legal compliance or court order</li>
+        <li>Completed collaboration records tied to another user's profile history</li>
+      </ul>
+    </div>
+
+    <div class="section" id="s10">
+      <div class="section-number">Section 10</div>
+      <h2>Community Voice &amp; Reputation</h2>
+      <p>Collective Loft allows users to rate collaborators and leave written reviews tied to completed Loft Studios.</p>
+      <p>You agree that:</p>
+      <ul>
+        <li>Ratings and reviews must be honest, accurate, and made in good faith based on your direct collaboration experience</li>
+        <li>Harassment, retaliation, defamation, or coordinated review manipulation is prohibited</li>
+        <li>Collective Loft may remove reviews that violate these Terms or are determined to be fraudulent, abusive, or defamatory</li>
+        <li>Collective Loft reserves the right to moderate reputation systems to maintain platform integrity</li>
+      </ul>
+      <div class="callout">
+        <p>All moderation decisions regarding ratings, reviews, and reputation content are made at Collective Loft's sole discretion and are final. Collective Loft does not offer a formal appeals process for moderation actions, and no such action shall constitute a breach of these Terms.</p>
+      </div>
+    </div>
+
+    <div class="section" id="s11">
+      <div class="section-number">Section 11</div>
+      <h2>Email Communications</h2>
+      <p>By creating an account, you consent to receive transactional emails from Collective Loft related to your account activity, including:</p>
+      <ul>
+        <li>Account confirmation and password reset emails</li>
+        <li>Collaboration term notifications</li>
+        <li>Studio activity alerts</li>
+        <li>Rating and review prompts</li>
+        <li>Subscription billing notifications</li>
+        <li>Platform updates and policy changes</li>
+      </ul>
+      <p>You may opt out of non-essential marketing communications at any time through your account settings or via the unsubscribe link in any marketing email. Transactional emails related to active subscriptions and collaboration activity cannot be opted out of while your account is active.</p>
+    </div>
+
+    <div class="section" id="s12">
+      <div class="section-number">Section 12</div>
+      <h2>Acceptable Use</h2>
+      <p>You agree not to:</p>
+      <ul>
+        <li>Harass, threaten, intimidate, or abuse other users</li>
+        <li>Upload illegal, infringing, stolen, or unauthorized content</li>
+        <li>Share malware, malicious code, or harmful content</li>
+        <li>Attempt unauthorized access to any system, account, or data</li>
+        <li>Scrape, crawl, or systematically harvest Platform data</li>
+        <li>Manipulate matching, rating, or reputation systems</li>
+        <li>Circumvent subscription fees or access controls</li>
+        <li>Use the Platform for any unlawful purpose</li>
+        <li>Impersonate Collective Loft staff or representatives</li>
+      </ul>
+      <p>Collective Loft reserves the right to suspend or permanently terminate accounts that violate these Terms, with or without prior notice, at its sole discretion.</p>
+    </div>
+
+    <div class="section" id="s13">
+      <div class="section-number">Section 13</div>
+      <h2>Intellectual Property</h2>
+      <p>All Platform branding, logos, systems, interfaces, software, workflows, visual design, matching systems, and proprietary technology are owned by Collective Loft and Morgan Collective Group LLC and protected under applicable intellectual property law.</p>
+      <p>No user may copy, reverse engineer, reproduce, distribute, modify, or commercially exploit Platform technology, design, or systems without explicit written permission from Collective Loft.</p>
+    </div>
+
+    <div class="section" id="s14">
+      <div class="section-number">Section 14</div>
+      <h2>Copyright &amp; DMCA</h2>
+      <p>If you believe your copyrighted work has been infringed on the Platform, you may submit a DMCA takedown notice to hello@collectiveloft.com containing:</p>
+      <ul>
+        <li>Identification of the copyrighted work claimed to be infringed</li>
+        <li>Identification of the allegedly infringing material and its location on the Platform</li>
+        <li>Your contact information (name, address, phone, email)</li>
+        <li>A statement that you have a good faith belief the use is not authorized</li>
+        <li>A statement made under penalty of perjury that the information is accurate and you are authorized to act on behalf of the copyright owner</li>
+      </ul>
+      <p>Collective Loft will respond to valid DMCA notices and reserves the right to remove allegedly infringing material and terminate accounts of repeat infringers.</p>
+    </div>
+
+    <div class="section" id="s15">
+      <div class="section-number">Section 15</div>
+      <h2>Privacy &amp; Data</h2>
+      <p>Your use of the Platform is also governed by our Privacy Policy, available at collectiveloft.com/privacy. The Privacy Policy explains how we collect, use, store, and share your personal data. By using the Platform, you agree to the Privacy Policy in addition to these Terms.</p>
+      <p>Collective Loft uses Google Analytics to understand Platform usage patterns. Google Analytics may collect information about your use of the Platform through cookies and similar tracking technologies. See our Privacy Policy for full details.</p>
+      <p>Beyond session management cookies required by Supabase Auth for authentication, Collective Loft does not deploy additional tracking cookies beyond those used by Google Analytics.</p>
+    </div>
+
+    <div class="section" id="s16">
+      <div class="section-number">Section 16</div>
+      <h2>Disclaimers</h2>
+      <div class="caps-warning">
+        <p>THE PLATFORM IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED.</p>
+      </div>
+      <p>Collective Loft makes no warranties regarding:</p>
+      <ul>
+        <li>Platform uptime, availability, or uninterrupted access</li>
+        <li>Collaboration success or creative compatibility between users</li>
+        <li>Revenue outcomes or financial results from collaborations</li>
+        <li>Security against all possible breaches or unauthorized access</li>
+        <li>Availability of third-party services including Stripe, Supabase, Vercel, or Google Analytics</li>
+      </ul>
+      <p>Collective Loft shall not be liable for interruptions, failures, or unavailability resulting from circumstances beyond its reasonable control, including but not limited to natural disasters, third-party infrastructure failures, internet disruptions, government actions, or other force majeure events.</p>
+    </div>
+
+    <div class="section" id="s17">
+      <div class="section-number">Section 17</div>
+      <h2>Limitation of Liability</h2>
+      <div class="caps-warning">
+        <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, COLLECTIVE LOFT AND MORGAN COLLECTIVE GROUP LLC SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, CONSEQUENTIAL, PUNITIVE, OR SPECIAL DAMAGES ARISING FROM:</p>
+      </div>
+      <ul>
+        <li>User conduct or user-to-user interactions</li>
+        <li>Failed, incomplete, or disputed collaborations</li>
+        <li>Payment disputes between users</li>
+        <li>Lost revenue, data, or creative work</li>
+        <li>Reputation damage arising from reviews or ratings</li>
+        <li>Third-party service failures (Stripe, Supabase, Vercel, Google, etc.)</li>
+        <li>Force majeure events</li>
+      </ul>
+      <p>Collective Loft's total aggregate liability to any user shall not exceed the total subscription fees paid by that user during the twelve (12) months immediately preceding the claim giving rise to liability.</p>
+    </div>
+
+    <div class="section" id="s18">
+      <div class="section-number">Section 18</div>
+      <h2>Termination</h2>
+      <p>Collective Loft may suspend or terminate accounts at its sole discretion for violations of these Terms, harmful conduct, fraud, abuse, legal compliance requirements, or any reason Collective Loft deems necessary to protect the Platform and its users.</p>
+      <p>Users may terminate their subscriptions and accounts at any time through account settings. Upon termination, access continues through the end of the current paid billing period.</p>
+      <p>If you believe your account has been suspended or terminated in error, contact hello@collectiveloft.com with your account details and the reason you believe the action was taken in error. Collective Loft will review the request at its discretion. This review process does not guarantee reinstatement.</p>
+      <p>The following provisions survive termination of these Terms: intellectual property rights (Section 13), content license for completed collaboration records (Section 9), Community Voice records (Section 10), dispute provisions (Section 20), limitation of liability (Section 17), and governing law (Section 19).</p>
+    </div>
+
+    <div class="section" id="s19">
+      <div class="section-number">Section 19</div>
+      <h2>Governing Law</h2>
+      <p>These Terms shall be governed by and construed in accordance with the laws of the State of Illinois, without regard to its conflict-of-law principles.</p>
+      <p>Any disputes not subject to arbitration under Section 21 shall be resolved exclusively in the state or federal courts located in Chicago, Illinois. You consent to the personal jurisdiction of such courts.</p>
+    </div>
+
+    <div class="section" id="s20">
+      <div class="section-number">Section 20</div>
+      <h2>User Disputes &amp; Platform Non-Liability</h2>
+      <p>Collective Loft and Morgan Collective Group LLC are not parties to agreements, collaborations, creative arrangements, compensation structures, rights transfers, revenue-share agreements, or project outcomes entered into between users of the Platform. All collaborations, services, creative exchanges, deliverables, payments, rights transfers, milestone approvals, and business arrangements are solely between participating users.</p>
+      <p>Users acknowledge and agree that:</p>
+      <ul>
+        <li>Collective Loft acts solely as a technology platform facilitating discovery, communication, collaboration infrastructure, and project organization between independent users</li>
+        <li>Collective Loft does not supervise, direct, control, or guarantee the quality, legality, completion, timeliness, or outcome of any collaboration or creative project</li>
+        <li>Collective Loft is not responsible for disputes involving payment, scope of work, missed deadlines, creative disagreements, intellectual property ownership, rights usage, revenue sharing, or project performance</li>
+      </ul>
+      <p>In the event of a dispute between users, the parties agree to first attempt to resolve the matter independently. Collective Loft is under no obligation to mediate, arbitrate, investigate, enforce, or resolve disputes between users. Collective Loft reserves the right, at its sole discretion, to review disputes, preserve records, suspend accounts, or remove content.</p>
+      <p>Users acknowledge that Collective Loft may disclose account information, communications, activity logs, collaboration records, uploaded files, or other relevant information if required by law, subpoena, court order, or governmental request, or to protect the rights, safety, and integrity of the Platform or its users.</p>
+      <p>Any claims, disputes, or legal actions arising from collaborations between users shall be directed solely against the relevant user(s) involved and not against Collective Loft or Morgan Collective Group LLC, except where prohibited by applicable law.</p>
+    </div>
+
+    <div class="section" id="s21">
+      <div class="section-number">Section 21</div>
+      <h2>Mandatory Arbitration &amp; Class Action Waiver</h2>
+      <p>By using the Platform, you agree that any dispute, claim, or controversy arising out of or relating to these Terms or your use of the Platform shall be resolved through binding individual arbitration rather than in court, except where prohibited by applicable law.</p>
+      <div class="caps-warning">
+        <p>YOU WAIVE ANY RIGHT TO PARTICIPATE IN CLASS ACTIONS, CLASS ARBITRATIONS, OR REPRESENTATIVE PROCEEDINGS AGAINST COLLECTIVE LOFT OR MORGAN COLLECTIVE GROUP LLC.</p>
+      </div>
+      <p>Arbitration shall be conducted in Chicago, Illinois under the rules of a mutually agreed arbitration provider, or if agreement cannot be reached, under the rules of the American Arbitration Association (AAA) in effect at the time of the dispute.</p>
+      <p>Nothing in this section prevents either party from seeking emergency injunctive or equitable relief in a court of competent jurisdiction to prevent irreparable harm pending arbitration.</p>
+    </div>
+
+    <div class="section" id="s22">
+      <div class="section-number">Section 22</div>
+      <h2>Creator Verification Disclaimer</h2>
+      <p>Collective Loft may display profile completion indicators, collaboration history counts, Community Voice ratings, or trust signals. These indicators are provided for informational purposes only and do not constitute endorsements, guarantees, certifications, background checks, or assurances of any kind regarding a user's identity, professionalism, reliability, financial standing, creative ability, or conduct.</p>
+      <p>Users are solely responsible for conducting their own due diligence before entering into collaborations or agreements with other users.</p>
+    </div>
+
+    <div class="section" id="s23">
+      <div class="section-number">Section 23</div>
+      <h2>Collaborative Works &amp; Rights Ownership</h2>
+      <p>Ownership and intellectual property rights related to collaborative works created through the Platform are determined solely by the agreements between participating users.</p>
+      <p>Collective Loft and Morgan Collective Group LLC do not determine, arbitrate, or guarantee ownership rights, licensing rights, publishing rights, royalty allocations, copyright registrations, trademark rights, or revenue participation between collaborators.</p>
+      <p>Users are strongly encouraged to clearly define ownership, usage rights, credits, licensing permissions, revenue participation, derivative rights, and transfer conditions before work begins — through the Platform's Collab Terms system or through independent legal agreements.</p>
+      <p>Collective Loft shall not be liable for disputes regarding authorship, ownership, royalties, licensing, or intellectual property usage arising from collaborative works created through the Platform.</p>
+    </div>
+
+    <div class="section" id="s24">
+      <div class="section-number">Section 24</div>
+      <h2>Changes to Terms</h2>
+      <p>Collective Loft reserves the right to update these Terms at any time. When material changes are made, we will notify registered users by email at least 14 days before the changes take effect. Continued use of the Platform after changes become effective constitutes acceptance of the revised Terms.</p>
+      <p>If you do not agree to revised Terms, you must cancel your subscription and stop using the Platform before the effective date of the changes.</p>
+    </div>
+
+    <div class="section" id="s25">
+      <div class="section-number">Section 25</div>
+      <h2>Contact Information</h2>
+      <div class="contact-block">
+        <p><strong style="color: var(--gold); font-family: 'EB Garamond', serif; font-size: 18px;">Collective Loft</strong></p>
+        <p>Morgan Collective Group LLC</p>
+        <p>Chicago, Illinois</p>
+        <p style="margin-top: 12px;"><a href="mailto:hello@collectiveloft.com">hello@collectiveloft.com</a></p>
+        <p><a href="https://collectiveloft.com">collectiveloft.com</a></p>
+        <p style="margin-top: 12px; font-size: 13px; color: rgba(245,240,232,0.5);">For legal, copyright, DMCA, or platform inquiries, contact the address above.</p>
+      </div>
+      <p style="margin-top: 32px; font-family: 'EB Garamond', serif; font-style: italic; font-size: 18px; color: rgba(245,240,232,0.4); text-align: center;">Make something together.</p>
+    </div>
+
+  </main>
+</div>
+
+<!-- Acknowledgment Footer -->
+<footer class="ack-footer">
+  <div class="ack-inner">
+    <div class="ack-text">
+      By clicking <strong>I Agree</strong>, you confirm that you have read and agree to Collective Loft's Terms &amp; Conditions and Privacy Policy, and that you are 18 years of age or older.
+    </div>
+    <div class="ack-actions">
+      <button class="btn-decline" onclick="window.history.back()">Decline</button>
+      <button class="btn-accept" onclick="alert('Acknowledged. Proceeding to profile creation.')">I Agree</button>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

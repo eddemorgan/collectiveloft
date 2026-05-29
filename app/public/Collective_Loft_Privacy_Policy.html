@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Collective Loft</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #042C53;
+    --blue: #185FA5;
+    --rose: #993556;
+    --ice: #E8EDF3;
+    --gold: #C9A84C;
+    --nearblack: #0D0D0D;
+    --cream: #F5F0E8;
+    --stone: #6B7280;
+    --white: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--navy);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  .site-header {
+    background: var(--nearblack);
+    border-bottom: 1px solid rgba(201,168,76,0.25);
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .wordmark {
+    font-family: 'EB Garamond', serif;
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    color: var(--cream);
+    text-transform: uppercase;
+  }
+
+  .wordmark span { color: var(--gold); }
+
+  .doc-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.4);
+    padding: 4px 12px;
+    border-radius: 2px;
+  }
+
+  .doc-hero {
+    background: var(--nearblack);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    padding: 64px 48px 48px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .doc-type {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 16px;
+  }
+
+  .doc-title {
+    font-family: 'EB Garamond', serif;
+    font-size: 52px;
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+
+  .doc-subtitle {
+    font-family: 'EB Garamond', serif;
+    font-size: 20px;
+    font-style: italic;
+    color: var(--gold);
+    margin-bottom: 32px;
+  }
+
+  .doc-meta {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item { display: flex; flex-direction: column; gap: 4px; }
+
+  .meta-label {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--stone);
+  }
+
+  .meta-value { font-size: 13px; color: var(--cream); opacity: 0.8; }
+
+  .doc-layout {
+    max-width: 960px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+    min-height: 80vh;
+  }
+
+  .toc {
+    padding: 48px 32px 48px 48px;
+    border-right: 1px solid rgba(201,168,76,0.12);
+    position: sticky;
+    top: 65px;
+    height: calc(100vh - 65px);
+    overflow-y: auto;
+  }
+
+  .toc-label {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+
+  .toc a {
+    display: block;
+    font-size: 11px;
+    color: rgba(245,240,232,0.5);
+    text-decoration: none;
+    padding: 5px 0;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+
+  .toc a:hover {
+    color: var(--cream);
+    border-left-color: var(--gold);
+  }
+
+  .doc-content { padding: 48px 48px 96px; }
+
+  .section {
+    margin-bottom: 56px;
+    padding-bottom: 56px;
+    border-bottom: 1px solid rgba(201,168,76,0.08);
+  }
+
+  .section:last-child { border-bottom: none; }
+
+  .section-number {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rose);
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-family: 'EB Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--cream);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin: 28px 0 12px;
+  }
+
+  p {
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(245,240,232,0.8);
+    margin-bottom: 16px;
+  }
+
+  ul { list-style: none; margin: 16px 0; }
+
+  ul li {
+    font-size: 15px;
+    line-height: 1.7;
+    color: rgba(245,240,232,0.75);
+    padding: 5px 0 5px 20px;
+    position: relative;
+  }
+
+  ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 14px;
+    width: 5px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .callout {
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-left: 3px solid var(--gold);
+    padding: 20px 24px;
+    margin: 24px 0;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .callout p { margin: 0; font-size: 14px; color: rgba(245,240,232,0.7); }
+  .callout strong { color: var(--cream); font-weight: 500; }
+
+  /* Provider table */
+  .provider-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    font-size: 13px;
+  }
+
+  .provider-table th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-align: left;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    background: rgba(201,168,76,0.04);
+  }
+
+  .provider-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(245,240,232,0.05);
+    color: rgba(245,240,232,0.7);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .provider-table tr:hover td {
+    background: rgba(201,168,76,0.03);
+  }
+
+  .provider-name {
+    font-weight: 500;
+    color: var(--cream);
+    white-space: nowrap;
+  }
+
+  .contact-block {
+    background: var(--nearblack);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 28px 32px;
+    margin-top: 24px;
+  }
+
+  .contact-block p {
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: rgba(245,240,232,0.7);
+  }
+
+  .contact-block a { color: var(--gold); text-decoration: none; }
+
+  .rights-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+
+  .rights-item {
+    background: rgba(4,44,83,0.4);
+    border: 1px solid rgba(24,95,165,0.2);
+    padding: 16px 20px;
+    border-radius: 2px;
+  }
+
+  .rights-item-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin-bottom: 8px;
+  }
+
+  .rights-item p {
+    font-size: 13px;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .ack-footer {
+    background: var(--nearblack);
+    border-top: 1px solid rgba(201,168,76,0.25);
+    padding: 40px 48px;
+    position: sticky;
+    bottom: 0;
+  }
+
+  .ack-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .ack-text {
+    font-size: 13px;
+    color: rgba(245,240,232,0.55);
+    max-width: 520px;
+    line-height: 1.6;
+  }
+
+  .ack-text strong { color: var(--cream); }
+
+  .ack-actions { display: flex; gap: 12px; align-items: center; }
+
+  .btn-decline {
+    background: transparent;
+    border: 1px solid rgba(245,240,232,0.2);
+    color: rgba(245,240,232,0.4);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-decline:hover {
+    border-color: rgba(245,240,232,0.4);
+    color: rgba(245,240,232,0.7);
+  }
+
+  .btn-accept {
+    background: var(--rose);
+    border: 1px solid var(--rose);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 32px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-accept:hover { background: #7A2843; border-color: #7A2843; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--navy); }
+  ::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
+
+  @media (max-width: 768px) {
+    .doc-layout { grid-template-columns: 1fr; }
+    .toc { display: none; }
+    .site-header { padding: 16px 24px; }
+    .doc-hero { padding: 40px 24px 32px; }
+    .doc-content { padding: 32px 24px 80px; }
+    .doc-title { font-size: 36px; }
+    .ack-footer { padding: 24px; }
+    .ack-inner { flex-direction: column; align-items: flex-start; }
+    .rights-grid { grid-template-columns: 1fr; }
+    .provider-table { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wordmark">Collective <span>LOFT</span></div>
+  <div class="doc-badge">Legal Document</div>
+</header>
+
+<div style="background: var(--nearblack);">
+  <div class="doc-hero">
+    <div class="doc-type">Morgan Collective Group LLC</div>
+    <div class="doc-title">Privacy Policy</div>
+    <div class="doc-subtitle">How Collective Loft collects, uses, and protects your data</div>
+    <div class="doc-meta">
+      <div class="meta-item">
+        <div class="meta-label">Effective Date</div>
+        <div class="meta-value">[Insert Date Before Publishing]</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Last Updated</div>
+        <div class="meta-value">[Insert Date Before Publishing]</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Platform</div>
+        <div class="meta-value">collectiveloft.com</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Contact</div>
+        <div class="meta-value">hello@collectiveloft.com</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="doc-layout">
+
+  <nav class="toc">
+    <div class="toc-label">Contents</div>
+    <a href="#s1">1. Information We Collect</a>
+    <a href="#s2">2. How We Use Your Information</a>
+    <a href="#s3">3. How We Share Your Information</a>
+    <a href="#s4">4. Payment Data</a>
+    <a href="#s5">5. Data Retention</a>
+    <a href="#s6">6. Your Rights &amp; Choices</a>
+    <a href="#s7">7. Data Security</a>
+    <a href="#s8">8. Children's Privacy</a>
+    <a href="#s9">9. Third-Party Links</a>
+    <a href="#s10">10. Changes to This Policy</a>
+    <a href="#s11">11. Contact Us</a>
+  </nav>
+
+  <main class="doc-content">
+
+    <div class="callout" style="margin-bottom: 40px;">
+      <p>Collective Loft is committed to protecting your privacy. This Privacy Policy explains what information we collect, how we use it, who we share it with, and what rights you have regarding your data. By using the Platform, you agree to the collection and use of information in accordance with this Privacy Policy.</p>
+    </div>
+
+    <div class="section" id="s1">
+      <div class="section-number">Section 01</div>
+      <h2>Information We Collect</h2>
+
+      <h3>1.1 Information You Provide Directly</h3>
+      <p>When you create an account or use the Platform, you provide us with:</p>
+      <ul>
+        <li>Name and email address</li>
+        <li>Password (stored encrypted — we do not have access to your plaintext password)</li>
+        <li>Location (country, state, city)</li>
+        <li>Creative profile information: disciplines, skills, bio, headline, Right Now card, portfolio links, social links</li>
+        <li>Collaboration preferences: seeking disciplines and skills</li>
+        <li>Content you upload: portfolio files, studio files, profile images, cover images</li>
+        <li>Messages and communications within Loft Studios</li>
+        <li>Collaboration terms you create or accept</li>
+        <li>Ratings and reviews you submit</li>
+        <li>Payment information (processed by Stripe — see Section 4)</li>
+      </ul>
+
+      <h3>1.2 Information Collected Automatically</h3>
+      <p>When you use the Platform, we and our service providers automatically collect:</p>
+      <ul>
+        <li>Log data: IP address, browser type, pages visited, time spent, referring URLs</li>
+        <li>Device information: device type, operating system, browser version</li>
+        <li>Usage data: features used, actions taken, search queries, collaboration activity</li>
+        <li>Session data: authentication tokens managed by Supabase Auth</li>
+        <li>Analytics data: page views, navigation patterns, feature engagement (via Google Analytics)</li>
+      </ul>
+
+      <h3>1.3 Cookies &amp; Tracking Technologies</h3>
+      <p>Collective Loft uses the following cookies and tracking technologies:</p>
+      <ul>
+        <li><strong style="color: var(--cream);">Authentication cookies:</strong> set by Supabase Auth to maintain your logged-in session. Required for Platform functionality. Cannot be disabled while using the Platform.</li>
+        <li><strong style="color: var(--cream);">Google Analytics cookies:</strong> used to understand how users navigate and use the Platform. These cookies do not identify you personally. You may opt out via browser settings or the Google Analytics opt-out browser add-on (tools.google.com/dlpage/gaoptout).</li>
+      </ul>
+      <p>We do not use advertising cookies, third-party tracking pixels, or behavioral targeting technologies beyond those described above.</p>
+    </div>
+
+    <div class="section" id="s2">
+      <div class="section-number">Section 02</div>
+      <h2>How We Use Your Information</h2>
+      <p>We use the information we collect to:</p>
+      <ul>
+        <li>Create and manage your account</li>
+        <li>Provide, operate, and improve the Platform</li>
+        <li>Power the Discipline Matching algorithm</li>
+        <li>Enable collaboration features (Briefs, Terms, Loft Studios)</li>
+        <li>Process subscription payments through Stripe</li>
+        <li>Send transactional emails related to your account and collaborations</li>
+        <li>Display your profile and creative identity to other users</li>
+        <li>Generate and display Community Voice ratings and reviews</li>
+        <li>Analyze Platform usage to improve features and performance</li>
+        <li>Respond to support requests and resolve disputes</li>
+        <li>Comply with legal obligations</li>
+        <li>Protect the security and integrity of the Platform</li>
+      </ul>
+      <div class="callout">
+        <p><strong>We do not sell your personal data.</strong> We do not use your data to serve third-party advertising.</p>
+      </div>
+    </div>
+
+    <div class="section" id="s3">
+      <div class="section-number">Section 03</div>
+      <h2>How We Share Your Information</h2>
+
+      <h3>3.1 With Other Users</h3>
+      <p>Collective Loft is a professional network. The following profile information is visible to other users by default:</p>
+      <ul>
+        <li>Your name, headline, bio, and Right Now card</li>
+        <li>Your disciplines, skills, and collaboration preferences</li>
+        <li>Your location (city, state, country)</li>
+        <li>Your portfolio links and social links</li>
+        <li>Your collaboration history (count and project titles from completed Loft Studios)</li>
+        <li>Your Community Voice rating and reviews</li>
+      </ul>
+      <p>Information shared within a Loft Studio (messages, files, notes, milestones) is visible only to the two parties in that Studio. It is not visible to other users.</p>
+
+      <h3>3.2 With Service Providers</h3>
+      <p>We share data with trusted third-party service providers who help us operate the Platform:</p>
+
+      <table class="provider-table">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Purpose</th>
+            <th>Data Shared</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="provider-name">Supabase</span></td>
+            <td>Database, auth, storage, realtime</td>
+            <td>All platform data — hosted and processed on Supabase infrastructure</td>
+          </tr>
+          <tr>
+            <td><span class="provider-name">Vercel</span></td>
+            <td>Platform hosting and deployment</td>
+            <td>Server logs, request data</td>
+          </tr>
+          <tr>
+            <td><span class="provider-name">Stripe</span></td>
+            <td>Subscription payment processing</td>
+            <td>Name, email, payment method details</td>
+          </tr>
+          <tr>
+            <td><span class="provider-name">Resend</span></td>
+            <td>Transactional email delivery</td>
+            <td>Name, email, notification content</td>
+          </tr>
+          <tr>
+            <td><span class="provider-name">Google Analytics</span></td>
+            <td>Platform usage analytics</td>
+            <td>Anonymized usage data, device info, page views</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Each of these providers has their own privacy policies governing how they handle data. We encourage you to review their policies.</p>
+
+      <h3>3.3 Legal Disclosures</h3>
+      <p>We may disclose your information when required by law, subpoena, court order, or government request, or when we believe in good faith that disclosure is necessary to protect the rights, safety, or property of Collective Loft, our users, or the public.</p>
+    </div>
+
+    <div class="section" id="s4">
+      <div class="section-number">Section 04</div>
+      <h2>Payment Data</h2>
+      <p>Collective Loft does not store your full payment card information. All payment processing is handled by Stripe. When you subscribe, your payment details are transmitted directly to Stripe and governed by Stripe's Privacy Policy (stripe.com/privacy).</p>
+      <p>We retain a record of your subscription status, billing history, and the last four digits of your card on file as provided by Stripe for account management purposes.</p>
+    </div>
+
+    <div class="section" id="s5">
+      <div class="section-number">Section 05</div>
+      <h2>Data Retention</h2>
+      <p>We retain your data for as long as your account is active or as needed to provide services. Specifically:</p>
+      <ul>
+        <li><strong style="color: var(--cream);">Active account data:</strong> retained for the life of your account</li>
+        <li><strong style="color: var(--cream);">Completed Loft Studio records:</strong> retained as part of both parties' collaboration history, even after account cancellation, because a collaboration belongs to both participants. When a user departs the Platform, Collective Loft will handle data removal requests on a case-by-case basis, including facilitating the transfer of applicable project files to any remaining active collaborator before removing the departed user's personal data where feasible and required by law</li>
+        <li><strong style="color: var(--cream);">Messages and files within Studios:</strong> retained as part of the Studio record</li>
+        <li><strong style="color: var(--cream);">Billing records:</strong> retained for 7 years for tax and legal compliance</li>
+        <li><strong style="color: var(--cream);">System backups:</strong> purged within 90 days on a rolling basis</li>
+        <li><strong style="color: var(--cream);">Google Analytics data:</strong> retained per Google's standard retention policies (typically 26 months)</li>
+      </ul>
+      <p>If you delete your account, we will delete or anonymize your profile data within 30 days, except where retention is required for legal compliance, active disputes, or completed collaboration records tied to another user's history.</p>
+    </div>
+
+    <div class="section" id="s6">
+      <div class="section-number">Section 06</div>
+      <h2>Your Rights &amp; Choices</h2>
+
+      <div class="rights-grid">
+        <div class="rights-item">
+          <div class="rights-item-label">Access &amp; Correction</div>
+          <p>You may access and update most of your profile information directly through your account settings and profile edit mode at any time.</p>
+        </div>
+        <div class="rights-item">
+          <div class="rights-item-label">Account Deletion</div>
+          <p>You may request deletion of your account by contacting hello@collectiveloft.com. We will process deletion requests within 30 days. Note that some data may be retained as described in Section 5.</p>
+        </div>
+        <div class="rights-item">
+          <div class="rights-item-label">Google Analytics Opt-Out</div>
+          <p>You may opt out of Google Analytics data collection by installing the opt-out browser add-on at tools.google.com/dlpage/gaoptout, or by adjusting your browser's cookie settings.</p>
+        </div>
+        <div class="rights-item">
+          <div class="rights-item-label">Marketing Email Opt-Out</div>
+          <p>You may opt out of non-essential marketing communications at any time through your account settings or the unsubscribe link in any marketing email.</p>
+        </div>
+      </div>
+
+      <h3>6.5 California Residents (CCPA)</h3>
+      <p>If you are a California resident, you have additional rights under the California Consumer Privacy Act (CCPA), including the right to know what personal information we collect, the right to request deletion, and the right to opt out of the sale of personal information. We do not sell personal information. To exercise your rights, contact hello@collectiveloft.com.</p>
+
+      <h3>6.6 European Users (GDPR)</h3>
+      <p>If you are located in the European Economic Area, United Kingdom, or Switzerland, you have rights under the General Data Protection Regulation (GDPR) or applicable local law, including rights of access, rectification, erasure, portability, and objection. Our legal basis for processing your data is primarily contract performance (to provide the Platform you subscribed to) and legitimate interests (to operate and improve the Platform). To exercise your rights, contact hello@collectiveloft.com.</p>
+    </div>
+
+    <div class="section" id="s7">
+      <div class="section-number">Section 07</div>
+      <h2>Data Security</h2>
+      <p>We implement industry-standard security measures to protect your data, including:</p>
+      <ul>
+        <li>Encrypted data transmission (HTTPS/TLS)</li>
+        <li>Encrypted password storage (managed by Supabase Auth)</li>
+        <li>Row Level Security (RLS) enforced at the database level</li>
+        <li>Access controls limiting which staff can access user data</li>
+      </ul>
+      <div class="callout">
+        <p>No method of transmission over the internet or electronic storage is 100% secure. While we take reasonable precautions, we cannot guarantee absolute security. In the event of a data breach affecting your rights and freedoms, we will notify affected users as required by applicable law.</p>
+      </div>
+    </div>
+
+    <div class="section" id="s8">
+      <div class="section-number">Section 08</div>
+      <h2>Children's Privacy</h2>
+      <p>The Platform is intended exclusively for users who are 18 years of age or older. We do not knowingly collect, solicit, or maintain personal information from anyone under 18. If we learn that we have collected personal information from a user under 18, we will delete that information and terminate the account immediately.</p>
+      <p>If you believe a user under 18 has created an account, please contact us at hello@collectiveloft.com.</p>
+    </div>
+
+    <div class="section" id="s9">
+      <div class="section-number">Section 09</div>
+      <h2>Third-Party Links</h2>
+      <p>The Platform may contain links to third-party websites, portfolio platforms, social media profiles, and external content. This Privacy Policy applies only to the Collective Loft Platform. We are not responsible for the privacy practices of third-party sites and encourage you to review their privacy policies before sharing personal information.</p>
+    </div>
+
+    <div class="section" id="s10">
+      <div class="section-number">Section 10</div>
+      <h2>Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. When we make material changes, we will notify you by email at least 14 days before the changes take effect and update the "Last Updated" date at the top of this page. Continued use of the Platform after changes take effect constitutes acceptance of the revised policy.</p>
+    </div>
+
+    <div class="section" id="s11">
+      <div class="section-number">Section 11</div>
+      <h2>Contact Us</h2>
+      <p>For privacy-related questions, data requests, or concerns:</p>
+      <div class="contact-block">
+        <p><strong style="color: var(--gold); font-family: 'EB Garamond', serif; font-size: 18px;">Collective Loft</strong></p>
+        <p>Morgan Collective Group LLC</p>
+        <p>Chicago, Illinois</p>
+        <p style="margin-top: 12px;"><a href="mailto:hello@collectiveloft.com">hello@collectiveloft.com</a></p>
+        <p><a href="https://collectiveloft.com">collectiveloft.com</a></p>
+      </div>
+      <p style="margin-top: 32px; font-family: 'EB Garamond', serif; font-style: italic; font-size: 18px; color: rgba(245,240,232,0.4); text-align: center;">Make something together.</p>
+    </div>
+
+  </main>
+</div>
+
+<footer class="ack-footer">
+  <div class="ack-inner">
+    <div class="ack-text">
+      By clicking <strong>I Agree</strong>, you confirm that you have read and agree to Collective Loft's Privacy Policy and Terms &amp; Conditions, and that you understand how your data is collected and used.
+    </div>
+    <div class="ack-actions">
+      <button class="btn-decline" onclick="window.history.back()">Decline</button>
+      <button class="btn-accept" onclick="alert('Acknowledged. Proceeding to profile creation.')">I Agree</button>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

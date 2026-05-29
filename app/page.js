@@ -176,7 +176,7 @@ export default function LandingPage() {
 
   const [form, setForm] = useState({
     firstname: '', lastname: '', email: '', headline: '',
-    bio: '', rightnow: '', seeking: '', password: '', confirmPassword: '', portfolio_link: '',
+    bio: '', rightnow: '', seeking: '', password: '', confirmPassword: '', portfolio_link: '', availability: '', location_preference: '',
   })
   const [country,        setCountry]        = useState('')
   const [stateVal,       setStateVal]       = useState('')
@@ -351,6 +351,8 @@ export default function LandingPage() {
         seeking_skills:       seekingSkills,
         skill_ratings:        Object.keys(skillRatings).length > 0 ? skillRatings : null,
         portfolio_link:       form.portfolio_link || null,
+        availability:         form.availability || null,
+        location_preference:  form.location_preference || null,
       }).eq('id', authData.user.id)
 
       // Step 4: Upload any queued portfolio files
@@ -764,11 +766,11 @@ export default function LandingPage() {
                     <div className={styles.mfRow}>
                       <div className={styles.mf}>
                         <label>Location preference</label>
-                        <select><option value="">Select…</option><option>Local only</option><option>Remote OK</option><option>Remote preferred</option><option>No preference</option></select>
+                        <select value={form.location_preference} onChange={e => setForm(f => ({ ...f, location_preference: e.target.value }))}><option value="">Select…</option><option value="local">Local only</option><option value="remote_ok">Remote OK</option><option value="remote_preferred">Remote preferred</option><option value="no_preference">No preference</option></select>
                       </div>
                       <div className={styles.mf}>
                         <label>Availability</label>
-                        <select><option value="">Select…</option><option>Open to collabs now</option><option>Available in 1–2 months</option><option>Not available right now</option></select>
+                        <select value={form.availability} onChange={e => setForm(f => ({ ...f, availability: e.target.value }))}><option value="">Select…</option><option value="open">Open to collabs now</option><option value="available_soon">Available in 1–2 months</option><option value="not_available">Not available right now</option></select>
                       </div>
                     </div>
 

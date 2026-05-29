@@ -404,6 +404,37 @@ export default function ProfilePage() {
 
   useEffect(() => { if (username) loadProfile() }, [username])
 
+  // ── REALTIME: portfolio_items ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!profileId) return
+
+    const channel = supabase
+      .channel(`portfolio-${profileId}`)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'portfolio_items',
+        filter: `profile_id=eq.${profileId}`,
+      }, payload => {
+        setPortfolio(prev => {
+          // Avoid duplicates (owner already appended optimistically)
+          if (prev.find(p => p.id === payload.new.id)) return prev
+          return [...prev, payload.new].sort((a,b) => a.sort_order - b.sort_order)
+        })
+      })
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'portfolio_items',
+        filter: `profile_id=eq.${profileId}`,
+      }, payload => {
+        setPortfolio(prev => prev.filter(p => p.id !== payload.old.id))
+      })
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
+  }, [profileId])
+
   async function loadProfile() {
     setLoading(true)
     const isUuid = /^[0-9a-f-]{36}$/.test(username)

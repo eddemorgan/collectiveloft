@@ -176,7 +176,7 @@ export default function LandingPage() {
 
   const [form, setForm] = useState({
     firstname: '', lastname: '', email: '', headline: '',
-    bio: '', rightnow: '', seeking: '', password: '', confirmPassword: '',
+    bio: '', rightnow: '', seeking: '', password: '', confirmPassword: '', portfolio_link: '',
   })
   const [country,        setCountry]        = useState('')
   const [stateVal,       setStateVal]       = useState('')
@@ -187,7 +187,9 @@ export default function LandingPage() {
   const [seekingDiscs,     setSeekingDiscs]     = useState([])
   const [seekingSkills,    setSeekingSkills]    = useState([])
   const [seekingOpen,      setSeekingOpen]      = useState(false)
-  const [skillRatings,     setSkillRatings]     = useState({}) // { "Film scoring": 4, ... }
+  const [skillRatings,     setSkillRatings]     = useState({})
+  const [queuedFiles,      setQueuedFiles]      = useState([])   // files to upload after signup
+  const [uploadingPortfolio, setUploadingPortfolio] = useState(false) // { "Film scoring": 4, ... }
 
   // Required fields for profile creation
   const REQUIRED = [
@@ -227,6 +229,62 @@ export default function LandingPage() {
   }
   function toggleComp(label) {
     setSelectedComps(prev => prev.includes(label) ? prev.filter(c => c !== label) : [...prev, label])
+  }
+
+  function detectFileType(file) {
+    if (file.type.startsWith('image/')) return 'image'
+    if (file.type.startsWith('video/')) return 'video'
+    if (file.type.startsWith('audio/')) return 'audio'
+    return 'document'
+  }
+
+  function bucketForType(type) {
+    if (type === 'image') return 'portfolio-images'
+    if (type === 'video') return 'portfolio-video'
+    if (type === 'audio') return 'portfolio-audio'
+    return 'portfolio-docs'
+  }
+
+  function handleFileQueue(e) {
+    const files = Array.from(e.target.files || [])
+    const valid = files.filter(f => f.size <= 20 * 1024 * 1024) // 20MB max
+    setQueuedFiles(prev => [...prev, ...valid].slice(0, 12))
+    e.target.value = ''
+  }
+
+  function removeQueuedFile(idx) {
+    setQueuedFiles(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  async function uploadQueuedPortfolioFiles(userId) {
+    if (queuedFiles.length === 0) return
+    setUploadingPortfolio(true)
+    for (let i = 0; i < queuedFiles.length; i++) {
+      const file = queuedFiles[i]
+      const type = detectFileType(file)
+      const ext = file.name.split('.').pop()
+      const path = `${userId}/${Date.now()}-${i}.${ext}`
+      try {
+        const { error: uploadError } = await supabase.storage
+          .from(bucketForType(type))
+          .upload(path, file, { upsert: true })
+        if (uploadError) { console.error(uploadError); continue }
+        const { data: { publicUrl } } = supabase.storage
+          .from(bucketForType(type))
+          .getPublicUrl(path)
+        const title = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
+        await supabase.from('portfolio_items').insert({
+          profile_id: userId,
+          type,
+          title,
+          file_url: publicUrl,
+          sort_order: i,
+        })
+      } catch (err) {
+        console.error('Portfolio upload error:', err)
+      }
+    }
+    setUploadingPortfolio(false)
   }
   function handleCountryChange(val) {
     setCountry(val); setStateVal(''); setCity('')
@@ -292,7 +350,13 @@ export default function LandingPage() {
         seeking_disciplines:  seekingDiscs,
         seeking_skills:       seekingSkills,
         skill_ratings:        Object.keys(skillRatings).length > 0 ? skillRatings : null,
+        portfolio_link:       form.portfolio_link || null,
       }).eq('id', authData.user.id)
+
+      // Step 4: Upload any queued portfolio files
+      if (queuedFiles.length > 0) {
+        uploadQueuedPortfolioFiles(authData.user.id) // fire and forget — don't block signup success
+      }
 
       // Always show success even if profile update had issues --
       // the auth account is created and they can update profile after confirming email
@@ -625,16 +689,62 @@ export default function LandingPage() {
                   </section>
 
                   <section>
-                    <div className={styles.msl}>Work samples</div>
-                    <div className={styles.uz}>
-                      <input type="file" multiple accept="image/*,audio/*,video/*,.pdf" />
-                      <div className={styles.uzI}>↑</div>
-                      <div className={styles.uzT}>Drop files here or click to browse</div>
-                      <div className={styles.uzS}>JPG, PNG, MP3, MP4, PDF · Max 20MB · <span>Up to 12 files</span></div>
-                    </div>
+                    <div className={styles.msl}>Work samples <span style={{ fontSize:'0.62rem', color:'rgba(240,236,227,0.25)', fontWeight:300, letterSpacing:'0', textTransform:'none' }}>— optional</span></div>
+                    <label
+                      style={{
+                        display:'block', border:'0.5px dashed rgba(245,242,237,0.15)', borderRadius:'4px',
+                        padding:'1.25rem', textAlign:'center', cursor:'pointer',
+                        background: queuedFiles.length > 0 ? 'rgba(201,168,76,0.04)' : 'transparent',
+                        transition:'all 0.2s',
+                      }}
+                    >
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*,audio/*,video/*,.pdf"
+                        style={{ display:'none' }}
+                        onChange={handleFileQueue}
+                      />
+                      <div style={{ fontSize:'1.2rem', marginBottom:'0.35rem', color:'rgba(245,242,237,0.25)' }}>↑</div>
+                      <div style={{ fontSize:'0.72rem', color:'rgba(245,242,237,0.5)', marginBottom:'0.2rem' }}>
+                        {queuedFiles.length === 0 ? 'Drop files here or click to browse' : `${queuedFiles.length} file${queuedFiles.length !== 1 ? 's' : ''} queued`}
+                      </div>
+                      <div style={{ fontSize:'0.6rem', color:'rgba(245,242,237,0.25)' }}>JPG, PNG, MP3, MP4, PDF · Max 20MB · Up to 12 files</div>
+                    </label>
+
+                    {/* Queued file list */}
+                    {queuedFiles.length > 0 && (
+                      <div style={{ marginTop:'0.65rem', display:'flex', flexDirection:'column', gap:'0.3rem' }}>
+                        {queuedFiles.map((file, idx) => (
+                          <div key={idx} style={{
+                            display:'flex', alignItems:'center', justifyContent:'space-between',
+                            padding:'0.35rem 0.65rem', background:'rgba(245,242,237,0.04)',
+                            border:'0.5px solid rgba(245,242,237,0.08)', borderRadius:'3px',
+                          }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', minWidth:0 }}>
+                              <span style={{ fontSize:'0.75rem' }}>
+                                {file.type.startsWith('image/') ? '🖼' : file.type.startsWith('audio/') ? '🎵' : file.type.startsWith('video/') ? '🎬' : '📄'}
+                              </span>
+                              <span style={{ fontSize:'0.68rem', color:'rgba(245,242,237,0.6)', fontWeight:300, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                {file.name}
+                              </span>
+                              <span style={{ fontSize:'0.58rem', color:'rgba(245,242,237,0.25)', flexShrink:0 }}>
+                                {(file.size / (1024*1024)).toFixed(1)}MB
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeQueuedFile(idx)}
+                              style={{ background:'none', border:'none', color:'rgba(245,242,237,0.25)', cursor:'pointer', fontSize:'0.7rem', padding:'0 0.25rem', flexShrink:0 }}
+                            >✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     <div className={styles.mf} style={{ marginTop: '0.85rem' }}>
                       <label>Portfolio link <span style={{ color: 'rgba(240,236,227,0.25)', fontSize: '0.65rem' }}>— optional</span></label>
-                      <input type="url" placeholder="https://yoursite.com · SoundCloud · Behance" />
+                      <input type="url" placeholder="https://yoursite.com · SoundCloud · Behance" value={form.portfolio_link || ''} onChange={e => setForm(f => ({ ...f, portfolio_link: e.target.value }))} />
                     </div>
                   </section>
 

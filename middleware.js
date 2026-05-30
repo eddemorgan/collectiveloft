@@ -2,18 +2,24 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
 export async function middleware(req) {
-  const res = NextResponse.next()
   const { pathname } = req.nextUrl
 
-  const publicPaths = ['/', '/login', '/subscribe']
+  // Public routes -- never block these
   if (
-    publicPaths.includes(pathname) ||
+    pathname === '/' ||
+    pathname === '/login' ||
+    pathname === '/subscribe' ||
     pathname.startsWith('/api/stripe') ||
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon')
+    pathname.startsWith('/favicon') ||
+    pathname.includes('/auth/callback')
   ) {
-    return res
+    return NextResponse.next()
   }
+
+  let res = NextResponse.next({
+    request: { headers: req.headers },
+  })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -24,9 +30,10 @@ export async function middleware(req) {
           return req.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value, options }) => {
+            req.cookies.set(name, value)
             res.cookies.set(name, value, options)
-          )
+          })
         },
       },
     }

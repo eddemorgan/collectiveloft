@@ -4,12 +4,11 @@ import { NextResponse } from 'next/server'
 export async function middleware(req) {
   const { pathname } = req.nextUrl
 
-  // Public routes -- never block these
   if (
     pathname === '/' ||
     pathname === '/login' ||
     pathname === '/subscribe' ||
-    pathname.startsWith('/api/stripe') ||
+    pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
     pathname.includes('/auth/callback')
@@ -43,18 +42,6 @@ export async function middleware(req) {
 
   if (!user) {
     return NextResponse.redirect(new URL('/login', req.url))
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('subscription_status')
-    .eq('id', user.id)
-    .single()
-
-  const activeStatuses = ['active', 'trialing']
-
-  if (!profile || !activeStatuses.includes(profile.subscription_status)) {
-    return NextResponse.redirect(new URL('/subscribe', req.url))
   }
 
   return res

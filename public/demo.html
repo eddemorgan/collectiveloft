@@ -190,8 +190,9 @@ html,body{width:100%;height:100%;font-family:var(--sans);background:var(--bg);co
 .studio-tabs::-webkit-scrollbar{display:none;}
 .studio-tab{font-size:0.58rem;padding:0.45rem 0.7rem;color:var(--faint);cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;border-bottom:1.5px solid transparent;white-space:nowrap;}
 .studio-tab.on{color:var(--gold);border-bottom-color:var(--gold);}
-.studio-body{display:flex;flex:1;overflow:hidden;}
+.studio-body{display:flex;flex-direction:column;flex:1;overflow:hidden;}
 .studio-main-area{padding:0.85rem 1rem;overflow-y:auto;flex:1;}
+.studio-chat{display:none;}
 .prog-bar-wrap{margin-bottom:0.85rem;}
 .prog-bar-top{display:flex;justify-content:space-between;font-size:0.6rem;color:var(--faint);margin-bottom:0.3rem;}
 .prog-bar-bg{height:3px;background:rgba(245,242,237,0.08);border-radius:2px;overflow:hidden;}
@@ -208,7 +209,8 @@ html,body{width:100%;height:100%;font-family:var(--sans);background:var(--bg);co
 .ms-date{font-size:0.58rem;color:var(--faint);}
 .ms-chk{width:16px;height:16px;border-radius:2px;border:0.5px solid rgba(245,242,237,0.15);display:flex;align-items:center;justify-content:center;font-size:0.58rem;}
 .ms-chk.done{background:rgba(86,179,156,0.15);border-color:rgba(86,179,156,0.35);color:var(--teal);}
-.studio-chat{border-top:0.5px solid var(--rule);display:flex;flex-direction:column;flex-shrink:0;max-height:38%;}
+.studio-chat{border-top:0.5px solid var(--rule);flex-direction:column;flex-shrink:0;max-height:38%;}
+.mobile-chat-preview{display:flex;flex-direction:column;}
 .chat-hdr{padding:0.5rem 1rem;border-bottom:0.5px solid var(--rule);font-size:0.6rem;color:var(--faint);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
 .chat-online{display:flex;align-items:center;gap:0.3rem;font-size:0.58rem;}
 .chat-dot{width:5px;height:5px;border-radius:50%;background:var(--teal);}
@@ -268,7 +270,8 @@ html,body{width:100%;height:100%;font-family:var(--sans);background:var(--bg);co
   .match-cards{grid-template-columns:repeat(3,1fr);}
   .studio-body{flex-direction:row;}
   .studio-main-area{padding:1.25rem 1.5rem;}
-  .studio-chat{border-top:none;border-left:0.5px solid var(--rule);max-height:none;width:260px;flex-shrink:0;}
+  .studio-chat{display:flex;border-top:none;border-left:0.5px solid var(--rule);max-height:none;width:260px;flex-shrink:0;}
+  .mobile-chat-preview{display:none;}
   .scene-caption{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);background:transparent;border-top:none;padding:0;width:max-content;max-width:90vw;}
   .caption-title{font-size:1.5rem;}
   .caption-sub{display:block;}
@@ -582,6 +585,15 @@ html,body{width:100%;height:100%;font-family:var(--sans);background:var(--bg);co
       <div class="ms-row done"><div class="ms-num" style="color:var(--teal);border-color:rgba(86,179,156,0.3)">✓</div><div class="ms-title done-title">Temp track review + spotting</div><div class="ms-date">May 12</div><div class="ms-chk done">✓</div></div>
       <div class="ms-row done"><div class="ms-num" style="color:var(--teal);border-color:rgba(86,179,156,0.3)">✓</div><div class="ms-title done-title">Full score draft delivered</div><div class="ms-date">Jun 1</div><div class="ms-chk done">✓</div></div>
       <div class="ms-row"><div class="ms-num">3</div><div class="ms-title">Final stems + mix delivered</div><div class="ms-date" style="color:var(--gold)">Jul 15</div><div class="ms-chk"></div></div>
+
+      <!-- Mobile chat preview (hidden on desktop) -->
+      <div class="mobile-chat-preview">
+        <div style="font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,242,237,0.25);margin-bottom:0.5rem;margin-top:0.85rem;">Studio chat</div>
+        <div style="font-size:0.6rem;color:rgba(245,242,237,0.25);font-style:italic;text-align:center;margin-bottom:0.35rem;">Jordan Kim accepted the collab terms.</div>
+        <div style="align-self:flex-start;margin-bottom:0.35rem;"><div style="background:var(--bg1);border:0.5px solid var(--rule);border-radius:8px 8px 8px 2px;padding:0.4rem 0.6rem;font-size:0.65rem;color:var(--cream);line-height:1.4;max-width:85%;">Just finished the spotting session. Starting the main theme this week.</div></div>
+        <div style="align-self:flex-end;margin-bottom:0.35rem;"><div style="background:rgba(201,168,76,0.12);border:0.5px solid rgba(201,168,76,0.2);border-radius:8px 8px 2px 8px;padding:0.4rem 0.6rem;font-size:0.65rem;color:var(--cream);line-height:1.4;max-width:85%;">The opening sequence needs room — don't over-score it.</div></div>
+        <div style="font-size:0.6rem;color:rgba(245,242,237,0.25);font-style:italic;text-align:center;">Leila marked "Full score draft delivered" complete.</div>
+      </div>
     </div>
     <div class="studio-chat">
       <div class="chat-hdr"><span>Studio chat</span><div class="chat-online"><div class="chat-dot"></div><span>Jordan</span></div></div>

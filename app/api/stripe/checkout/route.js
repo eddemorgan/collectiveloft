@@ -38,7 +38,7 @@ export async function POST(req) {
       subscription_data: {
         trial_period_days: 7,
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/discover?subscribed=true`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/success?userId=${userId}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/subscribe?cancelled=true`,
     })
 

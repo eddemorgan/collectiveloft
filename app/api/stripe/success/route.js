@@ -9,16 +9,16 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url)
   const userId = searchParams.get('userId')
 
+  if (!userId) {
+    return Response.redirect(new URL('/?onboarding=true', req.url))
+  }
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('firstname, lastname')
     .eq('id', userId)
     .single()
 
-  if (profile?.firstname && profile?.lastname) {
-    const slug = `${profile.firstname.toLowerCase()}-${profile.lastname.toLowerCase()}`
-    return Response.redirect(new URL(`/profile/${slug}`, req.url))
-  }
-
-  return Response.redirect(new URL('/discover', req.url))
+  // Always send to onboarding form so new user can complete their profile
+  return Response.redirect(new URL('/?onboarding=true', req.url))
 }

@@ -139,7 +139,6 @@ export default function LandingPage() {
           .single()
           .then(({ data }) => setMyProfile(data))
 
-        // Check for onboarding redirect from Stripe
         const params = new URLSearchParams(window.location.search)
         if (params.get('onboarding') === 'true') {
           setIsOnboarding(true)
@@ -212,7 +211,6 @@ export default function LandingPage() {
   const [queuedFiles,      setQueuedFiles]      = useState([])
   const [uploadingPortfolio, setUploadingPortfolio] = useState(false)
 
-  // For onboarding flow, password fields are not required
   const REQUIRED = isOnboarding ? [
     form.firstname.trim().length > 0,
     form.lastname.trim().length > 0,
@@ -355,10 +353,8 @@ export default function LandingPage() {
       const { data: { session: currentSession } } = await supabase.auth.getSession()
 
       if (currentSession?.user) {
-        // Onboarding flow -- already authenticated, skip signup
         userId = currentSession.user.id
       } else {
-        // New signup flow
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: form.email,
           password: form.password,
@@ -369,11 +365,9 @@ export default function LandingPage() {
           throw new Error('An account with this email already exists. Try signing in instead.')
         }
         userId = authData.user.id
-        // Wait for the DB trigger to create the empty profile row
         await new Promise(r => setTimeout(r, 1000))
       }
 
-      // Update the profile row with all the form data
       await supabase.from('profiles').update({
         firstname:   form.firstname,
         lastname:    form.lastname,
@@ -404,7 +398,6 @@ export default function LandingPage() {
       }
 
       if (isOnboarding) {
-        // Go straight to their completed profile
         const slug = `${form.firstname.toLowerCase()}-${form.lastname.toLowerCase()}`
         router.push(`/profile/${slug}`)
       } else {
@@ -433,6 +426,9 @@ export default function LandingPage() {
             <Link href="/login">Sign in</Link>
           )}
           {!authUser && (
+            <a href="/collective-loft-user-guide.html" className={styles.btnS} style={{ textDecoration: 'none' }}>User Guide</a>
+          )}
+          {!authUser && (
             <button className={styles.btnJoin} onClick={() => router.push('/signup')}>Join</button>
           )}
         </div>
@@ -452,7 +448,9 @@ export default function LandingPage() {
             ) : (
               <button className={styles.btnP} onClick={() => router.push('/signup')}>Build Your Profile</button>
             )}
-            {!authUser && <Link href="/login" className={styles.btnS}>Sign in</Link>}
+            {!authUser && (
+              <a href="#how" className={styles.btnS} style={{ textDecoration: 'none' }}>See How It Works</a>
+            )}
           </div>
         </div>
 
@@ -519,7 +517,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className={styles.how}>
+      <div className={styles.how} id="how">
         {[
           { num: '01', title: 'Build your creative identity',  desc: 'Show your work, your influences, what you\'re making right now, and what kind of collaborators you\'re looking for.' },
           { num: '02', title: 'Post a Collab Brief',           desc: 'Describe your project and who you need. Creatives apply or reach out directly. The brief lives on your profile and in the public feed.' },

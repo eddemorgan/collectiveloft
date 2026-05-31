@@ -47,12 +47,11 @@ export default function SignupPage() {
     }
 
     // Save name to profile
-    await supabase
-      .from('profiles')
-      .update({ firstname, lastname })
-      .eq('id', data.user.id)
-
-    router.push('/subscribe')
+await supabase
+  .from('profiles')
+  .upsert({ id: data.user.id, firstname, lastname })
+  
+  router.push('/subscribe')
   }
 
   return (

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Collective Loft — Platform Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg:#1A1714; --bg1:#211E1A; --bg2:#272320;
+  --cream:#F5F2ED; --dim:rgba(245,242,237,0.75); --faint:rgba(245,242,237,0.45);
+  --gold:#C9A84C; --teal:#56b39c; --rule:rgba(245,242,237,0.07);
+  --serif:'EB Garamond',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif;
+}
+
+html,body{width:100%;height:100%;font-family:var(--sans);background:var(--bg);color:var(--cream);overflow:hidden;}
+
+#demo{width:100%;height:100vh;position:relative;overflow:hidden;}
+#progress-bar{position:fixed;top:0;left:0;height:2px;background:var(--gold);width:0%;transition:width 0.3s ease;z-index:1000;}
+
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity 0.7s ease;}
+.scene.active{opacity:1;pointer-events:all;}
+
+/* ── NAV ── */
+.demo-nav{display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1.25rem;border-bottom:0.5px solid var(--rule);background:var(--bg);flex-shrink:0;}
+.demo-logo{font-family:var(--serif);font-size:1.5rem;color:var(--cream);}
+.demo-logo span{color:var(--gold);}
+.demo-nav-links{display:flex;gap:1rem;font-size:0.6rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--faint);}
+.demo-nav-links .active-link{color:var(--gold);}
+
+/* ── CAPTION ── */
+.scene-caption{background:rgba(26,23,20,0.92);border-top:0.5px solid var(--rule);padding:0.75rem 1.25rem;flex-shrink:0;text-align:center;}
+.caption-eyebrow{font-size:0.52rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);opacity:0.8;margin-bottom:0.2rem;}
+.caption-title{font-family:var(--serif);font-size:1.1rem;color:var(--cream);margin-bottom:0.15rem;line-height:1.2;}
+.caption-sub{font-size:0.68rem;color:var(--faint);font-weight:300;line-height:1.55;display:none;}
+
+/* ── SCENE 1: TITLE ── */
+#scene-title{align-items:center;justify-content:center;padding:2rem 1.5rem;background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(201,168,76,0.06) 0%,transparent 70%),var(--bg);}
+.title-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(201,168,76,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 70% 60% at 50% 50%,black,transparent);}
+.title-eyebrow{font-size:0.55rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);opacity:0.75;margin-bottom:1rem;animation:fadeUp 0.8s 0.2s ease both;text-align:center;}
+.title-headline{font-family:var(--serif);font-size:clamp(2.2rem,7vw,5rem);font-weight:900;line-height:1.05;text-align:center;margin-bottom:0.85rem;animation:fadeUp 0.8s 0.4s ease both;}
+.title-headline em{font-style:italic;color:var(--gold);}
+.title-sub{font-size:0.82rem;color:var(--faint);font-weight:300;max-width:480px;text-align:center;line-height:1.7;animation:fadeUp 0.8s 0.6s ease both;margin-bottom:1.5rem;}
+.title-discs{display:flex;gap:0.4rem;flex-wrap:wrap;justify-content:center;animation:fadeUp 0.8s 0.8s ease both;}
+.title-disc-tag{font-size:0.55rem;letter-spacing:0.1em;text-transform:uppercase;border:0.5px solid rgba(201,168,76,0.2);color:rgba(201,168,76,0.6);padding:0.2rem 0.5rem;border-radius:2px;}
+
+/* ── SCENE 2: PROBLEM ── */
+#scene-problem{justify-content:flex-start;align-items:center;padding:1.25rem 1rem 0;}
+.problem-intro{text-align:center;margin-bottom:1rem;padding:0 0.5rem;}
+.problem-intro h2{font-family:var(--serif);font-size:clamp(1.2rem,4vw,2rem);margin-bottom:0.4rem;line-height:1.2;}
+.problem-intro h2 em{font-style:italic;color:var(--gold);}
+.problem-intro p{font-size:0.72rem;color:var(--faint);max-width:480px;margin:0 auto;line-height:1.6;}
+.problem-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem;max-width:700px;width:100%;padding:0 0.25rem;}
+.problem-card{background:var(--bg1);border:0.5px solid rgba(245,242,237,0.07);border-radius:4px;padding:0.85rem;position:relative;animation:cardSlide 0.5s ease both;}
+.problem-card:nth-child(1){animation-delay:0.1s}
+.problem-card:nth-child(2){animation-delay:0.2s}
+.problem-card:nth-child(3){animation-delay:0.3s}
+.problem-card:nth-child(4){animation-delay:0.4s}
+.problem-x{position:absolute;top:0.6rem;right:0.6rem;color:rgba(194,112,128,0.6);font-size:0.75rem;}
+.problem-platform{font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--faint);margin-bottom:0.35rem;}
+.problem-title{font-family:var(--serif);font-size:0.88rem;color:var(--cream);margin-bottom:0.25rem;line-height:1.25;}
+.problem-text{font-size:0.6rem;color:rgba(245,242,237,0.35);line-height:1.5;font-weight:300;}
+
+/* ── SCENE 3: DISCOVER ── */
+#scene-discover{flex-direction:column;}
+.discover-header{padding:0.75rem 1.25rem 0.5rem;border-bottom:0.5px solid var(--rule);flex-shrink:0;}
+.discover-body{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+.disc-pills{display:flex;gap:0.35rem;padding:0.65rem 1rem;border-bottom:0.5px solid var(--rule);overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+.disc-pills::-webkit-scrollbar{display:none;}
+.disc-pill{font-size:0.58rem;padding:0.2rem 0.6rem;border-radius:20px;white-space:nowrap;color:var(--faint);border:0.5px solid rgba(245,242,237,0.1);cursor:pointer;flex-shrink:0;}
+.disc-pill.on{background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.3);color:var(--gold);}
+.card-grid-area{padding:0.75rem 1rem;overflow-y:auto;flex:1;}
+.grid-count-row{font-size:0.65rem;color:var(--faint);margin-bottom:0.75rem;}
+.cards-row{display:grid;grid-template-columns:repeat(2,1fr);gap:0.6rem;}
+.profile-card{background:var(--bg1);border:0.5px solid var(--rule);border-radius:4px;overflow:hidden;animation:cardIn 0.4s ease both;}
+.profile-card:nth-child(1){animation-delay:0.05s}
+.profile-card:nth-child(2){animation-delay:0.1s}
+.profile-card:nth-child(3){animation-delay:0.15s}
+.profile-card:nth-child(4){animation-delay:0.2s}
+.card-cover{height:36px;}
+.cv-visual{background:#1c1228;} .cv-music{background:#0d1a1a;} .cv-writing{background:#181420;} .cv-design{background:#131820;} .cv-film{background:#1a1510;} .cv-photo{background:#101820;} .cv-perf{background:#1a1018;} .cv-tech{background:#101a14;}
+.card-body{padding:0.5rem 0.6rem 0.5rem;position:relative;}
+.card-av-wrap{position:absolute;top:-12px;left:0.6rem;}
+.card-av{width:26px;height:26px;border-radius:50%;border:2px solid var(--bg1);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:0.6rem;font-weight:700;}
+.av-gold{background:rgba(201,168,76,0.2);color:var(--gold);}
+.av-teal{background:rgba(86,179,156,0.2);color:var(--teal);}
+.av-purp{background:rgba(160,120,208,0.2);color:#a078d0;}
+.av-blue{background:rgba(86,140,195,0.2);color:#568cc3;}
+.card-content{padding-top:14px;}
+.card-name{font-family:var(--serif);font-size:0.78rem;font-weight:700;color:var(--cream);margin-bottom:0.05rem;}
+.card-hl{font-size:0.52rem;letter-spacing:0.03em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-hl.teal{color:var(--teal);} .card-hl.purp{color:#a078d0;}
+.card-bio{font-size:0.58rem;color:var(--faint);line-height:1.4;font-weight:300;margin-bottom:0.3rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-footer-mini{display:flex;justify-content:space-between;align-items:center;padding-top:0.3rem;border-top:0.5px solid var(--rule);}
+.card-loc{font-size:0.5rem;color:rgba(245,242,237,0.22);}
+.card-reach{font-size:0.48rem;padding:0.12rem 0.35rem;background:rgba(201,168,76,0.1);border:0.5px solid rgba(201,168,76,0.25);color:var(--gold);border-radius:2px;letter-spacing:0.04em;text-transform:uppercase;}
+
+/* ── SCENE 4: BRIEF ── */
+#scene-brief{flex-direction:column;}
+.brief-header{padding:0.65rem 1.25rem;border-bottom:0.5px solid var(--rule);flex-shrink:0;display:flex;justify-content:space-between;align-items:center;}
+.brief-layout{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+.brief-list{padding:0.75rem 1rem;border-bottom:0.5px solid var(--rule);flex-shrink:0;display:flex;flex-direction:column;gap:0.4rem;}
+.brief-item{background:var(--bg1);border:0.5px solid var(--rule);border-radius:3px;padding:0.65rem 0.75rem;animation:cardIn 0.4s ease both;}
+.brief-item:nth-child(1){animation-delay:0.05s;border-color:rgba(201,168,76,0.3);background:rgba(201,168,76,0.04);}
+.brief-item:nth-child(2){animation-delay:0.15s}
+.brief-item:nth-child(3){animation-delay:0.25s}
+.brief-tags{display:flex;gap:0.25rem;flex-wrap:wrap;margin-bottom:0.3rem;}
+.btag{font-size:0.48rem;padding:1px 5px;border-radius:2px;letter-spacing:0.05em;text-transform:uppercase;font-weight:600;}
+.btag-gold{background:rgba(201,168,76,0.12);color:var(--gold);}
+.btag-teal{background:rgba(86,179,156,0.12);color:var(--teal);}
+.btag-purp{background:rgba(160,120,208,0.12);color:#a078d0;}
+.brief-title{font-family:var(--serif);font-size:0.82rem;color:var(--cream);margin-bottom:0.15rem;line-height:1.25;}
+.brief-excerpt{font-size:0.6rem;color:var(--faint);line-height:1.45;font-weight:300;}
+.brief-detail{padding:0.85rem 1.25rem;overflow-y:auto;flex:1;}
+.brief-detail-tags{display:flex;gap:0.35rem;flex-wrap:wrap;margin-bottom:0.5rem;}
+.brief-detail-title{font-family:var(--serif);font-size:1.1rem;color:var(--cream);margin-bottom:0.65rem;line-height:1.2;}
+.brief-section-label{font-size:0.52rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(245,242,237,0.3);margin-bottom:0.3rem;margin-top:0.65rem;}
+.brief-section-text{font-size:0.72rem;color:var(--faint);line-height:1.6;font-weight:300;}
+.brief-apply-btn{background:var(--gold);color:var(--bg);border:none;padding:0.5rem 1.25rem;border-radius:2px;font-size:0.65rem;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;margin-top:0.85rem;display:inline-block;}
+
+/* ── SCENE 5: MATCHING ── */
+#scene-matching{flex-direction:column;}
+.match-header{padding:0.65rem 1.25rem;border-bottom:0.5px solid var(--rule);flex-shrink:0;}
+.match-you-row{display:flex;flex-wrap:wrap;gap:0.35rem;align-items:center;padding:0.6rem 1rem;border-bottom:0.5px solid var(--rule);font-size:0.6rem;color:var(--faint);flex-shrink:0;}
+.match-you-tag{background:rgba(201,168,76,0.1);border:0.5px solid rgba(201,168,76,0.3);color:var(--gold);padding:0.1rem 0.45rem;border-radius:2px;font-size:0.56rem;letter-spacing:0.04em;text-transform:uppercase;}
+.match-seek-tag{background:rgba(86,179,156,0.08);border:0.5px solid rgba(86,179,156,0.25);color:var(--teal);padding:0.1rem 0.45rem;border-radius:2px;font-size:0.56rem;letter-spacing:0.04em;text-transform:uppercase;}
+.match-main{padding:0.75rem 1rem;overflow-y:auto;flex:1;}
+.match-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:0.5rem;}
+.match-card{background:var(--bg1);border:0.5px solid var(--rule);border-radius:4px;padding:0.75rem;position:relative;animation:cardIn 0.4s ease both;}
+.match-card:nth-child(1){animation-delay:0.05s}
+.match-card:nth-child(2){animation-delay:0.1s}
+.match-card:nth-child(3){animation-delay:0.15s}
+.match-card:nth-child(4){animation-delay:0.2s}
+.match-score{position:absolute;top:0.5rem;right:0.5rem;font-size:0.54rem;font-weight:600;letter-spacing:0.03em;padding:0.1rem 0.4rem;border-radius:2px;}
+.score-high{background:rgba(201,168,76,0.15);border:0.5px solid rgba(201,168,76,0.35);color:var(--gold);}
+.score-good{background:rgba(86,179,156,0.12);border:0.5px solid rgba(86,179,156,0.3);color:var(--teal);}
+.match-card-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:0.68rem;font-weight:700;margin-bottom:0.4rem;}
+.match-card-name{font-family:var(--serif);font-size:0.85rem;font-weight:700;color:var(--cream);margin-bottom:0.05rem;}
+.match-card-hl{font-size:0.54rem;letter-spacing:0.03em;text-transform:uppercase;margin-bottom:0.4rem;}
+.match-reasons{display:flex;flex-direction:column;gap:0.15rem;margin-bottom:0.4rem;}
+.match-reason{font-size:0.56rem;color:rgba(245,242,237,0.4);display:flex;align-items:flex-start;gap:0.3rem;line-height:1.4;}
+.match-reason::before{content:'✓';color:var(--teal);font-size:0.54rem;flex-shrink:0;margin-top:0.05rem;}
+.match-skills{display:flex;gap:0.25rem;flex-wrap:wrap;}
+.match-skill-tag{font-size:0.5rem;padding:1px 5px;border:0.5px solid rgba(245,242,237,0.1);color:rgba(245,242,237,0.35);border-radius:2px;text-transform:uppercase;letter-spacing:0.03em;}
+
+/* ── SCENE 6: TERMS ── */
+#scene-terms{flex-direction:column;}
+.terms-header{padding:0.65rem 1.25rem;border-bottom:0.5px solid var(--rule);flex-shrink:0;}
+.terms-context-bar{display:flex;align-items:center;gap:0.65rem;background:rgba(245,242,237,0.03);border:0.5px solid rgba(245,242,237,0.07);border-radius:4px;padding:0.65rem 0.85rem;margin-bottom:1rem;}
+.terms-avs{display:flex;}
+.terms-av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:0.58rem;font-weight:700;border:2px solid var(--bg);margin-right:-4px;}
+.terms-form{padding:0.85rem 1.25rem;overflow-y:auto;flex:1;}
+.terms-section{margin-bottom:1rem;}
+.terms-section-label{font-size:0.55rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);opacity:0.75;display:flex;align-items:center;gap:0.5rem;margin-bottom:0.6rem;}
+.terms-section-label::after{content:'';flex:1;height:0.5px;background:rgba(201,168,76,0.18);}
+.terms-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.4rem;}
+.terms-type-card{background:var(--bg1);border:0.5px solid rgba(245,242,237,0.08);border-radius:3px;padding:0.6rem 0.5rem;}
+.terms-type-card.selected{border-color:var(--gold);background:rgba(201,168,76,0.06);}
+.terms-type-icon{font-size:0.9rem;color:var(--gold);margin-bottom:0.25rem;}
+.terms-type-name{font-family:var(--serif);font-size:0.75rem;color:var(--cream);margin-bottom:0.1rem;}
+.terms-type-desc{font-size:0.56rem;color:rgba(245,242,237,0.3);line-height:1.4;font-weight:300;}
+.terms-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.6rem;}
+.terms-field{display:flex;flex-direction:column;gap:0.2rem;}
+.terms-field label{font-size:0.6rem;color:var(--faint);}
+.terms-field-value{background:var(--bg1);border:0.5px solid rgba(245,242,237,0.1);border-radius:3px;padding:0.4rem 0.6rem;font-size:0.7rem;color:var(--cream);}
+.terms-field-value.gold{color:var(--gold);border-color:rgba(201,168,76,0.3);}
+.terms-summary-inline{background:var(--bg1);border:0.5px solid rgba(201,168,76,0.2);border-radius:4px;overflow:hidden;margin-top:0.5rem;}
+.terms-sc-hdr{padding:0.55rem 0.75rem;border-bottom:0.5px solid var(--rule);}
+.terms-sc-type{font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,242,237,0.25);margin-bottom:0.1rem;}
+.terms-sc-title{font-family:var(--serif);font-size:0.8rem;color:var(--cream);}
+.terms-sc-row{display:flex;justify-content:space-between;padding:0.3rem 0.75rem;border-bottom:0.5px solid rgba(245,242,237,0.04);font-size:0.58rem;}
+.terms-sc-row:last-child{border-bottom:none;}
+.terms-sc-k{color:rgba(245,242,237,0.3);}
+.terms-sc-v{color:var(--faint);text-align:right;}
+.terms-sc-v.gold{color:var(--gold);}
+.terms-sc-v.teal{color:var(--teal);}
+.terms-send-btn{width:100%;background:var(--gold);color:var(--bg);border:none;padding:0.55rem;border-radius:2px;font-size:0.65rem;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;margin-top:0.6rem;}
+
+/* ── SCENE 7: STUDIO ── */
+#scene-studio{flex-direction:column;}
+.studio-header{padding:0.65rem 1.25rem;border-bottom:0.5px solid var(--rule);flex-shrink:0;}
+.studio-title-text{font-family:var(--serif);font-size:1.1rem;font-weight:700;color:var(--cream);}
+.studio-meta{display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-top:0.25rem;}
+.studio-party{display:flex;align-items:center;gap:0.3rem;font-size:0.58rem;color:var(--faint);}
+.studio-party-av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:0.46rem;font-weight:700;}
+.studio-status-pill{font-size:0.5rem;padding:0.1rem 0.45rem;border-radius:2px;letter-spacing:0.05em;text-transform:uppercase;background:rgba(201,168,76,0.1);border:0.5px solid rgba(201,168,76,0.25);color:var(--gold);}
+.studio-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--rule);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
+.studio-tabs::-webkit-scrollbar{display:none;}
+.studio-tab{font-size:0.58rem;padding:0.45rem 0.7rem;color:var(--faint);cursor:pointer;letter-spacing:0.04em;text-transform:uppercase;border-bottom:1.5px solid transparent;white-space:nowrap;}
+.studio-tab.on{color:var(--gold);border-bottom-color:var(--gold);}
+.studio-body{display:flex;flex-direction:column;flex:1;overflow:hidden;}
+.studio-main-area{padding:0.85rem 1rem;overflow-y:auto;flex:1;}
+.studio-chat{display:none;}
+.prog-bar-wrap{margin-bottom:0.85rem;}
+.prog-bar-top{display:flex;justify-content:space-between;font-size:0.6rem;color:var(--faint);margin-bottom:0.3rem;}
+.prog-bar-bg{height:3px;background:rgba(245,242,237,0.08);border-radius:2px;overflow:hidden;}
+.prog-bar-fill{height:100%;border-radius:2px;transition:width 1.5s ease;}
+.ms-table-hdr{display:grid;grid-template-columns:20px 1fr 70px 24px;gap:0.4rem;font-size:0.5rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(245,242,237,0.25);padding:0 0.4rem;margin-bottom:0.35rem;}
+.ms-row{display:grid;grid-template-columns:20px 1fr 70px 24px;gap:0.4rem;align-items:center;background:var(--bg1);border:0.5px solid rgba(245,242,237,0.06);border-radius:3px;padding:0.45rem 0.4rem;margin-bottom:0.3rem;animation:fadeUp 0.4s ease both;}
+.ms-row:nth-child(1){animation-delay:0.1s}
+.ms-row:nth-child(2){animation-delay:0.2s}
+.ms-row:nth-child(3){animation-delay:0.3s}
+.ms-row.done{opacity:0.5;}
+.ms-num{width:16px;height:16px;border-radius:50%;border:0.5px solid rgba(245,242,237,0.12);display:flex;align-items:center;justify-content:center;font-size:0.5rem;color:rgba(245,242,237,0.3);}
+.ms-title{font-size:0.66rem;color:var(--cream);}
+.ms-title.done-title{text-decoration:line-through;color:var(--faint);}
+.ms-date{font-size:0.58rem;color:var(--faint);}
+.ms-chk{width:16px;height:16px;border-radius:2px;border:0.5px solid rgba(245,242,237,0.15);display:flex;align-items:center;justify-content:center;font-size:0.58rem;}
+.ms-chk.done{background:rgba(86,179,156,0.15);border-color:rgba(86,179,156,0.35);color:var(--teal);}
+.studio-chat{border-top:0.5px solid var(--rule);flex-direction:column;flex-shrink:0;max-height:38%;}
+.mobile-chat-preview{display:flex;flex-direction:column;}
+.chat-hdr{padding:0.5rem 1rem;border-bottom:0.5px solid var(--rule);font-size:0.6rem;color:var(--faint);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.chat-online{display:flex;align-items:center;gap:0.3rem;font-size:0.58rem;}
+.chat-dot{width:5px;height:5px;border-radius:50%;background:var(--teal);}
+.chat-msgs{flex:1;padding:0.5rem 1rem;display:flex;flex-direction:column;gap:0.4rem;overflow-y:auto;}
+.msg-sys{font-size:0.56rem;color:rgba(245,242,237,0.25);font-style:italic;text-align:center;animation:fadeUp 0.3s ease both;}
+.msg-mine{align-self:flex-end;max-width:80%;animation:fadeUp 0.3s ease both;}
+.msg-theirs{align-self:flex-start;max-width:80%;animation:fadeUp 0.3s ease both;}
+.msg-bubble-mine{background:rgba(201,168,76,0.12);border:0.5px solid rgba(201,168,76,0.2);border-radius:8px 8px 2px 8px;padding:0.4rem 0.6rem;font-size:0.66rem;color:var(--cream);line-height:1.45;}
+.msg-bubble-theirs{background:var(--bg1);border:0.5px solid var(--rule);border-radius:8px 8px 8px 2px;padding:0.4rem 0.6rem;font-size:0.66rem;color:var(--cream);line-height:1.45;}
+.msg-time{font-size:0.52rem;color:rgba(245,242,237,0.2);margin-top:0.1rem;text-align:right;}
+
+/* ── SCENE 8: COMPLETE ── */
+#scene-complete{align-items:center;justify-content:center;padding:2rem 1.5rem;}
+.complete-inner{text-align:center;max-width:420px;width:100%;}
+.complete-mark{font-size:2.5rem;color:var(--gold);margin-bottom:0.75rem;animation:pulse 2s ease infinite;}
+.complete-title{font-family:var(--serif);font-size:clamp(1.8rem,6vw,2.5rem);font-weight:900;color:var(--cream);margin-bottom:0.4rem;line-height:1.1;}
+.complete-title span{color:var(--gold);font-style:italic;}
+.complete-sub{font-size:0.78rem;color:var(--faint);font-weight:300;line-height:1.7;margin-bottom:1.5rem;}
+.complete-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:0.5px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:1.5rem;}
+.complete-stat{padding:0.75rem 0.5rem;border-right:0.5px solid var(--rule);text-align:center;}
+.complete-stat:last-child{border-right:none;}
+.complete-stat-num{font-family:var(--serif);font-size:1.4rem;color:var(--gold);margin-bottom:0.15rem;}
+.complete-stat-label{font-size:0.52rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(245,242,237,0.3);line-height:1.3;}
+.complete-cta{background:var(--gold);color:var(--bg);border:none;padding:0.7rem 1.75rem;border-radius:2px;font-size:0.72rem;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;cursor:pointer;font-family:var(--sans);}
+
+/* ── CONTROLS ── */
+#controls{position:fixed;bottom:1rem;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:0.6rem;z-index:200;background:rgba(26,23,20,0.92);border:0.5px solid rgba(245,242,237,0.1);border-radius:30px;padding:0.4rem 0.85rem;backdrop-filter:blur(12px);}
+.ctrl-btn{background:transparent;border:none;color:var(--faint);cursor:pointer;font-size:0.85rem;padding:0.2rem 0.3rem;border-radius:50%;transition:color 0.15s;}
+.ctrl-btn:hover{color:var(--cream);}
+.ctrl-dots{display:flex;gap:0.35rem;align-items:center;}
+.ctrl-dot{width:5px;height:5px;border-radius:50%;background:rgba(245,242,237,0.2);cursor:pointer;transition:all 0.2s;}
+.ctrl-dot.on{background:var(--gold);width:14px;border-radius:3px;}
+.ctrl-timer{font-size:0.58rem;color:rgba(245,242,237,0.3);letter-spacing:0.07em;min-width:28px;text-align:center;}
+
+/* ── DESKTOP OVERRIDES (600px+) ── */
+@media(min-width:600px){
+  .caption-sub{display:block;}
+  .title-sub{font-size:0.9rem;}
+  .cards-row{grid-template-columns:repeat(3,1fr);}
+  .match-cards{grid-template-columns:repeat(3,1fr);}
+  .card-bio{-webkit-line-clamp:3;}
+}
+
+@media(min-width:860px){
+  .demo-nav{padding:0.85rem 2rem;}
+  .demo-logo{font-size:1.8rem;}
+  .demo-nav-links{font-size:0.65rem;gap:1.5rem;}
+  .cards-row{grid-template-columns:repeat(4,1fr);}
+  .problem-grid{grid-template-columns:repeat(4,1fr);}
+  .discover-body{flex-direction:row;}
+  .disc-pills{display:none;}
+  .disc-sidebar{display:flex;flex-direction:column;width:200px;padding:1.25rem;border-right:0.5px solid var(--rule);border-bottom:none;flex-shrink:0;}
+  .disc-sidebar-label{display:block;font-size:0.54rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(245,242,237,0.25);margin-bottom:0.75rem;}
+  .disc-btn{display:flex;}
+  .brief-layout{flex-direction:row;}
+  .brief-list{width:300px;border-right:0.5px solid var(--rule);border-bottom:none;overflow-y:auto;}
+  .match-cards{grid-template-columns:repeat(3,1fr);}
+  .studio-body{flex-direction:row;}
+  .studio-main-area{padding:1.25rem 1.5rem;}
+  .studio-chat{display:flex;border-top:none;border-left:0.5px solid var(--rule);max-height:none;width:260px;flex-shrink:0;}
+  .mobile-chat-preview{display:none;}
+  .scene-caption{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);background:transparent;border-top:none;padding:0;width:max-content;max-width:90vw;}
+  .caption-title{font-size:1.5rem;}
+  .caption-sub{display:block;}
+  .terms-layout-inner{display:grid;grid-template-columns:1fr 260px;flex:1;overflow:hidden;}
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes cardSlide{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+@keyframes cardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+</style>
+</head>
+<body>
+<div id="progress-bar"></div>
+<div id="demo">
+
+<!-- ══ SCENE 1: TITLE ══ -->
+<div class="scene active" id="scene-title">
+  <div class="title-grid"></div>
+  <div class="title-eyebrow">Collective Loft · Est. 2026 · Chicago</div>
+  <div class="title-headline">Building the infrastructure<br/>for the <em>creative class.</em></div>
+  <p class="title-sub">The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and make something together.</p>
+  <div class="title-discs">
+    <span class="title-disc-tag">🎨 Visual Art</span>
+    <span class="title-disc-tag">🎵 Music</span>
+    <span class="title-disc-tag">✍️ Writing</span>
+    <span class="title-disc-tag">🖥 Design & Web</span>
+    <span class="title-disc-tag">🎬 Film</span>
+    <span class="title-disc-tag">📷 Photography</span>
+    <span class="title-disc-tag">🎭 Performance</span>
+    <span class="title-disc-tag">💻 Creative Tech</span>
+  </div>
+</div>
+
+<!-- ══ SCENE 2: PROBLEM ══ -->
+<div class="scene" id="scene-problem">
+  <nav class="demo-nav">
+    <div class="demo-logo">Collective <span>Loft</span></div>
+  </nav>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:1rem 0.75rem 0;overflow-y:auto;">
+    <div class="problem-intro">
+      <h2>Every platform built "for" creatives<br/><em>treats them as something else.</em></h2>
+      <p style="margin-top:0.5rem;">Service workers. Portfolio holders. Content producers. None built for how creative work actually happens.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card"><div class="problem-x">✕</div><div class="problem-platform">LinkedIn</div><div class="problem-title">Built for corporate professionals.</div><div class="problem-text">Treats a musician's profile like a résumé.</div></div>
+      <div class="problem-card"><div class="problem-x">✕</div><div class="problem-platform">Upwork</div><div class="problem-title">Client-worker hierarchy.</div><div class="problem-text">Race to the bottom on price. Not a collaboration.</div></div>
+      <div class="problem-card"><div class="problem-x">✕</div><div class="problem-platform">Behance</div><div class="problem-title">Work sits waiting.</div><div class="problem-text">Passive. No path from profile to project.</div></div>
+      <div class="problem-card"><div class="problem-x">✕</div><div class="problem-platform">Instagram</div><div class="problem-title">Optimizes for attention.</div><div class="problem-text">Engagement is the metric. Not completed work.</div></div>
+    </div>
+  </div>
+  <div class="scene-caption">
+    <div class="caption-eyebrow">The problem</div>
+    <div class="caption-title">165M creatives. Zero platforms built for them.</div>
+    <div class="caption-sub">Service workers. Content producers. Portfolio holders. None of them are built for what actually drives creative output.</div>
+  </div>
+</div>
+
+<!-- ══ SCENE 3: DISCOVER ══ -->
+<div class="scene" id="scene-discover">
+  <nav class="demo-nav">
+    <div class="demo-logo">Collective <span>Loft</span></div>
+    <div class="demo-nav-links"><span class="active-link">Discover</span><span>Collabs</span><span>Matching</span></div>
+  </nav>
+  <div class="discover-header">
+    <div style="font-family:var(--serif);font-size:1.15rem;font-weight:700;color:var(--cream);">Discover Creatives</div>
+    <div style="font-size:0.62rem;color:var(--faint);font-weight:300;">All open to collaboration.</div>
+  </div>
+  <div class="discover-body">
+    <!-- Mobile: discipline pills -->
+    <div class="disc-pills">
+      <div class="disc-pill on">✦ All · 207</div>
+      <div class="disc-pill">🎨 Visual Art · 53</div>
+      <div class="disc-pill">🎵 Music · 40</div>
+      <div class="disc-pill">✍️ Writing · 34</div>
+      <div class="disc-pill">🖥 Design · 31</div>
+      <div class="disc-pill">🎬 Film · 28</div>
+    </div>
+    <!-- Desktop: sidebar (hidden on mobile via CSS) -->
+    <div class="disc-sidebar" style="display:none;">
+      <div class="disc-sidebar-label">Disciplines</div>
+      <div class="disc-btn on"><span>✦</span> All disciplines <span style="font-size:0.58rem;opacity:0.5">207</span></div>
+      <div class="disc-btn"><span>🎨</span> Visual Art <span style="font-size:0.58rem;opacity:0.5">53</span></div>
+      <div class="disc-btn"><span>🎵</span> Music <span style="font-size:0.58rem;opacity:0.5">40</span></div>
+      <div class="disc-btn"><span>✍️</span> Writing <span style="font-size:0.58rem;opacity:0.5">34</span></div>
+      <div class="disc-btn"><span>🖥</span> Design & Web <span style="font-size:0.58rem;opacity:0.5">31</span></div>
+      <div class="disc-btn"><span>🎬</span> Film <span style="font-size:0.58rem;opacity:0.5">28</span></div>
+    </div>
+    <div class="card-grid-area">
+      <div class="grid-count-row">207 creatives · open to collaboration</div>
+      <div class="cards-row">
+        <div class="profile-card"><div class="card-cover cv-music"></div><div class="card-body"><div class="card-av-wrap"><div class="card-av av-teal">JK</div></div><div class="card-content"><div class="card-name">Jordan Kim</div><div class="card-hl teal">Film Composer</div><div class="card-bio">Scoring a documentary on Chicago muralists. Looking for a filmmaker.</div><div class="card-footer-mini"><span class="card-loc">Chicago, IL</span><span class="card-reach">Reach Out</span></div></div></div></div>
+        <div class="profile-card"><div class="card-cover cv-visual"></div><div class="card-body"><div class="card-av-wrap"><div class="card-av av-gold">MV</div></div><div class="card-content"><div class="card-name">Marisol Vega</div><div class="card-hl">Visual Artist</div><div class="card-bio">Large format abstract series. Seeking a poet for gallery installation text.</div><div class="card-footer-mini"><span class="card-loc">New York, NY</span><span class="card-reach">Reach Out</span></div></div></div></div>
+        <div class="profile-card"><div class="card-cover cv-writing"></div><div class="card-body"><div class="card-av-wrap"><div class="card-av av-purp">RD</div></div><div class="card-content"><div class="card-name">Roux Dunn</div><div class="card-hl purp">Poet · Spoken Word</div><div class="card-bio">Debut collection in progress. Need a visual artist for the cover.</div><div class="card-footer-mini"><span class="card-loc">Minneapolis, MN</span><span class="card-reach">Reach Out</span></div></div></div></div>
+        <div class="profile-card"><div class="card-cover cv-film"></div><div class="card-body"><div class="card-av-wrap"><div class="card-av av-blue">LM</div></div><div class="card-content"><div class="card-name">Leila Mora</div><div class="card-hl" style="color:#568cc3">Filmmaker</div><div class="card-bio">18-minute doc in post. Seeking a composer for original score.</div><div class="card-footer-mini"><span class="card-loc">Austin, TX</span><span class="card-reach">Reach Out</span></div></div></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="scene-caption">
+    <div class="caption-eyebrow">Step 1 · Discover</div>
+    <div class="caption-title">Find your collaborator.</div>
+    <div class="caption-sub">207 creatives across 8 disciplines. Filtered by what they do, what they're making, and whether they're open.</div>
+  </div>
+</div>
+
+<!-- ══ SCENE 4: BRIEF ══ -->
+<div class="scene" id="scene-brief">
+  <nav class="demo-nav">
+    <div class="demo-logo">Collective <span>Loft</span></div>
+    <div class="demo-nav-links"><span>Discover</span><span class="active-link">Collabs</span><span>Matching</span></div>
+  </nav>
+  <div class="brief-header">
+    <div style="font-family:var(--serif);font-size:1.1rem;font-weight:700;color:var(--cream);">Collab Briefs</div>
+    <div style="background:var(--gold);color:var(--bg);padding:0.3rem 0.75rem;border-radius:2px;font-size:0.58rem;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;">+ Post a Brief</div>
+  </div>
+  <div class="brief-layout">
+    <div class="brief-list">
+      <div class="brief-item">
+        <div class="brief-tags"><span class="btag btag-gold">Film</span><span class="btag btag-teal">Music</span><span class="btag btag-teal">Paid</span></div>
+        <div class="brief-title">Composer for 18-min doc on Chicago muralists</div>
+        <div class="brief-excerpt">Original score between ambient and jazz.</div>
+      </div>
+      <div class="brief-item">
+        <div class="brief-tags"><span class="btag btag-purp">Writing</span><span class="btag btag-gold">Visual Art</span></div>
+        <div class="brief-title">Poet for gallery installation</div>
+        <div class="brief-excerpt">Large format abstract works, September showing.</div>
+      </div>
+      <div class="brief-item">
+        <div class="brief-tags"><span class="btag btag-teal">Music</span><span class="btag btag-gold">Performance</span></div>
+        <div class="brief-title">Producer with jazz background for R&B EP</div>
+        <div class="brief-excerpt">6 tracks. Creative exchange or paid.</div>
+      </div>
+    </div>
+    <div class="brief-detail">
+      <div class="brief-detail-tags">
+        <span class="btag btag-gold" style="font-size:0.58rem;padding:2px 7px">Film</span>
+        <span class="btag btag-teal" style="font-size:0.58rem;padding:2px 7px">Music</span>
+        <span class="btag btag-teal" style="font-size:0.58rem;padding:2px 7px">Paid</span>
+      </div>
+      <div class="brief-detail-title">Looking for a film composer for a short documentary on Chicago muralists</div>
+      <div class="brief-section-label">What I'm making</div>
+      <div class="brief-section-text">An 18-minute documentary on muralists in Chicago's Pilsen neighborhood. In post now. I need a score that sits between ambient and jazz — something that gives the work room to breathe.</div>
+      <div class="brief-section-label">Who I need</div>
+      <div class="brief-section-text">A composer who has scored documentary or short film before. Chicago-based or remote. Fee is $1,200–1,800.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-top:0.65rem;">
+        <div style="background:var(--bg1);border:0.5px solid var(--rule);border-radius:3px;padding:0.4rem 0.55rem;"><div style="font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,242,237,0.25);margin-bottom:0.1rem;">Timeline</div><div style="font-size:0.68rem;color:var(--cream);">4–6 weeks</div></div>
+        <div style="background:var(--bg1);border:0.5px solid rgba(201,168,76,0.25);border-radius:3px;padding:0.4rem 0.55rem;"><div style="font-size:0.5rem;letter-spacing:0.1em;text-transform:uppercase;color:rgba(245,242,237,0.25);margin-bottom:0.1rem;">Fee</div><div style="font-size:0.68rem;color:var(--gold);">$1,200–1,800</div></div>
+      </div>
+      <div class="brief-apply-btn">Apply to this brief</div>
+    </div>
+  </div>
+  <div class="scene-caption">
+    <div class="caption-eyebrow">Step 2 · Collab Briefs</div>
+    <div class="caption-title">Post what you're making. Find who you need.</div>
+    <div class="caption-sub">Not a job listing. A creative brief in your own language. Creatives apply with a message, not a CV.</div>
+  </div>
+</div>
+
+<!-- ══ SCENE 5: MATCHING ══ -->
+<div class="scene" id="scene-matching">
+  <nav class="demo-nav">
+    <div class="demo-logo">Collective <span>Loft</span></div>
+    <div class="demo-nav-links"><span>Discover</span><span>Collabs</span><span class="active-link">Matching</span></div>
+  </nav>
+  <div class="match-header">
+    <div style="font-family:var(--serif);font-size:1.1rem;font-weight:700;color:var(--cream);">Discipline Matching</div>
+    <div style="font-size:0.62rem;color:var(--faint);">Ranked by fit — not popularity.</div>
+  </div>
+  <div class="match-you-row">
+    <span style="color:rgba(245,242,237,0.3);font-size:0.6rem;">You are</span>
+    <span class="match-you-tag">Writing</span><span class="match-you-tag">Creative Tech</span>
+    <span style="color:rgba(245,242,237,0.3);font-size:0.6rem;">Seeking</span>
+    <span class="match-seek-tag">Film</span><span class="match-seek-tag">Music</span>
+  </div>
+  <div class="match-main">
+    <div class="match-cards">
+      <div class="match-card">
+        <div class="match-score score-high">92%</div>
+        <div class="match-card-av av-teal">JK</div>
+        <div class="match-card-name">Jordan Kim</div>
+        <div class="match-card-hl teal">Film Composer</div>
+        <div class="match-reasons">
+          <div class="match-reason">You're seeking Music</div>
+          <div class="match-reason">They're seeking Writers</div>
+        </div>
+        <div class="match-skills"><span class="match-skill-tag">Film scoring</span></div>
+      </div>
+      <div class="match-card">
+        <div class="match-score score-high">88%</div>
+        <div class="match-card-av av-blue">LM</div>
+        <div class="match-card-name">Leila Mora</div>
+        <div class="match-card-hl" style="color:#568cc3">Filmmaker</div>
+        <div class="match-reasons">
+          <div class="match-reason">You're seeking Film</div>
+          <div class="match-reason">They're seeking Writers</div>
+        </div>
+        <div class="match-skills"><span class="match-skill-tag">Directing</span></div>
+      </div>
+      <div class="match-card">
+        <div class="match-score score-high">85%</div>
+        <div class="match-card-av av-gold">NI</div>
+        <div class="match-card-name">Nour Isley</div>
+        <div class="match-card-hl" style="color:#568cc3">Director</div>
+        <div class="match-reasons">
+          <div class="match-reason">You're seeking Film</div>
+          <div class="match-reason">2 completed collabs</div>
+        </div>
+        <div class="match-skills"><span class="match-skill-tag">Short film</span></div>
+      </div>
+      <div class="match-card">
+        <div class="match-score score-good">78%</div>
+        <div class="match-card-av av-teal">SA</div>
+        <div class="match-card-name">Simone Adeyemi</div>
+        <div class="match-card-hl teal">Vocalist</div>
+        <div class="match-reasons">
+          <div class="match-reason">You're seeking Music</div>
+        </div>
+        <div class="match-skills"><span class="match-skill-tag">Songwriting</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="scene-caption">
+    <div class="caption-eyebrow">Step 3 · Matching</div>
+    <div class="caption-title">The algorithm finds who's looking for you too.</div>
+    <div class="caption-sub">Bidirectional intent. People actively seeking each other surface first.</div>
+  </div>
+</div>
+
+<!-- ══ SCENE 6: TERMS ══ -->
+<div class="scene" id="scene-terms">
+  <nav class="demo-nav">
+    <div class="demo-logo">Collective <span>Loft</span></div>
+    <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.58rem;color:var(--faint);">
+      <span style="color:var(--teal)">Discover</span><span style="opacity:0.3">—</span>
+      <span style="color:var(--gold);font-weight:500">Terms</span><span style="opacity:0.3">—</span>
+      <span>Studio</span>
+    </div>
+  </nav>
+  <div class="terms-form">
+    <div class="terms-context-bar">
+      <div class="terms-avs"><div class="terms-av av-gold">LM</div><div class="terms-av av-teal">JK</div></div>
+      <div><div style="font-size:0.72rem;font-weight:500;color:var(--cream);">Leila Mora + Jordan Kim</div><div style="font-size:0.58rem;color:var(--faint);">Setting collab terms · May 2026</div></div>
+    </div>
+    <div class="terms-section">
+      <div class="terms-section-label">Collaboration type</div>
+      <div class="terms-type-grid">
+        <div class="terms-type-card"><div class="terms-type-icon">⇄</div><div class="terms-type-name">Exchange</div><div class="terms-type-desc">Trade skills. No money.</div></div>
+        <div class="terms-type-card selected"><div class="terms-type-icon">$</div><div class="terms-type-name">Paid</div><div class="terms-type-desc">Fee agreed upfront.</div></div>
+        <div class="terms-type-card"><div class="terms-type-icon">%</div><div class="terms-type-name">Revenue</div><div class="terms-type-desc">Split the outcome.</div></div>
+      </div>
+    </div>
+    <div class="terms-section">
+      <div class="terms-section-label">Payment</div>
+      <div class="terms-row">
+        <div class="terms-field"><label>Fee range</label><div class="terms-field-value gold">$1,200 – $1,800</div></div>
+        <div class="terms-field"><label>Schedule</label><div class="terms-field-value">Milestone-based</div></div>
+      </div>
+    </div>
+    <div class="terms-section">
+      <div class="terms-section-label">Rights & timeline</div>
+      <div class="terms-row">
+        <div class="terms-field"><label>Rights</label><div class="terms-field-value">Full transfer · portfolio use retained</div></div>
+        <div class="terms-field"><label>Deadline</label><div class="terms-field-value">Jul 15, 2026</div></div>
+      </div>
+    </div>
+    <div class="terms-summary-inline">
+      <div class="terms-sc-hdr"><div class="terms-sc-type">Paid collaboration</div><div class="terms-sc-title">Documentary Score · Chicago Muralists</div></div>
+      <div class="terms-sc-row"><span class="terms-sc-k">Fee</span><span class="terms-sc-v gold">$1,200–1,800</span></div>
+      <div class="terms-sc-row"><span class="terms-sc-k">Rights</span><span class="terms-sc-v">Full transfer</span></div>
+      <div class="terms-sc-row"><span class="terms-sc-k">Status</span><span class="terms-sc-v teal">Pending review</span></div>
+    </div>
+    <button class="terms-send-btn">Send to Jordan for review ↗</button>
+  </div>
+  <div class="scene-caption">
+    <div class="caption-eyebrow">Step 4 · Collab Terms</div>
+    <div class="caption-title">Agree before the first note is recorded.</div>
+    <div class="caption-sub">Fee, rights, milestones, timeline. Both parties accept. Terms are timestamped and locked.</div>
+  </div>
+</div>
+
+<!-- ══ SCENE 7: STUDIO ══ -->
+<div class="scene" id="scene-studio">
+  <nav class="demo-nav">
+    <div class="demo-logo">Collective <span>Loft</span></div>
+    <div class="demo-nav-links"><span class="active-link">My Loft Studios</span></div>
+  </nav>
+  <div class="studio-header">
+    <div class="studio-title-text">Documentary Score · Chicago Muralists</div>
+    <div class="studio-meta">
+      <div class="studio-party"><div class="studio-party-av av-gold">LM</div><span>Leila Mora</span></div>
+      <div class="studio-party"><div class="studio-party-av av-teal">JK</div><span>Jordan Kim</span></div>
+      <span class="studio-status-pill">In progress</span>
+    </div>
+  </div>
+  <div class="studio-tabs">
+    <div class="studio-tab on">Overview</div>
+    <div class="studio-tab">Milestones</div>
+    <div class="studio-tab">Terms</div>
+    <div class="studio-tab">Files</div>
+    <div class="studio-tab">Notes</div>
+  </div>
+  <div class="studio-body">
+    <div class="studio-main-area">
+      <div class="prog-bar-wrap">
+        <div class="prog-bar-top"><span>Progress</span><span style="color:var(--gold)">67%</span></div>
+        <div class="prog-bar-bg"><div class="prog-bar-fill" id="studio-prog" style="width:0%;background:var(--gold)"></div></div>
+        <div style="font-size:0.58rem;color:var(--faint);margin-top:0.2rem">2 of 3 milestones complete</div>
+      </div>
+      <div class="ms-table-hdr"><div>#</div><div>Milestone</div><div>Due</div><div>✓</div></div>
+      <div class="ms-row done"><div class="ms-num" style="color:var(--teal);border-color:rgba(86,179,156,0.3)">✓</div><div class="ms-title done-title">Temp track review + spotting</div><div class="ms-date">May 12</div><div class="ms-chk done">✓</div></div>
+      <div class="ms-row done"><div class="ms-num" style="color:var(--teal);border-color:rgba(86,179,156,0.3)">✓</div><div class="ms-title done-title">Full score draft delivered</div><div class="ms-date">Jun 1</div><div class="ms-chk done">✓</div></div>
+      <div class="ms-row"><div class="ms-num">3</div><div class="ms-title">Final stems + mix delivered</div><div class="ms-date" style="color:var(--gold)">Jul 15</div><div class="ms-chk"></div></div>
+
+      <!-- Mobile chat preview (hidden on desktop) -->
+      <div class="mobile-chat-preview">
+        <div style="font-size:0.55rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(245,242,237,0.25);margin-bottom:0.5rem;margin-top:0.85rem;">Studio chat</div>
+        <div style="font-size:0.6rem;color:rgba(245,242,237,0.25);font-style:italic;text-align:center;margin-bottom:0.35rem;">Jordan Kim accepted the collab terms.</div>
+        <div style="align-self:flex-start;margin-bottom:0.35rem;"><div style="background:var(--bg1);border:0.5px solid var(--rule);border-radius:8px 8px 8px 2px;padding:0.4rem 0.6rem;font-size:0.65rem;color:var(--cream);line-height:1.4;max-width:85%;">Just finished the spotting session. Starting the main theme this week.</div></div>
+        <div style="align-self:flex-end;margin-bottom:0.35rem;"><div style="background:rgba(201,168,76,0.12);border:0.5px solid rgba(201,168,76,0.2);border-radius:8px 8px 2px 8px;padding:0.4rem 0.6rem;font-size:0.65rem;color:var(--cream);line-height:1.4;max-width:85%;">The opening sequence needs room — don't over-score it.</div></div>
+        <div style="font-size:0.6rem;color:rgba(245,242,237,0.25);font-style:italic;text-align:center;">Leila marked "Full score draft delivered" complete.</div>
+      </div>
+    </div>
+    <div class="studio-chat">
+      <div class="chat-hdr"><span>Studio chat</span><div class="chat-online"><div class="chat-dot"></div><span>Jordan</span></div></div>
+      <div class="chat-msgs">
+        <div class="msg-sys">Studio opened · May 3, 2026</div>
+        <div class="msg-sys">Jordan Kim accepted the collab terms.</div>
+        <div class="msg-theirs"><div class="msg-bubble-theirs">Just finished the spotting session. Starting the main theme this week.</div><div class="msg-time">May 13 · 2:14 PM</div></div>
+        <div class="msg-mine"><div class="msg-bubble-mine">The opening sequence needs room — don't over-score it.</div><div class="msg-time">May 13 · 3:02 PM</div></div>
+        <div class="msg-sys">Jordan uploaded "documentary-score-draft-v1.wav"</div>
+        <div class="msg-mine"><div class="msg-bubble-mine">This is exactly right. The restraint in the first 90 seconds is perfect.</div><div class="msg-time">Jun 1 · 4:45 PM</div></div>
+        <div class="msg-sys">Leila marked "Full score draft delivered" complete.</div>
+      </div>
+      <div style="padding:0.5rem 0.85rem;border-top:0.5px solid var(--rule);flex-shrink:0;">
+        <div style="display:flex;gap:0.35rem;background:var(--bg1);border:0.5px solid rgba(245,242,237,0.1);border-radius:3px;padding:0.3rem 0.45rem;">
+          <input style="flex:1;background:transparent;border:none;outline:none;font-family:var(--sans);font-size:0.68rem;color:var(--cream);" type="text" placeholder="Message Jordan…" readonly/>
+          <button style="background:var(--gold);color:var(--bg);border:none;border-radius:2px;padding:0.12rem 0.45rem;font-size:0.65rem;cursor:pointer;">↑</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scene-caption">
+    <div class="caption-eyebrow">Step 5 · The Loft Studio</div>
+    <div class="caption-title">The work has a home now.</div>
+    <div class="caption-sub">Milestones, files, notes, and chat — all in one place. The brief pinned at the top. The terms locked and visible.</div>
+  </div>
+</div>
+
+<!-- ══ SCENE 8: COMPLETE ══ -->
+<div class="scene" id="scene-complete">
+  <div class="complete-inner">
+    <div class="complete-mark">✦</div>
+    <div class="complete-title">Built for the<br/><span>creative class.</span></div>
+    <p class="complete-sub">From first discovery to completed collab. One platform. Every step built around how creative work actually happens.</p>
+    <div class="complete-stats">
+      <div class="complete-stat"><div class="complete-stat-num">207</div><div class="complete-stat-label">Creatives on platform</div></div>
+      <div class="complete-stat"><div class="complete-stat-num">8</div><div class="complete-stat-label">Disciplines. One network.</div></div>
+      <div class="complete-stat"><div class="complete-stat-num">500</div><div class="complete-stat-label">Founding spots available</div></div>
+    </div>
+    <button class="complete-cta" onclick="window.open('https://collectiveloft.com#waitlist','_blank')">Request founding access ↗</button>
+  </div>
+</div>
+
+</div>
+
+<!-- ══ CONTROLS ══ -->
+<div id="controls">
+  <button class="ctrl-btn" id="btn-prev">‹</button>
+  <div class="ctrl-dots" id="ctrl-dots"></div>
+  <button class="ctrl-btn" id="btn-play">⏸</button>
+  <button class="ctrl-btn" id="btn-next">›</button>
+  <div class="ctrl-timer" id="ctrl-timer">0:00</div>
+</div>
+
+<script>
+const SCENES=['scene-title','scene-problem','scene-discover','scene-brief','scene-matching','scene-terms','scene-studio','scene-complete']
+const DURATIONS=[8000,14000,16000,16000,18000,16000,20000,12000]
+let current=0,playing=true,elapsed=0,timer=null,sceneStart=null
+
+function showScene(idx){
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'))
+  document.getElementById(SCENES[idx]).classList.add('active')
+  document.querySelectorAll('.ctrl-dot').forEach((d,i)=>d.classList.toggle('on',i===idx))
+  current=idx
+  if(idx===6){setTimeout(()=>{const b=document.getElementById('studio-prog');if(b)b.style.width='67%'},500)}
+}
+
+function buildDots(){
+  const c=document.getElementById('ctrl-dots')
+  SCENES.forEach((_,i)=>{
+    const d=document.createElement('div')
+    d.className='ctrl-dot'+(i===0?' on':'')
+    d.onclick=()=>{goTo(i);resetTimer()}
+    c.appendChild(d)
+  })
+}
+
+function goTo(idx){idx=Math.max(0,Math.min(SCENES.length-1,idx));showScene(idx);elapsed=0}
+
+function tick(){
+  if(!playing)return
+  const delta=Date.now()-sceneStart
+  elapsed=delta
+  const totalMs=DURATIONS.reduce((a,b)=>a+b,0)
+  const scenesMs=DURATIONS.slice(0,current).reduce((a,b)=>a+b,0)
+  document.getElementById('progress-bar').style.width=Math.min(((scenesMs+delta)/totalMs)*100,100)+'%'
+  const totalSecs=Math.floor((scenesMs+delta)/1000)
+  document.getElementById('ctrl-timer').textContent=`${Math.floor(totalSecs/60)}:${(totalSecs%60).toString().padStart(2,'0')}`
+  if(delta>=DURATIONS[current]){
+    if(current<SCENES.length-1){goTo(current+1);sceneStart=Date.now()}
+    else{playing=false;document.getElementById('btn-play').textContent='▶'}
+  }
+}
+
+function resetTimer(){sceneStart=Date.now();elapsed=0}
+
+document.getElementById('btn-prev').onclick=()=>{goTo(current-1);resetTimer()}
+document.getElementById('btn-next').onclick=()=>{goTo(current+1);resetTimer()}
+document.getElementById('btn-play').onclick=()=>{
+  playing=!playing
+  document.getElementById('btn-play').textContent=playing?'⏸':'▶'
+  if(playing){sceneStart=Date.now()-elapsed}
+}
+
+buildDots();showScene(0)
+sceneStart=Date.now();timer=setInterval(tick,100)
+</script>
+</body>
+</html>

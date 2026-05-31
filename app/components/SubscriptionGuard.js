@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 
-const PUBLIC_PATHS = ['/', '/login', '/subscribe']
+const PUBLIC_PATHS = ['/', '/login', '/subscribe', '/signup']
 
 export default function SubscriptionGuard({ children }) {
   const router = useRouter()

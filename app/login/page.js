@@ -127,7 +127,7 @@ export default function LoginPage() {
                   </button>
                 )}
                 <span className={styles.footerDivider}>·</span>
-                <Link href="/" className={styles.linkBtn}>Create an account</Link>
+                <Link href="/signup" className={styles.linkBtn}>Create an account</Link>
               </div>
             </>
           )}

@@ -107,6 +107,7 @@ export default function LandingPage() {
   const [myProfile,  setMyProfile]  = useState(null)
   const [discCounts, setDiscCounts] = useState({})
   const [isOnboarding, setIsOnboarding] = useState(false)
+  const [demoOpen, setDemoOpen] = useState(false)
 
   useEffect(() => {
     supabase
@@ -449,7 +450,7 @@ export default function LandingPage() {
               <button className={styles.btnP} onClick={() => router.push('/signup')}>Build Your Profile</button>
             )}
             {!authUser && (
-              <a href="#how" className={styles.btnS} style={{ textDecoration: 'none' }}>See How It Works</a>
+              <button className={styles.btnS} onClick={() => setDemoOpen(true)}>See How It Works</button>
             )}
           </div>
         </div>
@@ -517,7 +518,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      <div className={styles.how} id="how">
+      <div className={styles.how}>
         {[
           { num: '01', title: 'Build your creative identity',  desc: 'Show your work, your influences, what you\'re making right now, and what kind of collaborators you\'re looking for.' },
           { num: '02', title: 'Post a Collab Brief',           desc: 'Describe your project and who you need. Creatives apply or reach out directly. The brief lives on your profile and in the public feed.' },
@@ -1205,6 +1206,43 @@ export default function LandingPage() {
           </div>
         )
       })()}
+
+      {demoOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          background: 'rgba(0,0,0,0.95)',
+          display: 'flex', flexDirection: 'column',
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '0.65rem 1.25rem',
+            borderBottom: '0.5px solid rgba(240,236,227,0.08)',
+            background: '#0D0B09',
+            flexShrink: 0,
+          }}>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--cream)' }}>
+              Collective <span style={{ color: 'var(--gold)' }}>Loft</span>
+              <span style={{ fontSize: '0.62rem', color: 'rgba(240,236,227,0.3)', marginLeft: '0.75rem', fontFamily: 'var(--sans)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Platform Demo</span>
+            </div>
+            <button
+              onClick={() => setDemoOpen(false)}
+              style={{
+                background: 'transparent',
+                border: '0.5px solid rgba(240,236,227,0.15)',
+                color: 'rgba(240,236,227,0.5)',
+                width: '30px', height: '30px', borderRadius: '50%',
+                cursor: 'pointer', fontSize: '0.85rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
+          </div>
+          <iframe
+            src="/demo.html"
+            style={{ flex: 1, border: 'none', width: '100%' }}
+            title="Collective Loft Platform Demo"
+          />
+        </div>
+      )}
     </>
   )
 }

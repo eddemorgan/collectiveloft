@@ -34,7 +34,7 @@ export async function POST(req) {
       customer: customerId,
       mode: 'subscription',
       payment_method_types: ['card'],
-      line_items: [{ price: 'price_1TcSCe2RmoY8QNWSamXKxdNz', quantity: 1 }],
+      line_items: [{ price: 'price_1Tcu9i2RmoY8QNWSbjgDMDaH', quantity: 1 }],
       subscription_data: {
         trial_period_days: 7,
       },

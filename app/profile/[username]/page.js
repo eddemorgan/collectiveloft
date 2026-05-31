@@ -65,7 +65,6 @@ function locationStr(p) {
   return [p.city,p.state,p.country].filter(Boolean).join(', ')
 }
 
-// ─── COMPLETED COLLAB CARD -- clickable link to studio ───────────────────────
 function CompletedCollabCard({ studio, profileId }) {
   const collab = studio.initiator_id === profileId ? studio.partner : studio.initiator
   const collabName = collab ? `${collab.firstname} ${collab.lastname}` : 'Collaborator'
@@ -118,8 +117,6 @@ function CompletedCollabCard({ studio, profileId }) {
     </Link>
   )
 }
-
-// ─── TOP-LEVEL COMPONENTS ────────────────────────────────────────────────────
 
 function Editable({ value, onSave, placeholder, multiline, isOwner, editMode, className }) {
   const [editing, setEditing] = useState(false)
@@ -287,7 +284,6 @@ function SeekingEditor({ seekingDiscs, seekingSkills, onSave }) {
   function toggleDisc(label) {
     setDiscs(prev => {
       const next = prev.includes(label) ? prev.filter(d => d !== label) : [...prev, label]
-      // Remove skills that no longer belong to selected discs
       const validSkills = next.flatMap(d => {
         const opt = DISC_OPTS.find(o => o.label === d)
         return opt ? (SKILLS_BY_DISC[opt.id] || []) : []
@@ -363,8 +359,6 @@ function SeekingEditor({ seekingDiscs, seekingSkills, onSave }) {
   )
 }
 
-// ─── MAIN PAGE ───────────────────────────────────────────────────────────────
-
 export default function ProfilePage() {
   const params   = useParams()
   const router   = useRouter()
@@ -391,6 +385,7 @@ export default function ProfilePage() {
   const [draftDiscs,       setDraftDiscs]       = useState([])
   const [draftSkills,      setDraftSkills]      = useState([])
   const [notifCount,       setNotifCount]       = useState(0)
+  const [portalLoading,    setPortalLoading]    = useState(false)
 
   const [activeBriefs,     setActiveBriefs]     = useState([])
   const [negotiations,     setNegotiations]     = useState([])
@@ -404,10 +399,8 @@ export default function ProfilePage() {
 
   useEffect(() => { if (username) loadProfile() }, [username])
 
-  // ── REALTIME: portfolio_items ──────────────────────────────────────────────
   useEffect(() => {
     if (!profileId) return
-
     const channel = supabase
       .channel(`portfolio-${profileId}`)
       .on('postgres_changes', {
@@ -417,7 +410,6 @@ export default function ProfilePage() {
         filter: `profile_id=eq.${profileId}`,
       }, payload => {
         setPortfolio(prev => {
-          // Avoid duplicates (owner already appended optimistically)
           if (prev.find(p => p.id === payload.new.id)) return prev
           return [...prev, payload.new].sort((a,b) => a.sort_order - b.sort_order)
         })
@@ -431,7 +423,6 @@ export default function ProfilePage() {
         setPortfolio(prev => prev.filter(p => p.id !== payload.old.id))
       })
       .subscribe()
-
     return () => supabase.removeChannel(channel)
   }, [profileId])
 
@@ -558,6 +549,29 @@ export default function ProfilePage() {
 
   async function handleSignOut() { await supabase.auth.signOut(); router.push('/') }
 
+  async function handleManageSubscription() {
+    setPortalLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const res = await fetch('/api/stripe/portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert('Could not open billing portal. Please try again.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setPortalLoading(false)
+    }
+  }
+
   async function saveField(field, value) {
     if (!profile) return
     setSaving(true)
@@ -651,6 +665,16 @@ export default function ProfilePage() {
           {isOwner && saving && <span className={styles.saveIndicator}>Saving…</span>}
           {isOwner && saveMsg && !saving && <span className={styles.saveIndicator}>{saveMsg}</span>}
           {isOwner && <button className={`${styles.btnEdit} ${editMode?styles.btnEditActive:''}`} onClick={()=>setEditMode(v=>!v)}>{editMode?'Done editing':'Edit profile'}</button>}
+          {isOwner && (
+            <button
+              onClick={handleManageSubscription}
+              disabled={portalLoading}
+              className={styles.btnSignOut}
+              style={{ opacity: portalLoading ? 0.6 : 1 }}
+            >
+              {portalLoading ? 'Loading…' : 'Manage subscription'}
+            </button>
+          )}
           {isOwner && <button className={styles.btnSignOut} onClick={handleSignOut}>Sign out</button>}
         </div>
       </nav>
@@ -900,7 +924,6 @@ export default function ProfilePage() {
                 Community Voice
                 {ratings.length > 0 && <span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'rgba(240,236,227,0.3)',letterSpacing:'normal',textTransform:'none'}}>({ratings.length} {ratings.length === 1 ? 'review' : 'reviews'})</span>}
               </div>
-
               {ratings.length === 0 ? (
                 <div className={styles.emptyState}>No reviews yet. Completed collabs will appear here.</div>
               ) : (
@@ -925,16 +948,10 @@ export default function ProfilePage() {
                             </div>
                           </div>
                         </div>
-
-                        {r.review && (
-                          <div className={styles.cvReview}>"{r.review}"</div>
-                        )}
-
+                        {r.review && <div className={styles.cvReview}>"{r.review}"</div>}
                         {(r.endorsements||[]).length > 0 && (
                           <div className={styles.cvTags}>
-                            {r.endorsements.map(tag => (
-                              <span key={tag} className={styles.cvTag}>{tag}</span>
-                            ))}
+                            {r.endorsements.map(tag => <span key={tag} className={styles.cvTag}>{tag}</span>)}
                           </div>
                         )}
                       </div>
@@ -962,7 +979,6 @@ export default function ProfilePage() {
                       :activeBriefs.map(b=><ActiveBriefCard key={b.id} brief={b} onDelete={deleteBrief} profileSlug={username}/>)
                     }
                   </div>
-
                   {isOwner&&(
                     <div style={{marginBottom:'2rem'}}>
                       <div className={styles.secLabel} style={{marginBottom:'0.75rem'}}>
@@ -975,7 +991,6 @@ export default function ProfilePage() {
                       }
                     </div>
                   )}
-
                   {isOwner&&(
                     <div>
                       <div className={styles.secLabel} style={{marginBottom:'0.75rem'}}>

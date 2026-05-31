@@ -433,7 +433,7 @@ export default function LandingPage() {
             <Link href="/login">Sign in</Link>
           )}
           {!authUser && (
-            <button className={styles.btnJoin} onClick={() => setModalOpen(true)}>Join</button>
+            <button className={styles.btnJoin} onClick={() => router.push('/signup')}>Join</button>
           )}
         </div>
       </nav>
@@ -450,7 +450,7 @@ export default function LandingPage() {
             {authUser && profileSlug ? (
               <Link href={`/profile/${profileSlug}`} className={styles.btnP}>My Profile</Link>
             ) : (
-              <button className={styles.btnP} onClick={() => setModalOpen(true)}>Build Your Profile</button>
+              <button className={styles.btnP} onClick={() => router.push('/signup')}>Build Your Profile</button>
             )}
             {!authUser && <Link href="/login" className={styles.btnS}>Sign in</Link>}
           </div>

@@ -37,6 +37,15 @@ export default function SignupPage() {
       return
     }
 
+    // Auto sign in immediately after signup
+    const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password })
+
+    if (signInErr) {
+      setError(signInErr.message)
+      setLoading(false)
+      return
+    }
+
     // Save name to profile
     await supabase
       .from('profiles')

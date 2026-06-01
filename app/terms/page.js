@@ -35,8 +35,7 @@ function TermsPage() {
   const [delChecked,   setDelChecked]   = useState([])
   const [newDel,       setNewDel]       = useState('')
   const [msPcts,       setMsPcts]       = useState({})
-  const [feeFrom,      setFeeFrom]      = useState('')
-  const [feeTo,        setFeeTo]        = useState('')
+  const [agreedFee,    setAgreedFee]    = useState('')
   const [paySchedule,  setPaySchedule]  = useState('')
   const [myShare,      setMyShare]      = useState('')
   const [theirShare,   setTheirShare]   = useState('')
@@ -75,10 +74,8 @@ function TermsPage() {
     setDelChecked(prev => prev.map((v, idx) => idx === i ? !v : v))
   }
 
-  // Active deliverables (checked ones)
   const activeDeliverables = deliverables.filter((_, i) => delChecked[i])
 
-  // Total percentage allocated across milestone payments
   const totalPct = activeDeliverables.reduce((sum, d) => sum + (parseFloat(msPcts[d]) || 0), 0)
   const pctComplete = totalPct === 100
   const pctOver = totalPct > 100
@@ -98,8 +95,7 @@ function TermsPage() {
         rights,
         deliverables:  activeDeliverables,
         milestones:    collabType === 'paid' ? milestonesData : [],
-        fee_from:      collabType === 'paid' ? feeFrom : null,
-        fee_to:        collabType === 'paid' ? feeTo : null,
+        agreed_fee:    collabType === 'paid' ? (agreedFee ? parseFloat(agreedFee) : null) : null,
         pay_schedule:  collabType === 'paid' ? paySchedule : null,
         my_share:      collabType === 'revenue' ? myShare : null,
         their_share:   collabType === 'revenue' ? theirShare : null,
@@ -169,7 +165,6 @@ function TermsPage() {
             </div>
           )}
 
-          {/* EXAMPLES -- shown at top for context */}
           <div className={styles.exampleStrip}>
             <div className={styles.exampleCard}>
               <div className={styles.exLabel}>Creative exchange example</div>
@@ -226,12 +221,19 @@ function TermsPage() {
             <div className={styles.formSection}>
               <div className={styles.fsecLabel}>Payment</div>
               <div className={styles.field}>
-                <label>Fee range</label>
+                <label>Agreed fee</label>
                 <div className={styles.amountRow}>
                   <div className={styles.currencyBox}>$</div>
-                  <input className={styles.amtInput} type="text" placeholder="From" value={feeFrom} onChange={e => setFeeFrom(e.target.value)} />
-                  <span className={styles.amtTo}>to</span>
-                  <input className={styles.amtInput} type="text" placeholder="To" value={feeTo} onChange={e => setFeeTo(e.target.value)} />
+                  <input
+                    className={styles.amtInput}
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={agreedFee}
+                    onChange={e => setAgreedFee(e.target.value)}
+                    style={{ flex: 1 }}
+                  />
                 </div>
               </div>
               <div className={styles.field}>
@@ -291,7 +293,7 @@ function TermsPage() {
             </div>
           </div>
 
-          {/* MILESTONE PAYMENTS -- only when paid + milestone-based + deliverables exist */}
+          {/* MILESTONE PAYMENTS */}
           {collabType === 'paid' && paySchedule === 'Milestone-based' && activeDeliverables.length > 0 && (
             <div className={styles.formSection}>
               <div className={styles.fsecLabel}>Milestone payments</div>
@@ -401,7 +403,12 @@ function TermsPage() {
               <div className={styles.scRow}><span className={styles.scK}>Compensation</span><span className={`${styles.scV} ${styles.gold}`}>{summaryComp}</span></div>
               {collabType === 'paid' && (
                 <>
-                  <div className={styles.scRow}><span className={styles.scK}>Fee range</span><span className={`${styles.scV} ${styles.gold} ${!feeFrom && !feeTo ? styles.empty : ''}`}>{feeFrom || feeTo ? `$${feeFrom}${feeTo ? '–' + feeTo : ''}` : '—'}</span></div>
+                  <div className={styles.scRow}>
+                    <span className={styles.scK}>Agreed fee</span>
+                    <span className={`${styles.scV} ${styles.gold} ${!agreedFee ? styles.empty : ''}`}>
+                      {agreedFee ? `$${parseFloat(agreedFee).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}
+                    </span>
+                  </div>
                   <div className={styles.scRow}><span className={styles.scK}>Schedule</span><span className={`${styles.scV} ${!paySchedule ? styles.empty : ''}`}>{paySchedule || '—'}</span></div>
                 </>
               )}

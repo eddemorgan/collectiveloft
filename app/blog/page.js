@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { getAllPosts, getFeaturedPost, LAYERS, ALL_CATEGORIES } from '../../lib/posts'
-import styles from './post.module.css'
-import { notFound } from 'next/navigation'
+import styles from './blog.module.css'
 
 export async function generateStaticParams() {
   const posts = getAllPosts()

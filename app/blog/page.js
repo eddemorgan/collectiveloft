@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getAllPosts, getPostBySlug, LAYERS } from '../../../../lib/posts'
+import { getAllPosts, getFeaturedPost, LAYERS, ALL_CATEGORIES } from '../../lib/posts'
 import styles from './post.module.css'
 import { notFound } from 'next/navigation'
 

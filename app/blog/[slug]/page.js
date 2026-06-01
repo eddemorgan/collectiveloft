@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getAllPosts, getFeaturedPost, LAYERS } from '../../../lib/posts'
+import { getAllPosts, getPostBySlug, LAYERS } from '../../../lib/posts'
 import styles from './blog.module.css'
 
 export const metadata = {

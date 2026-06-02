@@ -868,6 +868,7 @@ export default function Home() {
         <div className="hero-actions">
           <a href="#waitlist" className="btn-primary">Request early access ↗</a>
           <button className="btn-ghost" id="btnSeeHowItWorks">See how it works</button>
+          <a href="/blog" class="btn-ghost">Read The Brief</a>
         </div>
         <div className="discipline-scroll">
           {['Visual Art','Music','Writing','Design & Web','Film','Photography','Performance','Creative Tech'].map(d => (

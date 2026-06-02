@@ -3,7 +3,7 @@ import { getAllPosts, getFeaturedPost, LAYERS } from '../../lib/posts'
 import styles from './blog.module.css'
 
 export const metadata = {
-  title: 'Blog — Collective Loft',
+  title: 'The Brief — Collective Loft',
   description: 'Writing for the creative class. On collaboration, rights, craft, and the infrastructure creatives deserve.',
 }
 
@@ -40,9 +40,9 @@ export default function BlogIndex({ searchParams }) {
       </nav>
 
       <header className={styles.header}>
-        <div className={styles.headerLabel}>The Collective Loft Blog</div>
-        <h1 className={styles.headerTitle}>For the Creative Class</h1>
-        <p className={styles.headerSub}>On collaboration, rights, craft, and the infrastructure creatives deserve.</p>
+<div className={styles.headerLabel}>By Collective Loft</div>
+<h1 className={styles.headerTitle}>The Brief</h1>
+<p className={styles.headerSub}>For the Creative Class — on collaboration, rights, craft, and the infrastructure creatives deserve.</p>
       </header>
 
       <div className={styles.filterBar}>
@@ -53,7 +53,7 @@ export default function BlogIndex({ searchParams }) {
             href={`/blog?layer=${layer.number}`}
             className={`${styles.filterChip} ${activeLayer === layer.number && !activeCategory ? styles.filterActive : ''}`}
           >
-            Layer {layer.number}
+            Layer {layer.number} — {layer.name}
           </Link>
         ))}
       </div>

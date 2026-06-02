@@ -387,6 +387,10 @@ export default function ProfilePage() {
   const [notifCount,       setNotifCount]       = useState(0)
   const [portalLoading,    setPortalLoading]    = useState(false)
 
+  // Stripe Connect state
+  const [connectLoading,   setConnectLoading]   = useState(false)
+  const [connectToast,     setConnectToast]     = useState(null) // 'success' | 'incomplete' | null
+
   const [activeBriefs,     setActiveBriefs]     = useState([])
   const [negotiations,     setNegotiations]     = useState([])
   const [appliedBriefs,    setAppliedBriefs]    = useState([])
@@ -398,6 +402,24 @@ export default function ProfilePage() {
   const portfolioInputRef = useRef()
 
   useEffect(() => { if (username) loadProfile() }, [username])
+
+  // Handle connect_success / connect_incomplete query params from Stripe return
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('connect_success') === 'true') {
+      setConnectToast('success')
+      // Update local profile state so the button reflects the change immediately
+      setProfile(p => p ? { ...p, connect_onboarded: true } : p)
+      // Clean the URL
+      window.history.replaceState({}, '', window.location.pathname)
+      setTimeout(() => setConnectToast(null), 5000)
+    } else if (params.get('connect_incomplete') === 'true') {
+      setConnectToast('incomplete')
+      window.history.replaceState({}, '', window.location.pathname)
+      setTimeout(() => setConnectToast(null), 6000)
+    }
+  }, [])
 
   useEffect(() => {
     if (!profileId) return
@@ -572,6 +594,30 @@ export default function ProfilePage() {
     }
   }
 
+  // Stripe Connect: start onboarding
+  async function handleConnectPayout() {
+    setConnectLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const res = await fetch('/api/stripe/connect-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert(data.error || 'Could not start payout setup. Please try again.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Something went wrong. Please try again.')
+    } finally {
+      setConnectLoading(false)
+    }
+  }
+
   async function saveField(field, value) {
     if (!profile) return
     setSaving(true)
@@ -653,8 +699,35 @@ export default function ProfilePage() {
   const gridItems       = [...portfolio.map(p => ({ ...p, isEmpty:false })), ...Array(emptySlots).fill(null).map((_,i) => ({ id:`empty-${i}`, isEmpty:true }))]
   const availableSkills = skillsForDiscs(draftDiscs)
 
+  // Stripe Connect button state
+  const isConnected  = profile.connect_onboarded === true
+  const hasAccountId = !!profile.stripe_connect_id
+
   return (
     <div style={{display:'flex',flexDirection:'column',minHeight:'100vh'}}>
+
+      {/* Stripe Connect toast notification */}
+      {connectToast && (
+        <div style={{
+          position: 'fixed', top: '1.25rem', left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, padding: '0.7rem 1.25rem',
+          background: connectToast === 'success' ? 'rgba(86,179,156,0.12)' : 'rgba(201,168,76,0.1)',
+          border: `0.5px solid ${connectToast === 'success' ? 'rgba(86,179,156,0.4)' : 'rgba(201,168,76,0.3)'}`,
+          borderRadius: '4px', backdropFilter: 'blur(8px)',
+          fontFamily: 'var(--sans)', fontSize: '0.75rem',
+          color: connectToast === 'success' ? 'var(--teal)' : 'var(--gold)',
+          display: 'flex', alignItems: 'center', gap: '0.6rem',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+          whiteSpace: 'nowrap',
+        }}>
+          <span>{connectToast === 'success' ? '✦' : '⚠'}</span>
+          {connectToast === 'success'
+            ? 'Payout account connected. You can now receive payments through Collective Loft.'
+            : 'Onboarding not complete. You can finish setting up your payout account anytime.'}
+          <button onClick={() => setConnectToast(null)} style={{background:'none',border:'none',color:'inherit',cursor:'pointer',opacity:0.5,fontSize:'0.8rem',padding:'0 0 0 0.25rem',lineHeight:1}}>✕</button>
+        </div>
+      )}
+
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
@@ -665,6 +738,29 @@ export default function ProfilePage() {
           {isOwner && saving && <span className={styles.saveIndicator}>Saving…</span>}
           {isOwner && saveMsg && !saving && <span className={styles.saveIndicator}>{saveMsg}</span>}
           {isOwner && <button className={`${styles.btnEdit} ${editMode?styles.btnEditActive:''}`} onClick={()=>setEditMode(v=>!v)}>{editMode?'Done editing':'Edit profile'}</button>}
+
+          {/* Stripe Connect payout button — owner only */}
+          {isOwner && (
+            isConnected ? (
+              <span style={{
+                fontFamily: 'var(--sans)', fontSize: '0.65rem', fontWeight: 500,
+                letterSpacing: '0.05em', color: 'var(--teal)',
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+              }}>
+                ✦ Payouts connected
+              </span>
+            ) : (
+              <button
+                onClick={handleConnectPayout}
+                disabled={connectLoading}
+                className={styles.btnSignOut}
+                style={{ opacity: connectLoading ? 0.6 : 1 }}
+              >
+                {connectLoading ? 'Redirecting…' : hasAccountId ? 'Finish payout setup' : 'Connect payout account'}
+              </button>
+            )
+          )}
+
           {isOwner && (
             <button
               onClick={handleManageSubscription}

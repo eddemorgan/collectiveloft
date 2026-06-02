@@ -14,15 +14,14 @@ export default function BlogIndex({ searchParams }) {
   const activeCategory = searchParams?.category || null
 
   const filtered = allPosts.filter(p => {
-    if (p.featured) return false
-    if (activeCategory) return p.category === activeCategory
-    if (activeLayer) return p.layer === activeLayer
-    return true
-  })
+  if (activeCategory) return p.category === activeCategory
+  if (activeLayer) return p.layer === activeLayer
+  return true
+})
 
   const postsByLayer = LAYERS.map(layer => ({
     ...layer,
-    posts: allPosts.filter(p => !p.featured && p.layer === layer.number).slice(0, 3),
+    posts: allPosts.filter(p => p.layer === layer.number).slice(0, 3),
   }))
 
   const showLayered = !activeLayer && !activeCategory

@@ -1,12 +1,12 @@
 ---
-title: Why Creative Collaborations Fail — And What to Do Before Work Begins
+title: Why Creative Collaborations Fail, And What to Do Before Work Begins
 slug: why-creative-collaborations-fail
 date: 2026-06-01
 author: Edde Morgan
 category: Collab Terms
 layer: 1
 featured: true
-excerpt: The conversation nobody wants to have before a collab is the one that determines whether it ends well. Here is what actually goes wrong — and how to fix it before the first day of work.
+excerpt: The conversation nobody wants to have before a collab is the one that determines whether it ends well. Here is what actually goes wrong, and how to fix it before the first day of work.
 cover:
 ---
 
@@ -16,7 +16,7 @@ The work was not bad. The people were not bad. Something else went wrong. Someth
 
 Here is what actually happened. The business was never handled.
 
-I have talked to hundreds of independent creative professionals building Collective Loft. Musicians, filmmakers, visual artists, composers, designers. The stories are different but the failure mode is almost always the same. Two talented people find each other, feel the creative pull, and dive into the work. The conversation they should have had at the beginning — about rights, about deliverables, about what happens when things go sideways — never happens. And eventually that missing conversation becomes the reason the collaboration ends.
+I have talked to hundreds of independent creative professionals building Collective Loft. Musicians, filmmakers, visual artists, composers, designers. The stories are different but the failure mode is almost always the same. Two talented people find each other, feel the creative pull, and dive into the work. The conversation they should have had at the beginning, about rights, about deliverables, about what happens when things go sideways, never happens. And eventually that missing conversation becomes the reason the collaboration ends.
 
 This is not a personality problem. It is an infrastructure problem. And it is fixable.
 

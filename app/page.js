@@ -52,7 +52,7 @@ export default function Home() {
           opacity: 0.25;
         }
 
-        /* ── DEMO MODAL ─────────────────────────────────────────────────── */
+        /* DEMO MODAL */
         .demo-modal-overlay {
           position: fixed;
           inset: 0;
@@ -118,6 +118,7 @@ export default function Home() {
           border-color: rgba(139,105,20,0.5);
         }
 
+        /* NAV */
         nav {
           position: fixed;
           top: 0; left: 0; right: 0;
@@ -133,7 +134,7 @@ export default function Home() {
 
         .logo {
           font-family: var(--serif);
-          font-size: 1.35rem;
+          font-size: 1.55rem;
           font-weight: 400;
           letter-spacing: 0.02em;
           color: var(--cream);
@@ -143,7 +144,7 @@ export default function Home() {
 
         .nav-cta {
           font-family: var(--sans);
-          font-size: 0.72rem;
+          font-size: 0.82rem;
           font-weight: 500;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -158,6 +159,7 @@ export default function Home() {
         }
         .nav-cta:hover { background: var(--gold2); }
 
+        /* HERO */
         .hero {
           min-height: 100vh;
           display: flex;
@@ -194,7 +196,7 @@ export default function Home() {
 
         .eyebrow {
           font-family: var(--sans);
-          font-size: 0.62rem;
+          font-size: 0.72rem;
           font-weight: 500;
           letter-spacing: 0.22em;
           text-transform: uppercase;
@@ -218,7 +220,7 @@ export default function Home() {
 
         .hero-sub {
           font-family: var(--sans);
-          font-size: clamp(0.9rem, 2vw, 1.1rem);
+          font-size: clamp(1rem, 2vw, 1.2rem);
           font-weight: 300;
           color: rgba(26,24,20,0.55);
           max-width: 560px;
@@ -238,7 +240,7 @@ export default function Home() {
 
         .btn-primary {
           font-family: var(--sans);
-          font-size: 0.75rem;
+          font-size: 0.85rem;
           font-weight: 500;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -255,7 +257,7 @@ export default function Home() {
 
         .btn-ghost {
           font-family: var(--sans);
-          font-size: 0.75rem;
+          font-size: 0.85rem;
           font-weight: 400;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -281,7 +283,7 @@ export default function Home() {
 
         .disc-tag {
           font-family: var(--sans);
-          font-size: 0.6rem;
+          font-size: 0.7rem;
           font-weight: 500;
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -291,6 +293,7 @@ export default function Home() {
           border-radius: 2px;
         }
 
+        /* STATS */
         .stats {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -317,7 +320,7 @@ export default function Home() {
 
         .stat-label {
           font-family: var(--sans);
-          font-size: 0.7rem;
+          font-size: 0.8rem;
           font-weight: 400;
           letter-spacing: 0.06em;
           color: var(--muted);
@@ -325,12 +328,11 @@ export default function Home() {
         }
 
         section { padding: 7rem 2rem; }
-
         .container { max-width: 1100px; margin: 0 auto; }
 
         .section-eyebrow {
           font-family: var(--sans);
-          font-size: 0.58rem;
+          font-size: 0.68rem;
           font-weight: 500;
           letter-spacing: 0.2em;
           text-transform: uppercase;
@@ -351,13 +353,14 @@ export default function Home() {
 
         .section-body {
           font-family: var(--sans);
-          font-size: 1rem;
+          font-size: 1.1rem;
           font-weight: 300;
           color: var(--muted);
           max-width: 600px;
           line-height: 1.8;
         }
 
+        /* PROBLEM */
         .problem-grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
@@ -375,7 +378,7 @@ export default function Home() {
 
         .problem-platform {
           font-family: var(--sans);
-          font-size: 0.62rem;
+          font-size: 0.72rem;
           font-weight: 600;
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -385,7 +388,7 @@ export default function Home() {
 
         .problem-title {
           font-family: var(--serif);
-          font-size: 1.4rem;
+          font-size: 1.5rem;
           font-weight: 400;
           color: var(--cream);
           margin-bottom: 0.5rem;
@@ -393,7 +396,7 @@ export default function Home() {
 
         .problem-text {
           font-family: var(--sans);
-          font-size: 0.78rem;
+          font-size: 0.88rem;
           font-weight: 300;
           color: var(--muted);
           line-height: 1.7;
@@ -403,10 +406,11 @@ export default function Home() {
           position: absolute;
           top: 2rem;
           right: 2rem;
-          font-size: 0.9rem;
+          font-size: 1rem;
           color: rgba(160,60,70,0.5);
         }
 
+        /* FLOW */
         .flow-section {
           background: var(--bg2);
           border-top: 0.5px solid var(--faint);
@@ -445,7 +449,7 @@ export default function Home() {
 
         .flow-title {
           font-family: var(--sans);
-          font-size: 0.82rem;
+          font-size: 0.92rem;
           font-weight: 600;
           letter-spacing: 0.04em;
           color: var(--cream);
@@ -454,12 +458,13 @@ export default function Home() {
 
         .flow-desc {
           font-family: var(--sans);
-          font-size: 0.75rem;
+          font-size: 0.85rem;
           font-weight: 300;
           color: var(--muted);
           line-height: 1.7;
         }
 
+        /* MOCKUP */
         .mockup-wrap {
           border: 0.5px solid rgba(139,105,20,0.2);
           border-radius: 6px;
@@ -488,10 +493,10 @@ export default function Home() {
           border-bottom: 0.5px solid var(--faint);
         }
 
-        .mock-logo { font-family: var(--serif); font-size: 0.9rem; color: var(--cream); }
+        .mock-logo { font-family: var(--serif); font-size: 1rem; color: var(--cream); }
         .mock-logo span { color: var(--gold); }
         .mock-links { display: flex; gap: 1rem; }
-        .mock-link { font-family: var(--sans); font-size: 0.6rem; color: rgba(26,24,20,0.4); letter-spacing: 0.06em; }
+        .mock-link { font-family: var(--sans); font-size: 0.7rem; color: rgba(26,24,20,0.4); letter-spacing: 0.06em; }
 
         .mock-brief {
           background: rgba(26,24,20,0.04);
@@ -505,7 +510,7 @@ export default function Home() {
 
         .mock-tag {
           font-family: var(--sans);
-          font-size: 0.5rem;
+          font-size: 0.6rem;
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -518,7 +523,7 @@ export default function Home() {
 
         .mock-brief-title {
           font-family: var(--sans);
-          font-size: 0.75rem;
+          font-size: 0.85rem;
           font-weight: 600;
           color: var(--cream);
           margin-bottom: 0.25rem;
@@ -526,7 +531,7 @@ export default function Home() {
 
         .mock-brief-sub {
           font-family: var(--sans);
-          font-size: 0.62rem;
+          font-size: 0.72rem;
           color: rgba(26,24,20,0.5);
           line-height: 1.5;
         }
@@ -541,7 +546,7 @@ export default function Home() {
 
         .mock-studio-label {
           font-family: var(--sans);
-          font-size: 0.5rem;
+          font-size: 0.6rem;
           font-weight: 600;
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -552,7 +557,7 @@ export default function Home() {
 
         .mock-studio-title {
           font-family: var(--sans);
-          font-size: 0.72rem;
+          font-size: 0.82rem;
           font-weight: 600;
           color: var(--cream);
           margin-bottom: 0.2rem;
@@ -573,6 +578,7 @@ export default function Home() {
           border-radius: 1px;
         }
 
+        /* FLYWHEEL */
         .flywheel-section { background: var(--bg1); }
 
         .flywheel-grid {
@@ -616,7 +622,7 @@ export default function Home() {
         .fw-status {
           display: inline-block;
           font-family: var(--sans);
-          font-size: 0.55rem;
+          font-size: 0.65rem;
           font-weight: 600;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -630,7 +636,7 @@ export default function Home() {
 
         .fw-title {
           font-family: var(--serif);
-          font-size: 1.6rem;
+          font-size: 1.75rem;
           font-weight: 400;
           color: var(--cream);
           margin-bottom: 0.5rem;
@@ -639,7 +645,7 @@ export default function Home() {
 
         .fw-sub {
           font-family: var(--sans);
-          font-size: 0.65rem;
+          font-size: 0.75rem;
           font-weight: 500;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -649,12 +655,13 @@ export default function Home() {
 
         .fw-desc {
           font-family: var(--sans);
-          font-size: 0.78rem;
+          font-size: 0.88rem;
           font-weight: 300;
           color: var(--muted);
           line-height: 1.75;
         }
 
+        /* QUOTE */
         .quote-section {
           background: var(--bg2);
           border-top: 0.5px solid var(--faint);
@@ -678,13 +685,58 @@ export default function Home() {
 
         .quote-attr {
           font-family: var(--sans);
-          font-size: 0.65rem;
+          font-size: 0.75rem;
           font-weight: 400;
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: rgba(26,24,20,0.4);
         }
 
+        /* FAQ */
+        .faq-section {
+          background: var(--bg1);
+          border-top: 0.5px solid var(--faint);
+          border-bottom: 0.5px solid var(--faint);
+          padding: 7rem 2rem;
+        }
+
+        .faq-inner {
+          max-width: 760px;
+          margin: 0 auto;
+        }
+
+        .faq-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0;
+          margin-top: 3rem;
+        }
+
+        .faq-item {
+          padding: 2.25rem 0;
+          border-bottom: 0.5px solid var(--faint);
+        }
+        .faq-item:last-child { border-bottom: none; }
+
+        .faq-q {
+          font-family: var(--serif);
+          font-size: 1.4rem;
+          font-weight: 400;
+          color: var(--cream);
+          margin-bottom: 0.75rem;
+          line-height: 1.25;
+        }
+
+        .faq-a {
+          font-family: var(--sans);
+          font-size: 1rem;
+          font-weight: 300;
+          color: var(--muted);
+          line-height: 1.8;
+          max-width: 620px;
+        }
+
+        /* WAITLIST */
         .waitlist-section {
           background: var(--bg1);
           text-align: center;
@@ -716,7 +768,7 @@ export default function Home() {
           border-radius: 3px;
           padding: 0.85rem 1rem;
           font-family: var(--sans);
-          font-size: 0.82rem;
+          font-size: 0.92rem;
           font-weight: 300;
           color: var(--cream);
           outline: none;
@@ -732,13 +784,14 @@ export default function Home() {
           border-radius: 3px;
           padding: 0.85rem 1rem;
           font-family: var(--sans);
-          font-size: 0.82rem;
+          font-size: 0.92rem;
           font-weight: 300;
           color: var(--cream);
           outline: none;
           width: 100%;
           cursor: pointer;
           -webkit-appearance: none;
+          appearance: none;
         }
         .form-select:focus { border-color: rgba(139,105,20,0.4); }
 
@@ -749,7 +802,7 @@ export default function Home() {
           border-radius: 3px;
           padding: 0.9rem 2rem;
           font-family: var(--sans);
-          font-size: 0.75rem;
+          font-size: 0.85rem;
           font-weight: 600;
           letter-spacing: 0.1em;
           text-transform: uppercase;
@@ -760,7 +813,7 @@ export default function Home() {
 
         .waitlist-fine {
           font-family: var(--sans);
-          font-size: 0.65rem;
+          font-size: 0.75rem;
           color: rgba(26,24,20,0.3);
           margin-top: 1rem;
           letter-spacing: 0.04em;
@@ -773,12 +826,13 @@ export default function Home() {
           border-radius: 4px;
           padding: 1.5rem;
           font-family: var(--sans);
-          font-size: 0.82rem;
+          font-size: 0.92rem;
           color: var(--teal);
           line-height: 1.6;
           margin-top: 1rem;
         }
 
+        /* FOOTER */
         footer {
           border-top: 0.5px solid var(--faint);
           padding: 2.5rem 3rem;
@@ -787,13 +841,13 @@ export default function Home() {
           justify-content: space-between;
         }
 
-        .footer-logo { font-family: var(--serif); font-size: 1.1rem; color: var(--cream); text-decoration: none; }
+        .footer-logo { font-family: var(--serif); font-size: 1.2rem; color: var(--cream); text-decoration: none; }
         .footer-logo span { color: var(--gold); }
         .footer-links { display: flex; gap: 2rem; align-items: center; }
 
         .footer-link {
           font-family: var(--sans);
-          font-size: 0.65rem;
+          font-size: 0.75rem;
           font-weight: 400;
           letter-spacing: 0.08em;
           color: rgba(26,24,20,0.4);
@@ -804,7 +858,7 @@ export default function Home() {
 
         .footer-copy {
           font-family: var(--sans);
-          font-size: 0.62rem;
+          font-size: 0.72rem;
           color: rgba(26,24,20,0.25);
           letter-spacing: 0.04em;
         }
@@ -835,16 +889,11 @@ export default function Home() {
         }
       `}</style>
 
-      {/* ── DEMO MODAL ──────────────────────────────────────────────────── */}
+      {/* DEMO MODAL */}
       <div className="demo-modal-overlay" id="demoModal">
         <div className="demo-modal-inner">
           <button className="demo-modal-close" id="demoClose" aria-label="Close demo">✕</button>
-          <iframe
-            id="demoFrame"
-            src=""
-            title="Collective Loft Platform Demo"
-            allow="autoplay"
-          />
+          <iframe id="demoFrame" src="" title="Collective Loft Platform Demo" allow="autoplay" />
         </div>
       </div>
 
@@ -860,7 +909,7 @@ export default function Home() {
         <h1>
           Building the infrastructure<br/>
           <em>meant</em> for the<br/>
-          <em>creative class.</em>
+          creative class.
         </h1>
         <p className="hero-sub">
           The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and open a Loft Studio — a shared workspace built around the work.
@@ -868,7 +917,7 @@ export default function Home() {
         <div className="hero-actions">
           <a href="#waitlist" className="btn-primary">Request early access ↗</a>
           <button className="btn-ghost" id="btnSeeHowItWorks">See how it works</button>
-          <a href="/blog" class="btn-ghost">Read The Brief</a>
+          <a href="/blog" className="btn-ghost">Read The Brief</a>
         </div>
         <div className="discipline-scroll">
           {['Visual Art','Music','Writing','Design & Web','Film','Photography','Performance','Creative Tech'].map(d => (
@@ -958,7 +1007,7 @@ export default function Home() {
                 <div className="mock-studio">
                   <div className="mock-studio-label">✦ Loft Studio · Active</div>
                   <div className="mock-studio-title">Documentary Score · Chicago Muralists</div>
-                  <div style={{fontFamily:'var(--sans)',fontSize:'0.58rem',color:'rgba(26,24,20,0.5)',marginTop:'0.15rem'}}>With Jordan Kim · 1 of 3 milestones complete</div>
+                  <div style={{fontFamily:'var(--sans)',fontSize:'0.68rem',color:'rgba(26,24,20,0.5)',marginTop:'0.15rem'}}>With Jordan Kim · 1 of 3 milestones complete</div>
                   <div className="mock-progress"><div className="mock-progress-fill"></div></div>
                 </div>
               </div>
@@ -1031,6 +1080,28 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FAQ */}
+      <section className="faq-section">
+        <div className="faq-inner reveal">
+          <div className="section-eyebrow">Questions</div>
+          <h2 className="section-title">What you should<br/>know <em>before you join.</em></h2>
+          <div className="faq-list">
+            <div className="faq-item">
+              <div className="faq-q">Why does Collective Loft have a subscription?</div>
+              <div className="faq-a">Because free platforms attract people who aren&rsquo;t serious. The $15/month is what keeps this a professional environment — a room where everyone has skin in the game, agreements are in writing before work starts, and your creative work is protected from day one.</div>
+            </div>
+            <div className="faq-item">
+              <div className="faq-q">What does $15/month actually get me?</div>
+              <div className="faq-a">Everything. No tiers, no feature gates, no pay-to-unlock. Full access to Discover, Collab Briefs, Discipline Matching, Collab Terms, and the Loft Studio. Use it to run 10 collabs a month or use it to build your profile and get discovered. The platform works on your timeline and priorities.</div>
+            </div>
+            <div className="faq-item">
+              <div className="faq-q">What about founding members?</div>
+              <div className="faq-a">Founding members get 3 months free — no charge, no catch. After that it&rsquo;s $15/month, same as everyone else. The founding member badge on your profile stays forever.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="waitlist-section" id="waitlist">
         <div className="waitlist-inner">
           <span className="waitlist-mark">✦</span>
@@ -1081,14 +1152,12 @@ export default function Home() {
       </footer>
 
       <script dangerouslySetInnerHTML={{__html: `
-        // ── DEMO MODAL ──────────────────────────────────────────────────
-        const modal      = document.getElementById('demoModal');
-        const demoFrame  = document.getElementById('demoFrame');
-        const btnOpen    = document.getElementById('btnSeeHowItWorks');
-        const btnClose   = document.getElementById('demoClose');
+        const modal     = document.getElementById('demoModal');
+        const demoFrame = document.getElementById('demoFrame');
+        const btnOpen   = document.getElementById('btnSeeHowItWorks');
+        const btnClose  = document.getElementById('demoClose');
 
         function openDemo() {
-          // Load the demo src only when opened -- prevents autoplay on page load
           if (!demoFrame.src || demoFrame.src === window.location.href) {
             demoFrame.src = '/demo.html';
           }
@@ -1099,24 +1168,16 @@ export default function Home() {
         function closeDemo() {
           modal.classList.remove('open');
           document.body.style.overflow = '';
-          // Reset iframe so demo restarts fresh next time
           setTimeout(() => { demoFrame.src = ''; }, 400);
         }
 
         btnOpen.addEventListener('click', openDemo);
         btnClose.addEventListener('click', closeDemo);
-
-        // Close on overlay click
-        modal.addEventListener('click', e => {
-          if (e.target === modal) closeDemo();
-        });
-
-        // Close on Escape
+        modal.addEventListener('click', e => { if (e.target === modal) closeDemo(); });
         document.addEventListener('keydown', e => {
           if (e.key === 'Escape' && modal.classList.contains('open')) closeDemo();
         });
 
-        // ── SCROLL REVEAL ───────────────────────────────────────────────
         const reveals = document.querySelectorAll('.reveal');
         const observer = new IntersectionObserver(entries => {
           entries.forEach(e => {
@@ -1125,7 +1186,6 @@ export default function Home() {
         }, { threshold: 0.1 });
         reveals.forEach(r => observer.observe(r));
 
-        // ── WAITLIST FORM ───────────────────────────────────────────────
         const form = document.getElementById('waitlistForm');
         const success = document.getElementById('successMsg');
         if (form) {

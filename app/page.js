@@ -910,7 +910,7 @@ export default function Home() {
         <h1>
           Building the infrastructure<br/>
           <em>meant</em> for the<br/>
-          creative class.
+          <em>creative class<em>.
         </h1>
         <p className="hero-sub">
           The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and open a Loft Studio — a shared workspace built around the work.

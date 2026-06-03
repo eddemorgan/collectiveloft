@@ -39,8 +39,8 @@ export default function BlogIndex({ searchParams }) {
       </nav>
 
       <header className={styles.header}>
-<div className={styles.headerLabel}>By Collective Loft</div>
-<h1 className={styles.headerTitle}>The Brief</h1>
+<div className={styles.headerLabel}>The Brief</div>
+<h1 className={styles.headerTitle}>By Collective Loft</h1>
 <p className={styles.headerSub}>For the Creative Class — on collaboration, rights, craft, and the infrastructure creatives deserve.</p>
       </header>
 

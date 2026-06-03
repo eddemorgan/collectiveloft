@@ -1088,7 +1088,7 @@ export default function Home() {
           <div className="faq-list">
             <div className="faq-item">
               <div className="faq-q">Why does Collective Loft have a subscription?</div>
-              <div className="faq-a">Because free platforms attract people who aren&rsquo;t serious. The $15/month is what keeps this a professional environment — a room where everyone has skin in the game, agreements are in writing before work starts, and your creative work is protected from day one.</div>
+              <div className="faq-a">Because free platforms attract people who aren&rsquo;t serious. The $15/month is what keeps this a professional environment, a room where everyone has skin in the game, agreements are in writing before work starts, and your creative work is protected from day one.</div>
             </div>
             <div className="faq-item">
               <div className="faq-q">What does $15/month actually get me?</div>
@@ -1096,7 +1096,7 @@ export default function Home() {
             </div>
             <div className="faq-item">
               <div className="faq-q">What about founding members?</div>
-              <div className="faq-a">Founding members get 3 months free — no charge, no catch. After that it&rsquo;s $15/month, same as everyone else. The founding member badge on your profile stays forever.</div>
+              <div className="faq-a">Founding members get 3 months free, no charge, no catch. After that it&rsquo;s $15/month, same as everyone else. The founding member badge on your profile stays forever.</div>
             </div>
           </div>
         </div>

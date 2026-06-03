@@ -810,6 +810,50 @@
       transform: translateY(0);
     }
 
+    /* FAQ */
+    .faq-section {
+      background: var(--bg2);
+      border-top: 0.5px solid var(--faint);
+      border-bottom: 0.5px solid var(--faint);
+      padding: 7rem 2rem;
+    }
+
+    .faq-inner {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 3rem;
+    }
+
+    .faq-item {
+      padding: 2.25rem 0;
+      border-bottom: 0.5px solid var(--faint);
+    }
+    .faq-item:last-child { border-bottom: none; }
+
+    .faq-q {
+      font-family: var(--serif);
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 0.75rem;
+      line-height: 1.25;
+    }
+
+    .faq-a {
+      font-family: var(--sans);
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--muted);
+      line-height: 1.8;
+      max-width: 620px;
+    }
+
     /* RESPONSIVE */
     @media (max-width: 768px) {
       nav { padding: 1rem 1.5rem; }
@@ -900,7 +944,7 @@
         </div>
         <div class="problem-card">
           <div class="problem-x">✕</div>
-          <div class="problem-platform">Upwork & Fiverr</div>
+          <div class="problem-platform">Upwork</div>
           <div class="problem-title">Client-worker hierarchy.</div>
           <div class="problem-text">Race to the bottom on price. Not a creative relationship. Not a collaboration. A transaction that extracts value from the creative.</div>
         </div>
@@ -1027,14 +1071,14 @@
           <div class="fw-num">01</div>
           <div class="fw-status fw-status-live">Live now · Year 1</div>
           <div class="fw-title">Collective Loft Platform</div>
-          <div class="fw-sub">Digital Network · Remote</div>
-          <div class="fw-desc">The professional network for the creative class. Profiles, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio. Where creatives find each other and manage real projects together. The foundation everything else is built on.</div>
+          <div class="fw-sub">Digital Network · Chicago & Remote</div>
+          <div class="fw-desc">The professional network for the creative class. Profiles, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio. Where creatives find each other and manage real projects together. The foundation everything else grows from.</div>
         </div>
         <div class="flywheel-card fw-02">
           <div class="fw-num">02</div>
           <div class="fw-status fw-status-planned">Planned · Year 2</div>
           <div class="fw-title">Collective Loft Studios</div>
-          <div class="fw-sub">Recording Studio · TBD</div>
+          <div class="fw-sub">Recording Studio · Chicago</div>
           <div class="fw-desc">Professional recording infrastructure built for independent artists. Multiple rooms, professional equipment, accessible rates. Priority booking and discounted rates for platform members. The physical home of the community the platform builds.</div>
         </div>
         <div class="flywheel-card fw-03">
@@ -1042,7 +1086,7 @@
           <div class="fw-status fw-status-planned">Planned · Year 3</div>
           <div class="fw-title">Collective Loft Records</div>
           <div class="fw-sub">Independent Label</div>
-          <div class="fw-desc">Artist-first independent label built on the network and studio. Signing artists already known from the platform. Starting royalty splits at 50/50. Shorter contracts. More ownership retained by artists. The label where careers are built, not exploited.</div>
+          <div class="fw-desc">Artist-first independent label built on the network and studio. Signing artists already known from the platform. Starting royalty splits at 50/50. Shorter contracts. More ownership retained by artists. The label where careers are built, not extracted.</div>
         </div>
         <div class="flywheel-card fw-04">
           <div class="fw-num">04</div>
@@ -1050,6 +1094,28 @@
           <div class="fw-title">Collective Loft Publishing</div>
           <div class="fw-sub">Music · Literary · Art · Collaborative</div>
           <div class="fw-desc">A full creative publishing house. Music publishing and sync licensing. Literary publishing for writers and poets. Art books and monographs for visual artists. Collaborative works that cross disciplines — unique to the Collective Loft ecosystem.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="faq-inner reveal">
+      <div class="section-eyebrow">Questions</div>
+      <h2 class="section-title">What you should<br/>know <em>before you join.</em></h2>
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-q">Why does Collective Loft have a subscription?</div>
+          <div class="faq-a">Because free platforms attract people who aren't serious. The $15/month is what keeps this a professional environment — a room where everyone has skin in the game, agreements are in writing before work starts, and your creative work is protected from day one.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What does $15/month actually get me?</div>
+          <div class="faq-a">Everything. No tiers, no feature gates, no pay-to-unlock. Full access to Discover, Collab Briefs, Discipline Matching, Collab Terms, and the Loft Studio. Use it to run 10 collabs a month or use it to build your profile and get discovered. The platform works on your timeline and priorities.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q">What about founding members?</div>
+          <div class="faq-a">Founding members get 3 months free — no charge, no catch. After that it's $15/month, same as everyone else. The founding member badge on your profile stays forever.</div>
         </div>
       </div>
     </div>

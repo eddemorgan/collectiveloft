@@ -907,11 +907,11 @@ export default function Home() {
         <div className="hero-grid"></div>
         <div className="hero-glow"></div>
         <div className="eyebrow">Collective Loft · Est. 2026 · Chicago</div>
-        <h1>
-          Building the infrastructure<br/>
-          <em>meant</em> for the<br/>
-          <em>creative class<em><br/>.
-        </h1>
+<h1>
+  Building the infrastructure<br/>
+  <em>meant</em> for the<br/>
+  <em>creative class.</em>
+</h1>
         <p className="hero-sub">
           The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and open a Loft Studio — a shared workspace built around the work.
         </p>

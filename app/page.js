@@ -878,7 +878,7 @@ export default function LandingPage() {
                                 }}
                               >
                                 <div style={{ fontSize:'0.9rem', marginBottom:'0.15rem' }}>{d.icon}</div>
-                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', color: seekingDiscs.includes(d.discipline) ? 'var(--gold)' : 'rgba(26,24,20,0.5)', lineHeight:1.2 }}>{d.name}</div>
+                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', color: seekingDiscs.includes(d.discipline) ? 'var(--gold)' : 'var(--muted)', lineHeight:1.2 }}>{d.name}</div>
                               </div>
                             ))}
                           </div>

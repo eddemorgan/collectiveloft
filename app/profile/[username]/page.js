@@ -306,19 +306,19 @@ function SeekingEditor({ seekingDiscs, seekingSkills, onSave }) {
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
       <div>
-        <div style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'rgba(240,236,227,0.4)', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'0.6rem' }}>I'm looking to collaborate with</div>
+        <div style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'var(--muted)', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'0.6rem' }}>I'm looking to collaborate with</div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'0.4rem' }}>
           {DISC_OPTS.map(d => (
             <div key={d.id}
               onClick={() => toggleDisc(d.label)}
               style={{
-                border: discs.includes(d.label) ? '0.5px solid var(--gold)' : '0.5px solid rgba(240,236,227,0.1)',
-                background: discs.includes(d.label) ? 'rgba(201,168,76,0.08)' : 'var(--bg1)',
+                border: discs.includes(d.label) ? '0.5px solid var(--gold)' : '0.5px solid var(--rule)',
+                background: discs.includes(d.label) ? 'rgba(139,105,20,0.08)' : 'var(--bg)',
                 borderRadius:'3px', padding:'0.55rem 0.5rem', textAlign:'center',
                 cursor:'pointer', transition:'all 0.15s', userSelect:'none',
               }}>
               <div style={{ fontSize:'1rem', marginBottom:'0.2rem' }}>{d.icon}</div>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', color: discs.includes(d.label) ? 'var(--gold)' : 'rgba(240,236,227,0.4)' }}>{d.label}</div>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', color: discs.includes(d.label) ? 'var(--gold)' : 'var(--cream)' }}>{d.label}</div>
             </div>
           ))}
         </div>
@@ -326,7 +326,7 @@ function SeekingEditor({ seekingDiscs, seekingSkills, onSave }) {
 
       {availableSkills.length > 0 && (
         <div>
-          <div style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'rgba(240,236,227,0.4)', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'0.6rem' }}>Specific skills I need</div>
+          <div style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'var(--muted)', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'0.6rem' }}>Specific skills I need</div>
           <div style={{ display:'flex', flexWrap:'wrap', gap:'0.4rem' }}>
             {availableSkills.map(s => (
               <button key={s}
@@ -334,9 +334,9 @@ function SeekingEditor({ seekingDiscs, seekingSkills, onSave }) {
                 style={{
                   fontFamily:'var(--sans)', fontSize:'0.68rem',
                   padding:'0.22rem 0.68rem', borderRadius:'2px',
-                  border: skills.includes(s) ? '0.5px solid var(--gold)' : '0.5px solid rgba(240,236,227,0.1)',
-                  background: skills.includes(s) ? 'rgba(201,168,76,0.1)' : 'transparent',
-                  color: skills.includes(s) ? 'var(--gold)' : 'rgba(240,236,227,0.4)',
+                  border: skills.includes(s) ? '0.5px solid var(--gold)' : '0.5px solid var(--rule)',
+                  background: skills.includes(s) ? 'rgba(139,105,20,0.1)' : 'var(--bg)',
+                  color: skills.includes(s) ? 'var(--gold)' : 'var(--cream)',
                   cursor:'pointer', transition:'all 0.15s',
                 }}>
                 {s}
@@ -347,7 +347,7 @@ function SeekingEditor({ seekingDiscs, seekingSkills, onSave }) {
       )}
 
       <button onClick={handleSave} disabled={saving} style={{
-        alignSelf:'flex-start', background:'var(--gold)', color:'var(--ink)',
+        alignSelf:'flex-start', background:'var(--gold)', color:'var(--bg0)',
         border:'none', borderRadius:'2px', padding:'0.45rem 1.1rem',
         fontFamily:'var(--sans)', fontSize:'0.65rem', fontWeight:500,
         letterSpacing:'0.07em', textTransform:'uppercase', cursor:'pointer',

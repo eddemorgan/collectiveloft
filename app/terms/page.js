@@ -324,7 +324,7 @@ function TermsPage() {
               </div>
               <div className={styles.msTotalRow} style={{
                 color: pctComplete ? 'var(--teal)' : pctOver ? '#c27080' : 'var(--faint)',
-                borderColor: pctComplete ? 'rgba(86,179,156,0.3)' : pctOver ? 'rgba(194,112,128,0.3)' : 'rgba(245,242,237,0.08)',
+                borderColor: pctComplete ? 'rgba(86,179,156,0.3)' : pctOver ? 'rgba(194,112,128,0.3)' : 'var(--rule)',
               }}>
                 <span>{pctComplete ? '✓ Fully allocated' : pctOver ? '✕ Over 100%' : 'Total allocated'}</span>
                 <span style={{ fontWeight: 600 }}>{totalPct}% of 100%</span>

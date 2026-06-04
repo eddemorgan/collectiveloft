@@ -871,14 +871,14 @@ export default function LandingPage() {
                                   })
                                 }}
                                 style={{
-                                  border: seekingDiscs.includes(d.discipline) ? '0.5px solid var(--gold)' : '0.5px solid rgba(26,24,20,0.12)',
-                                  background: seekingDiscs.includes(d.discipline) ? 'rgba(201,168,76,0.08)' : 'var(--bg1)',
+                                  border: seekingDiscs.includes(d.discipline) ? '0.5px solid var(--gold)' : '0.5px solid var(--rule)',
+                                  background: seekingDiscs.includes(d.discipline) ? 'rgba(139,105,20,0.08)' : 'var(--bg)',
                                   borderRadius:'3px', padding:'0.5rem 0.35rem', textAlign:'center',
                                   cursor:'pointer', transition:'all 0.15s', userSelect:'none',
                                 }}
                               >
                                 <div style={{ fontSize:'0.9rem', marginBottom:'0.15rem' }}>{d.icon}</div>
-                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', color: seekingDiscs.includes(d.discipline) ? 'var(--gold)' : 'var(--muted)', lineHeight:1.2 }}>{d.name}</div>
+                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', color: seekingDiscs.includes(d.discipline) ? 'var(--gold)' : 'var(--cream)', lineHeight:1.2 }}>{d.name}</div>
                               </div>
                             ))}
                           </div>
@@ -892,7 +892,7 @@ export default function LandingPage() {
                             ).map(s => s.label)
                             return availSkills.length > 0 ? (
                               <>
-                                <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(26,24,20,0.45)', marginBottom:'0.6rem' }}>
+                                <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'0.6rem' }}>
                                   Specific skills I need
                                 </div>
                                 <div style={{ display:'flex', flexWrap:'wrap', gap:'0.35rem' }}>

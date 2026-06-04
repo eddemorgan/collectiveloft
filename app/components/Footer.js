@@ -9,11 +9,12 @@ export default function Footer() {
       alignItems: 'center',
       justifyContent: 'space-between',
       marginTop: 'auto',
+      background: 'var(--bg)',
     }}>
       <span style={{
         fontFamily: 'var(--sans)',
-        fontSize: '0.62rem',
-        color: 'rgba(240,236,227,0.6)',
+        fontSize: '0.72rem',
+        color: 'var(--muted)',
         letterSpacing: '0.06em',
         textTransform: 'uppercase',
       }}>
@@ -21,8 +22,8 @@ export default function Footer() {
       </span>
       <span style={{
         fontFamily: 'var(--sans)',
-        fontSize: '0.62rem',
-        color: 'rgba(240,236,227,0.45)',
+        fontSize: '0.72rem',
+        color: 'rgba(26,24,20,0.35)',
         letterSpacing: '0.04em',
       }}>
         © {new Date().getFullYear()} Collective Loft

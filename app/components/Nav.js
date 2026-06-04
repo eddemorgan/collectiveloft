@@ -9,9 +9,9 @@ export default function Nav() {
   const router   = useRouter()
   const pathname = usePathname()
  
-  const [user,           setUser]           = useState(null)
-  const [profile,        setProfile]        = useState(null)
-  const [notifCount,     setNotifCount]     = useState(0)
+  const [user,       setUser]       = useState(null)
+  const [profile,    setProfile]    = useState(null)
+  const [notifCount, setNotifCount] = useState(0)
  
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -47,7 +47,6 @@ export default function Nav() {
   async function loadNotifCount(userId) {
     let count = 0
  
-    // Terms waiting for my approval (I'm the partner, status pending)
     const { count: pendingTerms } = await supabase
       .from('collab_terms')
       .select('id', { count: 'exact', head: true })
@@ -56,7 +55,6 @@ export default function Nav() {
  
     count += pendingTerms || 0
  
-    // Completed studios I haven't rated yet
     const { count: unrated } = await supabase
       .from('collab_terms')
       .select('id', { count: 'exact', head: true })
@@ -66,7 +64,6 @@ export default function Nav() {
  
     count += unrated || 0
  
-    // Applications to my briefs (briefs I posted)
     const { data: myBriefs } = await supabase
       .from('briefs')
       .select('id')
@@ -100,17 +97,20 @@ export default function Nav() {
       justifyContent: 'space-between',
       padding: '0.85rem 2rem',
       borderBottom: '0.5px solid var(--rule)',
-      background: 'var(--bg)',
+      background: 'rgba(240,236,227,0.95)',
+      backdropFilter: 'blur(12px)',
       position: 'sticky',
       top: 0,
       zIndex: 100,
     }}>
       <Link href="/" style={{
         fontFamily: 'var(--serif)',
-        fontSize: '2.2rem',
+        fontSize: '1.75rem',
+        fontWeight: 400,
         color: 'var(--cream)',
         textDecoration: 'none',
         lineHeight: 1,
+        letterSpacing: '0.02em',
       }}>
         Collective <span style={{ color: 'var(--gold)' }}>Loft</span>
       </Link>
@@ -124,19 +124,18 @@ export default function Nav() {
         {user && profileSlug && (
           <Link href={`/profile/${profileSlug}`} style={{
             ...navLinkStyle(pathname.startsWith('/profile')),
-            color: pathname.startsWith('/profile') ? 'var(--gold)' : 'var(--cream)',
+            color: pathname.startsWith('/profile') ? 'var(--gold)' : 'var(--muted)',
             fontWeight: 500,
           }}>
             My Profile
           </Link>
         )}
  
-        {/* Envelope notification icon */}
         {user && (
           <Link href="/notifications" style={{ position: 'relative', display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
             <span style={{
               fontSize: '1.05rem',
-              color: isActive('/notifications') ? 'var(--gold)' : notifCount > 0 ? 'var(--cream)' : 'rgba(240,236,227,0.35)',
+              color: isActive('/notifications') ? 'var(--gold)' : notifCount > 0 ? 'var(--cream)' : 'var(--muted)',
               transition: 'color 0.15s',
               lineHeight: 1,
             }}>
@@ -148,7 +147,7 @@ export default function Nav() {
                 top: '-6px',
                 right: '-8px',
                 background: 'var(--gold)',
-                color: '#0D0D0D',
+                color: 'var(--bg0)',
                 fontSize: '0.5rem',
                 fontWeight: 700,
                 fontFamily: 'var(--sans)',
@@ -175,9 +174,9 @@ export default function Nav() {
 function navLinkStyle(active) {
   return {
     fontFamily: 'var(--sans)',
-    fontSize: '0.72rem',
+    fontSize: '0.82rem',
     letterSpacing: '0.04em',
-    color: active ? 'var(--gold)' : 'rgba(240,236,227,0.55)',
+    color: active ? 'var(--gold)' : 'var(--muted)',
     textDecoration: 'none',
     transition: 'color 0.15s',
   }

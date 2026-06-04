@@ -26,11 +26,11 @@ function NotifCard({ icon, iconColor, title, sub, meta, href, tag, tagColor }) {
       <div style={{
         display: 'flex', alignItems: 'flex-start', gap: '1rem',
         padding: '1.1rem 1.25rem', background: 'var(--bg1)',
-        border: '0.5px solid rgba(240,236,227,0.07)', borderRadius: '4px',
+        border: '0.5px solid rgba(26,24,20,0.08)', borderRadius: '4px',
         marginBottom: '0.65rem', transition: 'border-color 0.15s, background 0.15s', cursor: 'pointer',
       }}
         onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.25)'; e.currentTarget.style.background = 'rgba(201,168,76,0.03)' }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(240,236,227,0.07)'; e.currentTarget.style.background = 'var(--bg1)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(26,24,20,0.08)'; e.currentTarget.style.background = 'var(--bg1)' }}
       >
         <div style={{ width:'36px', height:'36px', borderRadius:'50%', flexShrink:0, background:iconColor||'rgba(201,168,76,0.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.9rem' }}>
           {icon}
@@ -44,11 +44,11 @@ function NotifCard({ icon, iconColor, title, sub, meta, href, tag, tagColor }) {
               </span>
             )}
           </div>
-          <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(240,236,227,0.5)', lineHeight:1.5 }}>{sub}</div>
+          <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--cream)', lineHeight:1.5 }}>{sub}</div>
         </div>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'0.3rem', flexShrink:0 }}>
-          <span style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'rgba(240,236,227,0.25)' }}>{meta}</span>
-          <span style={{ color:'rgba(240,236,227,0.2)', fontSize:'0.75rem' }}>↗</span>
+          <span style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'var(--muted)' }}>{meta}</span>
+          <span style={{ color:'var(--muted)', fontSize:'0.75rem' }}>↗</span>
         </div>
       </div>
     </Link>
@@ -58,7 +58,7 @@ function NotifCard({ icon, iconColor, title, sub, meta, href, tag, tagColor }) {
 function SectionLabel({ label, count }) {
   return (
     <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', marginBottom:'0.65rem', marginTop:'1.5rem' }}>
-      <span style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.16em', textTransform:'uppercase', color:'rgba(240,236,227,0.3)' }}>{label}</span>
+      <span style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.16em', textTransform:'uppercase', color:'var(--muted)' }}>{label}</span>
       {count > 0 && <span style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:700, background:'rgba(201,168,76,0.15)', color:'var(--gold)', padding:'1px 6px', borderRadius:'2px' }}>{count}</span>}
     </div>
   )
@@ -218,18 +218,18 @@ export default function NotificationsPage() {
         <div style={{ marginBottom:'2rem' }}>
           <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.2em', textTransform:'uppercase', color:'var(--gold)', opacity:0.75, marginBottom:'0.4rem' }}>Collective Loft</div>
           <div style={{ fontFamily:'var(--serif)', fontSize:'2rem', fontWeight:700, color:'var(--cream)', marginBottom:'0.3rem' }}>Message Center</div>
-          <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'rgba(240,236,227,0.4)', fontWeight:300 }}>
+          <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--muted)', fontWeight:300 }}>
             {loading ? 'Loading…' : totalCount === 0 ? 'You\'re all caught up.' : `${totalCount} item${totalCount > 1 ? 's' : ''} waiting for you`}
           </div>
         </div>
 
         {loading ? (
-          <div style={{ textAlign:'center', padding:'3rem', color:'rgba(240,236,227,0.25)', fontFamily:'var(--sans)', fontSize:'0.78rem' }}>✦ Loading…</div>
+          <div style={{ textAlign:'center', padding:'3rem', color:'var(--muted)', fontFamily:'var(--sans)', fontSize:'0.78rem' }}>✦ Loading…</div>
         ) : totalCount === 0 ? (
-          <div style={{ textAlign:'center', padding:'4rem 2rem', background:'var(--bg1)', border:'0.5px solid rgba(240,236,227,0.06)', borderRadius:'6px' }}>
+          <div style={{ textAlign:'center', padding:'4rem 2rem', background:'var(--bg1)', border:'0.5px solid rgba(26,24,20,0.06)', borderRadius:'6px' }}>
             <div style={{ fontSize:'2rem', marginBottom:'0.75rem', opacity:0.3 }}>✉</div>
             <div style={{ fontFamily:'var(--serif)', fontSize:'1.1rem', color:'var(--cream)', marginBottom:'0.4rem' }}>All caught up.</div>
-            <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(240,236,227,0.35)', lineHeight:1.65 }}>No pending terms, ratings, or applications right now. When something needs your attention, it'll show up here.</div>
+            <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--muted)', lineHeight:1.65 }}>No pending terms, ratings, or applications right now. When something needs your attention, it'll show up here.</div>
           </div>
         ) : (
           <>

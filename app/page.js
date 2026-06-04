@@ -690,14 +690,14 @@ export default function LandingPage() {
 
                     {selectedSkills.length > 0 && (
                       <div style={{ marginTop:'1rem' }}>
-                        <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(245,242,237,0.3)', marginBottom:'0.6rem' }}>
-                          Rate your proficiency <span style={{ color:'rgba(245,242,237,0.2)', letterSpacing:'0', textTransform:'none', fontSize:'0.6rem' }}>— optional</span>
+                        <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(26,24,20,0.45)', marginBottom:'0.6rem' }}>
+                          Rate your proficiency <span style={{ color:'rgba(26,24,20,0.3)', letterSpacing:'0', textTransform:'none', fontSize:'0.6rem' }}>— optional</span>
                         </div>
                         {selectedSkills.map(skill => {
                           const rating = skillRatings[skill] || 0
                           return (
                             <div key={skill} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.5rem', gap:'0.75rem' }}>
-                              <span style={{ fontSize:'0.72rem', color:'rgba(245,242,237,0.6)', fontWeight:300, minWidth:'120px', flexShrink:0 }}>{skill}</span>
+                              <span style={{ fontSize:'0.72rem', color:'var(--muted)', fontWeight:300, minWidth:'120px', flexShrink:0 }}>{skill}</span>
                               <div style={{ display:'flex', gap:'0.3rem', alignItems:'center' }}>
                                 {[1,2,3,4,5].map(n => (
                                   <button
@@ -710,12 +710,12 @@ export default function LandingPage() {
                                     style={{
                                       width:'28px', height:'6px', borderRadius:'1px',
                                       border:'none', cursor:'pointer', transition:'all 0.15s',
-                                      background: n <= rating ? 'var(--gold)' : 'rgba(245,242,237,0.1)',
+                                      background: n <= rating ? 'var(--gold)' : 'rgba(26,24,20,0.12)',
                                     }}
                                     title={['','Beginner','Developing','Proficient','Advanced','Expert'][n]}
                                   />
                                 ))}
-                                <span style={{ fontSize:'0.58rem', color:'rgba(245,242,237,0.25)', marginLeft:'0.35rem', minWidth:'54px' }}>
+                                <span style={{ fontSize:'0.58rem', color:'rgba(26,24,20,0.35)', marginLeft:'0.35rem', minWidth:'54px' }}>
                                   {rating === 0 ? 'not set' : ['','Beginner','Developing','Proficient','Advanced','Expert'][rating]}
                                 </span>
                               </div>
@@ -743,7 +743,7 @@ export default function LandingPage() {
                     <div className={styles.msl}>Work samples <span style={{ fontSize:'0.62rem', color:'rgba(240,236,227,0.25)', fontWeight:300, letterSpacing:'0', textTransform:'none' }}>— optional</span></div>
                     <label
                       style={{
-                        display:'block', border:'0.5px dashed rgba(245,242,237,0.15)', borderRadius:'4px',
+                        display:'block', border:'0.5px dashed rgba(26,24,20,0.15)', borderRadius:'4px',
                         padding:'1.25rem', textAlign:'center', cursor:'pointer',
                         background: queuedFiles.length > 0 ? 'rgba(201,168,76,0.04)' : 'transparent',
                         transition:'all 0.2s',
@@ -756,11 +756,11 @@ export default function LandingPage() {
                         style={{ display:'none' }}
                         onChange={handleFileQueue}
                       />
-                      <div style={{ fontSize:'1.2rem', marginBottom:'0.35rem', color:'rgba(245,242,237,0.25)' }}>↑</div>
-                      <div style={{ fontSize:'0.72rem', color:'rgba(245,242,237,0.5)', marginBottom:'0.2rem' }}>
+                      <div style={{ fontSize:'1.2rem', marginBottom:'0.35rem', color:'rgba(26,24,20,0.35)' }}>↑</div>
+                      <div style={{ fontSize:'0.72rem', color:'var(--muted)', marginBottom:'0.2rem' }}>
                         {queuedFiles.length === 0 ? 'Drop files here or click to browse' : `${queuedFiles.length} file${queuedFiles.length !== 1 ? 's' : ''} queued`}
                       </div>
-                      <div style={{ fontSize:'0.6rem', color:'rgba(245,242,237,0.25)' }}>JPG, PNG, MP3, MP4, PDF · Max 20MB · Up to 12 files</div>
+                      <div style={{ fontSize:'0.6rem', color:'rgba(26,24,20,0.35)' }}>JPG, PNG, MP3, MP4, PDF · Max 20MB · Up to 12 files</div>
                     </label>
 
                     {queuedFiles.length > 0 && (
@@ -768,24 +768,24 @@ export default function LandingPage() {
                         {queuedFiles.map((file, idx) => (
                           <div key={idx} style={{
                             display:'flex', alignItems:'center', justifyContent:'space-between',
-                            padding:'0.35rem 0.65rem', background:'rgba(245,242,237,0.04)',
-                            border:'0.5px solid rgba(245,242,237,0.08)', borderRadius:'3px',
+                            padding:'0.35rem 0.65rem', background:'rgba(26,24,20,0.03)',
+                            border:'0.5px solid var(--rule)', borderRadius:'3px',
                           }}>
                             <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', minWidth:0 }}>
                               <span style={{ fontSize:'0.75rem' }}>
                                 {file.type.startsWith('image/') ? '🖼' : file.type.startsWith('audio/') ? '🎵' : file.type.startsWith('video/') ? '🎬' : '📄'}
                               </span>
-                              <span style={{ fontSize:'0.68rem', color:'rgba(245,242,237,0.6)', fontWeight:300, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                              <span style={{ fontSize:'0.68rem', color:'var(--muted)', fontWeight:300, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
                                 {file.name}
                               </span>
-                              <span style={{ fontSize:'0.58rem', color:'rgba(245,242,237,0.25)', flexShrink:0 }}>
+                              <span style={{ fontSize:'0.58rem', color:'rgba(26,24,20,0.35)', flexShrink:0 }}>
                                 {(file.size / (1024*1024)).toFixed(1)}MB
                               </span>
                             </div>
                             <button
                               type="button"
                               onClick={() => removeQueuedFile(idx)}
-                              style={{ background:'none', border:'none', color:'rgba(245,242,237,0.25)', cursor:'pointer', fontSize:'0.7rem', padding:'0 0.25rem', flexShrink:0 }}
+                              style={{ background:'none', border:'none', color:'rgba(26,24,20,0.35)', cursor:'pointer', fontSize:'0.7rem', padding:'0 0.25rem', flexShrink:0 }}
                             >✕</button>
                           </div>
                         ))}
@@ -822,13 +822,13 @@ export default function LandingPage() {
                       </div>
                     </div>
 
-                    <div style={{ marginTop:'1rem', border:'0.5px solid rgba(245,242,237,0.08)', borderRadius:'4px', overflow:'hidden' }}>
+                    <div style={{ marginTop:'1rem', border:'0.5px solid var(--rule)', borderRadius:'4px', overflow:'hidden' }}>
                       <button
                         type="button"
                         onClick={() => setSeekingOpen(v => !v)}
                         style={{
                           width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between',
-                          padding:'0.75rem 1rem', background:'rgba(245,242,237,0.03)',
+                          padding:'0.75rem 1rem', background:'var(--bg1)',
                           border:'none', cursor:'pointer', textAlign:'left',
                         }}
                       >
@@ -836,7 +836,7 @@ export default function LandingPage() {
                           <div style={{ fontFamily:'var(--sans)', fontSize:'0.7rem', fontWeight:500, color:'var(--cream)', marginBottom:'0.1rem' }}>
                             Who are you looking to collaborate with?
                           </div>
-                          <div style={{ fontSize:'0.62rem', color:'rgba(245,242,237,0.35)', fontWeight:300 }}>
+                          <div style={{ fontSize:'0.62rem', color:'var(--muted)', fontWeight:300 }}>
                             {seekingDiscs.length === 0 && seekingSkills.length === 0
                               ? 'Optional — helps the matching algorithm find the right people for you'
                               : `${seekingDiscs.length} discipline${seekingDiscs.length !== 1 ? 's' : ''} · ${seekingSkills.length} skill${seekingSkills.length !== 1 ? 's' : ''} selected`
@@ -847,8 +847,8 @@ export default function LandingPage() {
                       </button>
 
                       {seekingOpen && (
-                        <div style={{ padding:'1rem', borderTop:'0.5px solid rgba(245,242,237,0.06)' }}>
-                          <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(245,242,237,0.3)', marginBottom:'0.6rem' }}>
+                        <div style={{ padding:'1rem', borderTop:'0.5px solid rgba(26,24,20,0.06)' }}>
+                          <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(26,24,20,0.45)', marginBottom:'0.6rem' }}>
                             I'm looking to work with
                           </div>
                           <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'0.4rem', marginBottom:'1rem' }}>
@@ -871,14 +871,14 @@ export default function LandingPage() {
                                   })
                                 }}
                                 style={{
-                                  border: seekingDiscs.includes(d.discipline) ? '0.5px solid var(--gold)' : '0.5px solid rgba(245,242,237,0.1)',
+                                  border: seekingDiscs.includes(d.discipline) ? '0.5px solid var(--gold)' : '0.5px solid rgba(26,24,20,0.12)',
                                   background: seekingDiscs.includes(d.discipline) ? 'rgba(201,168,76,0.08)' : 'var(--bg1)',
                                   borderRadius:'3px', padding:'0.5rem 0.35rem', textAlign:'center',
                                   cursor:'pointer', transition:'all 0.15s', userSelect:'none',
                                 }}
                               >
                                 <div style={{ fontSize:'0.9rem', marginBottom:'0.15rem' }}>{d.icon}</div>
-                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', color: seekingDiscs.includes(d.discipline) ? 'var(--gold)' : 'rgba(245,242,237,0.4)', lineHeight:1.2 }}>{d.name}</div>
+                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', color: seekingDiscs.includes(d.discipline) ? 'var(--gold)' : 'rgba(26,24,20,0.5)', lineHeight:1.2 }}>{d.name}</div>
                               </div>
                             ))}
                           </div>
@@ -892,7 +892,7 @@ export default function LandingPage() {
                             ).map(s => s.label)
                             return availSkills.length > 0 ? (
                               <>
-                                <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(245,242,237,0.3)', marginBottom:'0.6rem' }}>
+                                <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(26,24,20,0.45)', marginBottom:'0.6rem' }}>
                                   Specific skills I need
                                 </div>
                                 <div style={{ display:'flex', flexWrap:'wrap', gap:'0.35rem' }}>
@@ -904,9 +904,9 @@ export default function LandingPage() {
                                       style={{
                                         fontFamily:'var(--sans)', fontSize:'0.65rem',
                                         padding:'0.2rem 0.6rem', borderRadius:'2px',
-                                        border: seekingSkills.includes(s) ? '0.5px solid var(--gold)' : '0.5px solid rgba(245,242,237,0.1)',
+                                        border: seekingSkills.includes(s) ? '0.5px solid var(--gold)' : '0.5px solid rgba(26,24,20,0.12)',
                                         background: seekingSkills.includes(s) ? 'rgba(201,168,76,0.1)' : 'transparent',
-                                        color: seekingSkills.includes(s) ? 'var(--gold)' : 'rgba(245,242,237,0.4)',
+                                        color: seekingSkills.includes(s) ? 'var(--gold)' : 'rgba(26,24,20,0.5)',
                                         cursor:'pointer', transition:'all 0.15s',
                                       }}
                                     >{s}</button>
@@ -936,7 +936,7 @@ export default function LandingPage() {
 
                 <div className={styles.mftr}>
                   <div style={{ width:'100%', marginBottom:'1rem' }}>
-                    <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(245,242,237,0.3)', marginBottom:'0.75rem' }}>
+                    <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(26,24,20,0.45)', marginBottom:'0.75rem' }}>
                       Required acknowledgements
                     </div>
 
@@ -945,7 +945,7 @@ export default function LandingPage() {
                         onClick={() => { if (tcAccepted) setTcChecked(v => !v) }}
                         style={{
                           width:'18px', height:'18px', borderRadius:'3px', flexShrink:0,
-                          border: tcChecked ? '0.5px solid var(--gold)' : '0.5px solid rgba(245,242,237,0.2)',
+                          border: tcChecked ? '0.5px solid var(--gold)' : '0.5px solid rgba(26,24,20,0.3)',
                           background: tcChecked ? 'rgba(201,168,76,0.15)' : 'transparent',
                           display:'flex', alignItems:'center', justifyContent:'center',
                           cursor: tcAccepted ? 'pointer' : 'not-allowed',
@@ -954,14 +954,14 @@ export default function LandingPage() {
                           color:'var(--gold)', fontSize:'0.65rem',
                         }}
                       >{tcChecked ? '✓' : ''}</div>
-                      <span style={{ fontSize:'0.72rem', color:'rgba(245,242,237,0.55)', fontWeight:300 }}>
+                      <span style={{ fontSize:'0.72rem', color:'rgba(26,24,20,0.7)', fontWeight:300 }}>
                         I have read and agree to the{' '}
                         <button
                           type="button"
                           onClick={() => setShowTcDoc(true)}
                           style={{ background:'none', border:'none', color:'var(--gold)', cursor:'pointer', fontSize:'0.72rem', fontFamily:'var(--sans)', textDecoration:'underline', padding:0 }}
                         >Terms & Conditions</button>
-                        {!tcAccepted && <span style={{ fontSize:'0.6rem', color:'rgba(245,242,237,0.3)', marginLeft:'0.4rem' }}>(must read to enable)</span>}
+                        {!tcAccepted && <span style={{ fontSize:'0.6rem', color:'rgba(26,24,20,0.45)', marginLeft:'0.4rem' }}>(must read to enable)</span>}
                         {tcAccepted && !tcChecked && <span style={{ fontSize:'0.6rem', color:'var(--teal)', marginLeft:'0.4rem' }}>✓ read — check to confirm</span>}
                       </span>
                     </div>
@@ -971,7 +971,7 @@ export default function LandingPage() {
                         onClick={() => { if (ppAccepted) setPpChecked(v => !v) }}
                         style={{
                           width:'18px', height:'18px', borderRadius:'3px', flexShrink:0,
-                          border: ppChecked ? '0.5px solid var(--gold)' : '0.5px solid rgba(245,242,237,0.2)',
+                          border: ppChecked ? '0.5px solid var(--gold)' : '0.5px solid rgba(26,24,20,0.3)',
                           background: ppChecked ? 'rgba(201,168,76,0.15)' : 'transparent',
                           display:'flex', alignItems:'center', justifyContent:'center',
                           cursor: ppAccepted ? 'pointer' : 'not-allowed',
@@ -980,20 +980,20 @@ export default function LandingPage() {
                           color:'var(--gold)', fontSize:'0.65rem',
                         }}
                       >{ppChecked ? '✓' : ''}</div>
-                      <span style={{ fontSize:'0.72rem', color:'rgba(245,242,237,0.55)', fontWeight:300 }}>
+                      <span style={{ fontSize:'0.72rem', color:'rgba(26,24,20,0.7)', fontWeight:300 }}>
                         I have read and agree to the{' '}
                         <button
                           type="button"
                           onClick={() => setShowPpDoc(true)}
                           style={{ background:'none', border:'none', color:'var(--gold)', cursor:'pointer', fontSize:'0.72rem', fontFamily:'var(--sans)', textDecoration:'underline', padding:0 }}
                         >Privacy Policy</button>
-                        {!ppAccepted && <span style={{ fontSize:'0.6rem', color:'rgba(245,242,237,0.3)', marginLeft:'0.4rem' }}>(must read to enable)</span>}
+                        {!ppAccepted && <span style={{ fontSize:'0.6rem', color:'rgba(26,24,20,0.45)', marginLeft:'0.4rem' }}>(must read to enable)</span>}
                         {ppAccepted && !ppChecked && <span style={{ fontSize:'0.6rem', color:'var(--teal)', marginLeft:'0.4rem' }}>✓ read — check to confirm</span>}
                       </span>
                     </div>
 
                     {!requiredComplete && (
-                      <div style={{ marginTop:'0.75rem', fontSize:'0.62rem', color:'rgba(245,242,237,0.28)', fontWeight:300, lineHeight:1.5 }}>
+                      <div style={{ marginTop:'0.75rem', fontSize:'0.62rem', color:'rgba(26,24,20,0.4)', fontWeight:300, lineHeight:1.5 }}>
                         {isOnboarding
                           ? 'Required: First name, Last name, at least one Discipline, at least one Skill, Headline, and Bio.'
                           : 'Required to create profile: First name, Last name, Email, Password (8+ chars), at least one Discipline, at least one Skill, Headline, and Bio.'
@@ -1037,11 +1037,11 @@ export default function LandingPage() {
           : 'By clicking I Agree, you confirm you have read and agree to Collective Loft\'s Privacy Policy.'
 
         const s = {
-          p: () => ({ fontSize:'0.78rem', color:'rgba(245,242,237,0.65)', lineHeight:1.75, fontWeight:300, marginBottom:'0.75rem' }),
-          h: () => ({ fontFamily:'var(--serif)', fontSize:'1.05rem', fontWeight:700, color:'var(--cream)', marginBottom:'0.5rem', marginTop:'1.5rem', paddingTop:'1rem', borderTop:'0.5px solid rgba(245,242,237,0.08)' }),
+          p: () => ({ fontSize:'0.78rem', color:'var(--cream)', lineHeight:1.75, fontWeight:300, marginBottom:'0.75rem' }),
+          h: () => ({ fontFamily:'var(--serif)', fontSize:'1.05rem', fontWeight:700, color:'var(--cream)', marginBottom:'0.5rem', marginTop:'1.5rem', paddingTop:'1rem', borderTop:'0.5px solid var(--rule)' }),
           sub: () => ({ fontSize:'0.72rem', fontWeight:600, color:'var(--gold)', marginBottom:'0.35rem', marginTop:'1rem', letterSpacing:'0.02em' }),
-          li: () => ({ fontSize:'0.76rem', color:'rgba(245,242,237,0.6)', lineHeight:1.65, paddingLeft:'1rem', position:'relative', marginBottom:'0.25rem' }),
-          caps: () => ({ fontSize:'0.74rem', color:'rgba(245,242,237,0.75)', lineHeight:1.7, fontWeight:500, marginBottom:'0.75rem' }),
+          li: () => ({ fontSize:'0.76rem', color:'var(--muted)', lineHeight:1.65, paddingLeft:'1rem', position:'relative', marginBottom:'0.25rem' }),
+          caps: () => ({ fontSize:'0.74rem', color:'var(--cream)', lineHeight:1.7, fontWeight:500, marginBottom:'0.75rem' }),
         }
 
         const Sec = ({num, title, children}) => (
@@ -1068,7 +1068,7 @@ export default function LandingPage() {
           <div style={{fontFamily:'var(--sans)'}}>
             <div style={{background:'rgba(201,168,76,0.06)',border:'0.5px solid rgba(201,168,76,0.15)',borderRadius:'4px',padding:'1rem',marginBottom:'1.5rem'}}>
               <P>Welcome to Collective Loft. These Terms & Conditions govern your access to and use of the Collective Loft platform, website, applications, services, collaboration systems, creator tools, community features, and subscription offerings (collectively, the "Platform"). By accessing or using the Platform, you agree to be bound by these Terms. If you do not agree, you may not use the Platform.</P>
-              <div style={{fontSize:'0.68rem',color:'rgba(245,242,237,0.35)',display:'flex',gap:'1rem',flexWrap:'wrap'}}>
+              <div style={{fontSize:'0.68rem',color:'var(--muted)',display:'flex',gap:'1rem',flexWrap:'wrap'}}>
                 <span>Effective Date: [Insert Date]</span><span>·</span><span>collectiveloft.com</span><span>·</span><span>hello@collectiveloft.com</span><span>·</span><span>Morgan Collective Group LLC · Chicago, Illinois</span>
               </div>
             </div>
@@ -1103,7 +1103,7 @@ export default function LandingPage() {
             <Sec num="23" title="Collaborative Works & Rights Ownership"><P>Rights related to collaborative works are determined solely by agreements between participating users.</P></Sec>
             <Sec num="24" title="Changes to Terms"><P>We will notify registered users by email at least 14 days before material changes take effect.</P></Sec>
             <Sec num="25" title="Contact Information">
-              <div style={{background:'rgba(245,242,237,0.03)',border:'0.5px solid rgba(245,242,237,0.08)',borderRadius:'3px',padding:'1rem',fontSize:'0.78rem',color:'rgba(245,242,237,0.5)',lineHeight:1.8}}>
+              <div style={{background:'var(--bg1)',border:'0.5px solid var(--rule)',borderRadius:'3px',padding:'1rem',fontSize:'0.78rem',color:'var(--muted)',lineHeight:1.8}}>
                 Collective Loft · Morgan Collective Group LLC<br/>Chicago, Illinois<br/>hello@collectiveloft.com · collectiveloft.com
               </div>
             </Sec>
@@ -1114,7 +1114,7 @@ export default function LandingPage() {
           <div style={{fontFamily:'var(--sans)'}}>
             <div style={{background:'rgba(201,168,76,0.06)',border:'0.5px solid rgba(201,168,76,0.15)',borderRadius:'4px',padding:'1rem',marginBottom:'1.5rem'}}>
               <P>Collective Loft is committed to protecting your privacy. This Privacy Policy explains what information we collect, how we use it, who we share it with, and what rights you have regarding your data.</P>
-              <div style={{fontSize:'0.68rem',color:'rgba(245,242,237,0.35)',display:'flex',gap:'1rem',flexWrap:'wrap'}}>
+              <div style={{fontSize:'0.68rem',color:'var(--muted)',display:'flex',gap:'1rem',flexWrap:'wrap'}}>
                 <span>Effective Date: [Insert Date]</span><span>·</span><span>collectiveloft.com</span><span>·</span><span>hello@collectiveloft.com</span><span>·</span><span>Morgan Collective Group LLC · Chicago, Illinois</span>
               </div>
             </div>
@@ -1131,9 +1131,9 @@ export default function LandingPage() {
               <Sub>3.1 With Other Users (visible by default)</Sub><Ul items={['Name, headline, bio, and Right Now card','Disciplines, skills, and collaboration preferences','Location','Portfolio links and social links','Collaboration history','Community Voice rating and reviews']}/>
               <Sub>3.2 With Service Providers</Sub>
               {[['Supabase','Database, auth, storage, realtime'],['Vercel','Platform hosting and deployment'],['Stripe','Subscription payment processing'],['Resend','Transactional email delivery'],['Google Analytics','Platform usage analytics (anonymized)']].map(([p,pu]) => (
-                <div key={p} style={{display:'flex',gap:'1rem',padding:'0.3rem 0',borderBottom:'0.5px solid rgba(245,242,237,0.05)',fontSize:'0.75rem'}}>
+                <div key={p} style={{display:'flex',gap:'1rem',padding:'0.3rem 0',borderBottom:'0.5px solid var(--rule)',fontSize:'0.75rem'}}>
                   <span style={{color:'var(--gold)',fontWeight:500,minWidth:'120px'}}>{p}</span>
-                  <span style={{color:'rgba(245,242,237,0.5)'}}>{pu}</span>
+                  <span style={{color:'var(--muted)'}}>{pu}</span>
                 </div>
               ))}
               <div style={{height:'0.75rem'}}/>
@@ -1142,9 +1142,9 @@ export default function LandingPage() {
             <Sec num="4" title="Payment Data"><P>Collective Loft does not store your full payment card information. All payment processing is handled by Stripe.</P></Sec>
             <Sec num="5" title="Data Retention">
               {[['Active account data','Life of account'],['Completed Loft Studio records','Indefinitely as part of collaboration history'],['Billing records','7 years (tax and legal compliance)'],['System backups','Purged within 90 days'],['Google Analytics data','~26 months']].map(([t,r]) => (
-                <div key={t} style={{display:'flex',justifyContent:'space-between',padding:'0.3rem 0',borderBottom:'0.5px solid rgba(245,242,237,0.05)',fontSize:'0.75rem'}}>
-                  <span style={{color:'rgba(245,242,237,0.6)'}}>{t}</span>
-                  <span style={{color:'rgba(245,242,237,0.35)',textAlign:'right',maxWidth:'55%'}}>{r}</span>
+                <div key={t} style={{display:'flex',justifyContent:'space-between',padding:'0.3rem 0',borderBottom:'0.5px solid var(--rule)',fontSize:'0.75rem'}}>
+                  <span style={{color:'var(--muted)'}}>{t}</span>
+                  <span style={{color:'var(--muted)',textAlign:'right',maxWidth:'55%'}}>{r}</span>
                 </div>
               ))}
               <div style={{height:'0.5rem'}}/>
@@ -1159,7 +1159,7 @@ export default function LandingPage() {
             <Sec num="8" title="Children's Privacy"><P>The Platform is exclusively for users 18 years of age or older. We do not knowingly collect personal information from anyone under 18.</P></Sec>
             <Sec num="9" title="Changes to This Policy"><P>We will notify you by email at least 14 days before material changes take effect.</P></Sec>
             <Sec num="10" title="Contact Us">
-              <div style={{background:'rgba(245,242,237,0.03)',border:'0.5px solid rgba(245,242,237,0.08)',borderRadius:'3px',padding:'1rem',fontSize:'0.78rem',color:'rgba(245,242,237,0.5)',lineHeight:1.8}}>
+              <div style={{background:'var(--bg1)',border:'0.5px solid var(--rule)',borderRadius:'3px',padding:'1rem',fontSize:'0.78rem',color:'var(--muted)',lineHeight:1.8}}>
                 Collective Loft · Morgan Collective Group LLC<br/>Chicago, Illinois<br/>hello@collectiveloft.com · collectiveloft.com
               </div>
             </Sec>
@@ -1168,13 +1168,13 @@ export default function LandingPage() {
 
         return (
           <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.92)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1.5rem'}}>
-            <div style={{background:'#1A1714',border:'0.5px solid rgba(201,168,76,0.3)',borderRadius:'6px',width:'100%',maxWidth:'760px',height:'88vh',display:'flex',flexDirection:'column',overflow:'hidden',boxShadow:'0 40px 80px rgba(0,0,0,0.6)'}}>
-              <div style={{padding:'1.25rem 1.5rem',borderBottom:'0.5px solid rgba(245,242,237,0.08)',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0}}>
+            <div style={{background:'var(--bg1)',border:'0.5px solid rgba(139,105,20,0.3)',borderRadius:'6px',width:'100%',maxWidth:'760px',height:'88vh',display:'flex',flexDirection:'column',overflow:'hidden',boxShadow:'0 20px 60px rgba(26,24,20,0.15)'}}>
+              <div style={{padding:'1.25rem 1.5rem',borderBottom:'0.5px solid var(--rule)',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0}}>
                 <div>
                   <div style={{fontSize:'0.55rem',letterSpacing:'0.18em',textTransform:'uppercase',color:'var(--gold)',opacity:0.8,marginBottom:'0.2rem'}}>Legal Document</div>
-                  <div style={{fontFamily:'var(--serif)',fontSize:'1.3rem',fontWeight:700,color:'var(--cream)'}}>{title}</div>
+                  <div style={{fontFamily:'var(--serif)',fontSize:'1.3rem',fontWeight:400,color:'var(--cream)'}}>{title}</div>
                 </div>
-                <button onClick={onClose} style={{background:'transparent',border:'0.5px solid rgba(245,242,237,0.15)',color:'rgba(245,242,237,0.4)',width:'30px',height:'30px',borderRadius:'50%',cursor:'pointer',fontSize:'0.85rem',display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+                <button onClick={onClose} style={{background:'transparent',border:'0.5px solid var(--rule)',color:'var(--muted)',width:'30px',height:'30px',borderRadius:'50%',cursor:'pointer',fontSize:'0.85rem',display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
               </div>
               {!scrolled && (
                 <div style={{background:'rgba(201,168,76,0.08)',borderBottom:'0.5px solid rgba(201,168,76,0.2)',padding:'0.6rem 1.5rem',fontSize:'0.68rem',color:'rgba(201,168,76,0.8)',flexShrink:0}}>
@@ -1192,12 +1192,12 @@ export default function LandingPage() {
               >
                 {isTc ? <TcContent /> : <PpContent />}
               </div>
-              <div style={{padding:'1rem 1.5rem',borderTop:'0.5px solid rgba(245,242,237,0.08)',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0,background:'#211E1A'}}>
-                <div style={{fontSize:'0.68rem',color:'rgba(245,242,237,0.38)',fontWeight:300,maxWidth:'420px',lineHeight:1.5}}>{agreeLabel}</div>
+              <div style={{padding:'1rem 1.5rem',borderTop:'0.5px solid var(--rule)',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0,background:'var(--bg)'}}>
+                <div style={{fontSize:'0.68rem',color:'var(--muted)',fontWeight:300,maxWidth:'420px',lineHeight:1.5}}>{agreeLabel}</div>
                 <button
                   onClick={onAgree}
                   disabled={!scrolled}
-                  style={{background:scrolled?'var(--gold)':'rgba(201,168,76,0.25)',color:scrolled?'#0D0D0D':'rgba(245,242,237,0.3)',border:'none',borderRadius:'2px',padding:'0.6rem 1.5rem',fontFamily:'var(--sans)',fontSize:'0.72rem',fontWeight:500,letterSpacing:'0.08em',textTransform:'uppercase',cursor:scrolled?'pointer':'not-allowed',transition:'all 0.2s',whiteSpace:'nowrap',flexShrink:0,marginLeft:'1rem'}}
+                  style={{background:scrolled?'var(--gold)':'rgba(139,105,20,0.2)',color:scrolled?'var(--bg0)':'var(--muted)',border:'none',borderRadius:'2px',padding:'0.6rem 1.5rem',fontFamily:'var(--sans)',fontSize:'0.72rem',fontWeight:500,letterSpacing:'0.08em',textTransform:'uppercase',cursor:scrolled?'pointer':'not-allowed',transition:'all 0.2s',whiteSpace:'nowrap',flexShrink:0,marginLeft:'1rem'}}
                 >
                   {scrolled ? 'I Agree ✓' : 'Read to continue ↓'}
                 </button>

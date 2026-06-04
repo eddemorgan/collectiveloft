@@ -17,8 +17,8 @@ const RIGHTS_LABELS = {
 function SpecRow({ label, value, gold }) {
   if (!value) return null
   return (
-    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', padding:'0.6rem 0', borderBottom:'0.5px solid rgba(240,236,227,0.06)' }}>
-      <span style={{ fontFamily:'var(--sans)', fontSize:'0.68rem', color:'rgba(240,236,227,0.35)', letterSpacing:'0.04em' }}>{label}</span>
+    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', padding:'0.6rem 0', borderBottom:'0.5px solid rgba(26,24,20,0.06)' }}>
+      <span style={{ fontFamily:'var(--sans)', fontSize:'0.68rem', color:'var(--muted)', letterSpacing:'0.04em' }}>{label}</span>
       <span style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', color: gold ? 'var(--gold)' : 'var(--cream)', textAlign:'right', maxWidth:'60%' }}>{value}</span>
     </div>
   )
@@ -28,7 +28,7 @@ function FieldInput({ label, value, original, onChange, type }) {
   const changed = original !== undefined && value !== original && value !== ''
   return (
     <div style={{ marginBottom:'1rem' }}>
-      <label style={{ display:'block', fontFamily:'var(--sans)', fontSize:'0.62rem', letterSpacing:'0.08em', textTransform:'uppercase', color: changed ? 'var(--gold)' : 'rgba(240,236,227,0.4)', marginBottom:'0.35rem' }}>
+      <label style={{ display:'block', fontFamily:'var(--sans)', fontSize:'0.62rem', letterSpacing:'0.08em', textTransform:'uppercase', color: changed ? 'var(--gold)' : 'var(--muted)', marginBottom:'0.35rem' }}>
         {label}{changed && <span style={{ marginLeft:'0.4rem', fontSize:'0.55rem', opacity:0.7 }}>· modified</span>}
       </label>
       <input
@@ -37,8 +37,8 @@ function FieldInput({ label, value, original, onChange, type }) {
         onChange={e => onChange(e.target.value)}
         style={{
           width:'100%', boxSizing:'border-box',
-          background:'rgba(240,236,227,0.04)',
-          border:`1px solid ${changed ? 'var(--gold)' : 'rgba(240,236,227,0.12)'}`,
+          background:'rgba(26,24,20,0.04)',
+          border:`1px solid ${changed ? 'var(--gold)' : 'rgba(26,24,20,0.15)'}`,
           borderRadius:'4px', padding:'0.6rem 0.85rem',
           fontFamily:'var(--sans)', fontSize:'0.82rem',
           color:'var(--cream)', outline:'none',
@@ -54,7 +54,7 @@ function SelectInput({ label, value, original, onChange, options }) {
   const changed = original !== undefined && value !== original && value !== ''
   return (
     <div style={{ marginBottom:'1rem' }}>
-      <label style={{ display:'block', fontFamily:'var(--sans)', fontSize:'0.62rem', letterSpacing:'0.08em', textTransform:'uppercase', color: changed ? 'var(--gold)' : 'rgba(240,236,227,0.4)', marginBottom:'0.35rem' }}>
+      <label style={{ display:'block', fontFamily:'var(--sans)', fontSize:'0.62rem', letterSpacing:'0.08em', textTransform:'uppercase', color: changed ? 'var(--gold)' : 'var(--muted)', marginBottom:'0.35rem' }}>
         {label}{changed && <span style={{ marginLeft:'0.4rem', fontSize:'0.55rem', opacity:0.7 }}>· modified</span>}
       </label>
       <select
@@ -62,8 +62,8 @@ function SelectInput({ label, value, original, onChange, options }) {
         onChange={e => onChange(e.target.value)}
         style={{
           width:'100%', boxSizing:'border-box',
-          background:'rgba(240,236,227,0.04)',
-          border:`1px solid ${changed ? 'var(--gold)' : 'rgba(240,236,227,0.12)'}`,
+          background:'rgba(26,24,20,0.04)',
+          border:`1px solid ${changed ? 'var(--gold)' : 'rgba(26,24,20,0.15)'}`,
           borderRadius:'4px', padding:'0.6rem 0.85rem',
           fontFamily:'var(--sans)', fontSize:'0.82rem',
           color:'var(--cream)', outline:'none',
@@ -255,7 +255,7 @@ export default function TermsReviewPage() {
   if (loading) return (
     <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh' }}>
       <Nav />
-      <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'rgba(240,236,227,0.25)', fontFamily:'var(--sans)', fontSize:'0.78rem' }}>✦ Loading…</div>
+      <div style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--muted)', fontFamily:'var(--sans)', fontSize:'0.78rem' }}>✦ Loading…</div>
       <Footer />
     </div>
   )
@@ -265,7 +265,7 @@ export default function TermsReviewPage() {
       <Nav />
       <div style={{ flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'1rem' }}>
         <div style={{ fontFamily:'var(--serif)', fontSize:'1.5rem', color:'var(--cream)' }}>Terms not found</div>
-        <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'rgba(240,236,227,0.4)' }}>This terms agreement doesn't exist or you don't have access to it.</div>
+        <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--muted)' }}>This terms agreement doesn't exist or you don't have access to it.</div>
         <Link href="/briefs" style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--gold)', textDecoration:'none' }}>Back to Collabs</Link>
       </div>
       <Footer />
@@ -294,7 +294,7 @@ export default function TermsReviewPage() {
           <div style={{ fontFamily:'var(--serif)', fontSize:'2rem', color:'var(--cream)', lineHeight:1.2, marginBottom:'0.5rem' }}>
             {term.project_title || 'Untitled project'}
           </div>
-          <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'rgba(240,236,227,0.4)' }}>
+          <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--muted)' }}>
             With{' '}
             {partnerSlug
               ? <Link href={`/profile/${partnerSlug}`} style={{ color:'var(--teal)', textDecoration:'none' }}>{partner?.firstname} {partner?.lastname}</Link>
@@ -307,24 +307,24 @@ export default function TermsReviewPage() {
         {/* Turn indicator */}
         <div style={{
           padding:'0.85rem 1.1rem', borderRadius:'4px', marginBottom:'2rem',
-          background: myTurn ? 'rgba(201,168,76,0.08)' : 'rgba(240,236,227,0.03)',
-          border: `0.5px solid ${myTurn ? 'rgba(201,168,76,0.3)' : 'rgba(240,236,227,0.08)'}`,
+          background: myTurn ? 'rgba(201,168,76,0.08)' : 'rgba(26,24,20,0.03)',
+          border: `0.5px solid ${myTurn ? 'rgba(201,168,76,0.3)' : 'var(--rule)'}`,
           display:'flex', alignItems:'center', gap:'0.75rem',
         }}>
           <span style={{ fontSize:'1.1rem' }}>{myTurn ? '⟳' : '⏳'}</span>
           <div>
-            <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', fontWeight:600, color: myTurn ? 'var(--gold)' : 'rgba(240,236,227,0.5)', marginBottom:'0.1rem' }}>
+            <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', fontWeight:600, color: myTurn ? 'var(--gold)' : 'var(--cream)', marginBottom:'0.1rem' }}>
               {myTurn ? 'Your turn to review these terms' : `Waiting for ${partner?.firstname} to review`}
             </div>
-            <div style={{ fontFamily:'var(--sans)', fontSize:'0.65rem', color:'rgba(240,236,227,0.3)' }}>
+            <div style={{ fontFamily:'var(--sans)', fontSize:'0.65rem', color:'var(--muted)' }}>
               {myTurn ? 'Accept, modify, or decline below.' : 'You\'ll be notified when they respond.'}
             </div>
           </div>
         </div>
 
         {/* Terms summary */}
-        <div style={{ background:'rgba(240,236,227,0.02)', border:'0.5px solid rgba(240,236,227,0.08)', borderRadius:'6px', padding:'1.5rem', marginBottom:'2rem' }}>
-          <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(240,236,227,0.3)', marginBottom:'1rem' }}>Current terms</div>
+        <div style={{ background:'rgba(26,24,20,0.03)', border:'0.5px solid var(--rule)', borderRadius:'6px', padding:'1.5rem', marginBottom:'2rem' }}>
+          <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'1rem' }}>Current terms</div>
 
           <SpecRow label="Compensation type" value={compLabel} />
           {term.collab_type === 'paid' && (
@@ -347,23 +347,23 @@ export default function TermsReviewPage() {
           <SpecRow label="Cadence" value={term.cadence} />
 
           {(term.deliverables || []).length > 0 && (
-            <div style={{ paddingTop:'0.75rem', borderTop:'0.5px solid rgba(240,236,227,0.06)', marginTop:'0.5rem' }}>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.5rem' }}>Deliverables</div>
+            <div style={{ paddingTop:'0.75rem', borderTop:'0.5px solid rgba(26,24,20,0.06)', marginTop:'0.5rem' }}>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'0.5rem' }}>Deliverables</div>
               {term.deliverables.map((d, i) => (
                 <div key={i} style={{ display:'flex', gap:'0.5rem', alignItems:'flex-start', marginBottom:'0.3rem' }}>
                   <span style={{ color:'var(--gold)', fontSize:'0.65rem', marginTop:'0.1rem', flexShrink:0 }}>✓</span>
-                  <span style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'rgba(240,236,227,0.6)' }}>{d}</span>
+                  <span style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{d}</span>
                 </div>
               ))}
             </div>
           )}
 
           {(term.milestones || []).length > 0 && (
-            <div style={{ paddingTop:'0.75rem', borderTop:'0.5px solid rgba(240,236,227,0.06)', marginTop:'0.5rem' }}>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.5rem' }}>Milestones</div>
+            <div style={{ paddingTop:'0.75rem', borderTop:'0.5px solid rgba(26,24,20,0.06)', marginTop:'0.5rem' }}>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.1em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'0.5rem' }}>Milestones</div>
               {term.milestones.map((m, i) => (
                 <div key={i} style={{ display:'flex', justifyContent:'space-between', marginBottom:'0.3rem' }}>
-                  <span style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'rgba(240,236,227,0.6)' }}>{m.desc || m.title || `Milestone ${i+1}`}</span>
+                  <span style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--cream)' }}>{m.desc || m.title || `Milestone ${i+1}`}</span>
                   {m.pct && <span style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--gold)' }}>{m.pct}%</span>}
                 </div>
               ))}
@@ -380,8 +380,8 @@ export default function TermsReviewPage() {
 
             {/* Locked project title */}
             <div style={{ marginBottom:'1rem' }}>
-              <label style={{ display:'block', fontFamily:'var(--sans)', fontSize:'0.62rem', letterSpacing:'0.08em', textTransform:'uppercase', color:'rgba(240,236,227,0.25)', marginBottom:'0.35rem' }}>Project title (locked)</label>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.82rem', color:'rgba(240,236,227,0.4)', padding:'0.6rem 0.85rem', background:'rgba(240,236,227,0.02)', border:'1px solid rgba(240,236,227,0.06)', borderRadius:'4px' }}>
+              <label style={{ display:'block', fontFamily:'var(--sans)', fontSize:'0.62rem', letterSpacing:'0.08em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'0.35rem' }}>Project title (locked)</label>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.82rem', color:'var(--muted)', padding:'0.6rem 0.85rem', background:'rgba(26,24,20,0.03)', border:'1px solid rgba(26,24,20,0.06)', borderRadius:'4px' }}>
                 {term.project_title || '—'}
               </div>
             </div>
@@ -429,7 +429,7 @@ export default function TermsReviewPage() {
             <button onClick={handleSubmitModify} disabled={!!acting} style={{ background:'var(--gold)', color:'#0D0D0D', border:'none', borderRadius:'4px', padding:'0.65rem 1.5rem', fontFamily:'var(--sans)', fontSize:'0.72rem', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer', opacity:acting?0.5:1 }}>
               {acting === 'modifying' ? 'Sending…' : 'Send modified terms ↗'}
             </button>
-            <button onClick={() => { setModifyMode(false); setDraft({}) }} disabled={!!acting} style={{ background:'none', border:'1px solid rgba(240,236,227,0.15)', borderRadius:'4px', padding:'0.65rem 1.25rem', fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(240,236,227,0.5)', letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer' }}>
+            <button onClick={() => { setModifyMode(false); setDraft({}) }} disabled={!!acting} style={{ background:'none', border:'1px solid rgba(26,24,20,0.12)', borderRadius:'4px', padding:'0.65rem 1.25rem', fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--cream)', letterSpacing:'0.06em', textTransform:'uppercase', cursor:'pointer' }}>
               Cancel
             </button>
           </div>
@@ -437,7 +437,7 @@ export default function TermsReviewPage() {
 
         {/* Back link */}
         <div>
-          <Link href="/briefs" style={{ fontFamily:'var(--sans)', fontSize:'0.68rem', color:'rgba(240,236,227,0.3)', textDecoration:'none', letterSpacing:'0.04em' }}>
+          <Link href="/briefs" style={{ fontFamily:'var(--sans)', fontSize:'0.68rem', color:'var(--muted)', textDecoration:'none', letterSpacing:'0.04em' }}>
             ← Back to Collabs
           </Link>
         </div>

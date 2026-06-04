@@ -710,12 +710,12 @@ export default function LandingPage() {
                                     style={{
                                       width:'28px', height:'6px', borderRadius:'1px',
                                       border:'none', cursor:'pointer', transition:'all 0.15s',
-                                      background: n <= rating ? 'var(--gold)' : 'rgba(26,24,20,0.12)',
+                                      background: n <= rating ? 'var(--gold)' : 'rgba(26,24,20,0.18)',
                                     }}
                                     title={['','Beginner','Developing','Proficient','Advanced','Expert'][n]}
                                   />
                                 ))}
-                                <span style={{ fontSize:'0.58rem', color:'rgba(26,24,20,0.35)', marginLeft:'0.35rem', minWidth:'54px' }}>
+                                <span style={{ fontSize:'0.58rem', color:'var(--muted)', marginLeft:'0.35rem', minWidth:'54px' }}>
                                   {rating === 0 ? 'not set' : ['','Beginner','Developing','Proficient','Advanced','Expert'][rating]}
                                 </span>
                               </div>
@@ -904,9 +904,9 @@ export default function LandingPage() {
                                       style={{
                                         fontFamily:'var(--sans)', fontSize:'0.65rem',
                                         padding:'0.2rem 0.6rem', borderRadius:'2px',
-                                        border: seekingSkills.includes(s) ? '0.5px solid var(--gold)' : '0.5px solid rgba(26,24,20,0.12)',
-                                        background: seekingSkills.includes(s) ? 'rgba(201,168,76,0.1)' : 'transparent',
-                                        color: seekingSkills.includes(s) ? 'var(--gold)' : 'rgba(26,24,20,0.5)',
+                                        border: seekingSkills.includes(s) ? '0.5px solid var(--gold)' : '0.5px solid var(--rule)',
+                                        background: seekingSkills.includes(s) ? 'rgba(139,105,20,0.1)' : 'var(--bg)',
+                                        color: seekingSkills.includes(s) ? 'var(--gold)' : 'var(--cream)',
                                         cursor:'pointer', transition:'all 0.15s',
                                       }}
                                     >{s}</button>

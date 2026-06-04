@@ -303,7 +303,7 @@ function BriefsInner() {
                           {deletingId === selected.id ? 'Deleting…' : '✕ Delete this brief'}
                         </button>
                         {fromProfile && (
-                          <Link href={`/profile/${fromProfile}#briefs`} style={{fontFamily:'var(--sans)',fontSize:'0.65rem',color:'rgba(240,236,227,0.4)',textDecoration:'none',letterSpacing:'0.04em',whiteSpace:'nowrap'}}>
+                          <Link href={`/profile/${fromProfile}#briefs`} style={{fontFamily:'var(--sans)',fontSize:'0.65rem',color:'var(--muted)',textDecoration:'none',letterSpacing:'0.04em',whiteSpace:'nowrap'}}>
                             ← Back to My Profile
                           </Link>
                         )}
@@ -352,7 +352,7 @@ function BriefsInner() {
                         Terms have been sent to one applicant and are under negotiation. Other applicants remain available if those terms fall through.
                       </div>
                     ) : applicants.length === 0 ? (
-                      <div style={{ fontSize:'0.72rem', color:'rgba(240,236,227,0.3)', fontStyle:'italic' }}>Applications will appear here once creatives apply.</div>
+                      <div style={{ fontSize:'0.72rem', color:'var(--muted)', fontStyle:'italic' }}>Applications will appear here once creatives apply.</div>
                     ) : (
                       <div style={{ display:'flex', flexDirection:'column', gap:'0.75rem', marginTop:'0.5rem' }}>
                         {applicants.map(app => {
@@ -360,7 +360,7 @@ function BriefsInner() {
                           const aIni = a ? initials(a.firstname, a.lastname) : '??'
                           const slug = a ? `${a.firstname.trim().toLowerCase()}-${a.lastname.trim().toLowerCase()}` : null
                           return (
-                            <div key={app.id} style={{ background:'rgba(240,236,227,0.03)', border:'0.5px solid rgba(240,236,227,0.08)', borderRadius:'4px', padding:'0.85rem 1rem' }}>
+                            <div key={app.id} style={{ background:'rgba(26,24,20,0.03)', border:'0.5px solid var(--rule)', borderRadius:'4px', padding:'0.85rem 1rem' }}>
                               <div style={{ display:'flex', alignItems:'center', gap:'0.65rem', marginBottom:'0.5rem' }}>
                                 <div style={{ width:'32px', height:'32px', borderRadius:'50%', flexShrink:0, background:'rgba(86,179,156,0.2)', color:'var(--teal)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.72rem', fontWeight:600 }}>{aIni}</div>
                                 <div style={{ flex:1, minWidth:0 }}>
@@ -371,12 +371,12 @@ function BriefsInner() {
                                       {a.firstname} {a.lastname}
                                     </Link>
                                   ) : <span style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', fontWeight:600, color:'var(--cream)' }}>Anonymous</span>}
-                                  {a?.headline && <div style={{ fontFamily:'var(--sans)', fontSize:'0.65rem', color:'rgba(240,236,227,0.4)', marginTop:'1px' }}>{a.headline}</div>}
+                                  {a?.headline && <div style={{ fontFamily:'var(--sans)', fontSize:'0.65rem', color:'var(--muted)', marginTop:'1px' }}>{a.headline}</div>}
                                 </div>
-                                <span style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', color:'rgba(240,236,227,0.25)' }}>{new Date(app.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' })}</span>
+                                <span style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', color:'var(--muted)' }}>{new Date(app.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric' })}</span>
                               </div>
                               {app.message && (
-                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'rgba(240,236,227,0.55)', lineHeight:1.65, marginBottom:'0.65rem', borderLeft:'2px solid rgba(240,236,227,0.08)', paddingLeft:'0.65rem' }}>
+                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--cream)', lineHeight:1.65, marginBottom:'0.65rem', borderLeft:'2px solid var(--rule)', paddingLeft:'0.65rem' }}>
                                   {app.message}
                                 </div>
                               )}

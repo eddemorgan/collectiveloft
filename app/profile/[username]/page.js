@@ -77,8 +77,8 @@ function CompletedCollabCard({ studio, profileId }) {
     <Link href={`/studio/${studio.id}`} style={{ textDecoration: 'none', display: 'block' }}>
       <div
         style={{
-          background: 'rgba(240,236,227,0.02)',
-          border: '0.5px solid rgba(240,236,227,0.08)',
+          background: 'rgba(26,24,20,0.03)',
+          border: '0.5px solid var(--rule)',
           borderRadius: '4px',
           padding: '1rem 1.1rem',
           marginBottom: '0.65rem',
@@ -89,8 +89,8 @@ function CompletedCollabCard({ studio, profileId }) {
           justifyContent: 'space-between',
           gap: '1rem',
         }}
-        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(240,236,227,0.04)'; e.currentTarget.style.borderColor = 'rgba(201,168,76,0.25)' }}
-        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(240,236,227,0.02)'; e.currentTarget.style.borderColor = 'rgba(240,236,227,0.08)' }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(26,24,20,0.04)'; e.currentTarget.style.borderColor = 'rgba(201,168,76,0.25)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(26,24,20,0.03)'; e.currentTarget.style.borderColor = 'var(--rule)' }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
           <div style={{
@@ -103,7 +103,7 @@ function CompletedCollabCard({ studio, profileId }) {
             <div style={{ fontFamily: 'var(--sans)', fontSize: '0.82rem', fontWeight: 600, color: 'var(--cream)', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {studio.project_title || 'Untitled project'}
             </div>
-            <div style={{ fontFamily: 'var(--sans)', fontSize: '0.68rem', color: 'rgba(240,236,227,0.4)' }}>
+            <div style={{ fontFamily: 'var(--sans)', fontSize: '0.68rem', color: 'var(--muted)' }}>
               With {collabName} · {typeLabel}
             </div>
           </div>
@@ -177,21 +177,21 @@ function BriefModal({ brief, isOwner, onClose, onDelete }) {
   if (!brief) return null
   return (
     <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:200,display:'flex',alignItems:'center',justifyContent:'center',padding:'1.5rem'}} onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
-      <div style={{background:'var(--bg1)',border:'0.5px solid rgba(240,236,227,0.1)',borderRadius:'6px',width:'100%',maxWidth:'560px',maxHeight:'85vh',overflowY:'auto',padding:'2rem',position:'relative'}}>
-        <button onClick={onClose} style={{position:'absolute',top:'1rem',right:'1rem',background:'none',border:'none',color:'rgba(240,236,227,0.35)',fontSize:'1rem',cursor:'pointer',lineHeight:1}}>✕</button>
+      <div style={{background:'var(--bg1)',border:'0.5px solid var(--rule)',borderRadius:'6px',width:'100%',maxWidth:'560px',maxHeight:'85vh',overflowY:'auto',padding:'2rem',position:'relative'}}>
+        <button onClick={onClose} style={{position:'absolute',top:'1rem',right:'1rem',background:'none',border:'none',color:'var(--muted)',fontSize:'1rem',cursor:'pointer',lineHeight:1}}>✕</button>
         <div style={{display:'flex',gap:'0.5rem',flexWrap:'wrap',marginBottom:'0.75rem'}}>
           {(brief.disciplines||[]).map(d=><span key={d} style={{fontFamily:'var(--sans)',fontSize:'0.58rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'2px 8px',borderRadius:'2px',background:'rgba(201,168,76,0.12)',color:'var(--gold)'}}>{d}</span>)}
           {brief.compensation&&<span style={{fontFamily:'var(--sans)',fontSize:'0.58rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'2px 8px',borderRadius:'2px',background:'rgba(86,179,156,0.12)',color:'var(--teal)'}}>{brief.compensation}</span>}
-          <span style={{fontFamily:'var(--sans)',fontSize:'0.58rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'2px 8px',borderRadius:'2px',background:brief._isApplied?'rgba(160,120,208,0.15)':'rgba(201,168,76,0.08)',color:brief._isApplied?'#a078d0':'rgba(240,236,227,0.4)'}}>{brief._isApplied?'Applied':'Active'}</span>
+          <span style={{fontFamily:'var(--sans)',fontSize:'0.58rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'2px 8px',borderRadius:'2px',background:brief._isApplied?'rgba(160,120,208,0.15)':'rgba(201,168,76,0.08)',color:brief._isApplied?'#a078d0':'var(--muted)'}}>{brief._isApplied?'Applied':'Active'}</span>
         </div>
         <div style={{fontFamily:'var(--serif)',fontSize:'1.4rem',color:'var(--cream)',marginBottom:'1.25rem',lineHeight:1.3}}>{brief.title}</div>
-        {brief.what_making&&<div style={{marginBottom:'1rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.6rem',letterSpacing:'0.14em',textTransform:'uppercase',color:'rgba(240,236,227,0.3)',marginBottom:'0.35rem'}}>What I'm making</div><div style={{fontFamily:'var(--sans)',fontSize:'0.78rem',color:'rgba(240,236,227,0.7)',lineHeight:1.7}}>{brief.what_making}</div></div>}
-        {brief.who_needed&&<div style={{marginBottom:'1rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.6rem',letterSpacing:'0.14em',textTransform:'uppercase',color:'rgba(240,236,227,0.3)',marginBottom:'0.35rem'}}>Who I need</div><div style={{fontFamily:'var(--sans)',fontSize:'0.78rem',color:'rgba(240,236,227,0.7)',lineHeight:1.7}}>{brief.who_needed}</div></div>}
+        {brief.what_making&&<div style={{marginBottom:'1rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.6rem',letterSpacing:'0.14em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.35rem'}}>What I'm making</div><div style={{fontFamily:'var(--sans)',fontSize:'0.78rem',color:'var(--cream)',lineHeight:1.7}}>{brief.what_making}</div></div>}
+        {brief.who_needed&&<div style={{marginBottom:'1rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.6rem',letterSpacing:'0.14em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.35rem'}}>Who I need</div><div style={{fontFamily:'var(--sans)',fontSize:'0.78rem',color:'var(--cream)',lineHeight:1.7}}>{brief.who_needed}</div></div>}
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0.5rem',marginBottom:'1.5rem'}}>
-          {brief.timeline&&<div style={{background:'rgba(240,236,227,0.03)',border:'0.5px solid rgba(240,236,227,0.07)',borderRadius:'3px',padding:'0.6rem 0.75rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.58rem',letterSpacing:'0.1em',textTransform:'uppercase',color:'rgba(240,236,227,0.25)',marginBottom:'0.2rem'}}>Timeline</div><div style={{fontFamily:'var(--sans)',fontSize:'0.75rem',color:'var(--cream)'}}>{brief.timeline}</div></div>}
-          {brief.location_preference&&<div style={{background:'rgba(240,236,227,0.03)',border:'0.5px solid rgba(240,236,227,0.07)',borderRadius:'3px',padding:'0.6rem 0.75rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.58rem',letterSpacing:'0.1em',textTransform:'uppercase',color:'rgba(240,236,227,0.25)',marginBottom:'0.2rem'}}>Location</div><div style={{fontFamily:'var(--sans)',fontSize:'0.75rem',color:'var(--cream)'}}>{brief.location_preference}</div></div>}
-          {brief.fee_range&&<div style={{background:'rgba(240,236,227,0.03)',border:'0.5px solid rgba(240,236,227,0.07)',borderRadius:'3px',padding:'0.6rem 0.75rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.58rem',letterSpacing:'0.1em',textTransform:'uppercase',color:'rgba(240,236,227,0.25)',marginBottom:'0.2rem'}}>Fee range</div><div style={{fontFamily:'var(--sans)',fontSize:'0.75rem',color:'var(--gold)'}}>{brief.fee_range}</div></div>}
-          {brief.deadline&&<div style={{background:'rgba(240,236,227,0.03)',border:'0.5px solid rgba(240,236,227,0.07)',borderRadius:'3px',padding:'0.6rem 0.75rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.58rem',letterSpacing:'0.1em',textTransform:'uppercase',color:'rgba(240,236,227,0.25)',marginBottom:'0.2rem'}}>Deadline</div><div style={{fontFamily:'var(--sans)',fontSize:'0.75rem',color:'var(--cream)'}}>{new Date(brief.deadline).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></div>}
+          {brief.timeline&&<div style={{background:'rgba(26,24,20,0.03)',border:'0.5px solid rgba(26,24,20,0.08)',borderRadius:'3px',padding:'0.6rem 0.75rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.58rem',letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.2rem'}}>Timeline</div><div style={{fontFamily:'var(--sans)',fontSize:'0.75rem',color:'var(--cream)'}}>{brief.timeline}</div></div>}
+          {brief.location_preference&&<div style={{background:'rgba(26,24,20,0.03)',border:'0.5px solid rgba(26,24,20,0.08)',borderRadius:'3px',padding:'0.6rem 0.75rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.58rem',letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.2rem'}}>Location</div><div style={{fontFamily:'var(--sans)',fontSize:'0.75rem',color:'var(--cream)'}}>{brief.location_preference}</div></div>}
+          {brief.fee_range&&<div style={{background:'rgba(26,24,20,0.03)',border:'0.5px solid rgba(26,24,20,0.08)',borderRadius:'3px',padding:'0.6rem 0.75rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.58rem',letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.2rem'}}>Fee range</div><div style={{fontFamily:'var(--sans)',fontSize:'0.75rem',color:'var(--gold)'}}>{brief.fee_range}</div></div>}
+          {brief.deadline&&<div style={{background:'rgba(26,24,20,0.03)',border:'0.5px solid rgba(26,24,20,0.08)',borderRadius:'3px',padding:'0.6rem 0.75rem'}}><div style={{fontFamily:'var(--sans)',fontSize:'0.58rem',letterSpacing:'0.1em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.2rem'}}>Deadline</div><div style={{fontFamily:'var(--sans)',fontSize:'0.75rem',color:'var(--cream)'}}>{new Date(brief.deadline).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></div>}
         </div>
         {isOwner&&!brief._isApplied&&<button onClick={()=>{onDelete(brief.id);onClose()}} style={{background:'none',border:'0.5px solid rgba(194,112,128,0.3)',color:'#c27080',borderRadius:'3px',padding:'0.45rem 1rem',fontFamily:'var(--sans)',fontSize:'0.65rem',letterSpacing:'0.06em',textTransform:'uppercase',cursor:'pointer'}}>✕ Delete this brief</button>}
         {brief._isApplied&&<div style={{background:'rgba(160,120,208,0.08)',border:'0.5px solid rgba(160,120,208,0.2)',borderRadius:'4px',padding:'0.75rem 1rem',fontFamily:'var(--sans)',fontSize:'0.72rem',color:'rgba(160,120,208,0.8)'}}>You applied to this brief. The poster will reach out if they want to move forward.</div>}
@@ -203,9 +203,9 @@ function BriefModal({ brief, isOwner, onClose, onDelete }) {
 function ActiveBriefCard({ brief, onDelete, profileSlug }) {
   return (
     <Link href={`/briefs?open=${brief.id}&from=${profileSlug}`} style={{textDecoration:'none',display:'block'}}>
-    <div style={{position:'relative',cursor:'pointer',background:'rgba(240,236,227,0.02)',border:'0.5px solid rgba(240,236,227,0.08)',borderRadius:'4px',padding:'1rem 1.1rem',marginBottom:'0.65rem',transition:'border-color 0.15s, background 0.15s'}}
-      onMouseEnter={e=>{e.currentTarget.style.background='rgba(240,236,227,0.04)';e.currentTarget.style.borderColor='rgba(201,168,76,0.25)'}}
-      onMouseLeave={e=>{e.currentTarget.style.background='rgba(240,236,227,0.02)';e.currentTarget.style.borderColor='rgba(240,236,227,0.08)'}}>
+    <div style={{position:'relative',cursor:'pointer',background:'rgba(26,24,20,0.03)',border:'0.5px solid var(--rule)',borderRadius:'4px',padding:'1rem 1.1rem',marginBottom:'0.65rem',transition:'border-color 0.15s, background 0.15s'}}
+      onMouseEnter={e=>{e.currentTarget.style.background='rgba(26,24,20,0.04)';e.currentTarget.style.borderColor='rgba(201,168,76,0.25)'}}
+      onMouseLeave={e=>{e.currentTarget.style.background='rgba(26,24,20,0.03)';e.currentTarget.style.borderColor='var(--rule)'}}>
       <button onClick={e=>{e.stopPropagation();if(!confirm('Delete this brief? This cannot be undone.'))return;onDelete(brief.id)}}
         style={{position:'absolute',top:'0.6rem',right:'0.6rem',background:'none',border:'none',color:'rgba(194,112,128,0.5)',cursor:'pointer',fontSize:'0.72rem',lineHeight:1,padding:'2px 4px',borderRadius:'2px',transition:'color 0.15s'}}
         onMouseEnter={e=>e.currentTarget.style.color='#c27080'}
@@ -213,10 +213,10 @@ function ActiveBriefCard({ brief, onDelete, profileSlug }) {
       <div style={{display:'flex',gap:'0.4rem',flexWrap:'wrap',marginBottom:'0.5rem'}}>
         {(brief.disciplines||[]).slice(0,2).map(d=><span key={d} style={{fontFamily:'var(--sans)',fontSize:'0.55rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'1px 6px',borderRadius:'2px',background:'rgba(201,168,76,0.1)',color:'var(--gold)'}}>{d}</span>)}
         {brief.compensation&&<span style={{fontFamily:'var(--sans)',fontSize:'0.55rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'1px 6px',borderRadius:'2px',background:'rgba(86,179,156,0.1)',color:'var(--teal)'}}>{brief.compensation}</span>}
-        <span style={{fontFamily:'var(--sans)',fontSize:'0.55rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'1px 6px',borderRadius:'2px',background:'rgba(201,168,76,0.06)',color:'rgba(240,236,227,0.35)'}}>Active</span>
+        <span style={{fontFamily:'var(--sans)',fontSize:'0.55rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'1px 6px',borderRadius:'2px',background:'rgba(201,168,76,0.06)',color:'var(--muted)'}}>Active</span>
       </div>
       <div style={{fontFamily:'var(--sans)',fontSize:'0.82rem',fontWeight:600,color:'var(--cream)',marginBottom:'0.3rem',paddingRight:'1.5rem'}}>{brief.title}</div>
-      {brief.what_making&&<div style={{fontFamily:'var(--sans)',fontSize:'0.7rem',color:'rgba(240,236,227,0.45)',lineHeight:1.6,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{brief.what_making}</div>}
+      {brief.what_making&&<div style={{fontFamily:'var(--sans)',fontSize:'0.7rem',color:'var(--muted)',lineHeight:1.6,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{brief.what_making}</div>}
     </div>
     </Link>
   )
@@ -234,17 +234,17 @@ function NegotiationCard({ term, currentUserId }) {
 
   return (
     <Link href={`/terms-review/${term.id}`} style={{textDecoration:'none',display:'block'}}>
-      <div style={{cursor:'pointer',background:'rgba(240,236,227,0.02)',border:`0.5px solid ${myTurn?'rgba(201,168,76,0.3)':'rgba(240,236,227,0.08)'}`,borderRadius:'4px',padding:'1rem 1.1rem',marginBottom:'0.65rem',transition:'border-color 0.15s, background 0.15s',boxShadow:myTurn?'0 0 0 1px rgba(201,168,76,0.06)':'none'}}
-        onMouseEnter={e=>{e.currentTarget.style.background='rgba(240,236,227,0.04)';e.currentTarget.style.borderColor=myTurn?'rgba(201,168,76,0.5)':'rgba(201,168,76,0.2)'}}
-        onMouseLeave={e=>{e.currentTarget.style.background='rgba(240,236,227,0.02)';e.currentTarget.style.borderColor=myTurn?'rgba(201,168,76,0.3)':'rgba(240,236,227,0.08)'}}>
+      <div style={{cursor:'pointer',background:'rgba(26,24,20,0.03)',border:`0.5px solid ${myTurn?'rgba(201,168,76,0.3)':'var(--rule)'}`,borderRadius:'4px',padding:'1rem 1.1rem',marginBottom:'0.65rem',transition:'border-color 0.15s, background 0.15s',boxShadow:myTurn?'0 0 0 1px rgba(201,168,76,0.06)':'none'}}
+        onMouseEnter={e=>{e.currentTarget.style.background='rgba(26,24,20,0.04)';e.currentTarget.style.borderColor=myTurn?'rgba(201,168,76,0.5)':'rgba(201,168,76,0.2)'}}
+        onMouseLeave={e=>{e.currentTarget.style.background='rgba(26,24,20,0.03)';e.currentTarget.style.borderColor=myTurn?'rgba(201,168,76,0.3)':'var(--rule)'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'0.5rem'}}>
-          <span style={{fontFamily:'var(--sans)',fontSize:'0.55rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'1px 6px',borderRadius:'2px',background:myTurn?'rgba(201,168,76,0.15)':'rgba(240,236,227,0.06)',color:myTurn?'var(--gold)':'rgba(240,236,227,0.35)'}}>
+          <span style={{fontFamily:'var(--sans)',fontSize:'0.55rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'1px 6px',borderRadius:'2px',background:myTurn?'rgba(201,168,76,0.15)':'rgba(26,24,20,0.06)',color:myTurn?'var(--gold)':'var(--muted)'}}>
             {myTurn ? 'Your turn to review' : 'Awaiting their review'}
           </span>
-          <span style={{fontFamily:'var(--sans)',fontSize:'0.62rem',color:'rgba(240,236,227,0.25)'}}>Review terms ↗</span>
+          <span style={{fontFamily:'var(--sans)',fontSize:'0.62rem',color:'var(--muted)'}}>Review terms ↗</span>
         </div>
         <div style={{fontFamily:'var(--sans)',fontSize:'0.82rem',fontWeight:600,color:'var(--cream)',marginBottom:'0.25rem'}}>{term.project_title||'Untitled project'}</div>
-        <div style={{fontFamily:'var(--sans)',fontSize:'0.7rem',color:'rgba(240,236,227,0.4)'}}>
+        <div style={{fontFamily:'var(--sans)',fontSize:'0.7rem',color:'var(--muted)'}}>
           With {partner ? `${partner.firstname} ${partner.lastname}` : 'collaborator'}
           {' · '}{term.collab_type==='exchange'?'Creative exchange':term.collab_type==='paid'?'Paid':'Revenue share'}
         </div>
@@ -255,16 +255,16 @@ function NegotiationCard({ term, currentUserId }) {
 
 function AppliedBriefCard({ brief, onSelect }) {
   return (
-    <div onClick={() => onSelect(brief)} style={{cursor:'pointer',background:'rgba(240,236,227,0.02)',border:'0.5px solid rgba(160,120,208,0.15)',borderRadius:'4px',padding:'1rem 1.1rem',marginBottom:'0.65rem',transition:'border-color 0.15s, background 0.15s'}}
-      onMouseEnter={e=>{e.currentTarget.style.background='rgba(240,236,227,0.04)';e.currentTarget.style.borderColor='rgba(160,120,208,0.35)'}}
-      onMouseLeave={e=>{e.currentTarget.style.background='rgba(240,236,227,0.02)';e.currentTarget.style.borderColor='rgba(160,120,208,0.15)'}}>
+    <div onClick={() => onSelect(brief)} style={{cursor:'pointer',background:'rgba(26,24,20,0.03)',border:'0.5px solid rgba(160,120,208,0.15)',borderRadius:'4px',padding:'1rem 1.1rem',marginBottom:'0.65rem',transition:'border-color 0.15s, background 0.15s'}}
+      onMouseEnter={e=>{e.currentTarget.style.background='rgba(26,24,20,0.04)';e.currentTarget.style.borderColor='rgba(160,120,208,0.35)'}}
+      onMouseLeave={e=>{e.currentTarget.style.background='rgba(26,24,20,0.03)';e.currentTarget.style.borderColor='rgba(160,120,208,0.15)'}}>
       <div style={{display:'flex',gap:'0.4rem',flexWrap:'wrap',marginBottom:'0.5rem'}}>
         {(brief.disciplines||[]).slice(0,2).map(d=><span key={d} style={{fontFamily:'var(--sans)',fontSize:'0.55rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'1px 6px',borderRadius:'2px',background:'rgba(201,168,76,0.1)',color:'var(--gold)'}}>{d}</span>)}
         {brief.compensation&&<span style={{fontFamily:'var(--sans)',fontSize:'0.55rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'1px 6px',borderRadius:'2px',background:'rgba(86,179,156,0.1)',color:'var(--teal)'}}>{brief.compensation}</span>}
         <span style={{fontFamily:'var(--sans)',fontSize:'0.55rem',fontWeight:600,letterSpacing:'0.1em',textTransform:'uppercase',padding:'1px 6px',borderRadius:'2px',background:'rgba(160,120,208,0.12)',color:'#a078d0'}}>Applied</span>
       </div>
       <div style={{fontFamily:'var(--sans)',fontSize:'0.82rem',fontWeight:600,color:'var(--cream)',marginBottom:'0.3rem'}}>{brief.title}</div>
-      {brief.what_making&&<div style={{fontFamily:'var(--sans)',fontSize:'0.7rem',color:'rgba(240,236,227,0.45)',lineHeight:1.6,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{brief.what_making}</div>}
+      {brief.what_making&&<div style={{fontFamily:'var(--sans)',fontSize:'0.7rem',color:'var(--muted)',lineHeight:1.6,display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical',overflow:'hidden'}}>{brief.what_making}</div>}
     </div>
   )
 }
@@ -313,12 +313,12 @@ function SeekingEditor({ seekingDiscs, seekingSkills, onSave }) {
               onClick={() => toggleDisc(d.label)}
               style={{
                 border: discs.includes(d.label) ? '0.5px solid var(--gold)' : '0.5px solid var(--rule)',
-                background: discs.includes(d.label) ? 'rgba(139,105,20,0.08)' : 'var(--bg)',
+                background: discs.includes(d.label) ? 'rgba(201,168,76,0.08)' : 'var(--bg1)',
                 borderRadius:'3px', padding:'0.55rem 0.5rem', textAlign:'center',
                 cursor:'pointer', transition:'all 0.15s', userSelect:'none',
               }}>
               <div style={{ fontSize:'1rem', marginBottom:'0.2rem' }}>{d.icon}</div>
-              <div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', color: discs.includes(d.label) ? 'var(--gold)' : 'var(--cream)' }}>{d.label}</div>
+              <div style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', color: discs.includes(d.label) ? 'var(--gold)' : 'var(--muted)' }}>{d.label}</div>
             </div>
           ))}
         </div>
@@ -335,8 +335,8 @@ function SeekingEditor({ seekingDiscs, seekingSkills, onSave }) {
                   fontFamily:'var(--sans)', fontSize:'0.68rem',
                   padding:'0.22rem 0.68rem', borderRadius:'2px',
                   border: skills.includes(s) ? '0.5px solid var(--gold)' : '0.5px solid var(--rule)',
-                  background: skills.includes(s) ? 'rgba(139,105,20,0.1)' : 'var(--bg)',
-                  color: skills.includes(s) ? 'var(--gold)' : 'var(--cream)',
+                  background: skills.includes(s) ? 'rgba(201,168,76,0.1)' : 'transparent',
+                  color: skills.includes(s) ? 'var(--gold)' : 'var(--muted)',
                   cursor:'pointer', transition:'all 0.15s',
                 }}>
                 {s}
@@ -347,7 +347,7 @@ function SeekingEditor({ seekingDiscs, seekingSkills, onSave }) {
       )}
 
       <button onClick={handleSave} disabled={saving} style={{
-        alignSelf:'flex-start', background:'var(--gold)', color:'var(--bg0)',
+        alignSelf:'flex-start', background:'var(--gold)', color:'var(--ink)',
         border:'none', borderRadius:'2px', padding:'0.45rem 1.1rem',
         fontFamily:'var(--sans)', fontSize:'0.65rem', fontWeight:500,
         letterSpacing:'0.07em', textTransform:'uppercase', cursor:'pointer',
@@ -798,7 +798,7 @@ export default function ProfilePage() {
                 <Editable value={profile.lastname} onSave={v=>saveField('lastname',v)} placeholder="Last name" isOwner={isOwner} editMode={editMode} className={styles.nameLast}/>
                 {isOwner&&(
                   <Link href="/notifications" style={{position:'relative',display:'inline-flex',alignItems:'center',textDecoration:'none',marginLeft:'0.25rem'}}>
-                    <span style={{fontSize:'1rem',color:notifCount>0?'var(--gold)':'rgba(240,236,227,0.25)',lineHeight:1}}>✉</span>
+                    <span style={{fontSize:'1rem',color:notifCount>0?'var(--gold)':'var(--muted)',lineHeight:1}}>✉</span>
                     {notifCount>0&&<span style={{position:'absolute',top:'-6px',right:'-8px',background:'var(--gold)',color:'#0D0D0D',fontSize:'0.48rem',fontWeight:700,fontFamily:'var(--sans)',borderRadius:'10px',padding:'1px 4px',minWidth:'14px',textAlign:'center',lineHeight:'14px'}}>{notifCount>9?'9+':notifCount}</span>}
                   </Link>
                 )}
@@ -935,11 +935,11 @@ export default function ProfilePage() {
                                     const newR = { ...(profile.skill_ratings || {}), [s]: profile.skill_ratings?.[s] === n ? 0 : n }
                                     await saveField('skill_ratings', newR)
                                   }}
-                                  style={{ width:'22px', height:'5px', borderRadius:'1px', border:'none', cursor:'pointer', transition:'all 0.15s', background: n <= rating ? 'var(--gold)' : 'rgba(240,236,227,0.12)' }}
+                                  style={{ width:'22px', height:'5px', borderRadius:'1px', border:'none', cursor:'pointer', transition:'all 0.15s', background: n <= rating ? 'var(--gold)' : 'rgba(26,24,20,0.18)' }}
                                   title={SKILL_LEVEL_LABELS[n]}
                                 />
                               ))}
-                              {rating > 0 && <span style={{ fontSize:'0.52rem', color:'rgba(240,236,227,0.3)', marginLeft:'0.25rem' }}>{SKILL_LEVEL_LABELS[rating]}</span>}
+                              {rating > 0 && <span style={{ fontSize:'0.52rem', color:'var(--muted)', marginLeft:'0.25rem' }}>{SKILL_LEVEL_LABELS[rating]}</span>}
                             </div>
                           ) : (
                             <div className={styles.skillBarBg}>
@@ -1018,7 +1018,7 @@ export default function ProfilePage() {
             <div className={styles.contentSection}>
               <div className={styles.secLabel}>
                 Community Voice
-                {ratings.length > 0 && <span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'rgba(240,236,227,0.3)',letterSpacing:'normal',textTransform:'none'}}>({ratings.length} {ratings.length === 1 ? 'review' : 'reviews'})</span>}
+                {ratings.length > 0 && <span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'var(--muted)',letterSpacing:'normal',textTransform:'none'}}>({ratings.length} {ratings.length === 1 ? 'review' : 'reviews'})</span>}
               </div>
               {ratings.length === 0 ? (
                 <div className={styles.emptyState}>No reviews yet. Completed collabs will appear here.</div>
@@ -1066,7 +1066,7 @@ export default function ProfilePage() {
                     <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'0.75rem'}}>
                       <div className={styles.secLabel} style={{margin:0}}>
                         Active briefs
-                        {activeBriefs.length>0&&<span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'rgba(240,236,227,0.3)'}}>({activeBriefs.length})</span>}
+                        {activeBriefs.length>0&&<span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'var(--muted)'}}>({activeBriefs.length})</span>}
                       </div>
                       <Link href="/briefs?post=true" style={{fontFamily:'var(--sans)',fontSize:'0.62rem',color:'var(--gold)',textDecoration:'none',letterSpacing:'0.04em'}}>+ Post a brief</Link>
                     </div>
@@ -1079,7 +1079,7 @@ export default function ProfilePage() {
                     <div style={{marginBottom:'2rem'}}>
                       <div className={styles.secLabel} style={{marginBottom:'0.75rem'}}>
                         In negotiation
-                        {negotiations.length>0&&<span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'rgba(240,236,227,0.3)'}}>({negotiations.length})</span>}
+                        {negotiations.length>0&&<span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'var(--muted)'}}>({negotiations.length})</span>}
                       </div>
                       {negotiations.length===0
                         ?<div className={styles.emptyState}>No active negotiations.</div>
@@ -1091,7 +1091,7 @@ export default function ProfilePage() {
                     <div>
                       <div className={styles.secLabel} style={{marginBottom:'0.75rem'}}>
                         Applied briefs
-                        {appliedBriefs.length>0&&<span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'rgba(240,236,227,0.3)'}}>({appliedBriefs.length})</span>}
+                        {appliedBriefs.length>0&&<span style={{marginLeft:'0.5rem',fontFamily:'var(--sans)',fontSize:'0.6rem',color:'var(--muted)'}}>({appliedBriefs.length})</span>}
                       </div>
                       {appliedBriefs.length===0
                         ?<div className={styles.emptyState}>No applications sent yet.</div>

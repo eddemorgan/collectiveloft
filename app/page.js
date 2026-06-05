@@ -906,7 +906,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-grid"></div>
         <div className="hero-glow"></div>
-        <div className="eyebrow">Collective Loft · Est. 2026 · Chicago</div>
+        <div className="eyebrow">Collective Loft · Est. 2026 · </div>
 <h1>
   Building the infrastructure<br/>
   <em>meant</em> for the<br/>
@@ -1053,14 +1053,14 @@ export default function Home() {
               <div className="fw-num">01</div>
               <div className="fw-status fw-status-live">Live now · Year 1</div>
               <div className="fw-title">Collective Loft Platform</div>
-              <div className="fw-sub">Digital Network · Chicago &amp; Remote</div>
+              <div className="fw-sub">Digital Network · amp; Remote</div>
               <div className="fw-desc">The professional network for the creative class. Profiles, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio. Where creatives find each other and manage real projects together. The foundation everything else grows from.</div>
             </div>
             <div className="flywheel-card fw-02">
               <div className="fw-num">02</div>
               <div className="fw-status fw-status-planned">Planned · Year 2</div>
               <div className="fw-title">Collective Loft Studios</div>
-              <div className="fw-sub">Recording Studio · Chicago</div>
+              <div className="fw-sub">Recording & Art Studios · </div>
               <div className="fw-desc">Professional recording infrastructure built for independent artists. Multiple rooms, professional equipment, accessible rates. Priority booking and discounted rates for platform members. The physical home of the community the platform builds.</div>
             </div>
             <div className="flywheel-card fw-03">

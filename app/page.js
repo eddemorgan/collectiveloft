@@ -1053,7 +1053,7 @@ export default function Home() {
               <div className="fw-num">01</div>
               <div className="fw-status fw-status-live">Live now · Year 1</div>
               <div className="fw-title">Collective Loft Platform</div>
-              <div className="fw-sub">Digital Network · amp; Remote</div>
+              <div className="fw-sub">Digital Network · Remote</div>
               <div className="fw-desc">The professional network for the creative class. Profiles, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio. Where creatives find each other and manage real projects together. The foundation everything else grows from.</div>
             </div>
             <div className="flywheel-card fw-02">
@@ -1061,7 +1061,7 @@ export default function Home() {
               <div className="fw-status fw-status-planned">Planned · Year 2</div>
               <div className="fw-title">Collective Loft Studios</div>
               <div className="fw-sub">Recording & Art Studios · </div>
-              <div className="fw-desc">Professional recording infrastructure built for independent artists. Multiple rooms, professional equipment, accessible rates. Priority booking and discounted rates for platform members. The physical home of the community the platform builds.</div>
+              <div className="fw-desc">Professional recording and art infrastructure built for independent artists. Multiple rooms, professional equipment, accessible rates. Priority booking and discounted rates for platform members. The physical home of the community the platform builds.</div>
             </div>
             <div className="flywheel-card fw-03">
               <div className="fw-num">03</div>

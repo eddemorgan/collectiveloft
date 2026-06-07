@@ -50,7 +50,7 @@ The conversation still happens. The infrastructure just makes it the natural nex
 
 You do not need the platform to start protecting yourself right now. Before your next collaboration begins, write down your answers to these five questions and send them to your collaborator as a starting point for the conversation.
 
-What percentage of the work do each of us own? What is the compensation model — exchange, paid, or revenue share? What are three specific deliverables with formats and deadlines? How will we credit each other and where? What is the first milestone and when do we check in?
+What percentage of the work do each of us own? What is the compensation model: exchange, paid, or revenue share? What are three specific deliverables with formats and deadlines? How will we credit each other and where? What is the first milestone and when do we check in?
 
 That is the whole conversation. It takes fifteen minutes. It is the difference between a collaboration that builds something real and one that ends with a lawyer.
 

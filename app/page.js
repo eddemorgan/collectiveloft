@@ -419,7 +419,14 @@ export default function LandingPage() {
   return (
     <>
       <nav className={styles.nav}>
-        <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
+        <Link href="/" className={styles.logo} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', textDecoration: 'none', lineHeight: 1 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--serif)', fontSize: '1.6rem', fontWeight: 400, lineHeight: 1, letterSpacing: '0.02em' }}>
+            <span style={{ color: '#B8922E' }}>✦</span>
+            <span style={{ color: '#1A1A1A' }}>Collective <em style={{ fontStyle: 'italic', color: '#B8922E' }}>Loft</em></span>
+          </span>
+          <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(184,146,46,0.35)', margin: '5px 0' }} />
+          <span style={{ fontFamily: 'var(--sans)', fontSize: '8.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: '#7A7060' }}>Where creatives find each other</span>
+        </Link>
         <div className={styles.navLinks}>
           {authUser && profileSlug ? (
             <Link href={`/profile/${profileSlug}`}>My Profile</Link>

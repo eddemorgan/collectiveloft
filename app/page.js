@@ -7,7 +7,7 @@ export default function Home() {
         <title>Collective Loft — The Professional Network for the Creative Class</title>
         <meta name="description" content="The platform where artists, musicians, writers, designers, and filmmakers find each other, agree on terms, and make something real." />
         <meta property="og:title" content="Collective Loft" />
-        <meta property="og:description" content="Building the infrastructure meant for the creative class" />
+        <meta property="og:description" content="Building the infrastructure meant for the creative class." />
         <meta property="og:url" content="https://collectiveloft.com" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -899,18 +899,25 @@ export default function Home() {
       </div>
 
       <nav>
-        <a href="/" className="logo">Collective <span>Loft</span></a>
+        <a href="/" className="logo" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
+            <span style={{ color: 'var(--gold)' }}>✦</span>
+            <span>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
+          </span>
+          <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '5px 0' }} />
+          <span style={{ fontFamily: 'var(--sans)', fontSize: '8.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
+        </a>
         <a href="#waitlist" className="nav-cta">Request early access</a>
       </nav>
 
       <section className="hero">
         <div className="hero-grid"></div>
         <div className="hero-glow"></div>
-        <div className="eyebrow">Collective Loft · Est. 2026 · </div>
+        <div className="eyebrow">Collective Loft · Est. 2026 · Chicago</div>
 <h1>
   Building the infrastructure<br/>
   <em>meant</em> for the<br/>
-  <em>creative class</em>
+  <em>creative class.</em>
 </h1>
         <p className="hero-sub">
           The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and open a Loft Studio — a shared workspace built around the work.
@@ -1053,15 +1060,15 @@ export default function Home() {
               <div className="fw-num">01</div>
               <div className="fw-status fw-status-live">Live now · Year 1</div>
               <div className="fw-title">Collective Loft Platform</div>
-              <div className="fw-sub">Digital Network · Remote</div>
+              <div className="fw-sub">Digital Network · Chicago &amp; Remote</div>
               <div className="fw-desc">The professional network for the creative class. Profiles, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio. Where creatives find each other and manage real projects together. The foundation everything else grows from.</div>
             </div>
             <div className="flywheel-card fw-02">
               <div className="fw-num">02</div>
               <div className="fw-status fw-status-planned">Planned · Year 2</div>
               <div className="fw-title">Collective Loft Studios</div>
-              <div className="fw-sub">Recording & Art Studios · </div>
-              <div className="fw-desc">Professional recording and art infrastructure built for independent artists. Multiple rooms, professional equipment, accessible rates. Priority booking and discounted rates for platform members. The physical home of the community the platform builds.</div>
+              <div className="fw-sub">Recording Studio · Chicago</div>
+              <div className="fw-desc">Professional recording infrastructure built for independent artists. Multiple rooms, professional equipment, accessible rates. Priority booking and discounted rates for platform members. The physical home of the community the platform builds.</div>
             </div>
             <div className="flywheel-card fw-03">
               <div className="fw-num">03</div>
@@ -1142,7 +1149,14 @@ export default function Home() {
       </section>
 
       <footer>
-        <a href="/" className="footer-logo">Collective <span>Loft</span></a>
+        <a href="/" className="footer-logo" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', lineHeight: 1 }}>
+            <span style={{ color: 'var(--gold)' }}>✦</span>
+            <span>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
+          </span>
+          <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '4px 0' }} />
+          <span style={{ fontFamily: 'var(--sans)', fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
+        </a>
         <div className="footer-links">
           <a href="#how-it-works" className="footer-link">How it works</a>
           <a href="#waitlist" className="footer-link">Early access</a>

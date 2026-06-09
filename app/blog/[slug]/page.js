@@ -31,7 +31,14 @@ export default function PostPage({ params }) {
   return (
     <div className={styles.page}>
       <nav className={styles.nav}>
-        <Link href="/" className={styles.navLogo}>Collective<span>Loft</span></Link>
+        <Link href="/" className={styles.navLogo} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
+            <span style={{ color: '#8B6914' }}>✦</span>
+            <span style={{ color: '#1A1814' }}>Collective <em style={{ fontStyle: 'italic', color: '#8B6914' }}>Loft</em></span>
+          </span>
+          <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '5px 0' }} />
+          <span style={{ fontFamily: "Arial, sans-serif", fontSize: '8.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'rgba(26,24,20,0.5)' }}>Where creatives find each other</span>
+        </Link>
         <div className={styles.navLinks}>
           <Link href="/blog" className={styles.navLink}>← Blog</Link>
           <Link href="/discover" className={styles.navLink}>Discover</Link>
@@ -113,7 +120,14 @@ export default function PostPage({ params }) {
       )}
 
       <footer className={styles.footer}>
-        <Link href="/" className={styles.footerLogo}>Collective<span>Loft</span></Link>
+        <Link href="/" className={styles.footerLogo} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', lineHeight: 1 }}>
+            <span style={{ color: '#8B6914' }}>✦</span>
+            <span style={{ color: '#1A1814' }}>Collective <em style={{ fontStyle: 'italic', color: '#8B6914' }}>Loft</em></span>
+          </span>
+          <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '4px 0' }} />
+          <span style={{ fontFamily: "Arial, sans-serif", fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'rgba(26,24,20,0.5)' }}>Where creatives find each other</span>
+        </Link>
         <div className={styles.footerLinks}>
           <Link href="/discover" className={styles.footerLink}>Discover</Link>
           <Link href="/briefs" className={styles.footerLink}>Collabs</Link>

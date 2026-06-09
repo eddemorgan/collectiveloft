@@ -129,72 +129,13 @@ export default function PostPage({ params }) {
           <span style={{ fontFamily: "Arial, sans-serif", fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'rgba(26,24,20,0.5)' }}>Where creatives find each other</span>
         </Link>
         <div className={styles.footerLinks}>
-          <a href="#" id="blogHowItWorks" className={styles.footerLink}>How it works</a>
+          <Link href="/#how-it-works" className={styles.footerLink}>How it works</Link>
           <Link href="/#waitlist" className={styles.footerLink}>Early access</Link>
           <a href="https://www.instagram.com/the.collective.loft" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>Instagram</a>
           <a href="mailto:help@collectiveloft.com" className={styles.footerLink}>Contact</a>
         </div>
         <div className={styles.footerCopy}>© {new Date().getFullYear()} Morgan Collective Group LLC</div>
       </footer>
-
-      <div className="cl-demo-overlay" id="blogDemoModal">
-        <div className="cl-demo-inner">
-          <button className="cl-demo-close" id="blogDemoClose" aria-label="Close demo">✕</button>
-          <iframe id="blogDemoFrame" src="" title="Collective Loft Platform Demo" allow="autoplay" />
-        </div>
-      </div>
-
-      <style dangerouslySetInnerHTML={{__html: `
-        .cl-demo-overlay {
-          position: fixed; inset: 0; z-index: 1000;
-          background: rgba(10,8,6,0.82); backdrop-filter: blur(6px);
-          display: flex; align-items: center; justify-content: center;
-          padding: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
-        }
-        .cl-demo-overlay.open { opacity: 1; pointer-events: auto; }
-        .cl-demo-inner {
-          position: relative; width: 100%; max-width: 1100px; height: 80vh;
-          background: #1A1814; border-radius: 8px; overflow: hidden;
-          box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-          transform: translateY(12px) scale(0.99); transition: transform 0.4s ease;
-        }
-        .cl-demo-overlay.open .cl-demo-inner { transform: translateY(0) scale(1); }
-        .cl-demo-inner iframe { width: 100%; height: 100%; border: 0; display: block; }
-        .cl-demo-close {
-          position: absolute; top: 12px; right: 12px; z-index: 2;
-          width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
-          background: rgba(240,236,227,0.12); color: #F0ECE3; font-size: 1rem; line-height: 1;
-        }
-        .cl-demo-close:hover { background: rgba(240,236,227,0.22); }
-        @media (max-width: 900px) { .cl-demo-inner { height: 70vh; } }
-      `}} />
-
-      <script dangerouslySetInnerHTML={{__html: `
-        (function () {
-          var modal = document.getElementById('blogDemoModal');
-          var frame = document.getElementById('blogDemoFrame');
-          var btnOpen = document.getElementById('blogHowItWorks');
-          var btnClose = document.getElementById('blogDemoClose');
-          if (!modal || !btnOpen) return;
-          function openDemo(e) {
-            if (e) e.preventDefault();
-            if (!frame.src || frame.src === window.location.href) { frame.src = '/demo.html'; }
-            modal.classList.add('open');
-            document.body.style.overflow = 'hidden';
-          }
-          function closeDemo() {
-            modal.classList.remove('open');
-            document.body.style.overflow = '';
-            setTimeout(function () { frame.src = ''; }, 400);
-          }
-          btnOpen.addEventListener('click', openDemo);
-          btnClose.addEventListener('click', closeDemo);
-          modal.addEventListener('click', function (e) { if (e.target === modal) closeDemo(); });
-          document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape' && modal.classList.contains('open')) closeDemo();
-          });
-        })();
-      `}} />
     </div>
   )
 }

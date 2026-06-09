@@ -129,9 +129,10 @@ export default function PostPage({ params }) {
           <span style={{ fontFamily: "Arial, sans-serif", fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'rgba(26,24,20,0.5)' }}>Where creatives find each other</span>
         </Link>
         <div className={styles.footerLinks}>
-          <Link href="/discover" className={styles.footerLink}>Discover</Link>
-          <Link href="/briefs" className={styles.footerLink}>Collabs</Link>
-          <Link href="/blog" className={styles.footerLink}>Blog</Link>
+          <Link href="/#how-it-works" className={styles.footerLink}>How it works</Link>
+          <Link href="/#waitlist" className={styles.footerLink}>Early access</Link>
+          <a href="https://www.instagram.com/the.collective.loft" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>Instagram</a>
+          <a href="mailto:help@collectiveloft.com" className={styles.footerLink}>Contact</a>
         </div>
         <div className={styles.footerCopy}>© {new Date().getFullYear()} Morgan Collective Group LLC</div>
       </footer>

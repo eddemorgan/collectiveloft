@@ -45,43 +45,13 @@ export default function Nav() {
   }
  
   async function loadNotifCount(userId) {
-    let count = 0
- 
-    const { count: pendingTerms } = await supabase
-      .from('collab_terms')
+    const { count } = await supabase
+      .from('notifications')
       .select('id', { count: 'exact', head: true })
-      .eq('partner_id', userId)
-      .eq('status', 'pending')
- 
-    count += pendingTerms || 0
- 
-    const { count: unrated } = await supabase
-      .from('collab_terms')
-      .select('id', { count: 'exact', head: true })
-      .or(`initiator_id.eq.${userId},partner_id.eq.${userId}`)
-      .eq('status', 'complete')
-      .eq('rated', false)
- 
-    count += unrated || 0
- 
-    const { data: myBriefs } = await supabase
-      .from('briefs')
-      .select('id')
-      .eq('poster_id', userId)
-      .eq('status', 'open')
- 
-    if (myBriefs && myBriefs.length > 0) {
-      const briefIds = myBriefs.map(b => b.id)
-      const { count: apps } = await supabase
-        .from('applications')
-        .select('id', { count: 'exact', head: true })
-        .in('brief_id', briefIds)
-        .eq('seen', false)
- 
-      count += apps || 0
-    }
- 
-    setNotifCount(count)
+      .eq('user_id', userId)
+      .eq('read', false)
+
+    setNotifCount(count || 0)
   }
  
   const profileSlug = profile

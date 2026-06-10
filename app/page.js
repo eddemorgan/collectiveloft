@@ -7,7 +7,7 @@ export default function Home() {
         <title>Collective Loft — The Professional Network for the Creative Class</title>
         <meta name="description" content="The platform where artists, musicians, writers, designers, and filmmakers find each other, agree on terms, and make something real." />
         <meta property="og:title" content="Collective Loft" />
-        <meta property="og:description" content="Building the infrastructure meant for the creative class." />
+        <meta property="og:description" content="Building the infrastructure meant for the creative class" />
         <meta property="og:url" content="https://collectiveloft.com" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

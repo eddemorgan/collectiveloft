@@ -20,34 +20,45 @@ function timeAgo(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-function NotifCard({ icon, iconColor, title, sub, meta, href, tag, tagColor }) {
+// Visual style per notification type
+const TYPE_STYLE = {
+  application:   { icon: '✉', iconColor: 'rgba(160,120,208,0.18)', tag: 'New application', tagColor: '#a078d0' },
+  term_review:   { icon: '📋', iconColor: 'rgba(201,168,76,0.18)', tag: 'Action required', tagColor: '#C9A84C' },
+  rating_prompt: { icon: '★', iconColor: 'rgba(86,179,156,0.18)', tag: 'Rate now',        tagColor: '#56B39C' },
+  default:       { icon: '◈', iconColor: 'rgba(86,140,195,0.18)', tag: null,              tagColor: '#568cc3' },
+}
+
+function NotifCard({ notif, onOpen }) {
+  const style = TYPE_STYLE[notif.type] || TYPE_STYLE.default
+  const dim = notif.read
   return (
-    <Link href={href} style={{ textDecoration: 'none' }}>
+    <Link href={notif.link || '#'} style={{ textDecoration: 'none' }} onClick={() => onOpen(notif)}>
       <div style={{
         display: 'flex', alignItems: 'flex-start', gap: '1rem',
-        padding: '1.1rem 1.25rem', background: 'var(--bg1)',
+        padding: '1.1rem 1.25rem', background: dim ? 'transparent' : 'var(--bg1)',
         border: '0.5px solid rgba(26,24,20,0.08)', borderRadius: '4px',
         marginBottom: '0.65rem', transition: 'border-color 0.15s, background 0.15s', cursor: 'pointer',
+        opacity: dim ? 0.62 : 1,
       }}
         onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.25)'; e.currentTarget.style.background = 'rgba(201,168,76,0.03)' }}
-        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(26,24,20,0.08)'; e.currentTarget.style.background = 'var(--bg1)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(26,24,20,0.08)'; e.currentTarget.style.background = dim ? 'transparent' : 'var(--bg1)' }}
       >
-        <div style={{ width:'36px', height:'36px', borderRadius:'50%', flexShrink:0, background:iconColor||'rgba(201,168,76,0.15)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.9rem' }}>
-          {icon}
+        <div style={{ width:'36px', height:'36px', borderRadius:'50%', flexShrink:0, background:style.iconColor, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.9rem' }}>
+          {style.icon}
         </div>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', marginBottom:'0.2rem', flexWrap:'wrap' }}>
-            <span style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', fontWeight:600, color:'var(--cream)' }}>{title}</span>
-            {tag && (
-              <span style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', color:tagColor||'var(--gold)', background:tagColor?`${tagColor}22`:'rgba(201,168,76,0.12)', padding:'1px 6px', borderRadius:'2px' }}>
-                {tag}
+            <span style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', fontWeight:600, color:'var(--cream)' }}>{notif.title}</span>
+            {!notif.read && style.tag && (
+              <span style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:600, letterSpacing:'0.1em', textTransform:'uppercase', color:style.tagColor, background:`${style.tagColor}22`, padding:'1px 6px', borderRadius:'2px' }}>
+                {style.tag}
               </span>
             )}
           </div>
-          <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--cream)', lineHeight:1.5 }}>{sub}</div>
+          <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--cream)', lineHeight:1.5 }}>{notif.body}</div>
         </div>
         <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'0.3rem', flexShrink:0 }}>
-          <span style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'var(--muted)' }}>{meta}</span>
+          <span style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'var(--muted)' }}>{timeAgo(notif.created_at)}</span>
           <span style={{ color:'var(--muted)', fontSize:'0.75rem' }}>↗</span>
         </div>
       </div>
@@ -66,149 +77,54 @@ function SectionLabel({ label, count }) {
 
 export default function NotificationsPage() {
   const router = useRouter()
-  const [loading,     setLoading]     = useState(true)
-  const [actionItems, setActionItems] = useState([])
-  const [updateItems, setUpdateItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [items,   setItems]   = useState([])
+  const [userId,  setUserId]  = useState(null)
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      setUserId(user.id)
 
-      const actions = []
-      const updates = []
-
-      // 1. Terms waiting for my review
-      const { data: pendingTerms } = await supabase
-        .from('collab_terms')
-        .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(firstname, lastname)`)
-        .or(`initiator_id.eq.${user.id},partner_id.eq.${user.id}`)
-        .eq('status', 'pending')
+      const { data } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
+        .limit(100)
 
-      for (const t of pendingTerms || []) {
-        const isInitiator = t.initiator_id === user.id
-        const other = t.initiator ? `${t.initiator.firstname} ${t.initiator.lastname}` : 'Someone'
-        const myTurn = (t.current_editor === 'partner' && !isInitiator) || (t.current_editor === 'initiator' && isInitiator)
-
-        if (myTurn) {
-          actions.push({
-            key: `terms-${t.id}`,
-            icon: '📋',
-            iconColor: 'rgba(201,168,76,0.18)',
-            title: isInitiator ? `Your modified terms are back` : `${other} sent you collab terms`,
-            sub: t.project_title ? `Project: ${t.project_title} · Review on your profile Briefs tab` : 'Review the terms on your profile Briefs tab.',
-            meta: timeAgo(t.created_at),
-            href: `/profile/${user.id}#briefs`,
-            tag: 'Action required',
-            tagColor: '#C9A84C',
-          })
-        }
-      }
-
-      // 2. Completed studios I haven't rated -- check ratings table per-user, not rated flag
-      const { data: completedStudios } = await supabase
-        .from('collab_terms')
-        .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(firstname, lastname), partner:profiles!collab_terms_partner_id_fkey(firstname, lastname)`)
-        .or(`initiator_id.eq.${user.id},partner_id.eq.${user.id}`)
-        .eq('status', 'complete')
-        .order('updated_at', { ascending: false })
-
-      const { data: myRatings } = await supabase
-        .from('ratings')
-        .select('studio_id')
-        .eq('rater_id', user.id)
-        .eq('submitted', true)
-
-      const ratedStudioIds = new Set((myRatings || []).map(r => r.studio_id))
-
-      for (const t of completedStudios || []) {
-        if (ratedStudioIds.has(t.id)) continue
-        const other = t.initiator_id === user.id ? t.partner : t.initiator
-        const name  = other ? `${other.firstname} ${other.lastname}` : 'your collaborator'
-        actions.push({
-          key: `rate-${t.id}`,
-          icon: '★',
-          iconColor: 'rgba(86,179,156,0.18)',
-          title: `Rate your collab with ${name}`,
-          sub: t.project_title ? `${t.project_title} is complete. Leave a review.` : 'This collaboration is complete. Leave a review.',
-          meta: timeAgo(t.updated_at),
-          href: `/rating?studio=${t.id}`,
-          tag: 'Rate now',
-          tagColor: '#56B39C',
-        })
-      }
-
-      // 3. Applications to my briefs
-      const { data: myBriefs } = await supabase
-        .from('briefs')
-        .select('id, title')
-        .eq('poster_id', user.id)
-        .eq('status', 'open')
-
-      if (myBriefs && myBriefs.length > 0) {
-        const briefMap = Object.fromEntries(myBriefs.map(b => [b.id, b]))
-        const briefIds = myBriefs.map(b => b.id)
-
-        const { data: apps } = await supabase
-          .from('applications')
-          .select(`*, applicant:profiles!applications_applicant_id_fkey(firstname, lastname)`)
-          .in('brief_id', briefIds)
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false })
-          .limit(20)
-
-        for (const a of apps || []) {
-          const name  = a.applicant ? `${a.applicant.firstname} ${a.applicant.lastname}` : 'Someone'
-          const brief = briefMap[a.brief_id]
-          const title = brief?.title || 'your brief'
-          updates.push({
-            key: `app-${a.id}`,
-            icon: '✉',
-            iconColor: 'rgba(160,120,208,0.18)',
-            title: `${name} applied to your brief`,
-            sub: `"${title}" · Click to open the brief and review their application`,
-            meta: timeAgo(a.created_at),
-            href: `/briefs?open=${a.brief_id}`,
-            tag: 'New application',
-            tagColor: '#a078d0',
-          })
-        }
-      }
-
-      // 4. Active studios
-      const { data: activeStudios } = await supabase
-        .from('collab_terms')
-        .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(firstname, lastname), partner:profiles!collab_terms_partner_id_fkey(firstname, lastname)`)
-        .or(`initiator_id.eq.${user.id},partner_id.eq.${user.id}`)
-        .eq('status', 'active')
-        .order('updated_at', { ascending: false })
-        .limit(5)
-
-      for (const t of activeStudios || []) {
-        const other = t.initiator_id === user.id ? t.partner : t.initiator
-        const name  = other ? `${other.firstname} ${other.lastname}` : 'your collaborator'
-        updates.push({
-          key: `studio-${t.id}`,
-          icon: '◈',
-          iconColor: 'rgba(86,140,195,0.18)',
-          title: `Studio open with ${name}`,
-          sub: t.project_title ? `${t.project_title} · In progress` : 'Your collaboration is active.',
-          meta: timeAgo(t.updated_at),
-          href: `/studio/${t.id}`,
-          tag: 'Active',
-          tagColor: '#568cc3',
-        })
-      }
-
-      setActionItems(actions)
-      setUpdateItems(updates)
+      setItems(data || [])
       setLoading(false)
     }
     load()
   }, [])
 
-  const totalCount = actionItems.length + updateItems.length
+  // Mark a single notification read (optimistic + DB write). Navigation proceeds via the Link.
+  async function handleOpen(notif) {
+    if (notif.read) return
+    setItems(prev => prev.map(n => n.id === notif.id ? { ...n, read: true, read_at: new Date().toISOString() } : n))
+    await supabase
+      .from('notifications')
+      .update({ read: true, read_at: new Date().toISOString() })
+      .eq('id', notif.id)
+      .eq('user_id', userId)
+  }
+
+  async function markAllRead() {
+    const unreadIds = items.filter(n => !n.read).map(n => n.id)
+    if (unreadIds.length === 0) return
+    setItems(prev => prev.map(n => ({ ...n, read: true })))
+    await supabase
+      .from('notifications')
+      .update({ read: true, read_at: new Date().toISOString() })
+      .in('id', unreadIds)
+      .eq('user_id', userId)
+  }
+
+  const newItems  = items.filter(n => !n.read)
+  const readItems = items.filter(n => n.read)
+  const newCount  = newItems.length
 
   return (
     <div style={{ display:'flex', flexDirection:'column', minHeight:'100vh' }}>
@@ -218,31 +134,38 @@ export default function NotificationsPage() {
         <div style={{ marginBottom:'2rem' }}>
           <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.2em', textTransform:'uppercase', color:'var(--gold)', opacity:0.75, marginBottom:'0.4rem' }}>Collective Loft</div>
           <div style={{ fontFamily:'var(--serif)', fontSize:'2rem', fontWeight:700, color:'var(--cream)', marginBottom:'0.3rem' }}>Message Center</div>
-          <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--muted)', fontWeight:300 }}>
-            {loading ? 'Loading…' : totalCount === 0 ? 'You\'re all caught up.' : `${totalCount} item${totalCount > 1 ? 's' : ''} waiting for you`}
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'1rem', flexWrap:'wrap' }}>
+            <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--muted)', fontWeight:300 }}>
+              {loading ? 'Loading…' : newCount === 0 ? 'You\'re all caught up.' : `${newCount} new message${newCount > 1 ? 's' : ''} waiting for you`}
+            </div>
+            {!loading && newCount > 0 && (
+              <button onClick={markAllRead} style={{ fontFamily:'var(--sans)', fontSize:'0.66rem', letterSpacing:'0.04em', color:'var(--muted)', background:'none', border:'0.5px solid rgba(26,24,20,0.15)', borderRadius:'3px', padding:'4px 10px', cursor:'pointer' }}>
+                Mark all read
+              </button>
+            )}
           </div>
         </div>
 
         {loading ? (
           <div style={{ textAlign:'center', padding:'3rem', color:'var(--muted)', fontFamily:'var(--sans)', fontSize:'0.78rem' }}>✦ Loading…</div>
-        ) : totalCount === 0 ? (
+        ) : items.length === 0 ? (
           <div style={{ textAlign:'center', padding:'4rem 2rem', background:'var(--bg1)', border:'0.5px solid rgba(26,24,20,0.06)', borderRadius:'6px' }}>
             <div style={{ fontSize:'2rem', marginBottom:'0.75rem', opacity:0.3 }}>✉</div>
             <div style={{ fontFamily:'var(--serif)', fontSize:'1.1rem', color:'var(--cream)', marginBottom:'0.4rem' }}>All caught up.</div>
-            <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--muted)', lineHeight:1.65 }}>No pending terms, ratings, or applications right now. When something needs your attention, it'll show up here.</div>
+            <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--muted)', lineHeight:1.65 }}>No applications, terms, or rating prompts right now. When something needs your attention, it&apos;ll show up here.</div>
           </div>
         ) : (
           <>
-            {actionItems.length > 0 && (
+            {newItems.length > 0 && (
               <>
-                <SectionLabel label="Action required" count={actionItems.length} />
-                {actionItems.map(n => <NotifCard key={n.key} {...n} />)}
+                <SectionLabel label="New messages" count={newItems.length} />
+                {newItems.map(n => <NotifCard key={n.id} notif={n} onOpen={handleOpen} />)}
               </>
             )}
-            {updateItems.length > 0 && (
+            {readItems.length > 0 && (
               <>
-                <SectionLabel label="Updates" count={updateItems.length} />
-                {updateItems.map(n => <NotifCard key={n.key} {...n} />)}
+                <SectionLabel label="Read messages" count={0} />
+                {readItems.map(n => <NotifCard key={n.id} notif={n} onOpen={handleOpen} />)}
               </>
             )}
           </>

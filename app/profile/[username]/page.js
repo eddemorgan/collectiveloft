@@ -537,36 +537,12 @@ export default function ProfilePage() {
   }
 
   async function loadNotifCount(userId) {
-    let count = 0
-    const { data: myTerms } = await supabase
-      .from('collab_terms')
-      .select('id, current_editor, initiator_id, partner_id')
-      .or(`initiator_id.eq.${userId},partner_id.eq.${userId}`)
-      .eq('status', 'pending')
-    for (const t of myTerms || []) {
-      const myTurn = (t.current_editor === 'initiator' && t.initiator_id === userId) ||
-                     (t.current_editor === 'partner'   && t.partner_id   === userId)
-      if (myTurn) count++
-    }
-    const { data: completedForRating } = await supabase
-      .from('collab_terms')
-      .select('id')
-      .or(`initiator_id.eq.${userId},partner_id.eq.${userId}`)
-      .eq('status', 'complete')
-    const { data: mySubmittedRatings } = await supabase
-      .from('ratings')
-      .select('studio_id')
-      .eq('rater_id', userId)
-      .eq('submitted', true)
-    const ratedSet = new Set((mySubmittedRatings || []).map(r => r.studio_id))
-    const unratedCount = (completedForRating || []).filter(s => !ratedSet.has(s.id)).length
-    count += unratedCount
-    const { data: mb } = await supabase.from('briefs').select('id').eq('poster_id', userId).eq('status', 'open')
-    if (mb && mb.length > 0) {
-      const { count: apps } = await supabase.from('applications').select('id', { count:'exact', head:true }).in('brief_id', mb.map(b => b.id)).eq('seen', false)
-      count += apps || 0
-    }
-    setNotifCount(count)
+    const { count } = await supabase
+      .from('notifications')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('read', false)
+    setNotifCount(count || 0)
   }
 
   async function handleSignOut() { await supabase.auth.signOut(); router.push('/') }
@@ -729,14 +705,7 @@ export default function ProfilePage() {
       )}
 
       <nav className={styles.nav}>
-        <Link href="/" className={styles.logo} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', textDecoration: 'none', lineHeight: 1 }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--serif)', fontSize: '1.6rem', fontWeight: 400, lineHeight: 1, letterSpacing: '0.02em' }}>
-            <span style={{ color: '#B8922E' }}>✦</span>
-            <span style={{ color: '#1A1A1A' }}>Collective <em style={{ fontStyle: 'italic', color: '#B8922E' }}>Loft</em></span>
-          </span>
-          <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(184,146,46,0.35)', margin: '5px 0' }} />
-          <span style={{ fontFamily: 'var(--sans)', fontSize: '8.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: '#7A7060' }}>Where creatives find each other</span>
-        </Link>
+        <Link href="/" className={styles.logo}>Collective <span>Loft</span></Link>
         <div className={styles.navLinks}>
           <Link href="/discover">Discover</Link>
           <Link href="/briefs">Collabs</Link>

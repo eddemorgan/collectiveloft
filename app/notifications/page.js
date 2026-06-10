@@ -150,16 +150,13 @@ export default function NotificationsPage() {
         <div style={{ marginBottom:'2rem' }}>
           <div style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.2em', textTransform:'uppercase', color:'var(--gold)', opacity:0.75, marginBottom:'0.4rem' }}>Collective Loft</div>
           <div style={{ fontFamily:'var(--serif)', fontSize:'2rem', fontWeight:700, color:'var(--cream)', marginBottom:'0.3rem' }}>Message Center</div>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'1rem', flexWrap:'wrap' }}>
-            <div style={{ fontFamily:'var(--sans)', fontSize:'0.75rem', color:'var(--muted)', fontWeight:300 }}>
-              {loading ? 'Loading…' : newCount === 0 ? 'You\'re all caught up.' : `${newCount} new message${newCount > 1 ? 's' : ''} waiting for you`}
-            </div>
-            {!loading && newCount > 0 && (
+          {!loading && newCount > 0 && (
+            <div style={{ display:'flex', justifyContent:'flex-end' }}>
               <button onClick={markAllRead} style={{ fontFamily:'var(--sans)', fontSize:'0.66rem', letterSpacing:'0.04em', color:'var(--muted)', background:'none', border:'0.5px solid rgba(26,24,20,0.15)', borderRadius:'3px', padding:'4px 10px', cursor:'pointer' }}>
                 Mark all read
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {loading ? (

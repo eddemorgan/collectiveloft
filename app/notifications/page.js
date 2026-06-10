@@ -66,12 +66,27 @@ function NotifCard({ notif, onOpen }) {
   )
 }
 
-function SectionLabel({ label, count }) {
+function Tab({ label, count, active, onClick, accent }) {
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', marginBottom:'0.65rem', marginTop:'1.5rem' }}>
-      <span style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', letterSpacing:'0.16em', textTransform:'uppercase', color:'var(--muted)' }}>{label}</span>
-      {count > 0 && <span style={{ fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:700, background:'rgba(201,168,76,0.15)', color:'var(--gold)', padding:'1px 6px', borderRadius:'2px' }}>{count}</span>}
-    </div>
+    <button onClick={onClick} style={{
+      display:'flex', alignItems:'center', gap:'0.45rem',
+      fontFamily:'var(--sans)', fontSize:'0.7rem', letterSpacing:'0.1em', textTransform:'uppercase',
+      fontWeight:600, color: active ? 'var(--cream)' : 'var(--muted)',
+      background:'none', border:'none', cursor:'pointer',
+      padding:'0.65rem 0.15rem', marginRight:'1.75rem',
+      borderBottom: active ? '2px solid var(--gold)' : '2px solid transparent',
+      transition:'color 0.15s, border-color 0.15s',
+    }}>
+      {label}
+      {count > 0 && (
+        <span style={{
+          fontFamily:'var(--sans)', fontSize:'0.58rem', fontWeight:700,
+          background: accent ? 'rgba(201,168,76,0.15)' : 'rgba(26,24,20,0.1)',
+          color: accent ? 'var(--gold)' : 'var(--muted)',
+          padding:'1px 6px', borderRadius:'2px',
+        }}>{count}</span>
+      )}
+    </button>
   )
 }
 
@@ -80,6 +95,7 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true)
   const [items,   setItems]   = useState([])
   const [userId,  setUserId]  = useState(null)
+  const [activeTab, setActiveTab] = useState('new')
 
   useEffect(() => {
     async function load() {
@@ -156,17 +172,21 @@ export default function NotificationsPage() {
           </div>
         ) : (
           <>
-            {newItems.length > 0 && (
-              <>
-                <SectionLabel label="New messages" count={newItems.length} />
-                {newItems.map(n => <NotifCard key={n.id} notif={n} onOpen={handleOpen} />)}
-              </>
+            <div style={{ display:'flex', alignItems:'center', borderBottom:'0.5px solid rgba(26,24,20,0.12)', marginBottom:'1.25rem' }}>
+              <Tab label="New" count={newItems.length} active={activeTab === 'new'} onClick={() => setActiveTab('new')} accent />
+              <Tab label="Read" count={readItems.length} active={activeTab === 'read'} onClick={() => setActiveTab('read')} />
+            </div>
+
+            {activeTab === 'new' && (
+              newItems.length > 0
+                ? newItems.map(n => <NotifCard key={n.id} notif={n} onOpen={handleOpen} />)
+                : <div style={{ textAlign:'center', padding:'3rem 2rem', color:'var(--muted)', fontFamily:'var(--sans)', fontSize:'0.74rem' }}>No new messages. You&apos;re all caught up.</div>
             )}
-            {readItems.length > 0 && (
-              <>
-                <SectionLabel label="Read messages" count={0} />
-                {readItems.map(n => <NotifCard key={n.id} notif={n} onOpen={handleOpen} />)}
-              </>
+
+            {activeTab === 'read' && (
+              readItems.length > 0
+                ? readItems.map(n => <NotifCard key={n.id} notif={n} onOpen={handleOpen} />)
+                : <div style={{ textAlign:'center', padding:'3rem 2rem', color:'var(--muted)', fontFamily:'var(--sans)', fontSize:'0.74rem' }}>No read messages yet.</div>
             )}
           </>
         )}

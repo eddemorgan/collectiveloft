@@ -1,4 +1,14 @@
 .page {
+  /* Light-theme overrides, scoped to this page only, so it matches Discover and
+     the rest of the app (dark text on cream) instead of the original dark design. */
+  --bg: #EDE9E0;        /* page background (cream) */
+  --bg1: #F4F1EA;       /* cards / inputs (lighter cream) */
+  --bg2: #E7E2D6;       /* nested / secondary surfaces */
+  --cream: #1A1A1A;     /* primary text (now dark ink, not cream) */
+  --faint: #6A6358;     /* secondary text */
+  --dim: #2A2620;       /* emphasized secondary text */
+  --rule: rgba(26,24,20,0.12);
+
   min-height: 100vh;
   background: var(--bg);
   color: var(--cream);
@@ -30,12 +40,12 @@
 }
 .stepDone .stepNum   { background: rgba(86,179,156,0.2);  color: var(--teal); border: 0.5px solid rgba(86,179,156,0.35); }
 .stepActive .stepNum { background: rgba(201,168,76,0.15); color: var(--gold); border: 0.5px solid rgba(201,168,76,0.4); }
-.stepUpcoming .stepNum { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.25); border: 0.5px solid rgba(255,255,255,0.1); }
+.stepUpcoming .stepNum { background: rgba(26,24,20,0.05); color: rgba(26,24,20,0.25); border: 0.5px solid rgba(26,24,20,0.1); }
 .stepLabel { font-size: 0.62rem; font-weight: 300; }
-.stepDone .stepLabel    { color: rgba(255,255,255,0.3); }
+.stepDone .stepLabel    { color: rgba(26,24,20,0.3); }
 .stepActive .stepLabel  { color: var(--gold); font-weight: 400; }
-.stepUpcoming .stepLabel { color: rgba(255,255,255,0.2); }
-.stepDivider { width: 20px; height: 0.5px; background: rgba(255,255,255,0.1); }
+.stepUpcoming .stepLabel { color: rgba(26,24,20,0.2); }
+.stepDivider { width: 20px; height: 0.5px; background: rgba(26,24,20,0.1); }
 
 /* PAGE LAYOUT */
 .pageLayout {
@@ -49,13 +59,13 @@
 /* FORM SIDE */
 .formSide {
   padding: 2.5rem 2.5rem 4rem;
-  border-right: 0.5px solid rgba(255,255,255,0.06);
+  border-right: 0.5px solid rgba(26,24,20,0.06);
 }
 
 /* CONTEXT BAR */
 .contextBar {
-  background: rgba(255,255,255,0.03);
-  border: 0.5px solid rgba(255,255,255,0.07);
+  background: rgba(26,24,20,0.03);
+  border: 0.5px solid rgba(26,24,20,0.07);
   border-radius: 4px;
   padding: 0.85rem 1rem;
   display: flex;
@@ -95,10 +105,10 @@
 .field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
 .field:last-child { margin-bottom: 0; }
 .field label { font-size: 0.72rem; color: var(--dim); }
-.opt { color: rgba(255,255,255,0.28); font-weight: 300; font-size: 0.65rem; }
+.opt { color: rgba(26,24,20,0.28); font-weight: 300; font-size: 0.65rem; }
 .field input, .field select, .field textarea {
   background: var(--bg1);
-  border: 0.5px solid rgba(255,255,255,0.1);
+  border: 0.5px solid rgba(26,24,20,0.1);
   border-radius: 3px;
   padding: 0.6rem 0.8rem;
   font-family: var(--sans);
@@ -109,17 +119,17 @@
   transition: border-color 0.15s;
 }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(201,168,76,0.4); }
-.field input::placeholder, .field textarea::placeholder { color: rgba(255,255,255,0.18); }
+.field input::placeholder, .field textarea::placeholder { color: rgba(26,24,20,0.18); }
 .field textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
 .field select {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.25)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(26,24,20,0.45)'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   padding-right: 2rem;
 }
 .field select option { background: var(--bg1); }
-.hint { font-size: 0.62rem; color: rgba(255,255,255,0.25); font-weight: 300; line-height: 1.5; }
+.hint { font-size: 0.62rem; color: rgba(26,24,20,0.25); font-weight: 300; line-height: 1.5; }
 
 .fieldRow { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
 
@@ -127,17 +137,17 @@
 .amountRow { display: flex; gap: 0.4rem; align-items: center; }
 .currencyBox {
   background: var(--bg2);
-  border: 0.5px solid rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(26,24,20,0.08);
   border-radius: 3px;
   padding: 0.6rem 0.65rem;
   font-size: 0.72rem;
-  color: rgba(255,255,255,0.35);
+  color: rgba(26,24,20,0.35);
   flex-shrink: 0;
 }
 .amtInput {
   flex: 1;
   background: var(--bg1);
-  border: 0.5px solid rgba(255,255,255,0.1);
+  border: 0.5px solid rgba(26,24,20,0.1);
   border-radius: 3px;
   padding: 0.6rem 0.75rem;
   font-family: var(--sans);
@@ -147,22 +157,22 @@
   transition: border-color 0.15s;
 }
 .amtInput:focus { border-color: rgba(201,168,76,0.4); }
-.amtInput::placeholder { color: rgba(255,255,255,0.18); }
-.amtTo { font-size: 0.7rem; color: rgba(255,255,255,0.28); flex-shrink: 0; }
+.amtInput::placeholder { color: rgba(26,24,20,0.18); }
+.amtTo { font-size: 0.7rem; color: rgba(26,24,20,0.28); flex-shrink: 0; }
 
 /* MILESTONES */
 .msBuilder { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 0.4rem; }
 .msRow { display: flex; align-items: center; gap: 0.5rem; }
 .msNum {
   width: 18px; height: 18px; border-radius: 50%;
-  border: 0.5px solid rgba(255,255,255,0.12);
+  border: 0.5px solid rgba(26,24,20,0.12);
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.55rem; color: rgba(255,255,255,0.3); flex-shrink: 0;
+  font-size: 0.55rem; color: rgba(26,24,20,0.3); flex-shrink: 0;
 }
 .msInp {
   flex: 1;
   background: var(--bg1);
-  border: 0.5px solid rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(26,24,20,0.08);
   border-radius: 3px;
   padding: 0.38rem 0.6rem;
   font-family: var(--sans);
@@ -172,11 +182,11 @@
   transition: border-color 0.15s;
 }
 .msInp:focus { border-color: rgba(201,168,76,0.35); }
-.msInp::placeholder { color: rgba(255,255,255,0.15); }
+.msInp::placeholder { color: rgba(26,24,20,0.15); }
 .msPct {
   width: 60px;
   background: var(--bg2);
-  border: 0.5px solid rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(26,24,20,0.08);
   border-radius: 3px;
   padding: 0.38rem 0.5rem;
   font-family: var(--sans);
@@ -195,8 +205,8 @@
   font-size: 0.75rem;
   color: var(--dim);
   padding: 0.38rem 0.6rem;
-  background: rgba(255,255,255,0.02);
-  border: 0.5px solid rgba(255,255,255,0.06);
+  background: rgba(26,24,20,0.02);
+  border: 0.5px solid rgba(26,24,20,0.06);
   border-radius: 3px;
 }
 .msPctHeader {
@@ -205,14 +215,14 @@
   font-size: 0.56rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.25);
+  color: rgba(26,24,20,0.25);
 }
 .msDescHeader {
   flex: 1;
   font-size: 0.56rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.25);
+  color: rgba(26,24,20,0.25);
 }
 .msTotalRow {
   display: flex;
@@ -227,12 +237,12 @@
 }
 .btnAddMs {
   background: transparent;
-  border: 0.5px dashed rgba(255,255,255,0.1);
+  border: 0.5px dashed rgba(26,24,20,0.1);
   border-radius: 3px;
   padding: 0.38rem;
   font-family: var(--sans);
   font-size: 0.62rem;
-  color: rgba(255,255,255,0.22);
+  color: rgba(26,24,20,0.22);
   cursor: pointer;
   transition: all 0.15s;
   letter-spacing: 0.05em;
@@ -247,7 +257,7 @@
 .delRow { display: flex; align-items: center; gap: 0.5rem; }
 .delChk {
   width: 16px; height: 16px; border-radius: 2px; flex-shrink: 0;
-  border: 0.5px solid rgba(255,255,255,0.12);
+  border: 0.5px solid rgba(26,24,20,0.12);
   display: flex; align-items: center; justify-content: center;
   font-size: 0.62rem; cursor: pointer; transition: all 0.15s;
 }
@@ -258,7 +268,7 @@
 /* COLLAB TYPE */
 .typeChooser { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.55rem; margin-bottom: 2rem; }
 .typeCard {
-  border: 0.5px solid rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(26,24,20,0.08);
   border-radius: 4px;
   padding: 0.9rem 0.85rem;
   cursor: pointer;
@@ -267,7 +277,7 @@
   user-select: none;
   position: relative;
 }
-.typeCard:hover { border-color: rgba(255,255,255,0.18); }
+.typeCard:hover { border-color: rgba(26,24,20,0.18); }
 .typeCardSelected { border-color: var(--gold) !important; background: rgba(201,168,76,0.06) !important; }
 .typeCardSelected::after { content: '✓'; position: absolute; top: 0.55rem; right: 0.6rem; font-size: 0.6rem; color: var(--gold); }
 .typeIcon { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--gold); }
@@ -284,31 +294,31 @@
 .badgeEx { background: rgba(86,179,156,0.1);  border: 0.5px solid rgba(86,179,156,0.3);  color: rgba(86,179,156,0.85); }
 .badgePd { background: rgba(201,168,76,0.1);  border: 0.5px solid rgba(201,168,76,0.3);  color: rgba(201,168,76,0.85); }
 .badgeRs { background: rgba(160,120,208,0.1); border: 0.5px solid rgba(160,120,208,0.3); color: rgba(160,120,208,0.85); }
-.typeDesc { font-size: 0.65rem; color: rgba(255,255,255,0.35); line-height: 1.5; font-weight: 300; }
+.typeDesc { font-size: 0.65rem; color: rgba(26,24,20,0.35); line-height: 1.5; font-weight: 300; }
 
 /* RIGHTS */
 .rightsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
 .rightsOpt {
   background: var(--bg1);
-  border: 0.5px solid rgba(255,255,255,0.07);
+  border: 0.5px solid rgba(26,24,20,0.07);
   border-radius: 3px;
   padding: 0.65rem 0.75rem;
   cursor: pointer;
   transition: all 0.15s;
   user-select: none;
 }
-.rightsOpt:hover { border-color: rgba(255,255,255,0.18); }
+.rightsOpt:hover { border-color: rgba(26,24,20,0.18); }
 .rightsOptSelected { background: rgba(201,168,76,0.06); border-color: rgba(201,168,76,0.28); }
-.rightsTitle { font-size: 0.7rem; font-weight: 500; color: rgba(255,255,255,0.55); margin-bottom: 0.15rem; transition: color 0.15s; }
+.rightsTitle { font-size: 0.7rem; font-weight: 500; color: rgba(26,24,20,0.55); margin-bottom: 0.15rem; transition: color 0.15s; }
 .rightsOptSelected .rightsTitle { color: var(--gold); }
-.rightsDesc { font-size: 0.58rem; color: rgba(255,255,255,0.25); line-height: 1.45; font-weight: 300; }
+.rightsDesc { font-size: 0.58rem; color: rgba(26,24,20,0.25); line-height: 1.45; font-weight: 300; }
 
 /* EXAMPLES */
 .exampleStrip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-bottom: 2rem; }
-.exampleCard { background: var(--bg1); border: 0.5px solid rgba(255,255,255,0.06); border-radius: 4px; padding: 0.85rem; }
-.exLabel { font-size: 0.52rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(255,255,255,0.2); margin-bottom: 0.45rem; }
+.exampleCard { background: var(--bg1); border: 0.5px solid rgba(26,24,20,0.06); border-radius: 4px; padding: 0.85rem; }
+.exLabel { font-size: 0.52rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(26,24,20,0.2); margin-bottom: 0.45rem; }
 .exTitle { font-family: var(--serif); font-size: 0.85rem; color: var(--cream); margin-bottom: 0.22rem; }
-.exPeople { font-size: 0.6rem; color: rgba(255,255,255,0.28); margin-bottom: 0.35rem; }
+.exPeople { font-size: 0.6rem; color: rgba(26,24,20,0.28); margin-bottom: 0.35rem; }
 .exTerms { font-size: 0.68rem; color: var(--faint); line-height: 1.55; font-weight: 300; }
 .exTerms strong { color: var(--dim); font-weight: 500; }
 
@@ -334,7 +344,7 @@
 .btnBack {
   background: transparent;
   color: var(--faint);
-  border: 0.5px solid rgba(255,255,255,0.12);
+  border: 0.5px solid rgba(26,24,20,0.12);
   padding: 0.7rem 1.25rem;
   font-family: var(--sans);
   font-size: 0.72rem;
@@ -354,26 +364,26 @@
   top: 56px;
   height: calc(100vh - 56px);
   overflow-y: auto;
-  background: rgba(255,255,255,0.01);
+  background: rgba(26,24,20,0.01);
 }
 .summaryHeader {
   font-size: 0.58rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.25);
+  color: rgba(26,24,20,0.25);
   margin-bottom: 1.1rem;
 }
 .summaryCard {
   background: var(--bg1);
-  border: 0.5px solid rgba(255,255,255,0.07);
+  border: 0.5px solid rgba(26,24,20,0.07);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 1rem;
   transition: border-color 0.3s;
 }
 .hasContent { border-color: rgba(201,168,76,0.2); }
-.scHdr { padding: 0.75rem 0.9rem; border-bottom: 0.5px solid rgba(255,255,255,0.05); }
-.scType { font-size: 0.54rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.22); margin-bottom: 0.22rem; }
+.scHdr { padding: 0.75rem 0.9rem; border-bottom: 0.5px solid rgba(26,24,20,0.05); }
+.scType { font-size: 0.54rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(26,24,20,0.22); margin-bottom: 0.22rem; }
 .scTitle { font-family: var(--serif); font-size: 0.88rem; color: var(--cream); line-height: 1.3; }
 .scRows { padding: 0; }
 .scRow {
@@ -381,14 +391,14 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 0.4rem 0.9rem;
-  border-bottom: 0.5px solid rgba(255,255,255,0.04);
+  border-bottom: 0.5px solid rgba(26,24,20,0.04);
 }
 .scRow:last-child { border-bottom: none; }
-.scK { font-size: 0.62rem; color: rgba(255,255,255,0.28); font-weight: 300; flex-shrink: 0; padding-right: 0.5rem; }
+.scK { font-size: 0.62rem; color: rgba(26,24,20,0.28); font-weight: 300; flex-shrink: 0; padding-right: 0.5rem; }
 .scV { font-size: 0.62rem; color: var(--dim); text-align: right; line-height: 1.45; }
 .gold { color: var(--gold); }
 .teal { color: var(--teal); }
-.empty { color: rgba(255,255,255,0.15); font-style: italic; }
+.empty { color: rgba(26,24,20,0.15); font-style: italic; }
 
 /* PROTECTION LIST */
 .protectionList { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
@@ -397,7 +407,7 @@
   align-items: flex-start;
   gap: 0.4rem;
   font-size: 0.65rem;
-  color: rgba(255,255,255,0.3);
+  color: rgba(26,24,20,0.3);
   font-weight: 300;
   line-height: 1.45;
 }
@@ -424,8 +434,8 @@
 .btnPreview {
   width: 100%;
   background: transparent;
-  color: rgba(255,255,255,0.25);
-  border: 0.5px solid rgba(255,255,255,0.1);
+  color: rgba(26,24,20,0.25);
+  border: 0.5px solid rgba(26,24,20,0.1);
   padding: 0.55rem;
   font-family: var(--sans);
   font-size: 0.65rem;
@@ -477,8 +487,8 @@
 }
 .btnBackLink {
   background: transparent;
-  color: rgba(255,255,255,0.35);
-  border: 0.5px solid rgba(255,255,255,0.12);
+  color: rgba(26,24,20,0.35);
+  border: 0.5px solid rgba(26,24,20,0.12);
   padding: 0.65rem 1.2rem;
   font-family: var(--sans);
   font-size: 0.68rem;

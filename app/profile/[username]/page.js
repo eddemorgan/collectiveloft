@@ -802,7 +802,7 @@ export default function ProfilePage() {
             {location&&<div className={styles.metaItem}><span>📍</span><span>{location}</span></div>}
             <div className={styles.metaItem}><span>⊞</span><span>{profile.connections_count||0} collaborators</span></div>
             <div className={styles.metaItem}><span>◎</span><span>{studios.length} collabs completed</span></div>
-            {profile.connect_onboarded && <div className={styles.metaItem} style={{ color: 'var(--gold)' }}><span>✓</span><span>Payout ready</span></div>}
+            {profile.connect_onboarded && <div className={styles.metaItem} style={{ color: '#2A7A68', fontWeight: 700 }}><span>✓</span><span>Payout ready</span></div>}
           </div>
           <div className={styles.profileTags}>
             {profile.availability==='open'&&<span className={`${styles.ptag} ${styles.ptagOpen}`}>Open to collabs</span>}

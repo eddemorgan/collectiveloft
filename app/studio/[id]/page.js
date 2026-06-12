@@ -113,6 +113,8 @@ export default function StudioPage() {
 
   // Rating modal
   const [showRating,     setShowRating]     = useState(false)
+  const [payingIndex,    setPayingIndex]    = useState(null)   // which payment is processing (-1 = lump sum)
+  const [payError,       setPayError]       = useState('')
   const [ratingStars,    setRatingStars]    = useState(0)
   const [hoverStar,      setHoverStar]      = useState(0)
   const [endorsed,       setEndorsed]       = useState([])
@@ -413,6 +415,36 @@ export default function StudioPage() {
     }
     setNewMs({ title:'', due_date:'' })
     setAddingMs(false)
+  }
+
+  // Pay the collaborator. milestoneIndex = number for a terms milestone,
+  // or null for the full lump-sum payment. Redirects to Stripe's hosted page.
+  async function payCollaborator(milestoneIndex, savePaymentMethod) {
+    setPayError('')
+    setPayingIndex(milestoneIndex === null ? -1 : milestoneIndex)
+    try {
+      const res = await fetch('/api/stripe/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          collabId: studioId,
+          userId: myProfile?.id,
+          milestoneIndex,
+          savePaymentMethod: !!savePaymentMethod,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setPayError(data.message || data.error || 'Could not start payment. Please try again.')
+        setPayingIndex(null)
+        return
+      }
+      // Redirect to Stripe's hosted checkout.
+      window.location.href = data.url
+    } catch (err) {
+      setPayError('Could not start payment. Please try again.')
+      setPayingIndex(null)
+    }
   }
 
   async function sendChat() {
@@ -1084,6 +1116,97 @@ export default function StudioPage() {
                     </div>
                   </>
                 )}
+
+                {/* PAYMENT SECTION — payer (owner) only, paid collabs only.
+                    Driven by the TERMS (agreed_fee + milestone pct), not the
+                    working studio_milestones checklist. */}
+                {studio.collab_type === 'paid' && myProfile?.id === owner?.id && Number(studio.agreed_fee) > 0 && (() => {
+                  const fee = Number(studio.agreed_fee)
+                  const termsMs = Array.isArray(studio.milestones) ? studio.milestones : []
+                  const isMilestoneBased = studio.pay_schedule === 'Milestone-based' && termsMs.length > 0
+                  const fmt = (n) => `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                  const recipientName = contributor ? `${contributor.firstname || ''}`.trim() || 'your collaborator' : 'your collaborator'
+                  const recipientReady = contributor?.connect_onboarded
+                  const fullyPaid = studio.payment_status === 'paid'
+
+                  return (
+                    <>
+                      <div className={styles.secLbl} style={{ marginTop: '1.5rem' }}>Payment</div>
+                      <div className={styles.termsCard}>
+                        {!recipientReady && (
+                          <div style={{ background: 'rgba(194,112,128,0.08)', border: '0.5px solid rgba(194,112,128,0.25)', borderRadius: '4px', padding: '0.7rem 0.85rem', marginBottom: '0.85rem', fontFamily: 'var(--sans)', fontSize: '0.78rem', color: '#9c5563', lineHeight: 1.5 }}>
+                            {recipientName} hasn't set up a payout account yet, so payment is paused. They can connect payouts from their profile, then you'll be able to pay them here.
+                          </div>
+                        )}
+                        {payError && (
+                          <div style={{ background: 'rgba(194,112,128,0.08)', border: '0.5px solid rgba(194,112,128,0.25)', borderRadius: '4px', padding: '0.7rem 0.85rem', marginBottom: '0.85rem', fontFamily: 'var(--sans)', fontSize: '0.78rem', color: '#9c5563' }}>
+                            {payError}
+                          </div>
+                        )}
+
+                        {/* Summary row */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: isMilestoneBased ? '0.9rem' : '0.4rem', paddingBottom: '0.7rem', borderBottom: '0.5px solid rgba(26,24,20,0.08)' }}>
+                          <span style={{ fontFamily: 'var(--sans)', fontSize: '0.72rem', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--muted)' }}>Agreed fee</span>
+                          <span style={{ fontFamily: 'var(--serif)', fontSize: '1.15rem', color: 'var(--gold)', fontWeight: 600 }}>{fmt(fee)}</span>
+                        </div>
+                        {Number(studio.amount_paid) > 0 && !fullyPaid && (
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--sans)', fontSize: '0.78rem', color: 'var(--muted)', marginBottom: '0.6rem' }}>
+                            <span>Paid so far</span><span>{fmt(studio.amount_paid)}</span>
+                          </div>
+                        )}
+
+                        {fullyPaid ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#2A7A68', fontFamily: 'var(--sans)', fontSize: '0.85rem', fontWeight: 700, padding: '0.3rem 0' }}>
+                            <span>✓</span><span>Paid in full — {fmt(studio.amount_paid || fee)} sent to {recipientName}.</span>
+                          </div>
+                        ) : isMilestoneBased ? (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+                            {termsMs.map((m, i) => {
+                              const amt = Math.round(fee * (Number(m.pct) / 100) * 100) / 100
+                              const paid = !!m.paid
+                              const processing = payingIndex === i
+                              return (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', padding: '0.6rem 0.75rem', background: paid ? 'rgba(42,122,104,0.06)' : 'rgba(26,24,20,0.02)', border: `0.5px solid ${paid ? 'rgba(42,122,104,0.25)' : 'rgba(26,24,20,0.08)'}`, borderRadius: '4px' }}>
+                                  <div style={{ minWidth: 0 }}>
+                                    <div style={{ fontFamily: 'var(--sans)', fontSize: '0.82rem', color: 'var(--cream)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.desc || m.title || `Milestone ${i + 1}`}</div>
+                                    <div style={{ fontFamily: 'var(--sans)', fontSize: '0.7rem', color: 'var(--muted)' }}>{m.pct}% · {fmt(amt)}</div>
+                                  </div>
+                                  {paid ? (
+                                    <span style={{ color: '#2A7A68', fontFamily: 'var(--sans)', fontSize: '0.74rem', fontWeight: 700, whiteSpace: 'nowrap' }}>✓ Paid</span>
+                                  ) : (
+                                    <button
+                                      onClick={() => payCollaborator(i, false)}
+                                      disabled={!recipientReady || processing || payingIndex !== null}
+                                      style={{ fontFamily: 'var(--sans)', fontSize: '0.74rem', fontWeight: 700, letterSpacing: '0.03em', padding: '0.45rem 0.9rem', borderRadius: '3px', border: 'none', whiteSpace: 'nowrap', cursor: (!recipientReady || payingIndex !== null) ? 'default' : 'pointer', background: (!recipientReady || payingIndex !== null) ? 'rgba(26,24,20,0.12)' : 'var(--gold)', color: (!recipientReady || payingIndex !== null) ? 'rgba(26,24,20,0.4)' : 'var(--ink)' }}
+                                    >
+                                      {processing ? 'Starting…' : `Pay ${fmt(amt)}`}
+                                    </button>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        ) : (
+                          <div style={{ marginTop: '0.5rem' }}>
+                            <button
+                              onClick={() => payCollaborator(null, false)}
+                              disabled={!recipientReady || payingIndex !== null}
+                              style={{ width: '100%', fontFamily: 'var(--sans)', fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.03em', padding: '0.7rem 1rem', borderRadius: '4px', border: 'none', cursor: (!recipientReady || payingIndex !== null) ? 'default' : 'pointer', background: (!recipientReady || payingIndex !== null) ? 'rgba(26,24,20,0.12)' : 'var(--gold)', color: (!recipientReady || payingIndex !== null) ? 'rgba(26,24,20,0.4)' : 'var(--ink)' }}
+                            >
+                              {payingIndex === -1 ? 'Starting…' : `Pay ${recipientName} ${fmt(fee)}`}
+                            </button>
+                          </div>
+                        )}
+
+                        {!fullyPaid && recipientReady && (
+                          <div style={{ fontFamily: 'var(--sans)', fontSize: '0.68rem', color: 'var(--muted)', marginTop: '0.85rem', lineHeight: 1.5 }}>
+                            Payments are processed securely by Stripe. A 5% platform fee applies. You'll enter your card on Stripe's secure page.
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )
+                })()}
 
                 <div className={styles.termsNote}>
                   These terms were agreed upon by both parties when this Loft Studio was opened. They are locked and cannot be modified unilaterally.

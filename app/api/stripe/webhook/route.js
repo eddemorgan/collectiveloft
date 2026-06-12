@@ -52,22 +52,26 @@ export async function POST(req) {
     }
 
     // ----------------------------------------------------------------------
-    // COLLABORATION PAYMENTS — a milestone or lump-sum payment cleared.
+    // COLLABORATION PAYMENTS — a hosted Checkout payment completed.
     // Mark the ledger row succeeded, mark the milestone paid (or update the
     // lump-sum total), and recompute the collaboration's payment_status.
     // ----------------------------------------------------------------------
-    case 'payment_intent.succeeded': {
-      const intent = event.data.object
-      const md = intent.metadata || {}
+    case 'checkout.session.completed': {
+      const session = event.data.object
+      const md = session.metadata || {}
 
-      // Only handle PaymentIntents that came from our collaboration pay route.
+      // Only handle sessions that came from our collaboration pay route.
+      // (The subscription checkout has no collab_id in metadata.)
       if (!md.collab_id) break
+      if (session.payment_status !== 'paid') break
 
-      // 1. Flip the ledger row to succeeded.
+      const paymentIntentId = session.payment_intent || null
+
+      // 1. Flip the ledger row to succeeded (matched by checkout_session_id).
       await supabase
         .from('payments')
-        .update({ status: 'succeeded' })
-        .eq('stripe_payment_intent_id', intent.id)
+        .update({ status: 'succeeded', stripe_payment_intent_id: paymentIntentId })
+        .eq('metadata->>checkout_session_id', session.id)
 
       // 2. Load the collaboration to update its paid state.
       const { data: collab } = await supabase
@@ -78,10 +82,8 @@ export async function POST(req) {
 
       if (!collab) break
 
-      const paidAmount = (intent.amount || 0) / 100
-      const feeAmount  = (intent.application_fee_amount || 0) / 100
-      const newAmountPaid   = Number(collab.amount_paid || 0) + paidAmount
-      const newPlatformFees = Number(collab.platform_fees || 0) + feeAmount
+      const paidAmount = (session.amount_total || 0) / 100
+      const newAmountPaid = Number(collab.amount_paid || 0) + paidAmount
 
       // 3. If this was a milestone payment, mark that milestone paid in the jsonb.
       let milestones = Array.isArray(collab.milestones) ? collab.milestones : []
@@ -89,7 +91,7 @@ export async function POST(req) {
         const idx = parseInt(md.milestone_index, 10)
         if (!Number.isNaN(idx) && milestones[idx]) {
           milestones = milestones.map((m, i) =>
-            i === idx ? { ...m, paid: true, paid_at: new Date().toISOString(), payment_intent_id: intent.id } : m
+            i === idx ? { ...m, paid: true, paid_at: new Date().toISOString(), payment_intent_id: paymentIntentId } : m
           )
         }
       }
@@ -105,21 +107,10 @@ export async function POST(req) {
         .update({
           milestones,
           amount_paid: newAmountPaid,
-          platform_fees: newPlatformFees,
           payment_status,
         })
         .eq('id', md.collab_id)
 
-      break
-    }
-
-    case 'payment_intent.payment_failed': {
-      const intent = event.data.object
-      if (!intent.metadata?.collab_id) break
-      await supabase
-        .from('payments')
-        .update({ status: 'failed' })
-        .eq('stripe_payment_intent_id', intent.id)
       break
     }
 

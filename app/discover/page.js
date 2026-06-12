@@ -68,6 +68,7 @@ export default function DiscoverPage() {
   const [availSoon,     setAvailSoon]     = useState(false)
   const [histCompleted, setHistCompleted] = useState(false)
   const [histActive,    setHistActive]    = useState(false)
+  const [payoutReady,   setPayoutReady]   = useState(false)
   const [activeComp,    setActiveComp]    = useState(['Creative exchange', 'Paid', 'Revenue share'])
   const [location,      setLocation]      = useState('')
   const [search,        setSearch]        = useState('')
@@ -119,6 +120,7 @@ export default function DiscoverPage() {
         if (!cityMatch && !stateMatch) return false
       }
       if (histCompleted && (c.collabs_count || 0) === 0) return false
+      if (payoutReady && !c.connect_onboarded) return false
       if (search) {
         const hay = `${c.firstname} ${c.lastname} ${c.headline} ${(c.disciplines||[]).join(' ')} ${locationStr(c)} ${c.rightnow || ''}`.toLowerCase()
         if (!hay.includes(search.toLowerCase())) return false
@@ -128,7 +130,7 @@ export default function DiscoverPage() {
     if (sortMode === 'collabs') list = [...list].sort((a, b) => (b.collabs_count||0) - (a.collabs_count||0))
     else if (sortMode === 'new') list = [...list].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     return list
-  }, [creatives, user, activeDisc, availOpen, availSoon, histCompleted, histActive, activeComp, location, search, sortMode])
+  }, [creatives, user, activeDisc, availOpen, availSoon, histCompleted, histActive, payoutReady, activeComp, location, search, sortMode])
 
   function toggleComp(label) {
     setActiveComp(prev => prev.includes(label) ? prev.filter(x => x !== label) : [...prev, label])
@@ -222,7 +224,7 @@ export default function DiscoverPage() {
           <div className={styles.filterSection}>
             <div className={styles.filterLabel}>Collab history</div>
             <div className={styles.toggleRows}>
-              {[['Has completed collabs', histCompleted, setHistCompleted], ['Active on platform', histActive, setHistActive]].map(([label, val, setter]) => (
+              {[['Has completed collabs', histCompleted, setHistCompleted], ['Active on platform', histActive, setHistActive], ['Payout ready', payoutReady, setPayoutReady]].map(([label, val, setter]) => (
                 <div key={label} className={styles.toggleRow} onClick={() => setter(v => !v)}>
                   <span className={styles.toggleLbl}>{label}</span>
                   <div className={`${styles.toggle} ${val ? styles.on : styles.off}`}><div className={styles.toggleKnob} /></div>
@@ -264,6 +266,7 @@ export default function DiscoverPage() {
                 const loc  = locationStr(c)
                 const tags = [
                   c.availability === 'open' && { label: 'Open to collab', cls: styles.tagOpen },
+                  c.connect_onboarded && { label: '✓ Payout ready', cls: styles.tagPaid },
                   ...(c.compensation || []).slice(0,1).map(comp => ({ label: comp, cls: comp === 'Paid' ? styles.tagPaid : styles.tagDisc }))
                 ].filter(Boolean)
 

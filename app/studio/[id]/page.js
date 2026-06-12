@@ -125,6 +125,17 @@ export default function StudioPage() {
 
   useEffect(() => { if (studioId) load() }, [studioId])
 
+  // If arriving from a "rate your collaboration" notification (/studio/[id]?rate=1),
+  // auto-open the rating form once the studio has loaded and the collab is complete.
+  useEffect(() => {
+    if (loading || !studio) return
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('rate') === '1' && showComplete && !ratingDone) {
+      setShowRating(true)
+    }
+  }, [loading, studio, showComplete, ratingDone])
+
   // Realtime chat
   useEffect(() => {
     if (!studioId) return

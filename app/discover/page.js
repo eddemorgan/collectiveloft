@@ -266,7 +266,7 @@ export default function DiscoverPage() {
                 const loc  = locationStr(c)
                 const tags = [
                   c.availability === 'open' && { label: 'Open to collab', cls: styles.tagOpen },
-                  c.connect_onboarded && { label: '✓ Payout ready', cls: styles.tagPaid },
+                  c.connect_onboarded && { label: '✓ Payout ready', cls: styles.tagPaid, style: { background: 'rgba(42,122,104,0.12)', color: '#2A7A68', fontWeight: 700 } },
                   ...(c.compensation || []).slice(0,1).map(comp => ({ label: comp, cls: comp === 'Paid' ? styles.tagPaid : styles.tagDisc }))
                 ].filter(Boolean)
 
@@ -287,7 +287,7 @@ export default function DiscoverPage() {
                         <div className={`${styles.cardHeadline} ${styles[`hl_${dk}`]}`}>{c.headline || ''}</div>
                         <div className={styles.cardRightnow}>{c.rightnow || 'No current project listed.'}</div>
                         <div className={styles.cardTags}>
-                          {tags.map((t, j) => <span key={j} className={`${styles.ctag} ${t.cls}`}>{t.label}</span>)}
+                          {tags.map((t, j) => <span key={j} className={`${styles.ctag} ${t.cls}`} style={t.style}>{t.label}</span>)}
                         </div>
                         <div className={styles.cardFooter}>
                           <span className={styles.cardLocation}>📍 {loc}</span>

@@ -373,7 +373,7 @@ export default function ProfilePage() {
   const [portfolio,        setPortfolio]        = useState([])
   const [loading,          setLoading]          = useState(true)
   const [notFound,         setNotFound]         = useState(false)
-  const [activeTab,        setActiveTab]        = useState('work')
+  const [activeTab,        setActiveTab]        = useState('about')
   const [connected,        setConnected]        = useState(false)
   const [isOwner,          setIsOwner]          = useState(false)
   const [editMode,         setEditMode]         = useState(false)

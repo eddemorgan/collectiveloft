@@ -95,7 +95,7 @@ export default function MyStudiosPage() {
     const fillClass   = studio.status === 'active' ? styles.fillActive   : studio.status === 'complete' ? styles.fillComplete   : styles.fillPaused
     const pillClass   = studio.status === 'active' ? styles.pillActive   : studio.status === 'complete' && !needsRating ? styles.pillComplete : studio.status === 'complete' && needsRating ? styles.pillRate : styles.pillPaused
     const pillText    = studio.status === 'active' ? 'In progress'       : studio.status === 'complete' && needsRating ? 'Rate ↗' : studio.status === 'complete' ? '★ Rated' : 'Paused'
-    const href        = needsRating ? `/rating?studio=${studio.id}` : `/studio/${studio.id}`
+    const href        = needsRating ? `/studio/${studio.id}?rate=1` : `/studio/${studio.id}`
 
     return (
       <Link href={href}
@@ -173,7 +173,7 @@ export default function MyStudiosPage() {
                   Rate your collaboration{pendingRating.length > 1 ? 's' : ''}. It takes 2 minutes and it matters.
                 </div>
               </div>
-              <Link href={`/rating?studio=${pendingRating[0].id}`} className={styles.btnRateNow}>Rate now ↗</Link>
+              <Link href={`/studio/${pendingRating[0].id}?rate=1`} className={styles.btnRateNow}>Rate now ↗</Link>
             </div>
           )}
 

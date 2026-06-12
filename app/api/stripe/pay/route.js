@@ -1,9 +1,9 @@
-import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
+import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
-const supabaseAdmin = createClient(
+const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
@@ -13,12 +13,14 @@ const PLATFORM_FEE_RATE = 0.05  // 5%
 
 // --------------------------------------------------------------------------
 // POST /api/stripe/pay
-// Body: { collabId, userId, milestoneIndex|null, savePaymentMethod (bool) }
-//   - milestoneIndex = number  -> pay one milestone (amount = agreed_fee * pct/100)
-//   - milestoneIndex = null    -> pay the full agreed_fee (lump sum / on-delivery)
+// Body: { collabId, userId, milestoneIndex|null, savePaymentMethod }
+//   - milestoneIndex = number -> pay one milestone (agreed_fee * pct/100)
+//   - milestoneIndex = null   -> pay the full agreed_fee (lump sum / on delivery)
 //
-// Returns a Stripe PaymentIntent client_secret for the browser to confirm with
-// the card element. The actual money only moves when the client confirms.
+// Creates a hosted Stripe Checkout Session (payment mode) that routes money to
+// the recipient's connected account, with your 5% taken as the application fee.
+// Returns { url } to redirect the payer to Stripe's hosted page — same pattern
+// as the subscription checkout route.
 // --------------------------------------------------------------------------
 export async function POST(req) {
   try {
@@ -28,8 +30,8 @@ export async function POST(req) {
       return Response.json({ error: 'Missing collabId or userId' }, { status: 400 })
     }
 
-    // 1. Load the collaboration (the source of truth for amounts and parties).
-    const { data: collab, error: collabErr } = await supabaseAdmin
+    // 1. Load the collaboration (source of truth for amounts and parties).
+    const { data: collab, error: collabErr } = await supabase
       .from('collab_terms')
       .select('*')
       .eq('id', collabId)
@@ -54,7 +56,7 @@ export async function POST(req) {
     }
 
     // 4. Recipient must have an onboarded Stripe Connect account.
-    const { data: recipient, error: recipErr } = await supabaseAdmin
+    const { data: recipient, error: recipErr } = await supabase
       .from('profiles')
       .select('stripe_connect_id, connect_onboarded, firstname, lastname')
       .eq('id', recipientId)
@@ -77,11 +79,10 @@ export async function POST(req) {
     }
 
     const milestones = Array.isArray(collab.milestones) ? collab.milestones : []
-    let amount  // in dollars
+    let amount
     let label
 
     if (milestoneIndex === null) {
-      // Lump sum — pay the full fee minus anything already paid.
       const alreadyPaid = Number(collab.amount_paid || 0)
       amount = Math.max(0, agreedFee - alreadyPaid)
       label = 'Full payment'
@@ -89,7 +90,6 @@ export async function POST(req) {
         return Response.json({ error: 'This collaboration is already fully paid' }, { status: 409 })
       }
     } else {
-      // Milestone payment.
       const m = milestones[milestoneIndex]
       if (!m) {
         return Response.json({ error: 'Milestone not found' }, { status: 404 })
@@ -101,17 +101,15 @@ export async function POST(req) {
       if (!pct || pct <= 0) {
         return Response.json({ error: 'Milestone has no valid percentage' }, { status: 400 })
       }
-      // Round to cents to avoid floating-point drift.
       amount = Math.round(agreedFee * (pct / 100) * 100) / 100
       label = m.desc || `Milestone ${milestoneIndex + 1}`
     }
 
-    // 6. Compute amounts in cents for Stripe.
     const amountCents = Math.round(amount * 100)
     const feeCents    = Math.round(amountCents * PLATFORM_FEE_RATE)
 
-    // 7. Look up / create the payer's Stripe customer (so cards can be saved).
-    const { data: payer } = await supabaseAdmin
+    // 6. Look up / create the payer's Stripe customer (matches checkout route).
+    const { data: payer } = await supabase
       .from('profiles')
       .select('stripe_customer_id, email, firstname, lastname')
       .eq('id', userId)
@@ -125,51 +123,69 @@ export async function POST(req) {
         metadata: { supabase_user_id: userId },
       })
       customerId = customer.id
-      await supabaseAdmin.from('profiles').update({ stripe_customer_id: customerId }).eq('id', userId)
+      await supabase.from('profiles').update({ stripe_customer_id: customerId }).eq('id', userId)
     }
 
-    // 8. Create the destination charge: payer -> recipient's connected account,
-    //    with your 5% taken as the application fee. Money is held by Stripe until
-    //    the client confirms this PaymentIntent with a card.
-    const intent = await stripe.paymentIntents.create({
-      amount: amountCents,
-      currency: 'usd',
-      customer: customerId,
-      setup_future_usage: savePaymentMethod ? 'off_session' : undefined,
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+
+    // Metadata so the webhook can mark the right milestone/collab paid.
+    const sharedMetadata = {
+      collab_id: collabId,
+      payer_id: userId,
+      recipient_id: recipientId,
+      milestone_index: milestoneIndex === null ? '' : String(milestoneIndex),
+      label,
+    }
+
+    // The payment intent behind the session: destination charge + 5% app fee,
+    // and (optionally) save the card for future milestone payments.
+    const paymentIntentData = {
       application_fee_amount: feeCents,
       transfer_data: { destination: recipient.stripe_connect_id },
-      metadata: {
-        collab_id: collabId,
-        payer_id: userId,
-        recipient_id: recipientId,
-        milestone_index: milestoneIndex === null ? '' : String(milestoneIndex),
-        label,
-      },
+      metadata: sharedMetadata,
       description: `Collective Loft · ${collab.project_title || 'Collaboration'} · ${label}`,
+    }
+    if (savePaymentMethod) {
+      paymentIntentData.setup_future_usage = 'off_session'
+    }
+
+    // 7. Create the hosted Checkout Session (payment mode).
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      mode: 'payment',
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'usd',
+          unit_amount: amountCents,
+          product_data: {
+            name: `${collab.project_title || 'Collaboration'} — ${label}`,
+            description: `Payment to ${recipient.firstname || 'collaborator'} via Collective Loft`,
+          },
+        },
+        quantity: 1,
+      }],
+      payment_intent_data: paymentIntentData,
+      metadata: sharedMetadata,
+      success_url: `${baseUrl}/studio/${collabId}?paid=1`,
+      cancel_url: `${baseUrl}/studio/${collabId}?pay_cancelled=1`,
     })
 
-    // 9. Record a pending payment in the ledger. The webhook flips it to
-    //    'succeeded' and marks the milestone/collab paid once the charge clears.
-    await supabaseAdmin.from('payments').insert({
+    // 8. Record a pending payment in the ledger. The webhook flips it to
+    //    succeeded and marks the milestone/collab paid once the charge clears.
+    await supabase.from('payments').insert({
       collab_id: collabId,
       payer_id: userId,
       recipient_id: recipientId,
       milestone_index: milestoneIndex,
       amount,
       platform_fee: feeCents / 100,
-      stripe_payment_intent_id: intent.id,
+      stripe_payment_intent_id: null,  // filled in by the webhook from the session
       status: 'pending',
-      metadata: { label },
+      metadata: { label, checkout_session_id: session.id },
     })
 
-    return Response.json({
-      client_secret: intent.client_secret,
-      amount,
-      platform_fee: feeCents / 100,
-      net_to_recipient: (amountCents - feeCents) / 100,
-      recipient_name: `${recipient.firstname || ''} ${recipient.lastname || ''}`.trim(),
-      label,
-    })
+    return Response.json({ url: session.url })
 
   } catch (err) {
     console.error('Payment route error:', err)

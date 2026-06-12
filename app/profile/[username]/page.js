@@ -369,6 +369,7 @@ export default function ProfilePage() {
   const [currentUserId,    setCurrentUserId]    = useState(null)
   const [studios,          setStudios]          = useState([])
   const [ratings,          setRatings]          = useState([])
+  const [starFilter,       setStarFilter]       = useState([])  // empty = show all; multi-select star values
   const [portfolio,        setPortfolio]        = useState([])
   const [loading,          setLoading]          = useState(true)
   const [notFound,         setNotFound]         = useState(false)
@@ -1005,9 +1006,45 @@ export default function ProfilePage() {
               </div>
               {ratings.length === 0 ? (
                 <div className={styles.emptyState}>No reviews yet. Completed collabs will appear here.</div>
-              ) : (
-                <div className={styles.cvList}>
-                  {ratings.map(r => {
+              ) : (() => {
+                const filtered = starFilter.length === 0 ? ratings : ratings.filter(r => starFilter.includes(r.stars))
+                const toggleStar = (n) => setStarFilter(prev => prev.includes(n) ? prev.filter(s => s !== n) : [...prev, n])
+                const countFor = (n) => ratings.filter(r => r.stars === n).length
+                return (
+                <>
+                  <div style={{ display:'flex', alignItems:'center', flexWrap:'wrap', gap:'0.4rem', marginBottom:'1.25rem' }}>
+                    <span style={{ fontFamily:'var(--sans)', fontSize:'0.6rem', letterSpacing:'0.12em', textTransform:'uppercase', color:'var(--muted)', marginRight:'0.35rem' }}>Filter</span>
+                    <button onClick={() => setStarFilter([])} style={{
+                      fontFamily:'var(--sans)', fontSize:'0.66rem', fontWeight:600, cursor:'pointer',
+                      padding:'4px 10px', borderRadius:'3px', transition:'all 0.15s',
+                      border: starFilter.length === 0 ? '1px solid var(--gold)' : '0.5px solid rgba(26,24,20,0.18)',
+                      background: starFilter.length === 0 ? 'rgba(184,146,46,0.12)' : 'transparent',
+                      color: starFilter.length === 0 ? 'var(--gold)' : 'var(--muted)',
+                    }}>All</button>
+                    {[5,4,3,2,1].map(n => {
+                      const c = countFor(n)
+                      const active = starFilter.includes(n)
+                      return (
+                        <button key={n} onClick={() => toggleStar(n)} disabled={c === 0} style={{
+                          fontFamily:'var(--sans)', fontSize:'0.66rem', fontWeight:600,
+                          cursor: c === 0 ? 'default' : 'pointer', padding:'4px 10px', borderRadius:'3px', transition:'all 0.15s',
+                          display:'inline-flex', alignItems:'center', gap:'3px',
+                          border: active ? '1px solid var(--gold)' : '0.5px solid rgba(26,24,20,0.18)',
+                          background: active ? 'rgba(184,146,46,0.12)' : 'transparent',
+                          color: c === 0 ? 'rgba(26,24,20,0.25)' : active ? 'var(--gold)' : 'var(--cream)',
+                          opacity: c === 0 ? 0.5 : 1,
+                        }}>
+                          {n}<span style={{ color: active ? 'var(--gold)' : c === 0 ? 'rgba(26,24,20,0.25)' : 'var(--muted)' }}>★</span>
+                          <span style={{ fontSize:'0.56rem', color:'var(--muted)', fontWeight:400 }}>({c})</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {filtered.length === 0 ? (
+                    <div className={styles.emptyState}>No {starFilter.length === 1 ? `${starFilter[0]}-star` : 'matching'} reviews.</div>
+                  ) : (
+                  <div className={styles.cvList}>
+                  {filtered.map(r => {
                     const rater = r.rater
                     const raterName = rater ? `${rater.firstname} ${rater.lastname}` : 'Collaborator'
                     const raterInit = rater ? `${(rater.firstname||'?')[0]}${(rater.lastname||'?')[0]}`.toUpperCase() : '??'
@@ -1037,7 +1074,10 @@ export default function ProfilePage() {
                     )
                   })}
                 </div>
-              )}
+                  )}
+                </>
+                )
+              })()}
             </div>
           )}
 

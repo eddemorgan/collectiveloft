@@ -31,23 +31,97 @@ export async function POST(req) {
     return Response.json({ error: err.message }, { status: 400 })
   }
 
-  const subscription = event.data.object
-
   switch (event.type) {
     case 'customer.subscription.created':
-    case 'customer.subscription.updated':
+    case 'customer.subscription.updated': {
+      const subscription = event.data.object
       await supabase
         .from('profiles')
         .update({ subscription_status: subscription.status })
         .eq('stripe_customer_id', subscription.customer)
       break
+    }
 
-    case 'customer.subscription.deleted':
+    case 'customer.subscription.deleted': {
+      const subscription = event.data.object
       await supabase
         .from('profiles')
         .update({ subscription_status: 'cancelled' })
         .eq('stripe_customer_id', subscription.customer)
       break
+    }
+
+    // ----------------------------------------------------------------------
+    // COLLABORATION PAYMENTS — a milestone or lump-sum payment cleared.
+    // Mark the ledger row succeeded, mark the milestone paid (or update the
+    // lump-sum total), and recompute the collaboration's payment_status.
+    // ----------------------------------------------------------------------
+    case 'payment_intent.succeeded': {
+      const intent = event.data.object
+      const md = intent.metadata || {}
+
+      // Only handle PaymentIntents that came from our collaboration pay route.
+      if (!md.collab_id) break
+
+      // 1. Flip the ledger row to succeeded.
+      await supabase
+        .from('payments')
+        .update({ status: 'succeeded' })
+        .eq('stripe_payment_intent_id', intent.id)
+
+      // 2. Load the collaboration to update its paid state.
+      const { data: collab } = await supabase
+        .from('collab_terms')
+        .select('milestones, agreed_fee, amount_paid, platform_fees')
+        .eq('id', md.collab_id)
+        .single()
+
+      if (!collab) break
+
+      const paidAmount = (intent.amount || 0) / 100
+      const feeAmount  = (intent.application_fee_amount || 0) / 100
+      const newAmountPaid   = Number(collab.amount_paid || 0) + paidAmount
+      const newPlatformFees = Number(collab.platform_fees || 0) + feeAmount
+
+      // 3. If this was a milestone payment, mark that milestone paid in the jsonb.
+      let milestones = Array.isArray(collab.milestones) ? collab.milestones : []
+      if (md.milestone_index !== '' && md.milestone_index !== undefined && md.milestone_index !== null) {
+        const idx = parseInt(md.milestone_index, 10)
+        if (!Number.isNaN(idx) && milestones[idx]) {
+          milestones = milestones.map((m, i) =>
+            i === idx ? { ...m, paid: true, paid_at: new Date().toISOString(), payment_intent_id: intent.id } : m
+          )
+        }
+      }
+
+      // 4. Recompute overall payment_status against the agreed fee.
+      const agreedFee = Number(collab.agreed_fee || 0)
+      let payment_status = 'partial'
+      if (agreedFee > 0 && newAmountPaid >= agreedFee - 0.005) payment_status = 'paid'
+      else if (newAmountPaid <= 0) payment_status = 'unpaid'
+
+      await supabase
+        .from('collab_terms')
+        .update({
+          milestones,
+          amount_paid: newAmountPaid,
+          platform_fees: newPlatformFees,
+          payment_status,
+        })
+        .eq('id', md.collab_id)
+
+      break
+    }
+
+    case 'payment_intent.payment_failed': {
+      const intent = event.data.object
+      if (!intent.metadata?.collab_id) break
+      await supabase
+        .from('payments')
+        .update({ status: 'failed' })
+        .eq('stripe_payment_intent_id', intent.id)
+      break
+    }
 
     default:
       break

@@ -335,7 +335,7 @@ function BriefsInner() {
                   <div className={styles.dsecLabel}>Project specs</div>
                   <div className={styles.specsGrid}>
                     {selected.timeline && <div className={styles.specRow}><span className={styles.specK}>Timeline</span><span className={styles.specV}>{selected.timeline}</span></div>}
-                    {selected.compensation && <div className={styles.specRow}><span className={styles.specK}>Compensation</span><span className={`${styles.specV} ${styles.gold}`}>{selected.compensation}{selected.fee_range ? ` · ${selected.fee_range}` : ''}</span></div>}
+                    {selected.compensation && <div className={styles.specRow}><span className={styles.specK}>Compensation</span><span className={`${styles.specV} ${styles.gold}`}>{selected.compensation}{selected.fee_range ? ` · ${String(selected.fee_range).trim().startsWith('$') ? '' : '$'}${selected.fee_range}` : ''}</span></div>}
                     {selected.location_preference && <div className={styles.specRow}><span className={styles.specK}>Location</span><span className={styles.specV}>{selected.location_preference}</span></div>}
                     {selected.deadline && <div className={styles.specRow}><span className={styles.specK}>Deadline</span><span className={styles.specV}>{new Date(selected.deadline).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })}</span></div>}
                     <div className={styles.specRow}><span className={styles.specK}>Applications</span><span className={`${styles.specV} ${styles.teal}`}>{selected.applicants_count || 0} received</span></div>
@@ -439,7 +439,7 @@ function BriefsInner() {
                   </div>
                 ))}
               </div>
-              {postComp === 'Paid' && <div className={styles.mfield}><label>Fee range</label><input type="text" placeholder="e.g. $500–1,000" value={postForm.fee_range} onChange={e => setPostForm(f => ({ ...f, fee_range: e.target.value }))} /></div>}
+              {postComp === 'Paid' && <div className={styles.mfield}><label>Fee</label><input type="number" min="0" step="0.01" placeholder="e.g. 750" value={postForm.fee_range} onChange={e => setPostForm(f => ({ ...f, fee_range: e.target.value }))} /></div>}
               <div className={styles.mfieldRow}>
                 <div className={styles.mfield}><label>Timeline</label><input type="text" placeholder="e.g. 6–8 weeks" value={postForm.timeline} onChange={e => setPostForm(f => ({ ...f, timeline: e.target.value }))} /></div>
                 <div className={styles.mfield}><label>Deadline</label><input type="date" value={postForm.deadline} onChange={e => setPostForm(f => ({ ...f, deadline: e.target.value }))} /></div>

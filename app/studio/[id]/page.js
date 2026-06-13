@@ -180,7 +180,7 @@ export default function StudioPage() {
 
     const { data: term } = await supabase
       .from('collab_terms')
-      .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, headline, disciplines), partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, headline, disciplines)`)
+      .select(`*, initiator:profiles!collab_terms_initiator_id_fkey(id, firstname, lastname, headline, disciplines, connect_onboarded, stripe_connect_id), partner:profiles!collab_terms_partner_id_fkey(id, firstname, lastname, headline, disciplines, connect_onboarded, stripe_connect_id)`)
       .eq('id', studioId).single()
 
     if (term) {

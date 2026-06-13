@@ -329,7 +329,7 @@ export default function TermsReviewPage() {
           <SpecRow label="Compensation type" value={compLabel} />
           {term.collab_type === 'paid' && (
             <>
-              <SpecRow label="Fee range" value={term.fee_from ? `$${term.fee_from}${term.fee_to ? '–' + term.fee_to : ''}` : null} gold />
+              <SpecRow label="Fee" value={term.fee_from ? `$${term.fee_from}${term.fee_to ? '–' + term.fee_to : ''}` : null} gold />
               <SpecRow label="Payment schedule" value={term.pay_schedule} />
             </>
           )}

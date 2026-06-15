@@ -50,6 +50,8 @@ function BriefsInner() {
   const [postOpen,        setPostOpen]        = useState(false)
   const [applyOpen,       setApplyOpen]       = useState(false)
   const [applyMsg,        setApplyMsg]        = useState('')
+  const [applySample,     setApplySample]     = useState(null)   // { url, name } once uploaded
+  const [uploadingSample, setUploadingSample] = useState(false)
   const [appliedBriefIds, setAppliedBriefIds] = useState(new Set())
   const [savedIds,        setSavedIds]        = useState([])
   const [submitting,      setSubmitting]      = useState(false)
@@ -61,6 +63,7 @@ function BriefsInner() {
   const [postForm, setPostForm] = useState({
     title:'', making:'', needing:'', timeline:'', deadline:'', fee_range:'', location_preference:'',
   })
+  const [requireSample, setRequireSample] = useState(false)
   const [postDiscs, setPostDiscs] = useState([])
   const [postComp,  setPostComp]  = useState('Creative exchange')
 
@@ -161,28 +164,48 @@ function BriefsInner() {
           timeline: postForm.timeline, deadline: postForm.deadline || null,
           compensation: postComp, fee_range: postForm.fee_range,
           location_preference: postForm.location_preference, status: 'open',
+          require_work_sample: requireSample,
         })
         .select('*, profiles(firstname, lastname, headline, rating, collabs_count)')
         .single()
       if (!error && data) { setBriefs(prev => [data, ...prev]); setSelectedId(data.id) }
       setPostOpen(false)
       setPostForm({ title:'', making:'', needing:'', timeline:'', deadline:'', fee_range:'', location_preference:'' })
+      setRequireSample(false)
       setPostDiscs([])
       setPostComp('Creative exchange')
     } catch (err) { console.error(err) }
     finally { setSubmitting(false) }
   }
 
+  async function uploadSample(file) {
+    if (!file || !user) return
+    setUploadingSample(true)
+    try {
+      const path = `applications/${user.id}/${Date.now()}_${file.name}`
+      const { error } = await supabase.storage.from('studio-files').upload(path, file, { upsert: true })
+      if (!error) {
+        const { data: { publicUrl } } = supabase.storage.from('studio-files').getPublicUrl(path)
+        setApplySample({ url: publicUrl, name: file.name })
+      }
+    } catch (err) { console.error(err) }
+    finally { setUploadingSample(false) }
+  }
+
   async function submitApplication() {
     if (!applyMsg.trim() || !selectedId || !user) return
+    // If this brief requires a work sample, block submit until one is uploaded.
+    if (selected?.require_work_sample && !applySample) return
     setSubmitting(true)
     try {
       await supabase.from('applications').insert({
         brief_id: selectedId, applicant_id: user.id, message: applyMsg, status: 'pending',
+        sample_url: applySample?.url || null, sample_name: applySample?.name || null,
       })
       setAppliedBriefIds(prev => new Set([...prev, selectedId]))
       setApplyOpen(false)
       setApplyMsg('')
+      setApplySample(null)
     } catch (err) { console.error(err) }
     finally { setSubmitting(false) }
   }
@@ -430,6 +453,17 @@ function BriefsInner() {
               </div>
               <div className={styles.mfield}><label>What are you making?</label><textarea placeholder="Describe your project…" rows={3} value={postForm.making} onChange={e => setPostForm(f => ({ ...f, making: e.target.value }))} /></div>
               <div className={styles.mfield}><label>Who do you need?</label><textarea placeholder="Describe the collaborator you want to attract…" rows={3} value={postForm.needing} onChange={e => setPostForm(f => ({ ...f, needing: e.target.value }))} /></div>
+              <div className={styles.mfield}>
+                <div onClick={() => setRequireSample(v => !v)} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'1rem', cursor:'pointer', padding:'0.75rem 0.9rem', background:'rgba(26,24,20,0.02)', border:'0.5px solid rgba(26,24,20,0.1)', borderRadius:'4px' }}>
+                  <span style={{ fontFamily:'var(--sans)', fontSize:'0.82rem', color:'var(--cream)', lineHeight:1.4 }}>Require an example of their work in the application to the brief</span>
+                  <span style={{ position:'relative', flexShrink:0, width:'42px', height:'24px', borderRadius:'12px', transition:'background 0.15s', background: requireSample ? 'var(--gold)' : 'rgba(26,24,20,0.2)' }}>
+                    <span style={{ position:'absolute', top:'2px', left: requireSample ? '20px' : '2px', width:'20px', height:'20px', borderRadius:'50%', background:'#fff', transition:'left 0.15s', boxShadow:'0 1px 2px rgba(0,0,0,0.2)' }} />
+                  </span>
+                </div>
+                <div style={{ fontFamily:'var(--sans)', fontSize:'0.68rem', color:'var(--muted)', marginTop:'0.4rem', lineHeight:1.5 }}>
+                  When on, applicants must upload a relevant work sample to apply — so you can see work specific to what you're asking for.
+                </div>
+              </div>
               <div className={styles.msecLabel}>Compensation</div>
               <div className={styles.compTypeOpts}>
                 {['Creative exchange','Paid','Revenue share'].map(c => (
@@ -469,9 +503,38 @@ function BriefsInner() {
               <label>Your message</label>
               <textarea placeholder="Hi — I came across your brief and I'm really drawn to this project because…" rows={5} value={applyMsg} onChange={e => setApplyMsg(e.target.value)} />
             </div>
+
+            {/* Work-sample requirement — shows the poster's setting (locked) and,
+                if required, a file upload that gates the submit button. */}
+            {selected?.require_work_sample && (
+              <div className={styles.mfield}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'1rem', padding:'0.7rem 0.9rem', background:'rgba(184,146,46,0.06)', border:'0.5px solid rgba(184,146,46,0.25)', borderRadius:'4px', marginBottom:'0.7rem' }}>
+                  <span style={{ fontFamily:'var(--sans)', fontSize:'0.8rem', color:'var(--cream)', lineHeight:1.4 }}>This brief requires a work sample with your application</span>
+                  <span style={{ display:'inline-flex', alignItems:'center', gap:'0.35rem', flexShrink:0 }}>
+                    <span style={{ position:'relative', width:'42px', height:'24px', borderRadius:'12px', background:'var(--gold)', opacity:0.6 }}>
+                      <span style={{ position:'absolute', top:'2px', left:'20px', width:'20px', height:'20px', borderRadius:'50%', background:'#fff' }} />
+                    </span>
+                    <span style={{ fontFamily:'var(--sans)', fontSize:'0.62rem', color:'var(--muted)' }}>🔒</span>
+                  </span>
+                </div>
+                <label>Attach a work sample</label>
+                {applySample ? (
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'1rem', padding:'0.65rem 0.85rem', background:'rgba(42,122,104,0.06)', border:'0.5px solid rgba(42,122,104,0.25)', borderRadius:'4px' }}>
+                    <span style={{ fontFamily:'var(--sans)', fontSize:'0.78rem', color:'var(--cream)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>✓ {applySample.name}</span>
+                    <button onClick={() => setApplySample(null)} style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--muted)', background:'none', border:'none', cursor:'pointer', flexShrink:0 }}>Remove</button>
+                  </div>
+                ) : (
+                  <label style={{ display:'block', padding:'0.85rem', textAlign:'center', border:'1px dashed rgba(26,24,20,0.25)', borderRadius:'4px', cursor: uploadingSample ? 'default' : 'pointer', fontFamily:'var(--sans)', fontSize:'0.8rem', color: uploadingSample ? 'var(--muted)' : 'var(--gold)' }}>
+                    {uploadingSample ? 'Uploading…' : '+ Add a file'}
+                    <input type="file" style={{ display:'none' }} disabled={uploadingSample} onChange={e => e.target.files?.[0] && uploadSample(e.target.files[0])} />
+                  </label>
+                )}
+              </div>
+            )}
+
             <div className={styles.applyFooter}>
               <button className={styles.btnCancelBrief} onClick={() => setApplyOpen(false)}>Cancel</button>
-              <button className={styles.btnSubmitBrief} onClick={submitApplication} disabled={submitting}>{submitting?'Sending…':'Send application ↗'}</button>
+              <button className={styles.btnSubmitBrief} onClick={submitApplication} disabled={submitting || (selected?.require_work_sample && !applySample)}>{submitting?'Sending…':'Send application ↗'}</button>
             </div>
           </div>
         </div>

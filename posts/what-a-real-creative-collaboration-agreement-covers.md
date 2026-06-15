@@ -7,7 +7,6 @@ category: Rights & Ownership
 layer: 1
 featured: false
 excerpt: Most guides to collaboration agreements are written by lawyers for lawyers. This is the plain language version, what the agreement actually covers and what to say when you have the conversation.
-cover: null
 ---
 
 Most guides to creative collaboration agreements are written by lawyers for lawyers. They are full of legal language that makes a basic set of practical decisions feel like a PhD dissertation. That is not useful to the musician working with a producer on their first original track, or the filmmaker hiring a composer for a short documentary, or the visual artist entering into a licensing agreement for a piece of commissioned work.

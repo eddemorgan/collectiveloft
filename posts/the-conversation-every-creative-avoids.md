@@ -1,5 +1,5 @@
 ---
-title: The Conversation Every Creative Avoids — And Why It Kills Collaborations
+title: The Conversation Every Creative Avoids And Why It Kills Collaborations
 slug: the-conversation-every-creative-avoids
 date: 2026-06-07
 author: Edde Morgan

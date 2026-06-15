@@ -74,3 +74,5 @@ The conversation still happens. The infrastructure just makes it structured and 
 If you are actively making work right now and you want to be part of the platform that makes this the default for the creative class, we are building our founding cohort. Five hundred spots.
 
 Apply at collectiveloft.com.
+
+Edde Morgan is the CEO and Founder of Morgan Collective Group.

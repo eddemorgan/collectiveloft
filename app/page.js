@@ -1058,7 +1058,7 @@ export default function Home() {
           <div className="flywheel-grid reveal">
             <div className="flywheel-card fw-01">
               <div className="fw-num">01</div>
-              <div className="fw-status fw-status-live">Live now · Year 1</div>
+              <div className="fw-status fw-status-live">In Testing · Year 1</div>
               <div className="fw-title">Collective Loft Platform</div>
               <div className="fw-sub">Digital Network · Remote</div>
               <div className="fw-desc">The professional network for the creative class. Profiles, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio. Where creatives find each other and manage real projects together. The foundation everything else grows from.</div>

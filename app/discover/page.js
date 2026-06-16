@@ -265,6 +265,7 @@ export default function DiscoverPage() {
                 const ini  = initials(c)
                 const loc  = locationStr(c)
                 const tags = [
+                  c.founding_member && { label: '✦ Founding Member', cls: styles.tagPaid, style: { background: 'rgba(184,146,46,0.14)', color: '#B8922E', fontWeight: 700, border: '0.5px solid rgba(184,146,46,0.4)' } },
                   c.availability === 'open' && { label: 'Open to collab', cls: styles.tagOpen },
                   c.connect_onboarded && { label: '✓ Payout ready', cls: styles.tagPaid, style: { background: 'rgba(42,122,104,0.12)', color: '#2A7A68', fontWeight: 700 } },
                   ...(c.compensation || []).slice(0,1).map(comp => ({ label: comp, cls: comp === 'Paid' ? styles.tagPaid : styles.tagDisc }))

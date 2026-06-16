@@ -780,6 +780,11 @@ export default function ProfilePage() {
                 <Editable value={profile.firstname} onSave={v=>saveField('firstname',v)} placeholder="First name" isOwner={isOwner} editMode={editMode} className={styles.nameFirst}/>
                 {' '}
                 <Editable value={profile.lastname} onSave={v=>saveField('lastname',v)} placeholder="Last name" isOwner={isOwner} editMode={editMode} className={styles.nameLast}/>
+                {profile.founding_member && (
+                  <span title="Founding Member" style={{display:'inline-flex',alignItems:'center',gap:'0.3rem',padding:'3px 10px',borderRadius:'12px',background:'rgba(184,146,46,0.12)',border:'0.5px solid rgba(184,146,46,0.4)',fontFamily:'var(--sans)',fontSize:'0.6rem',fontWeight:700,letterSpacing:'0.08em',textTransform:'uppercase',color:'var(--gold)',whiteSpace:'nowrap'}}>
+                    <span style={{fontSize:'0.7rem'}}>✦</span>Founding Member
+                  </span>
+                )}
                 {isOwner&&(
                   <Link href="/notifications" style={{position:'relative',display:'inline-flex',alignItems:'center',textDecoration:'none',marginLeft:'0.25rem'}}>
                     <span style={{fontSize:'1rem',color:notifCount>0?'var(--gold)':'var(--muted)',lineHeight:1}}>✉</span>

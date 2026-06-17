@@ -202,6 +202,11 @@ export default function LandingPage() {
   const [country,        setCountry]        = useState('')
   const [stateVal,       setStateVal]       = useState('')
   const [city,           setCity]           = useState('')
+  const [locQuery,       setLocQuery]       = useState('')   // text in the location box
+  const [locResults,     setLocResults]     = useState([])   // Mapbox suggestions
+  const [locLat,         setLocLat]         = useState(null)
+  const [locLng,         setLocLng]         = useState(null)
+  const [locPicked,      setLocPicked]      = useState(false) // true once a suggestion is chosen
   const [selectedDiscs,  setSelectedDiscs]  = useState([])
   const [selectedSkills, setSelectedSkills] = useState([])
   const [selectedComps,    setSelectedComps]    = useState(['Creative exchange'])
@@ -319,6 +324,43 @@ export default function LandingPage() {
     setCountry(val); setStateVal(''); setCity('')
   }
 
+  // --- Mapbox city autocomplete ---
+  async function searchCities(q) {
+    setLocQuery(q)
+    setLocPicked(false)
+    if (!q || q.trim().length < 2) { setLocResults([]); return }
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+    if (!token) { setLocResults([]); return }
+    try {
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place&limit=5&access_token=${token}`
+      const res = await fetch(url)
+      const data = await res.json()
+      setLocResults(Array.isArray(data.features) ? data.features : [])
+    } catch (err) {
+      setLocResults([])
+    }
+  }
+
+  function pickCity(feature) {
+    // feature.text = city name; context holds region (state) and country.
+    const cityName = feature.text || ''
+    let regionName = ''
+    let countryName = ''
+    ;(feature.context || []).forEach(c => {
+      if (c.id?.startsWith('region')) regionName = c.text
+      if (c.id?.startsWith('country')) countryName = c.text
+    })
+    const [lng, lat] = feature.center || [null, null]
+    setCity(cityName)
+    setStateVal(regionName)
+    setCountry(countryName)
+    setLocLat(lat)
+    setLocLng(lng)
+    setLocQuery(feature.place_name || cityName)
+    setLocPicked(true)
+    setLocResults([])
+  }
+
   function closeModal() {
     setModalOpen(false); setSubmitted(false); setFormError('')
     setShowTcDoc(false); setShowPpDoc(false)
@@ -378,8 +420,10 @@ export default function LandingPage() {
         rightnow:    form.rightnow,
         seeking:     form.seeking,
         country,
-        state:       countryData?.states ? stateVal : '',
-        city:        countryData?.states ? city : stateVal,
+        state:       stateVal,
+        city:        city,
+        latitude:    locLat,
+        longitude:   locLng,
         disciplines: selectedDiscs.map(id => {
           const found = DISCIPLINES.find(d => d.id === id)
           return found ? found.label : id
@@ -645,27 +689,35 @@ export default function LandingPage() {
 
                     <div className={styles.mf}>
                       <label>Location</label>
-                      <div className={styles.locRow}>
-                        <select value={country} onChange={e => handleCountryChange(e.target.value)}>
-                          <option value="">Country…</option>
-                          {Object.keys(LOCATION_DATA).filter(k => k !== 'OTHER').map(k => (
-                            <option key={k} value={k}>{k === 'US' ? 'United States' : k === 'CA' ? 'Canada' : k === 'GB' ? 'United Kingdom' : k === 'AU' ? 'Australia' : k === 'DE' ? 'Germany' : k === 'FR' ? 'France' : k === 'JP' ? 'Japan' : k === 'BR' ? 'Brazil' : k === 'MX' ? 'Mexico' : k === 'NG' ? 'Nigeria' : k === 'ZA' ? 'South Africa' : k === 'IN' ? 'India' : k}</option>
-                          ))}
-                          <option value="OTHER">Other</option>
-                        </select>
-                        {stateOptions.length > 0 && (
-                          <select value={stateVal} onChange={e => { setStateVal(e.target.value); setCity('') }}>
-                            <option value="">State…</option>
-                            {stateOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                          </select>
-                        )}
-                        {cityOptions.length > 0 && (
-                          <select value={city} onChange={e => setCity(e.target.value)}>
-                            <option value="">City…</option>
-                            {cityOptions.map(c => <option key={c} value={c}>{c}</option>)}
-                          </select>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          placeholder="Start typing your city…"
+                          value={locQuery}
+                          onChange={e => searchCities(e.target.value)}
+                          autoComplete="off"
+                        />
+                        {locResults.length > 0 && (
+                          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20, background: '#fff', border: '0.5px solid rgba(26,24,20,0.15)', borderRadius: '4px', marginTop: '2px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+                            {locResults.map(f => (
+                              <div
+                                key={f.id}
+                                onClick={() => pickCity(f)}
+                                style={{ padding: '0.6rem 0.8rem', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: '0.85rem', color: '#1A1A1A', borderBottom: '0.5px solid rgba(26,24,20,0.06)' }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,146,46,0.08)'}
+                                onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                              >
+                                {f.place_name}
+                              </div>
+                            ))}
+                          </div>
                         )}
                       </div>
+                      {locPicked && city && (
+                        <div style={{ fontFamily: 'var(--sans)', fontSize: '0.7rem', color: 'var(--gold)', marginTop: '0.35rem' }}>
+                          ✓ {[city, stateVal, country].filter(Boolean).join(', ')}
+                        </div>
+                      )}
                     </div>
                   </section>
 

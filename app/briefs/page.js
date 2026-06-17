@@ -114,7 +114,7 @@ function BriefsInner() {
     if (!brief || brief.poster_id !== user.id) { setApplicants([]); return }
     supabase
       .from('applications')
-      .select(`id, message, status, created_at, applicant:profiles!applications_applicant_id_fkey(id, firstname, lastname, headline, disciplines)`)
+      .select(`id, message, status, created_at, sample_url, sample_name, applicant:profiles!applications_applicant_id_fkey(id, firstname, lastname, headline, disciplines)`)
       .eq('brief_id', selectedId)
       .eq('status', 'pending')
       .order('created_at', { ascending: true })
@@ -402,6 +402,14 @@ function BriefsInner() {
                                 <div style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--cream)', lineHeight:1.65, marginBottom:'0.65rem', borderLeft:'2px solid var(--rule)', paddingLeft:'0.65rem' }}>
                                   {app.message}
                                 </div>
+                              )}
+                              {app.sample_url && (
+                                <a href={app.sample_url} target="_blank" rel="noopener noreferrer"
+                                  style={{ display:'inline-flex', alignItems:'center', gap:'0.4rem', fontFamily:'var(--sans)', fontSize:'0.7rem', fontWeight:600, color:'var(--gold)', textDecoration:'none', background:'rgba(201,168,76,0.08)', border:'0.5px solid rgba(201,168,76,0.25)', borderRadius:'3px', padding:'0.4rem 0.7rem', marginBottom:'0.65rem' }}
+                                  onMouseEnter={e => e.currentTarget.style.background='rgba(201,168,76,0.14)'}
+                                  onMouseLeave={e => e.currentTarget.style.background='rgba(201,168,76,0.08)'}>
+                                  📎 {app.sample_name || 'View work sample'} ↗
+                                </a>
                               )}
                               <button onClick={() => acceptApplicant(app)} disabled={acceptingId === app.id || termsSent}
                                 style={{ background:'var(--gold)', color:'#0D0D0D', border:'none', borderRadius:'3px', padding:'0.4rem 0.9rem', fontFamily:'var(--sans)', fontSize:'0.65rem', fontWeight:600, letterSpacing:'0.06em', textTransform:'uppercase', cursor: termsSent ? 'not-allowed' : 'pointer', opacity: acceptingId === app.id || termsSent ? 0.4 : 1 }}>

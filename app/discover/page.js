@@ -57,6 +57,17 @@ function locationStr(p) {
   return [p.city, p.state].filter(Boolean).join(', ') || 'Remote'
 }
 
+// Great-circle distance between two lat/lng points, in miles.
+function distanceMiles(lat1, lng1, lat2, lng2) {
+  const toRad = d => (d * Math.PI) / 180
+  const R = 3958.8 // Earth radius in miles
+  const dLat = toRad(lat2 - lat1)
+  const dLng = toRad(lng2 - lng1)
+  const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
 export default function DiscoverPage() {
   const router = useRouter()
   const { loading: authLoading, user } = useAuth()
@@ -71,6 +82,12 @@ export default function DiscoverPage() {
   const [payoutReady,   setPayoutReady]   = useState(false)
   const [activeComp,    setActiveComp]    = useState(['Creative exchange', 'Paid', 'Revenue share'])
   const [location,      setLocation]      = useState('')
+  // Radius search: a chosen center city (with coords) + radius + unit.
+  const [radiusCity,    setRadiusCity]    = useState(null)   // { name, lat, lng }
+  const [radiusQuery,   setRadiusQuery]   = useState('')
+  const [radiusResults, setRadiusResults] = useState([])
+  const [radiusDist,    setRadiusDist]    = useState(50)     // number
+  const [radiusUnit,    setRadiusUnit]    = useState('mi')   // 'mi' | 'km'
   const [search,        setSearch]        = useState('')
   const [sortMode,      setSortMode]      = useState('recent')
 
@@ -97,6 +114,31 @@ export default function DiscoverPage() {
     return Array.from(cities).sort()
   }, [creatives])
 
+  // Mapbox search to choose the radius center city.
+  async function searchRadiusCity(q) {
+    setRadiusQuery(q)
+    if (!q || q.trim().length < 2) { setRadiusResults([]); return }
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+    if (!token) { setRadiusResults([]); return }
+    try {
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place&limit=5&access_token=${token}`
+      const res = await fetch(url)
+      const data = await res.json()
+      setRadiusResults(Array.isArray(data.features) ? data.features : [])
+    } catch { setRadiusResults([]) }
+  }
+
+  function pickRadiusCity(f) {
+    const [lng, lat] = f.center || [null, null]
+    setRadiusCity({ name: f.place_name, lat, lng })
+    setRadiusQuery(f.place_name)
+    setRadiusResults([])
+  }
+
+  function clearRadius() {
+    setRadiusCity(null); setRadiusQuery(''); setRadiusResults([])
+  }
+
   const discCounts = useMemo(() => {
     const counts = { all: creatives.length }
     DISCIPLINES.slice(1).forEach(d => {
@@ -114,7 +156,13 @@ export default function DiscoverPage() {
       if (activeComp.length > 0 && (c.compensation || []).length > 0) {
         if (!(c.compensation || []).some(x => activeComp.includes(x))) return false
       }
-      if (location) {
+      if (radiusCity && radiusCity.lat != null) {
+        // Only include creatives who have coordinates and fall within the radius.
+        if (c.latitude == null || c.longitude == null) return false
+        const miles = distanceMiles(radiusCity.lat, radiusCity.lng, c.latitude, c.longitude)
+        const limitMiles = radiusUnit === 'km' ? radiusDist * 0.621371 : radiusDist
+        if (miles > limitMiles) return false
+      } else if (location) {
         const cityMatch  = (c.city || '').toLowerCase().includes(location.toLowerCase())
         const stateMatch = (c.state || '').toLowerCase().includes(location.toLowerCase())
         if (!cityMatch && !stateMatch) return false
@@ -130,7 +178,7 @@ export default function DiscoverPage() {
     if (sortMode === 'collabs') list = [...list].sort((a, b) => (b.collabs_count||0) - (a.collabs_count||0))
     else if (sortMode === 'new') list = [...list].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     return list
-  }, [creatives, user, activeDisc, availOpen, availSoon, histCompleted, histActive, payoutReady, activeComp, location, search, sortMode])
+  }, [creatives, user, activeDisc, availOpen, availSoon, histCompleted, histActive, payoutReady, activeComp, location, radiusCity, radiusDist, radiusUnit, search, sortMode])
 
   function toggleComp(label) {
     setActiveComp(prev => prev.includes(label) ? prev.filter(x => x !== label) : [...prev, label])
@@ -140,7 +188,7 @@ export default function DiscoverPage() {
     setActiveDisc('all'); setAvailOpen(false); setAvailSoon(false)
     setHistCompleted(false); setHistActive(false)
     setActiveComp(['Creative exchange', 'Paid', 'Revenue share'])
-    setLocation(''); setSearch(''); setSortMode('recent')
+    setLocation(''); setSearch(''); setSortMode('recent'); clearRadius()
   }
 
   function handleReachOut(e, id) {
@@ -213,12 +261,43 @@ export default function DiscoverPage() {
 
           <div className={styles.filterSection}>
             <div className={styles.filterLabel}>Location</div>
-            <select className={styles.filterSelect} value={location} onChange={e => setLocation(e.target.value)}>
-              <option value="">Anywhere</option>
-              {cityOptions.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+            {radiusCity ? (
+              <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem' }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:'0.5rem', padding:'0.5rem 0.7rem', background:'rgba(184,146,46,0.08)', border:'0.5px solid rgba(184,146,46,0.3)', borderRadius:'4px' }}>
+                  <span style={{ fontFamily:'var(--sans)', fontSize:'0.72rem', color:'var(--cream)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>📍 {radiusCity.name}</span>
+                  <button onClick={clearRadius} style={{ background:'none', border:'none', color:'var(--muted)', cursor:'pointer', fontSize:'0.7rem', flexShrink:0 }}>✕</button>
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:'0.4rem' }}>
+                  <span style={{ fontFamily:'var(--sans)', fontSize:'0.7rem', color:'var(--muted)' }}>Within</span>
+                  <input type="number" min="1" value={radiusDist} onChange={e => setRadiusDist(Number(e.target.value) || 0)} style={{ width:'56px', padding:'0.35rem 0.4rem', fontFamily:'var(--sans)', fontSize:'0.75rem', border:'0.5px solid rgba(26,24,20,0.2)', borderRadius:'4px', background:'#fff', color:'#1A1A1A' }} />
+                  <div style={{ display:'inline-flex', border:'0.5px solid rgba(26,24,20,0.2)', borderRadius:'4px', overflow:'hidden' }}>
+                    {['mi','km'].map(u => (
+                      <button key={u} onClick={() => setRadiusUnit(u)} style={{ padding:'0.35rem 0.6rem', fontFamily:'var(--sans)', fontSize:'0.72rem', fontWeight:600, border:'none', cursor:'pointer', background: radiusUnit===u ? 'var(--gold)' : 'transparent', color: radiusUnit===u ? 'var(--ink)' : 'var(--muted)' }}>{u}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ position:'relative' }}>
+                <input
+                  type="text"
+                  placeholder="Search a city…"
+                  value={radiusQuery}
+                  onChange={e => searchRadiusCity(e.target.value)}
+                  autoComplete="off"
+                  style={{ width:'100%', padding:'0.5rem 0.7rem', fontFamily:'var(--sans)', fontSize:'0.78rem', border:'0.5px solid rgba(26,24,20,0.2)', borderRadius:'4px', background:'#fff', color:'#1A1A1A' }}
+                />
+                {radiusResults.length > 0 && (
+                  <div style={{ position:'absolute', top:'100%', left:0, right:0, zIndex:20, background:'#fff', border:'0.5px solid rgba(26,24,20,0.15)', borderRadius:'4px', marginTop:'2px', boxShadow:'0 4px 12px rgba(0,0,0,0.1)', overflow:'hidden' }}>
+                    {radiusResults.map(f => (
+                      <div key={f.id} onClick={() => pickRadiusCity(f)} style={{ padding:'0.5rem 0.7rem', cursor:'pointer', fontFamily:'var(--sans)', fontSize:'0.76rem', color:'#1A1A1A', borderBottom:'0.5px solid rgba(26,24,20,0.06)' }}>
+                        {f.place_name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className={styles.filterSection}>

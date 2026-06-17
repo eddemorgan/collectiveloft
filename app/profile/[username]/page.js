@@ -377,6 +377,9 @@ export default function ProfilePage() {
   const [connected,        setConnected]        = useState(false)
   const [isOwner,          setIsOwner]          = useState(false)
   const [editMode,         setEditMode]         = useState(false)
+  const [editingLoc,       setEditingLoc]       = useState(false)
+  const [locQuery,         setLocQuery]         = useState('')
+  const [locResults,       setLocResults]       = useState([])
   const [saving,           setSaving]           = useState(false)
   const [saveMsg,          setSaveMsg]          = useState('')
   const [lightboxIdx,      setLightboxIdx]      = useState(null)
@@ -604,6 +607,44 @@ export default function ProfilePage() {
   }
   function flashSave() { setSaveMsg('Saved ✦'); setTimeout(() => setSaveMsg(''), 2000) }
 
+  // --- Location editing (Mapbox autocomplete) ---
+  async function searchProfileCity(q) {
+    setLocQuery(q)
+    if (!q || q.trim().length < 2) { setLocResults([]); return }
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+    if (!token) { setLocResults([]); return }
+    try {
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place&limit=5&access_token=${token}`
+      const res = await fetch(url)
+      const data = await res.json()
+      setLocResults(Array.isArray(data.features) ? data.features : [])
+    } catch { setLocResults([]) }
+  }
+
+  async function pickProfileCity(f) {
+    if (!profile) return
+    const cityName = f.text || ''
+    let regionName = '', countryName = ''
+    ;(f.context || []).forEach(c => {
+      if (c.id?.startsWith('region')) regionName = c.text
+      if (c.id?.startsWith('country')) countryName = c.text
+    })
+    const [lng, lat] = f.center || [null, null]
+    setSaving(true)
+    const { error } = await supabase.from('profiles').update({
+      city: cityName, state: regionName, country: countryName,
+      latitude: lat, longitude: lng, updated_at: new Date().toISOString(),
+    }).eq('id', profile.id)
+    if (!error) {
+      setProfile(p => ({ ...p, city: cityName, state: regionName, country: countryName, latitude: lat, longitude: lng }))
+      flashSave()
+    }
+    setSaving(false)
+    setEditingLoc(false)
+    setLocQuery(''); setLocResults([])
+  }
+
+
   function toggleDraftDisc(label) {
     setDraftDiscs(prev => {
       const next = prev.includes(label) ? prev.filter(x => x!==label) : [...prev, label]
@@ -804,7 +845,39 @@ export default function ProfilePage() {
             )}
           </div>
           <div className={styles.metaRow}>
-            {location&&<div className={styles.metaItem}><span>📍</span><span>{location}</span></div>}
+            {isOwner && editMode ? (
+              <div className={styles.metaItem} style={{ position:'relative', alignItems:'flex-start' }}>
+                <span>📍</span>
+                {editingLoc ? (
+                  <div style={{ position:'relative', minWidth:'220px' }}>
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Search your city…"
+                      value={locQuery}
+                      onChange={e => searchProfileCity(e.target.value)}
+                      autoComplete="off"
+                      style={{ width:'100%', padding:'0.35rem 0.5rem', fontFamily:'var(--sans)', fontSize:'0.8rem', border:'0.5px solid rgba(26,24,20,0.25)', borderRadius:'4px', background:'#fff', color:'#1A1A1A' }}
+                    />
+                    {locResults.length > 0 && (
+                      <div style={{ position:'absolute', top:'100%', left:0, right:0, zIndex:30, background:'#fff', border:'0.5px solid rgba(26,24,20,0.15)', borderRadius:'4px', marginTop:'2px', boxShadow:'0 4px 12px rgba(0,0,0,0.12)', overflow:'hidden' }}>
+                        {locResults.map(f => (
+                          <div key={f.id} onClick={() => pickProfileCity(f)} style={{ padding:'0.5rem 0.7rem', cursor:'pointer', fontFamily:'var(--sans)', fontSize:'0.78rem', color:'#1A1A1A', borderBottom:'0.5px solid rgba(26,24,20,0.06)' }}>
+                            {f.place_name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <span onClick={() => { setEditingLoc(true); setLocQuery('') }} style={{ cursor:'pointer', borderBottom:'1px dashed rgba(184,146,46,0.5)' }}>
+                    {location || 'Add location'} <span style={{ color:'var(--gold)', fontSize:'0.7rem' }}>✎</span>
+                  </span>
+                )}
+              </div>
+            ) : (
+              location && <div className={styles.metaItem}><span>📍</span><span>{location}</span></div>
+            )}
             <div className={styles.metaItem}><span>⊞</span><span>{profile.connections_count||0} collaborators</span></div>
             <div className={styles.metaItem}><span>◎</span><span>{studios.length} collabs completed</span></div>
             {profile.connect_onboarded && <div className={styles.metaItem} style={{ color: '#2A7A68', fontWeight: 700 }}><span>✓</span><span>Payout ready</span></div>}

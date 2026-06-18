@@ -913,7 +913,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-grid"></div>
         <div className="hero-glow"></div>
-        <div className="eyebrow">Collective Loft · Est. 2026</div>
+        <div className="eyebrow">Est. 2026</div>
 <h1>
   Building the infrastructure<br/>
   <em>meant</em> for the<br/>

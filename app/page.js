@@ -902,7 +902,7 @@ export default function Home() {
         <a href="/" className="logo" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
             <span style={{ color: 'var(--gold)' }}>✦</span>
-            <span>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
+            <span style={{ color: '#1A1814' }}>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
           </span>
           <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '5px 0' }} />
           <span style={{ fontFamily: 'var(--sans)', fontSize: '8.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
@@ -913,7 +913,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero-grid"></div>
         <div className="hero-glow"></div>
-        <div className="eyebrow">Est. 2026</div>
+        <div className="eyebrow">Collective Loft · Est. 2026</div>
 <h1>
   Building the infrastructure<br/>
   <em>meant</em> for the<br/>
@@ -1152,7 +1152,7 @@ export default function Home() {
         <a href="/" className="footer-logo" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', lineHeight: 1 }}>
             <span style={{ color: 'var(--gold)' }}>✦</span>
-            <span>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
+            <span style={{ color: '#1A1814' }}>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
           </span>
           <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '4px 0' }} />
           <span style={{ fontFamily: 'var(--sans)', fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>

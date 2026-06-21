@@ -68,3 +68,5 @@ On Collective Loft, the Collab Terms layer includes all three models. Before any
 We are building the founding cohort now. If you are actively making work right now and you want to be on the platform that builds this infrastructure for the creative class, five hundred spots are available.
 
 Apply at collectiveloft.com.
+
+Edde Morgan is the CEO and Founder of Morgan Collective Group.

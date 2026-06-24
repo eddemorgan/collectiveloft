@@ -6,11 +6,11 @@ const FAQ_GROUPS = [
     items: [
       {
         q: 'What is Collective Loft?',
-        a: 'Collective Loft is a professional network built for the creative class — artists, musicians, writers, poets, designers, filmmakers, photographers, performers, and creative technologists. It\u2019s where creatives who don\u2019t already know each other find collaborators, agree on real terms before any work begins, and open a shared workspace built around the project. It\u2019s not a job board and not a portfolio site. It\u2019s the place creative collaboration actually happens, end to end.',
+        a: 'Collective Loft is a professional network built for the creative class: artists, musicians, writers, poets, designers, filmmakers, photographers, performers, and creative technologists. It\u2019s where creatives who don\u2019t already know each other find collaborators, agree on real terms before any work begins, and open a shared workspace built around the project. It\u2019s not a job board and not a portfolio site. It\u2019s the place creative collaboration actually happens, end to end.',
       },
       {
         q: 'Who is Collective Loft for?',
-        a: 'Independent creative professionals across eight disciplines: visual art, music, writing, design and web, film, photography, performance, and creative tech. If you make work and you need the right collaborator to make it real — a composer for your film, a designer for your record, a photographer for your collection — this is built for you.',
+        a: 'Independent creative professionals across eight disciplines: visual art, music, writing, design and web, film, photography, performance, and creative tech. If you make work and you need the right collaborator to make it real, a composer for your film, a designer for your record, a photographer for your collection, this is built for you.',
       },
       {
         q: 'How is this different from LinkedIn, Upwork, or Behance?',
@@ -23,19 +23,19 @@ const FAQ_GROUPS = [
     items: [
       {
         q: 'How do I find someone to collaborate with?',
-        a: 'You post a Collab Brief — a description of what you\u2019re making and who you need, written in creative language, not a job listing. Other members find it filtered by discipline, compensation type, and location. You can also discover and respond to briefs other creatives have posted. When someone\u2019s interested, they send a message explaining why they\u2019re drawn to the project, and you review their profile and portfolio before deciding to move forward.',
+        a: 'You post a Collab Brief, a description of what you\u2019re making and who you need, written in creative language, not a job listing. Other members find it filtered by discipline, compensation type, and location. You can also discover and respond to briefs other creatives have posted. When someone\u2019s interested, they send a message explaining why they\u2019re drawn to the project, and you review their profile and portfolio before deciding to move forward.',
       },
       {
         q: 'What are Collab Terms?',
-        a: 'Collab Terms are the agreement two creatives set before any work begins. They cover the compensation type — creative exchange, paid, or revenue share — along with rights, deliverables, milestones, and timeline. Both parties review, modify, and accept the terms, and they\u2019re timestamped. It\u2019s the structured agreement layer the creative class has never had: clarity in writing, before the work starts, instead of a misunderstanding three DMs deep after it falls apart.',
+        a: 'Collab Terms are the agreement two creatives set before any work begins. They cover the compensation type, creative exchange, paid, or revenue share, along with rights, deliverables, milestones, and timeline. Both parties review, modify, and accept the terms, and they\u2019re timestamped. It\u2019s the structured agreement layer the creative class has never had: clarity in writing, before the work starts, instead of a misunderstanding three DMs deep after it falls apart.',
       },
       {
         q: 'What is a Loft Studio?',
-        a: 'Once both parties accept the Collab Terms, a Loft Studio opens — a shared workspace dedicated to that collaboration. The original brief is pinned at the top, with milestones, files, and persistent messaging all in one place. The collaboration has a home now, instead of being scattered across email, texts, and a shared Notion page held together with hope.',
+        a: 'Once both parties accept the Collab Terms, a Loft Studio opens, a shared workspace dedicated to that collaboration. The original brief is pinned at the top, with milestones, files, and persistent messaging all in one place. The collaboration has a home now, instead of being scattered across email, texts, and a shared Notion page held together with hope.',
       },
       {
         q: 'What disciplines does Collective Loft support?',
-        a: 'Eight: visual art, music, writing, design and web, film, photography, performance, and creative tech. The whole point is cross-discipline collaboration — a filmmaker finding a composer, a painter finding a musician for an installation — so the network is built to connect across all of them, not silo them.',
+        a: 'Eight: visual art, music, writing, design and web, film, photography, performance, and creative tech. The whole point is cross-discipline collaboration, a filmmaker finding a composer, a painter finding a musician for an installation, so the network is built to connect across all of them, not silo them.',
       },
     ],
   },
@@ -48,7 +48,7 @@ const FAQ_GROUPS = [
       },
       {
         q: 'Why does Collective Loft charge a subscription?',
-        a: 'Because free platforms attract people who aren\u2019t serious. The $15 a month keeps this a professional environment — a room where everyone has skin in the game, agreements are in writing before work starts, and your creative work is protected from day one. The cost is the filter that keeps the quality high.',
+        a: 'Because free platforms attract people who aren\u2019t serious. The $15 a month keeps this a professional environment, a room where everyone has skin in the game, agreements are in writing before work starts, and your creative work is protected from day one. The cost is the filter that keeps the quality high.',
       },
       {
         q: 'What does the $15 a month actually get me?',
@@ -56,7 +56,7 @@ const FAQ_GROUPS = [
       },
       {
         q: 'Is there a free trial?',
-        a: 'Founding members get three months free — no charge, no catch. After that it\u2019s $15 a month, the same as everyone else. The founding member badge on your profile stays forever.',
+        a: 'Founding members get three months free, no charge, no catch. After that it\u2019s $15 a month, the same as everyone else. The founding member badge on your profile stays forever.',
       },
     ],
   },
@@ -69,11 +69,11 @@ const FAQ_GROUPS = [
       },
       {
         q: 'How do I become a founding member?',
-        a: 'Request early access and tell us your primary discipline. We\u2019re not running an open beta — we\u2019re building the founding cohort by hand, choosing people who are actively making work right now. We read every application. If you\u2019re selected, we\u2019ll be in touch with next steps before anyone else hears about it.',
+        a: 'Request early access and tell us your primary discipline. We\u2019re not running an open beta, we\u2019re building the founding cohort by hand, choosing people who are actively making work right now. We read every application. If you\u2019re selected, we\u2019ll be in touch with next steps before anyone else hears about it.',
       },
       {
         q: 'What happens after the three free months end?',
-        a: 'It becomes $15 a month, the same as every other member. Nothing else changes — you keep full access and your founding member badge stays on your profile permanently.',
+        a: 'It becomes $15 a month, the same as every other member. Nothing else changes, you keep full access and your founding member badge stays on your profile permanently.',
       },
     ],
   },
@@ -90,7 +90,7 @@ const FAQ_GROUPS = [
       },
       {
         q: 'Is Collective Loft only in Chicago?',
-        a: 'No. The platform is a digital network open to creatives anywhere — there are 165 million independent creative professionals worldwide, and the network is built for all of them. Chicago is home base and the site of the first physical Loft Studios and founding-member community, but membership and collaboration are not limited by location.',
+        a: 'No. The platform is a digital network open to creatives anywhere, there are 165 million independent creative professionals worldwide, and the network is built for all of them. Chicago is home base and the site of the first physical Loft Studios and founding-member community, but membership and collaboration are not limited by location.',
       },
     ],
   },
@@ -103,14 +103,14 @@ const FAQ_GROUPS = [
       },
       {
         q: 'What\u2019s coming after the platform?',
-        a: 'Three more divisions, in sequence. Collective Loft Studios — professional recording infrastructure for independent artists, with priority booking and discounted rates for members. Collective Loft Records — an artist-first independent label starting royalty splits at 50/50, with shorter contracts and more ownership kept by the artist. And Collective Loft Publishing — a full creative publishing house spanning music, literary, and art publishing, including collaborative works unique to the ecosystem.',
+        a: 'Three more divisions, in sequence. Collective Loft Studios, professional recording infrastructure for independent artists, with priority booking and discounted rates for members. Collective Loft Records, an artist-first independent label starting royalty splits at 50/50, with shorter contracts and more ownership kept by the artist. And Collective Loft Publishing, a full creative publishing house spanning music, literary, and art publishing, including collaborative works unique to the ecosystem.',
       },
     ],
   },
 ]
 
 export const metadata = {
-  title: 'FAQ — Collective Loft',
+  title: 'FAQ - Collective Loft',
   description: 'Everything you need to know about Collective Loft: how it works, membership and pricing, founding members, rights protection, and the bigger picture.',
 }
 

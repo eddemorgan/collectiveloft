@@ -1,19 +1,53 @@
-import Head from 'next/head'
+export const metadata = {
+  title: 'Collective Loft — Where Creatives Find Collaborators',
+  description: 'The platform where artists, musicians, writers, designers, and filmmakers find each other, agree on terms, and make something real.',
+  openGraph: {
+    title: 'Collective Loft',
+    description: 'Building the infrastructure meant for the creative class.',
+    url: 'https://collectiveloft.com',
+    siteName: 'Collective Loft',
+    type: 'website',
+  },
+}
+
+const homeFaqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Why does Collective Loft have a subscription?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Because free platforms attract people who aren\u2019t serious. The $15/month is what keeps this a professional environment, a room where everyone has skin in the game, agreements are in writing before work starts, and your creative work is protected from day one.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What does $15/month actually get me?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Everything. No tiers, no feature gates, no pay-to-unlock. Full access to Discover, Collab Briefs, Discipline Matching, Collab Terms, and the Loft Studio. Use it to run 10 collabs a month or use it to build your profile and get discovered. The platform works on your timeline and priorities.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What about founding members?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Founding members get 3 months free, no charge, no catch. After that it\u2019s $15/month, same as everyone else. The founding member badge on your profile stays forever.',
+      },
+    },
+  ],
+}
 
 export default function Home() {
   return (
     <>
-      <Head>
-        <title>Collective Loft — The Professional Network for the Creative Class</title>
-        <meta name="description" content="The platform where artists, musicians, writers, designers, and filmmakers find each other, agree on terms, and make something real." />
-        <meta property="og:title" content="Collective Loft" />
-        <meta property="og:description" content="Building the infrastructure meant for the creative class" />
-        <meta property="og:url" content="https://collectiveloft.com" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-      </Head>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeFaqSchema) }}
+      />
 
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

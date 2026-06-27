@@ -367,6 +367,7 @@ export default function ProfilePage() {
   const [profile,          setProfile]          = useState(null)
   const [profileId,        setProfileId]        = useState(null)
   const [currentUserId,    setCurrentUserId]    = useState(null)
+  const [mySlug,           setMySlug]           = useState(null)
   const [studios,          setStudios]          = useState([])
   const [ratings,          setRatings]          = useState([])
   const [starFilter,       setStarFilter]       = useState([])  // empty = show all; multi-select star values
@@ -477,6 +478,15 @@ export default function ProfilePage() {
         setIsOwner(true)
         loadNotifCount(user.id)
         loadBriefs(user.id)
+      } else {
+        const { data: me } = await supabase
+          .from('profiles')
+          .select('firstname, lastname')
+          .eq('id', user.id)
+          .single()
+        if (me?.firstname && me?.lastname) {
+          setMySlug(`${me.firstname.toLowerCase()}-${me.lastname.toLowerCase()}`)
+        }
       }
     }
 
@@ -760,6 +770,7 @@ export default function ProfilePage() {
           <Link href="/briefs">Collabs</Link>
           <Link href="/matching">Matching</Link>
           <Link href="/my-studios">My Loft Studios</Link>
+          {!isOwner && mySlug && <Link href={`/profile/${mySlug}`}>My Profile</Link>}
           {isOwner && saving && <span className={styles.saveIndicator}>Saving…</span>}
           {isOwner && saveMsg && !saving && <span className={styles.saveIndicator}>{saveMsg}</span>}
           {isOwner && <button className={`${styles.btnEdit} ${editMode?styles.btnEditActive:''}`} onClick={()=>setEditMode(v=>!v)}>{editMode?'Done editing':'Edit profile'}</button>}
@@ -906,7 +917,7 @@ export default function ProfilePage() {
             {tab === 'community' ? 'Community Voice' : tab.charAt(0).toUpperCase()+tab.slice(1)}
           </div>
         ))}
-        {isOwner && <Link href="/my-studios" className={styles.tab}>My Loft Studios</Link>}
+        <Link href="/my-studios" className={styles.tab}>My Loft Studios</Link>
       </div>
 
       <div className={styles.profileBody} style={{flex:1}}>

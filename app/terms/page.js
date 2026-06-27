@@ -272,7 +272,7 @@ function TermsPage() {
 
           {/* DELIVERABLES */}
           <div className={styles.formSection}>
-            <div className={styles.fsecLabel}>Deliverables</div>
+            <div className={styles.fsecLabel}>Final Deliverable</div>
             <div className={styles.delList}>
               {deliverables.map((d, i) => (
                 <div key={i} className={styles.delRow}>
@@ -284,12 +284,12 @@ function TermsPage() {
             <div className={styles.field} style={{ marginTop: '0.75rem' }}>
               <input
                 type="text"
-                placeholder="Add a deliverable…"
+                placeholder="e.g. Finished artist website, album cover, film score…"
                 value={newDel}
                 onChange={e => setNewDel(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addDeliverable()}
               />
-              <div className={styles.hint}>Milestones can be updated, if needed, in the Loft Studio.</div>
+              <div className={styles.hint}>Milestones can be added, with collaboration, in the Loft Studio.</div>
             </div>
           </div>
 

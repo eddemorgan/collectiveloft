@@ -906,7 +906,7 @@ export default function ProfilePage() {
             {tab === 'community' ? 'Community Voice' : tab.charAt(0).toUpperCase()+tab.slice(1)}
           </div>
         ))}
-        <Link href="/my-studios" className={styles.tab}>My Loft Studios</Link>
+        {isOwner && <Link href="/my-studios" className={styles.tab}>My Loft Studios</Link>}
       </div>
 
       <div className={styles.profileBody} style={{flex:1}}>

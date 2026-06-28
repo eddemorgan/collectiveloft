@@ -514,23 +514,54 @@ export default function StudioPage() {
   async function uploadFile(file) {
     if (!file) return
     setUploading(true)
-    const ext = file.name.split('.').pop()
-    const path = `${studioId}/${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('studio-files').upload(path, file, { upsert: true })
-    if (!error) {
-      const { data: { publicUrl } } = supabase.storage.from('studio-files').getPublicUrl(path)
-      const { data: f } = await supabase.from('studio_files').insert({
-        studio_id: studioId,
-        name: file.name,
-        url: publicUrl,
-        size: file.size,
-        type: file.type,
-      }).select().single()
-      if (f) {
-        setFiles(prev => [f, ...prev])
-        sys(`${myName()} uploaded "${file.name}" (${formatBytes(file.size)}).`)
-      }
+
+    const ext = (file.name.split('.').pop() || '').toLowerCase()
+
+    // Browsers often report an empty file.type for audio like .wav/.aiff/.flac.
+    // Derive a sensible MIME from the extension so the row + icons are correct.
+    const extMime = {
+      wav: 'audio/wav', wave: 'audio/wav',
+      aif: 'audio/aiff', aiff: 'audio/aiff',
+      flac: 'audio/flac',
+      m4a: 'audio/mp4', mp3: 'audio/mpeg', ogg: 'audio/ogg',
+      mp4: 'video/mp4', mov: 'video/quicktime',
+      png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif',
+      pdf: 'application/pdf', zip: 'application/zip',
     }
+    const fileType = file.type && file.type.length > 0
+      ? file.type
+      : (extMime[ext] || 'application/octet-stream')
+
+    const path = `${studioId}/${Date.now()}.${ext}`
+
+    const { error: upErr } = await supabase.storage
+      .from('studio-files')
+      .upload(path, file, { upsert: true, contentType: fileType })
+
+    if (upErr) {
+      sys(`⚠️ Upload failed for "${file.name}": ${upErr.message}`)
+      setUploading(false)
+      return
+    }
+
+    const { data: { publicUrl } } = supabase.storage.from('studio-files').getPublicUrl(path)
+
+    const { data: f, error: insErr } = await supabase.from('studio_files').insert({
+      studio_id: studioId,
+      name: file.name,
+      url: publicUrl,
+      size: file.size,
+      type: fileType,
+    }).select().single()
+
+    if (insErr) {
+      sys(`⚠️ "${file.name}" uploaded but could not be saved to the studio: ${insErr.message}`)
+      setUploading(false)
+      return
+    }
+
+    setFiles(prev => [f, ...prev])
+    sys(`${myName()} uploaded "${file.name}" (${formatBytes(file.size)}).`)
     setUploading(false)
   }
 
@@ -784,7 +815,7 @@ export default function StudioPage() {
                   </>
                 )}
 
-                <input ref={fileInputRef} type="file" style={{display:'none'}} onChange={e=>{if(e.target.files[0])uploadFile(e.target.files[0]);e.target.value=''}}/>
+                <input ref={fileInputRef} type="file" accept="image/*,video/*,audio/*,.wav,.aiff,.aif,.flac,.m4a,.mp3,.ogg,.pdf,.zip" style={{display:'none'}} onChange={e=>{if(e.target.files[0])uploadFile(e.target.files[0]);e.target.value=''}}/>
                 <button className={styles.btnUpload} onClick={() => fileInputRef.current?.click()}>{uploading?'Uploading…':'+ Upload a file'}</button>
               </div>
             )}
@@ -1250,7 +1281,7 @@ export default function StudioPage() {
                     ))}
                   </div>
                 )}
-                <input ref={fileInputRef} type="file" style={{display:'none'}} onChange={e=>{if(e.target.files[0])uploadFile(e.target.files[0]);e.target.value=''}}/>
+                <input ref={fileInputRef} type="file" accept="image/*,video/*,audio/*,.wav,.aiff,.aif,.flac,.m4a,.mp3,.ogg,.pdf,.zip" style={{display:'none'}} onChange={e=>{if(e.target.files[0])uploadFile(e.target.files[0]);e.target.value=''}}/>
                 <button className={styles.btnUpload} onClick={() => fileInputRef.current?.click()}>{uploading?'Uploading…':'+ Upload a file'}</button>
               </div>
             )}

@@ -38,11 +38,17 @@ function skillsForDiscs(discLabels) {
   })
 }
 function detectType(file) {
-  const mime = file.type
+  const mime = file.type || ''
   if (mime.startsWith('image/')) return 'image'
   if (mime.startsWith('video/')) return 'video'
   if (mime.startsWith('audio/')) return 'audio'
   if (mime === 'application/pdf') return 'document'
+  // Browsers often report empty file.type for lossless audio (.wav/.aiff/.flac)
+  // and some video. Fall back to the file extension so it routes correctly.
+  const ext = (file.name.split('.').pop() || '').toLowerCase()
+  if (['wav','wave','aif','aiff','flac','m4a','mp3','ogg','aac'].includes(ext)) return 'audio'
+  if (['mp4','mov','webm','avi','mkv'].includes(ext)) return 'video'
+  if (['png','jpg','jpeg','gif','webp','svg','heic'].includes(ext)) return 'image'
   return 'document'
 }
 function bucketForType(type) {
@@ -684,11 +690,22 @@ export default function ProfilePage() {
     const ext = file.name.split('.').pop()
     const path = `${profile.id}/${Date.now()}.${ext}`
     const { error: uploadError } = await supabase.storage.from(bucketForType(type)).upload(path, file, { upsert: true })
-    if (uploadError) { console.error(uploadError); setUploading(false); return }
+    if (uploadError) {
+      console.error(uploadError)
+      alert(`Could not upload "${file.name}": ${uploadError.message}`)
+      setUploading(false)
+      return
+    }
     const { data: { publicUrl } } = supabase.storage.from(bucketForType(type)).getPublicUrl(path)
     const title = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
     const { data: item, error: insertError } = await supabase.from('portfolio_items').insert({ profile_id: profile.id, type, title, file_url: publicUrl, sort_order: portfolio.length }).select().single()
-    if (!insertError && item) setPortfolio(prev => [...prev, item])
+    if (insertError) {
+      console.error(insertError)
+      alert(`"${file.name}" uploaded but could not be saved: ${insertError.message}`)
+      setUploading(false)
+      return
+    }
+    if (item) setPortfolio(prev => [...prev, item])
     setUploading(false)
     flashSave()
   }
@@ -938,7 +955,7 @@ export default function ProfilePage() {
                   <div className={styles.secLabel}>Portfolio</div>
                   {isOwner&&editMode&&<div className={styles.portfolioHint}>{uploading?'Uploading…':'Click any slot to upload — images, video, audio, or PDF'}</div>}
                 </div>
-                <input ref={portfolioInputRef} type="file" accept="image/*,video/*,audio/*,.pdf" style={{display:'none'}} onChange={e=>{if(e.target.files[0])uploadPortfolioItem(e.target.files[0]);e.target.value=''}}/>
+                <input ref={portfolioInputRef} type="file" accept="image/*,video/*,audio/*,.wav,.aiff,.aif,.flac,.m4a,.mp3,.ogg,.pdf" style={{display:'none'}} onChange={e=>{if(e.target.files[0])uploadPortfolioItem(e.target.files[0]);e.target.value=''}}/>
                 {portfolio.length===0&&!isOwner?<div className={styles.emptyState}>No portfolio items yet.</div>:(
                   <div className={styles.portfolioGrid}>
                     {gridItems.map(item=>{

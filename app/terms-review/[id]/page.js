@@ -140,8 +140,7 @@ export default function TermsReviewPage() {
       deadline:     term.deadline     || '',
       location:     term.location     || '',
       cadence:      term.cadence      || '',
-      fee_from:     term.fee_from     || '',
-      fee_to:       term.fee_to       || '',
+      agreed_fee:   term.agreed_fee   || '',
       pay_schedule: term.pay_schedule || '',
       my_share:     term.my_share     || '',
       their_share:  term.their_share  || '',
@@ -329,7 +328,7 @@ export default function TermsReviewPage() {
           <SpecRow label="Compensation type" value={compLabel} />
           {term.collab_type === 'paid' && (
             <>
-              <SpecRow label="Fee" value={term.fee_from ? `$${term.fee_from}${term.fee_to ? '–' + term.fee_to : ''}` : null} gold />
+              <SpecRow label="Fee" value={term.agreed_fee ? `$${term.agreed_fee}` : null} gold />
               <SpecRow label="Payment schedule" value={term.pay_schedule} />
             </>
           )}
@@ -393,8 +392,7 @@ export default function TermsReviewPage() {
 
             {term.collab_type === 'paid' && (
               <>
-                <FieldInput label="Fee from" value={draft.fee_from} original={originals.fee_from} onChange={v => setDraft(d => ({ ...d, fee_from: v }))} />
-                <FieldInput label="Fee to" value={draft.fee_to} original={originals.fee_to} onChange={v => setDraft(d => ({ ...d, fee_to: v }))} />
+                <FieldInput label="Agreed fee" value={draft.agreed_fee} original={originals.agreed_fee} onChange={v => setDraft(d => ({ ...d, agreed_fee: v }))} />
                 <SelectInput label="Payment schedule" value={draft.pay_schedule} original={originals.pay_schedule} onChange={v => setDraft(d => ({ ...d, pay_schedule: v }))} options={['50% upfront, 50% on delivery','Milestone-based','On delivery','Monthly retainer']} />
               </>
             )}

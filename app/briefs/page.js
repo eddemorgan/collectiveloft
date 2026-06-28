@@ -184,11 +184,17 @@ function BriefsInner() {
     try {
       const path = `applications/${user.id}/${Date.now()}_${file.name}`
       const { error } = await supabase.storage.from('studio-files').upload(path, file, { upsert: true })
-      if (!error) {
-        const { data: { publicUrl } } = supabase.storage.from('studio-files').getPublicUrl(path)
-        setApplySample({ url: publicUrl, name: file.name })
+      if (error) {
+        console.error(error)
+        alert(`Could not upload "${file.name}": ${error.message}`)
+        return
       }
-    } catch (err) { console.error(err) }
+      const { data: { publicUrl } } = supabase.storage.from('studio-files').getPublicUrl(path)
+      setApplySample({ url: publicUrl, name: file.name })
+    } catch (err) {
+      console.error(err)
+      alert('Something went wrong uploading your sample. Please try again.')
+    }
     finally { setUploadingSample(false) }
   }
 
@@ -534,7 +540,7 @@ function BriefsInner() {
                 ) : (
                   <label style={{ display:'block', padding:'0.85rem', textAlign:'center', border:'1px dashed rgba(26,24,20,0.25)', borderRadius:'4px', cursor: uploadingSample ? 'default' : 'pointer', fontFamily:'var(--sans)', fontSize:'0.8rem', color: uploadingSample ? 'var(--muted)' : 'var(--gold)' }}>
                     {uploadingSample ? 'Uploading…' : '+ Add a file'}
-                    <input type="file" style={{ display:'none' }} disabled={uploadingSample} onChange={e => e.target.files?.[0] && uploadSample(e.target.files[0])} />
+                    <input type="file" accept="image/*,video/*,audio/*,.wav,.aiff,.aif,.flac,.m4a,.mp3,.ogg,.pdf,.zip" style={{ display:'none' }} disabled={uploadingSample} onChange={e => e.target.files?.[0] && uploadSample(e.target.files[0])} />
                   </label>
                 )}
               </div>

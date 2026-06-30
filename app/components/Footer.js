@@ -23,6 +23,16 @@ export default function Footer() {
       <span style={{
         fontFamily: 'var(--sans)',
         fontSize: '0.72rem',
+        color: 'var(--muted)',
+        letterSpacing: '0.06em',
+        textTransform: 'uppercase',
+        textAlign: 'center',
+      }}>
+        A Collective Code Website
+      </span>
+      <span style={{
+        fontFamily: 'var(--sans)',
+        fontSize: '0.72rem',
         color: 'rgba(26,24,20,0.35)',
         letterSpacing: '0.04em',
       }}>

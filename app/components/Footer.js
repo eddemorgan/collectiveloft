@@ -28,7 +28,7 @@ export default function Footer() {
         textTransform: 'uppercase',
         textAlign: 'center',
       }}>
-        A Collective Code Website
+        A Collective Codes Website
       </span>
       <span style={{
         fontFamily: 'var(--sans)',

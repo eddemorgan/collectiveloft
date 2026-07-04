@@ -41,7 +41,7 @@ export default function PostPage({ params }) {
         </Link>
         <div className={styles.navLinks}>
           <Link href="/blog" className={styles.navLink}>← Blog</Link>
-          <Link href="/login" className={styles.navCta}>Sign in</Link>
+          <Link href="/#waitlist" className={styles.navCta}>Request early access</Link>
         </div>
       </nav>
 

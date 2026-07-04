@@ -134,7 +134,6 @@ export default function FAQPage() {
 
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        /* NOTE: typography-recommended copy of {orig}. Only font-size / font-weight (and one letter-spacing) values changed vs. the original; each edit is marked with an inline `was ...` comment. Serif = Cormorant Garamond (loaded weights 300/400/600 via app/layout.js — no change needed). See TYPOGRAPHY-REVIEW.md. */
 
         :root {
           --bg0: #F0ECE3;

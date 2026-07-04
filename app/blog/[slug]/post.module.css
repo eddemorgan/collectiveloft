@@ -28,7 +28,7 @@
 .navLogo span { color: #8B6914; }
 .navLinks { display: flex; align-items: center; gap: 2rem; }
 .navLink {
-  font-size: 0.72rem;
+  font-size: 0.8rem; /* was 0.72rem (11.5px) -> 12.8px */
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(26,24,20,0.5);
@@ -37,7 +37,7 @@
 }
 .navLink:hover { color: #1A1814; }
 .navCta {
-  font-size: 0.72rem;
+  font-size: 0.8rem; /* was 0.72rem -> 12.8px */
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #E8E3D9;
@@ -69,41 +69,41 @@
 
 .postMeta { display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
 .postLayer {
-  font-size: 0.6rem;
-  letter-spacing: 0.15em;
+  font-size: 0.72rem; /* was 0.6rem (9.6px) -> 11.5px */
+  letter-spacing: 0.12em; /* was 0.15em */
   text-transform: uppercase;
   color: rgba(26,24,20,0.35);
   text-decoration: none;
   transition: color 0.15s;
 }
 .postLayer:hover { color: rgba(26,24,20,0.6); }
-.postCategory { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: #8B6914; opacity: 0.8; }
-.postDate { font-size: 0.65rem; color: rgba(26,24,20,0.35); }
+.postCategory { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8B6914; opacity: 0.8; } /* was 0.6rem/0.15em -> 11.5px */
+.postDate { font-size: 0.75rem; color: rgba(26,24,20,0.35); } /* was 0.65rem -> 12px */
 
 .postTitle {
   font-family: 'EB Garamond', Georgia, serif;
   font-size: clamp(2rem, 4vw, 3.2rem);
-  font-weight: 400;
+  font-weight: 500; /* was 400; adds presence to the article H1 (needs EB Garamond 500) */
   line-height: 1.15;
   margin: 0 0 1.5rem;
   color: #1A1814;
 }
 .postExcerpt {
-  font-size: 1.05rem;
+  font-size: 1.05rem; /* unchanged — good */
   color: rgba(26,24,20,0.6);
   line-height: 1.7;
   margin: 0 0 1.5rem;
   border-left: 2px solid #8B6914;
   padding-left: 1.25rem;
 }
-.postByline { font-size: 0.72rem; color: rgba(26,24,20,0.4); }
+.postByline { font-size: 0.8rem; color: rgba(26,24,20,0.4); } /* was 0.72rem -> 12.8px */
 
-.postBody { font-size: 1rem; line-height: 1.85; color: rgba(26,24,20,0.8); }
+.postBody { font-size: 1rem; line-height: 1.85; color: rgba(26,24,20,0.8); } /* unchanged — good */
 .postBody p { margin: 0 0 1.5rem; }
 .postBody h2 {
   font-family: 'EB Garamond', Georgia, serif;
   font-size: 1.6rem;
-  font-weight: 400;
+  font-weight: 600; /* was 400; in-article H2 needs weight to separate from body (needs EB Garamond 600) */
   color: #1A1814;
   margin: 2.5rem 0 1rem;
   line-height: 1.2;
@@ -111,11 +111,11 @@
 .postBody h3 {
   font-family: 'EB Garamond', Georgia, serif;
   font-size: 1.2rem;
-  font-weight: 400;
+  font-weight: 600; /* was 400 (needs EB Garamond 600) */
   color: #1A1814;
   margin: 2rem 0 0.75rem;
 }
-.postBody strong { color: #1A1814; font-weight: 500; }
+.postBody strong { color: #1A1814; font-weight: 600; } /* was 500; clearer inline emphasis (DM Sans 600 already loaded) */
 .postBody em { color: rgba(26,24,20,0.65); font-style: italic; }
 .postBody a { color: #8B6914; text-decoration: underline; }
 .postBody a:hover { color: #A07C1A; }
@@ -136,12 +136,12 @@
   flex-direction: column;
   gap: 0.75rem;
 }
-.sidebarLabel { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(26,24,20,0.35); }
-.sidebarLayerName { font-size: 0.72rem; color: rgba(26,24,20,0.4); letter-spacing: 0.08em; }
-.sidebarLayerFull { font-family: 'EB Garamond', Georgia, serif; font-size: 1.1rem; font-weight: 400; color: #1A1814; }
+.sidebarLabel { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(26,24,20,0.35); } /* was 0.58rem/0.2em (9.3px) -> 11.5px */
+.sidebarLayerName { font-size: 0.8rem; color: rgba(26,24,20,0.4); letter-spacing: 0.08em; } /* was 0.72rem -> 12.8px */
+.sidebarLayerFull { font-family: 'EB Garamond', Georgia, serif; font-size: 1.1rem; font-weight: 500; color: #1A1814; } /* was 400 (needs EB Garamond 500) */
 .sidebarCategories { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
 .sidebarCat {
-  font-size: 0.7rem;
+  font-size: 0.78rem; /* was 0.7rem (11.2px) -> 12.5px */
   color: rgba(26,24,20,0.45);
   text-decoration: none;
   padding: 0.3rem 0;
@@ -150,9 +150,9 @@
 }
 .sidebarCat:hover { color: #1A1814; }
 .sidebarCatActive { color: #8B6914 !important; }
-.sidebarCopy { font-size: 0.82rem; color: rgba(26,24,20,0.55); line-height: 1.6; margin: 0; }
+.sidebarCopy { font-size: 0.9rem; color: rgba(26,24,20,0.55); line-height: 1.6; margin: 0; } /* was 0.82rem (13.1px) -> 14.4px */
 .sidebarCta {
-  font-size: 0.72rem;
+  font-size: 0.8rem; /* was 0.72rem -> 12.8px */
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #E8E3D9;
@@ -171,7 +171,7 @@
   margin: 0 auto;
   padding: 3rem 3rem 4rem;
 }
-.relatedLabel { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(26,24,20,0.35); margin-bottom: 2rem; opacity: 0.75; }
+.relatedLabel { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(26,24,20,0.35); margin-bottom: 2rem; opacity: 0.75; } /* was 0.6rem/0.2em -> 11.5px */
 .relatedGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
 .relatedCard {
   text-decoration: none;
@@ -185,9 +185,9 @@
   transition: border-color 0.2s;
 }
 .relatedCard:hover { border-color: rgba(139,105,20,0.35); }
-.relatedCategory { font-size: 0.58rem; letter-spacing: 0.15em; text-transform: uppercase; color: #8B6914; opacity: 0.8; }
-.relatedTitle { font-family: 'EB Garamond', Georgia, serif; font-size: 1.1rem; font-weight: 400; line-height: 1.3; color: #1A1814; }
-.relatedExcerpt { font-size: 0.78rem; color: rgba(26,24,20,0.55); line-height: 1.6; }
+.relatedCategory { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8B6914; opacity: 0.8; } /* was 0.58rem/0.15em (9.3px) -> 11.5px */
+.relatedTitle { font-family: 'EB Garamond', Georgia, serif; font-size: 1.1rem; font-weight: 500; line-height: 1.3; color: #1A1814; } /* was 400 (needs EB Garamond 500) */
+.relatedExcerpt { font-size: 0.85rem; color: rgba(26,24,20,0.55); line-height: 1.6; } /* was 0.78rem (12.5px) -> 13.6px */
 
 .footer {
   border-top: 0.5px solid rgba(26,24,20,0.1);
@@ -199,9 +199,9 @@
 .footerLogo { font-family: 'EB Garamond', Georgia, serif; font-size: 1.1rem; color: #1A1814; text-decoration: none; }
 .footerLogo span { color: #8B6914; }
 .footerLinks { display: flex; gap: 2rem; }
-.footerLink { font-size: 0.65rem; color: rgba(26,24,20,0.4); text-decoration: none; transition: color 0.15s; text-transform: uppercase; letter-spacing: 0.08em; }
+.footerLink { font-size: 0.78rem; color: rgba(26,24,20,0.4); text-decoration: none; transition: color 0.15s; text-transform: uppercase; letter-spacing: 0.08em; } /* was 0.65rem -> 12.5px */
 .footerLink:hover { color: rgba(26,24,20,0.7); }
-.footerCopy { font-size: 0.62rem; color: rgba(26,24,20,0.25); letter-spacing: 0.04em; }
+.footerCopy { font-size: 0.72rem; color: rgba(26,24,20,0.25); letter-spacing: 0.04em; } /* was 0.62rem (9.9px) -> 11.5px */
 
 @media (max-width: 900px) {
   .nav { padding: 1rem 1.5rem; }

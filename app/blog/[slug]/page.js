@@ -41,7 +41,6 @@ export default function PostPage({ params }) {
         </Link>
         <div className={styles.navLinks}>
           <Link href="/blog" className={styles.navLink}>← Blog</Link>
-          <Link href="/discover" className={styles.navLink}>Discover</Link>
           <Link href="/login" className={styles.navCta}>Sign in</Link>
         </div>
       </nav>

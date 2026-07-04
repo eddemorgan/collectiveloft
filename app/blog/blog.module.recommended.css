@@ -1,0 +1,226 @@
+/* =====================================================================
+   blog.module.css — RECOMMENDED TYPOGRAPHY REVISION (size & weight only)
+   Copy of app/blog/blog.module.css with font-size / font-weight edits.
+   Layout, spacing, and colors are UNCHANGED from the original.
+
+   Root font-size = 16px (browser default; globals.css sets body:15px,
+   but rem keys off the html root, which is unset). px values below assume 16px.
+
+   NOTE — the new title weights (500/600) require those weights to be
+   loaded. Make sure your font import includes:
+     • DM Sans   400, 500, 600
+     • EB Garamond 400, 500
+   Weights that aren't loaded will silently fall back and look unchanged.
+   ===================================================================== */
+
+.page {
+  min-height: 100vh;
+  background: #E8E3D9;
+  color: #1A1814;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 3rem;
+  border-bottom: 0.5px solid rgba(26,24,20,0.1);
+  position: sticky;
+  top: 0;
+  background: rgba(232,227,217,0.95);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+.navLogo {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: #1A1814;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+.navLogo span { color: #8B6914; }
+.navLinks { display: flex; align-items: center; gap: 2rem; }
+.navLink {
+  font-size: 0.8rem; /* was 0.72rem (11.5px) -> 12.8px; primary nav */
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(26,24,20,0.5);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.navLink:hover { color: #1A1814; }
+.navCta {
+  font-size: 0.8rem; /* was 0.72rem -> 12.8px; matches navLink */
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #E8E3D9;
+  background: #8B6914;
+  text-decoration: none;
+  border: none;
+  padding: 0.5rem 1.25rem;
+  transition: background 0.15s;
+}
+.navCta:hover { background: #A07C1A; }
+
+.header {
+  padding: 6rem 3rem 4rem;
+  max-width: 680px;
+}
+.headerLabel {
+  font-size: 0.7rem; /* was 0.62rem (9.9px) -> 11.2px */
+  letter-spacing: 0.16em; /* was 0.22em; tighter tracking aids small caps */
+  text-transform: uppercase;
+  color: #8B6914;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+.headerTitle {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 400; /* was 300; 300 renders frail for Garamond at display size */
+  line-height: 1.1;
+  margin: 0 0 1rem;
+  color: #1A1814;
+}
+.headerSub {
+  font-size: 1.05rem; /* was 1rem -> 16.8px; lead paragraph, slight lift */
+  color: rgba(26,24,20,0.55);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.filterBar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 3rem;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 65px;
+  background: rgba(232,227,217,0.95);
+  backdrop-filter: blur(12px);
+  z-index: 90;
+  border-bottom: 0.5px solid rgba(26,24,20,0.1);
+}
+.filterChip {
+  font-size: 0.8rem; /* was 0.65rem (10.4px) -> 12.8px; primary control */
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.9rem;
+  border: 0.5px solid rgba(26,24,20,0.2);
+  color: rgba(26,24,20,0.45);
+  text-decoration: none;
+  transition: all 0.15s;
+  border-radius: 2px;
+}
+.filterChip:hover { border-color: rgba(26,24,20,0.4); color: #1A1814; }
+.filterActive { border-color: #8B6914 !important; color: #8B6914 !important; }
+
+.main { padding: 3rem; max-width: 1200px; }
+
+.empty { text-align: center; padding: 6rem 0; color: rgba(26,24,20,0.4); }
+.emptyMark { font-size: 2rem; color: #8B6914; margin-bottom: 1rem; opacity: 0.5; }
+
+.featuredSection { margin-bottom: 5rem; }
+.featuredLabel {
+  font-size: 0.72rem; /* was 0.6rem (9.6px) -> 11.5px */
+  letter-spacing: 0.14em; /* was 0.2em */
+  text-transform: uppercase;
+  color: #8B6914;
+  margin-bottom: 1.5rem;
+  opacity: 0.75;
+}
+.featured {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  text-decoration: none;
+  color: inherit;
+  border: 0.5px solid rgba(26,24,20,0.1);
+  padding: 2.5rem;
+  background: #DDD8CE;
+  transition: border-color 0.2s;
+}
+.featured:hover { border-color: rgba(139,105,20,0.4); }
+.featuredCover { overflow: hidden; height: 300px; background: rgba(26,24,20,0.06); }
+.featuredCover img { width: 100%; height: 100%; object-fit: cover; }
+.featuredContent { display: flex; flex-direction: column; justify-content: center; gap: 1rem; }
+.featuredTitle {
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 500; /* was 400; weight contrast for the lead headline */
+  line-height: 1.2;
+  margin: 0;
+  color: #1A1814;
+}
+.featuredExcerpt { font-size: 1rem; color: rgba(26,24,20,0.6); line-height: 1.7; margin: 0; } /* was 0.9rem (14.4px) -> 16px */
+.featuredAuthor { font-size: 0.8rem; color: rgba(26,24,20,0.4); } /* was 0.72rem -> 12.8px */
+.readMore { font-size: 0.8rem; letter-spacing: 0.1em; color: #8B6914; text-transform: uppercase; } /* was 0.72rem -> 12.8px */
+
+.postMeta { display: flex; gap: 1rem; align-items: center; }
+.postCategory { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #8B6914; opacity: 0.8; } /* was 0.6rem/0.15em -> 11.5px */
+.postDate { font-size: 0.75rem; color: rgba(26,24,20,0.35); } /* was 0.65rem -> 12px */
+
+.layerSection { margin-bottom: 4rem; }
+.layerHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 0.5px solid rgba(26,24,20,0.1);
+  padding-bottom: 1rem;
+}
+.layerLabel { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(26,24,20,0.3); white-space: nowrap; } /* was 0.6rem/0.2em -> 11.5px */
+.layerName { font-family: 'EB Garamond', Georgia, serif; font-size: 1.4rem; font-weight: 600; margin: 0; color: #1A1814; } /* was 1.3rem/400 -> section heading now bolder + larger */
+.layerSeeAll { margin-left: auto; font-size: 0.8rem; letter-spacing: 0.1em; color: #8B6914; text-decoration: none; white-space: nowrap; } /* was 0.65rem -> 12.8px */
+.layerSeeAll:hover { text-decoration: underline; }
+
+.postGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+.postCard {
+  text-decoration: none;
+  color: inherit;
+  border: 0.5px solid rgba(26,24,20,0.1);
+  background: #DDD8CE;
+  transition: border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+.postCard:hover { border-color: rgba(139,105,20,0.35); }
+.postCover { height: 160px; overflow: hidden; background: rgba(26,24,20,0.06); }
+.postCover img { width: 100%; height: 100%; object-fit: cover; }
+.postCardContent { padding: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; flex: 1; }
+.postTitle { font-family: 'EB Garamond', Georgia, serif; font-size: 1.25rem; font-weight: 600; line-height: 1.3; margin: 0; color: #1A1814; } /* was 1.2rem/400 -> weight contrast anchors the card scan */
+.postExcerpt { font-size: 0.95rem; color: rgba(26,24,20,0.6); line-height: 1.6; margin: 0; flex: 1; } /* was 0.82rem (13.1px) -> 15.2px */
+.postAuthor { font-size: 0.75rem; color: rgba(26,24,20,0.35); } /* was 0.65rem -> 12px */
+
+.filteredTitle { font-family: 'EB Garamond', Georgia, serif; font-size: 1.8rem; font-weight: 600; margin: 0 0 2rem; color: #1A1814; } /* weight was 400 */
+
+.footer {
+  border-top: 0.5px solid rgba(26,24,20,0.1);
+  padding: 2.5rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4rem;
+}
+.footerLogo { font-family: 'EB Garamond', Georgia, serif; font-size: 1.1rem; color: #1A1814; text-decoration: none; }
+.footerLogo span { color: #8B6914; }
+.footerLinks { display: flex; gap: 2rem; }
+.footerLink { font-size: 0.78rem; color: rgba(26,24,20,0.4); text-decoration: none; transition: color 0.15s; text-transform: uppercase; letter-spacing: 0.08em; } /* was 0.65rem -> 12.5px */
+.footerLink:hover { color: rgba(26,24,20,0.7); }
+.footerCopy { font-size: 0.72rem; color: rgba(26,24,20,0.25); letter-spacing: 0.04em; } /* was 0.62rem (9.9px) -> 11.5px */
+
+@media (max-width: 900px) {
+  .nav { padding: 1rem 1.5rem; }
+  .header { padding: 4rem 1.5rem 3rem; }
+  .filterBar { padding: 1rem 1.5rem; }
+  .main { padding: 2rem 1.5rem; }
+  .featured { grid-template-columns: 1fr; }
+  .featuredCover { height: 200px; }
+  .postGrid { grid-template-columns: repeat(2, 1fr); }
+  .footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+}
+@media (max-width: 600px) {
+  .postGrid { grid-template-columns: 1fr; }
+}

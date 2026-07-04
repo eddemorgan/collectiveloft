@@ -134,6 +134,7 @@ export default function FAQPage() {
 
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        /* NOTE: typography-recommended copy of {orig}. Only font-size / font-weight (and one letter-spacing) values changed vs. the original; each edit is marked with an inline `was ...` comment. Serif = Cormorant Garamond (loaded weights 300/400/600 via app/layout.js — no change needed). See TYPOGRAPHY-REVIEW.md. */
 
         :root {
           --bg0: #F0ECE3;
@@ -155,7 +156,7 @@ export default function FAQPage() {
           background: var(--bg1);
           color: var(--cream);
           font-family: var(--sans);
-          font-weight: 300;
+          font-weight: 400; /* was 300 */
           line-height: 1.6;
           overflow-x: hidden;
         }
@@ -221,7 +222,7 @@ export default function FAQPage() {
           font-family: var(--sans);
           font-size: 0.72rem;
           font-weight: 500;
-          letter-spacing: 0.22em;
+          letter-spacing: 0.18em; /* was 0.22em */
           text-transform: uppercase;
           color: var(--gold);
           opacity: 0.8;
@@ -243,7 +244,7 @@ export default function FAQPage() {
         .faq-hero-sub {
           font-family: var(--sans);
           font-size: clamp(1rem, 2vw, 1.15rem);
-          font-weight: 300;
+          font-weight: 400; /* was 300 */
           color: var(--muted);
           max-width: 560px;
           margin: 0 auto;
@@ -262,7 +263,7 @@ export default function FAQPage() {
 
         .faq-group-label {
           font-family: var(--sans);
-          font-size: 0.68rem;
+          font-size: 0.75rem; /* was 0.68rem */
           font-weight: 600;
           letter-spacing: 0.2em;
           text-transform: uppercase;
@@ -282,7 +283,7 @@ export default function FAQPage() {
         .faq-q {
           font-family: var(--serif);
           font-size: 1.4rem;
-          font-weight: 400;
+          font-weight: 600; /* was 400 */
           color: var(--cream);
           margin-bottom: 0.75rem;
           line-height: 1.25;
@@ -291,7 +292,7 @@ export default function FAQPage() {
         .faq-a {
           font-family: var(--sans);
           font-size: 1rem;
-          font-weight: 300;
+          font-weight: 400; /* was 300 */
           color: var(--muted);
           line-height: 1.8;
         }
@@ -385,7 +386,7 @@ export default function FAQPage() {
             <span style={{ color: '#1A1814', fontSize: '1.55rem' }}>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
           </span>
           <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '5px 0' }} />
-          <span style={{ fontFamily: 'var(--sans)', fontSize: '8.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
+          <span style={{ fontFamily: 'var(--sans)', fontSize: '11px' /* was 8.5px */, letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
         </a>
         <a href="/#waitlist" className="nav-cta">Request early access</a>
       </nav>
@@ -429,7 +430,7 @@ export default function FAQPage() {
             <span style={{ color: '#1A1814' }}>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
           </span>
           <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '4px 0' }} />
-          <span style={{ fontFamily: 'var(--sans)', fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
+          <span style={{ fontFamily: 'var(--sans)', fontSize: '10.5px' /* was 7.5px */, letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
         </a>
         <div className="footer-links">
           <a href="/#how-it-works" className="footer-link">How it works</a>

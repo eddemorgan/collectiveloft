@@ -351,3 +351,65 @@
 .nrIcon  { font-size: 2rem; color: var(--muted); }
 .nrTitle { font-family: var(--serif); font-size: 1rem; color: var(--muted); }
 .nrSub   { font-size: 0.75rem; color: var(--muted); max-width: 300px; font-weight: 300; line-height: 1.65; }
+/* ── Match badge info glyph + Why-Match panel ─────────────────────────────── */
+.scoreBadgeInfo { opacity: 0.6; font-size: 0.85em; margin-left: 2px; }
+.scoreBadge { cursor: pointer; border: none; font: inherit; }
+.scoreBadge:hover { filter: brightness(1.08); }
+
+.whyOverlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.72);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  backdrop-filter: blur(3px);
+}
+.whyModal {
+  position: relative;
+  background: var(--bg2);
+  border: 0.5px solid var(--rule);
+  border-radius: 8px;
+  max-width: 440px; width: 100%;
+  padding: 2rem 2rem 1.5rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.whyClose {
+  position: absolute; top: 1rem; right: 1rem;
+  background: none; border: none; color: var(--dim);
+  font-size: 1rem; cursor: pointer; line-height: 1;
+}
+.whyClose:hover { color: var(--cream); }
+.whyScore {
+  font-family: var(--serif); font-size: 2.6rem; font-weight: 700;
+  color: var(--gold); line-height: 1; margin-bottom: 0.35rem;
+}
+.whyTitle {
+  font-family: var(--serif); font-size: 1.15rem; font-weight: 600;
+  color: var(--cream); margin-bottom: 0.6rem;
+}
+.whySub {
+  font-size: 0.8rem; color: var(--dim); line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+.whyList { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.25rem; }
+.whyRow {
+  display: flex; align-items: flex-start; gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  background: rgba(201,168,76,0.06);
+  border-left: 2px solid var(--gold);
+  border-radius: 3px;
+}
+.whyRowNeg {
+  background: rgba(180,60,50,0.08);
+  border-left-color: #b43c32;
+}
+.whyPts {
+  font-family: var(--sans); font-weight: 700; font-size: 0.8rem;
+  color: var(--gold); white-space: nowrap; min-width: 2.2rem;
+}
+.whyRowNeg .whyPts { color: #d9776e; }
+.whyReason { font-size: 0.82rem; color: var(--cream); line-height: 1.5; }
+.whyEmpty { font-size: 0.82rem; color: var(--dim); line-height: 1.6; }
+.whyFoot {
+  font-size: 0.72rem; color: var(--faint); line-height: 1.55;
+  border-top: 0.5px solid var(--rule); padding-top: 1rem;
+}

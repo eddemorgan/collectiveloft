@@ -44,6 +44,34 @@ const DISC_AFFINITY = {
   'Creative Tech': { strong: ['Music','Visual Art','Design & Web','Film'],            moderate: ['Writing','Photography'] },
 }
 
+// ── RIGHT NOW parser ─────────────────────────────────────────────────────────
+// "Right Now" is free-text current intent (e.g. "looking for a fine art
+// photographer working in portraiture and landscape"). It's the freshest,
+// most deliberate signal a member gives — people update it far more often than
+// the static seeking dropdowns. We scan it for known discipline names (and
+// natural variants) so that typed intent actually drives matching, weighted
+// ABOVE the static seeking fields.
+const DISC_TEXT_MATCHERS = {
+  'Visual Art':    [/\bvisual artist?s?\b/, /\bpainter?s?\b/, /\billustrat/, /\bfine artist?s?\b/],
+  'Music':         [/\bmusician?s?\b/, /\bcomposer?s?\b/, /\bproducer?s?\b/, /\bsongwriter/, /\bbeat ?maker/],
+  'Writing':       [/\bwriter?s?\b/, /\bwriting\b/, /\beditor?s?\b/, /\bauthor?s?\b/, /\bpoet/, /\bcopywriter/],
+  'Design & Web':  [/\bdesigner?s?\b/, /\bdesign\b/, /\bweb ?dev/, /\bux\b/, /\bui\b/, /\bbrand/],
+  'Film':          [/\bfilm ?maker?s?\b/, /\bfilm\b/, /\bdirector?s?\b/, /\bcinematograph/, /\bvideograph/, /\beditor?s?\b/],
+  'Photography':   [/\bphotograph(er|y|ers)?\b/, /\bportrait/, /\blandscape photo/, /\bphoto shoot/],
+  'Performance':   [/\bperformer?s?\b/, /\bdancer?s?\b/, /\bactor?s?\b/, /\bchoreograph/, /\btheat(er|re)/],
+  'Creative Tech': [/\bcreative tech/, /\bdeveloper?s?\b/, /\bcreative cod/, /\bprogrammer/, /\bengineer/],
+}
+
+function disciplinesFromText(text) {
+  if (!text || typeof text !== 'string') return []
+  const t = text.toLowerCase()
+  const found = []
+  for (const [disc, patterns] of Object.entries(DISC_TEXT_MATCHERS)) {
+    if (patterns.some(re => re.test(t))) found.push(disc)
+  }
+  return found
+}
+
 function computeScore(profile, myProfile) {
   if (!myProfile) return Math.floor(Math.random() * 30) + 50
 
@@ -76,9 +104,22 @@ function computeScore(profile, myProfile) {
   const theyWantMySkills = mySkills.some(s => theirSeekSkills.includes(s))
   if (theyWantMySkills) score += 10
 
+  // ── RIGHT NOW INTENT (highest weight — freshest, most deliberate signal) ─────
+  // Parse my free-text "Right Now" for disciplines. If their discipline matches
+  // what I'm actively looking for in my own words, that's a stronger signal than
+  // a static dropdown — someone who typed "fine art photographer" today means it.
+  const myRightNowDiscs = disciplinesFromText(myProfile.rightnow)
+  const rightNowHit = theirDiscs.some(d => myRightNowDiscs.includes(d))
+  if (rightNowHit) score += 30
+
+  // Bidirectional: their Right Now points at my discipline.
+  const theirRightNowDiscs = disciplinesFromText(profile.rightnow)
+  const theyWantMeRightNow = myDiscs.some(d => theirRightNowDiscs.includes(d))
+  if (theyWantMeRightNow) score += 15
+
   // ── DISCIPLINE AFFINITY ──────────────────────────────────────────────────────
   // Only apply affinity if no seeking data -- prevents double-counting
-  if (!iWantThem && !theyWantMe) {
+  if (!iWantThem && !theyWantMe && !rightNowHit) {
     let affinityBonus = 0
     myDiscs.forEach(myDisc => {
       const affinity = DISC_AFFINITY[myDisc]
@@ -144,7 +185,7 @@ export default function MatchingPage() {
       }
       let query = supabase
         .from('profiles')
-        .select('id, firstname, lastname, headline, disciplines, skills, city, state, country, avatar_url, availability, collabs_count, compensation, seeking, seeking_disciplines, seeking_skills, bio')
+        .select('id, firstname, lastname, headline, disciplines, skills, city, state, country, avatar_url, availability, collabs_count, compensation, seeking, seeking_disciplines, seeking_skills, bio, rightnow')
         .order('created_at', { ascending: false })
       if (user) query = query.neq('id', user.id)
       const { data: all } = await query

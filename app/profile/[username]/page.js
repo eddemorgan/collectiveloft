@@ -38,17 +38,11 @@ function skillsForDiscs(discLabels) {
   })
 }
 function detectType(file) {
-  const mime = file.type || ''
+  const mime = file.type
   if (mime.startsWith('image/')) return 'image'
   if (mime.startsWith('video/')) return 'video'
   if (mime.startsWith('audio/')) return 'audio'
   if (mime === 'application/pdf') return 'document'
-  // Browsers often report empty file.type for lossless audio (.wav/.aiff/.flac)
-  // and some video. Fall back to the file extension so it routes correctly.
-  const ext = (file.name.split('.').pop() || '').toLowerCase()
-  if (['wav','wave','aif','aiff','flac','m4a','mp3','ogg','aac'].includes(ext)) return 'audio'
-  if (['mp4','mov','webm','avi','mkv'].includes(ext)) return 'video'
-  if (['png','jpg','jpeg','gif','webp','svg','heic'].includes(ext)) return 'image'
   return 'document'
 }
 function bucketForType(type) {
@@ -373,7 +367,6 @@ export default function ProfilePage() {
   const [profile,          setProfile]          = useState(null)
   const [profileId,        setProfileId]        = useState(null)
   const [currentUserId,    setCurrentUserId]    = useState(null)
-  const [mySlug,           setMySlug]           = useState(null)
   const [studios,          setStudios]          = useState([])
   const [ratings,          setRatings]          = useState([])
   const [starFilter,       setStarFilter]       = useState([])  // empty = show all; multi-select star values
@@ -484,15 +477,6 @@ export default function ProfilePage() {
         setIsOwner(true)
         loadNotifCount(user.id)
         loadBriefs(user.id)
-      } else {
-        const { data: me } = await supabase
-          .from('profiles')
-          .select('firstname, lastname')
-          .eq('id', user.id)
-          .single()
-        if (me?.firstname && me?.lastname) {
-          setMySlug(`${me.firstname.toLowerCase()}-${me.lastname.toLowerCase()}`)
-        }
       }
     }
 
@@ -690,22 +674,11 @@ export default function ProfilePage() {
     const ext = file.name.split('.').pop()
     const path = `${profile.id}/${Date.now()}.${ext}`
     const { error: uploadError } = await supabase.storage.from(bucketForType(type)).upload(path, file, { upsert: true })
-    if (uploadError) {
-      console.error(uploadError)
-      alert(`Could not upload "${file.name}": ${uploadError.message}`)
-      setUploading(false)
-      return
-    }
+    if (uploadError) { console.error(uploadError); setUploading(false); return }
     const { data: { publicUrl } } = supabase.storage.from(bucketForType(type)).getPublicUrl(path)
     const title = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
     const { data: item, error: insertError } = await supabase.from('portfolio_items').insert({ profile_id: profile.id, type, title, file_url: publicUrl, sort_order: portfolio.length }).select().single()
-    if (insertError) {
-      console.error(insertError)
-      alert(`"${file.name}" uploaded but could not be saved: ${insertError.message}`)
-      setUploading(false)
-      return
-    }
-    if (item) setPortfolio(prev => [...prev, item])
+    if (!insertError && item) setPortfolio(prev => [...prev, item])
     setUploading(false)
     flashSave()
   }
@@ -787,7 +760,6 @@ export default function ProfilePage() {
           <Link href="/briefs">Collabs</Link>
           <Link href="/matching">Matching</Link>
           <Link href="/my-studios">My Loft Studios</Link>
-          {!isOwner && mySlug && <Link href={`/profile/${mySlug}`}>My Profile</Link>}
           {isOwner && saving && <span className={styles.saveIndicator}>Saving…</span>}
           {isOwner && saveMsg && !saving && <span className={styles.saveIndicator}>{saveMsg}</span>}
           {isOwner && <button className={`${styles.btnEdit} ${editMode?styles.btnEditActive:''}`} onClick={()=>setEditMode(v=>!v)}>{editMode?'Done editing':'Edit profile'}</button>}
@@ -943,19 +915,55 @@ export default function ProfilePage() {
           {activeTab==='work'&&(
             <>
               <div className={styles.contentSection}>
-                <div className={styles.secLabel}>About</div>
-                <div className={styles.bioText}><Editable value={profile.bio} onSave={v=>saveField('bio',v)} placeholder={isOwner?'Click to add your bio…':'No bio added yet.'} multiline isOwner={isOwner} editMode={editMode} className={styles.bioInner}/></div>
                 <div className={styles.rightnowCard}>
-                  <div className={styles.rnLabel}>Right now</div>
-                  <div className={styles.rnText}><Editable value={profile.rightnow} onSave={v=>saveField('rightnow',v)} placeholder={isOwner?'Click to describe what you\'re actively making…':'Nothing listed right now.'} multiline isOwner={isOwner} editMode={editMode} className={styles.rnInner}/></div>
+                  <div className={styles.rnLabel}>What I'm working on right now</div>
+                  <div className={styles.rnText}><Editable value={profile.rightnow} onSave={v=>saveField('rightnow',v)} placeholder={isOwner?'Click to describe what you\'re actively making or looking for…':'Nothing listed right now.'} multiline isOwner={isOwner} editMode={editMode} className={styles.rnInner}/></div>
                 </div>
+              </div>
+              <div className={styles.contentSection}>
+                <div className={styles.secLabel}>Collaboration preferences</div>
+                {isOwner && editMode ? (
+                  <SeekingEditor
+                    seekingDiscs={profile.seeking_disciplines || []}
+                    seekingSkills={profile.seeking_skills || []}
+                    onSave={async (discs, skills) => {
+                      await saveField('seeking_disciplines', discs)
+                      await saveField('seeking_skills', skills)
+                    }}
+                  />
+                ) : (
+                  <div className={styles.seekingView}>
+                    {(profile.seeking_disciplines||[]).length === 0 && (profile.seeking_skills||[]).length === 0 ? (
+                      <span className={styles.prefInner}>{isOwner ? 'Enter edit mode to set your collaboration preferences.' : 'Not specified.'}</span>
+                    ) : (
+                      <>
+                        {(profile.seeking_disciplines||[]).length > 0 && (
+                          <div className={styles.seekingRow}>
+                            <span className={styles.seekingRowLabel}>Disciplines</span>
+                            <div className={styles.seekingTags}>
+                              {(profile.seeking_disciplines||[]).map(d => <span key={d} className={styles.seekingTag}>{d}</span>)}
+                            </div>
+                          </div>
+                        )}
+                        {(profile.seeking_skills||[]).length > 0 && (
+                          <div className={styles.seekingRow}>
+                            <span className={styles.seekingRowLabel}>Skills</span>
+                            <div className={styles.seekingTags}>
+                              {(profile.seeking_skills||[]).map(s => <span key={s} className={`${styles.seekingTag} ${styles.seekingTagSkill}`}>{s}</span>)}
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
               <div className={styles.contentSection}>
                 <div className={styles.secLabelRow}>
                   <div className={styles.secLabel}>Portfolio</div>
                   {isOwner&&editMode&&<div className={styles.portfolioHint}>{uploading?'Uploading…':'Click any slot to upload — images, video, audio, or PDF'}</div>}
                 </div>
-                <input ref={portfolioInputRef} type="file" accept="image/*,video/*,audio/*,.wav,.aiff,.aif,.flac,.m4a,.mp3,.ogg,.pdf" style={{display:'none'}} onChange={e=>{if(e.target.files[0])uploadPortfolioItem(e.target.files[0]);e.target.value=''}}/>
+                <input ref={portfolioInputRef} type="file" accept="image/*,video/*,audio/*,.pdf" style={{display:'none'}} onChange={e=>{if(e.target.files[0])uploadPortfolioItem(e.target.files[0]);e.target.value=''}}/>
                 {portfolio.length===0&&!isOwner?<div className={styles.emptyState}>No portfolio items yet.</div>:(
                   <div className={styles.portfolioGrid}>
                     {gridItems.map(item=>{
@@ -1041,44 +1049,6 @@ export default function ProfilePage() {
                       )
                     })}
                     {isOwner&&editMode&&<button className={styles.editTagsBtn} onClick={()=>{setDraftSkills(skills);setEditingSkills(true)}}>✎ Edit skills</button>}
-                  </div>
-                )}
-              </div>
-              <div className={styles.contentSection}>
-                <div className={styles.secLabel}>Collaboration preferences</div>
-                {isOwner && editMode ? (
-                  <SeekingEditor
-                    seekingDiscs={profile.seeking_disciplines || []}
-                    seekingSkills={profile.seeking_skills || []}
-                    onSave={async (discs, skills) => {
-                      await saveField('seeking_disciplines', discs)
-                      await saveField('seeking_skills', skills)
-                    }}
-                  />
-                ) : (
-                  <div className={styles.seekingView}>
-                    {(profile.seeking_disciplines||[]).length === 0 && (profile.seeking_skills||[]).length === 0 ? (
-                      <span className={styles.prefInner}>{isOwner ? 'Enter edit mode to set your collaboration preferences.' : 'Not specified.'}</span>
-                    ) : (
-                      <>
-                        {(profile.seeking_disciplines||[]).length > 0 && (
-                          <div className={styles.seekingRow}>
-                            <span className={styles.seekingRowLabel}>Disciplines</span>
-                            <div className={styles.seekingTags}>
-                              {(profile.seeking_disciplines||[]).map(d => <span key={d} className={styles.seekingTag}>{d}</span>)}
-                            </div>
-                          </div>
-                        )}
-                        {(profile.seeking_skills||[]).length > 0 && (
-                          <div className={styles.seekingRow}>
-                            <span className={styles.seekingRowLabel}>Skills</span>
-                            <div className={styles.seekingTags}>
-                              {(profile.seeking_skills||[]).map(s => <span key={s} className={`${styles.seekingTag} ${styles.seekingTagSkill}`}>{s}</span>)}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    )}
                   </div>
                 )}
               </div>

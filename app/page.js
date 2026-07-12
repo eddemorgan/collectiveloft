@@ -1111,7 +1111,7 @@ export default function Home() {
         <div className="waitlist-inner">
           <span className="waitlist-mark">✦</span>
           <div className="section-eyebrow" style={{textAlign:'center',marginBottom:'1.25rem'}}>Early access</div>
-          <h2 className="section-title">The platform is built.<br/><em>We&rsquo;re selecting founding members.</em></h2>
+          <h2 className="section-title">The platform is built.<br/><em>We&rsquo;re admitting founding members.</em></h2>
           <p style={{ fontFamily: 'var(--sans)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--gold)', margin: '1.75rem 0 0.85rem' }}>500 founding spots. Admitted by hand.</p>
           <p style={{ fontFamily: 'var(--sans)', fontSize: '0.95rem', fontWeight: 300, color: 'var(--muted)', maxWidth: '520px', margin: '0 auto', lineHeight: 1.7 }}>
             <span style={{ color: 'var(--cream)', fontWeight: 500 }}>Already inside:</span> Musicians, Filmmakers, Visual Artists, Photographers, Writers, Poets and Creative Tech.

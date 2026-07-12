@@ -1,53 +1,19 @@
-export const metadata = {
-  title: 'Collective Loft — Where Creatives Find Collaborators',
-  description: 'The platform where artists, musicians, writers, designers, and filmmakers find each other, agree on terms, and make something real.',
-  openGraph: {
-    title: 'Collective Loft',
-    description: 'Building the infrastructure meant for the creative class.',
-    url: 'https://collectiveloft.com',
-    siteName: 'Collective Loft',
-    type: 'website',
-  },
-}
-
-const homeFaqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: [
-    {
-      '@type': 'Question',
-      name: 'Why does Collective Loft have a subscription?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Because free platforms attract people who aren\u2019t serious. The $15/month is what keeps this a professional environment, a room where everyone has skin in the game, agreements are in writing before work starts, and your creative work is protected from day one.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'What does $15/month actually get me?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Everything. No tiers, no feature gates, no pay-to-unlock. Full access to Discover, Collab Briefs, Discipline Matching, Collab Terms, and the Loft Studio. Use it to run 10 collabs a month or use it to build your profile and get discovered. The platform works on your timeline and priorities.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'What about founding members?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Founding members get 3 months free, no charge, no catch. After that it\u2019s $15/month, same as everyone else. The founding member badge on your profile stays forever.',
-      },
-    },
-  ],
-}
+import Head from 'next/head'
 
 export default function Home() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeFaqSchema) }}
-      />
+      <Head>
+        <title>Collective Loft — The Professional Network for the Creative Class</title>
+        <meta name="description" content="The platform where artists, musicians, writers, designers, and filmmakers find each other, agree on terms, and make something real." />
+        <meta property="og:title" content="Collective Loft" />
+        <meta property="og:description" content="Building the infrastructure meant for the creative class" />
+        <meta property="og:url" content="https://collectiveloft.com" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+      </Head>
 
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -72,7 +38,7 @@ export default function Home() {
           background: var(--bg1);
           color: var(--cream);
           font-family: var(--sans);
-          font-weight: 400; /* was 300 — Light body text hurts legibility on textured bg */
+          font-weight: 300;
           line-height: 1.6;
           overflow-x: hidden;
         }
@@ -233,7 +199,7 @@ export default function Home() {
           font-family: var(--sans);
           font-size: 0.72rem;
           font-weight: 500;
-          letter-spacing: 0.18em; /* was 0.22em — tighter tracking aids tiny caps */
+          letter-spacing: 0.22em;
           text-transform: uppercase;
           color: var(--gold);
           opacity: 0.8;
@@ -256,7 +222,7 @@ export default function Home() {
         .hero-sub {
           font-family: var(--sans);
           font-size: clamp(1rem, 2vw, 1.2rem);
-          font-weight: 400; /* was 300 */
+          font-weight: 300;
           color: rgba(26,24,20,0.55);
           max-width: 560px;
           margin: 0 auto 2.5rem;
@@ -318,7 +284,7 @@ export default function Home() {
 
         .disc-tag {
           font-family: var(--sans);
-          font-size: 0.75rem; /* was 0.7rem */
+          font-size: 0.7rem;
           font-weight: 500;
           letter-spacing: 0.14em;
           text-transform: uppercase;
@@ -367,7 +333,7 @@ export default function Home() {
 
         .section-eyebrow {
           font-family: var(--sans);
-          font-size: 0.75rem; /* was 0.68rem */
+          font-size: 0.68rem;
           font-weight: 500;
           letter-spacing: 0.2em;
           text-transform: uppercase;
@@ -389,7 +355,7 @@ export default function Home() {
         .section-body {
           font-family: var(--sans);
           font-size: 1.1rem;
-          font-weight: 400; /* was 300 */
+          font-weight: 300;
           color: var(--muted);
           max-width: 600px;
           line-height: 1.8;
@@ -424,15 +390,15 @@ export default function Home() {
         .problem-title {
           font-family: var(--serif);
           font-size: 1.5rem;
-          font-weight: 600; /* was 400 — stronger card-title hierarchy */
+          font-weight: 400;
           color: var(--cream);
           margin-bottom: 0.5rem;
         }
 
         .problem-text {
           font-family: var(--sans);
-          font-size: 0.95rem; /* was 0.88rem */
-          font-weight: 400; /* was 300 */
+          font-size: 0.88rem;
+          font-weight: 300;
           color: var(--muted);
           line-height: 1.7;
         }
@@ -493,8 +459,8 @@ export default function Home() {
 
         .flow-desc {
           font-family: var(--sans);
-          font-size: 0.9rem; /* was 0.85rem */
-          font-weight: 400; /* was 300 */
+          font-size: 0.85rem;
+          font-weight: 300;
           color: var(--muted);
           line-height: 1.7;
         }
@@ -657,7 +623,7 @@ export default function Home() {
         .fw-status {
           display: inline-block;
           font-family: var(--sans);
-          font-size: 0.72rem; /* was 0.65rem */
+          font-size: 0.65rem;
           font-weight: 600;
           letter-spacing: 0.12em;
           text-transform: uppercase;
@@ -672,7 +638,7 @@ export default function Home() {
         .fw-title {
           font-family: var(--serif);
           font-size: 1.75rem;
-          font-weight: 600; /* was 400 */
+          font-weight: 400;
           color: var(--cream);
           margin-bottom: 0.5rem;
           line-height: 1.2;
@@ -690,8 +656,8 @@ export default function Home() {
 
         .fw-desc {
           font-family: var(--sans);
-          font-size: 0.95rem; /* was 0.88rem */
-          font-weight: 400; /* was 300 */
+          font-size: 0.88rem;
+          font-weight: 300;
           color: var(--muted);
           line-height: 1.75;
         }
@@ -756,7 +722,7 @@ export default function Home() {
         .faq-q {
           font-family: var(--serif);
           font-size: 1.4rem;
-          font-weight: 600; /* was 400 — separates question from answer */
+          font-weight: 400;
           color: var(--cream);
           margin-bottom: 0.75rem;
           line-height: 1.25;
@@ -765,26 +731,11 @@ export default function Home() {
         .faq-a {
           font-family: var(--sans);
           font-size: 1rem;
-          font-weight: 400; /* was 300 */
+          font-weight: 300;
           color: var(--muted);
           line-height: 1.8;
           max-width: 620px;
         }
-
-        .faq-more {
-          margin-top: 2.5rem;
-        }
-
-        .faq-more-link {
-          font-family: var(--sans);
-          font-size: 0.9rem;
-          font-weight: 500;
-          letter-spacing: 0.04em;
-          color: var(--gold);
-          text-decoration: none;
-          transition: color 0.2s;
-        }
-        .faq-more-link:hover { color: var(--gold2); }
 
         /* WAITLIST */
         .waitlist-section {
@@ -819,7 +770,7 @@ export default function Home() {
           padding: 0.85rem 1rem;
           font-family: var(--sans);
           font-size: 0.92rem;
-          font-weight: 400; /* was 300 */
+          font-weight: 300;
           color: var(--cream);
           outline: none;
           transition: border-color 0.2s;
@@ -835,7 +786,7 @@ export default function Home() {
           padding: 0.85rem 1rem;
           font-family: var(--sans);
           font-size: 0.92rem;
-          font-weight: 400; /* was 300 */
+          font-weight: 300;
           color: var(--cream);
           outline: none;
           width: 100%;
@@ -951,28 +902,25 @@ export default function Home() {
         <a href="/" className="logo" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
             <span style={{ color: 'var(--gold)' }}>✦</span>
-            <span>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
+            <span style={{ color: '#1A1814' }}>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
           </span>
           <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '5px 0' }} />
-          <span style={{ fontFamily: 'var(--sans)', fontSize: '11px' /* was 8.5px */, letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
+          <span style={{ fontFamily: 'var(--sans)', fontSize: '8.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
         </a>
-        <a href="#waitlist" className="nav-cta">Request early access</a>
+        <a href="#waitlist" className="nav-cta">Claim your founding spot</a>
       </nav>
 
       <section className="hero">
         <div className="hero-grid"></div>
         <div className="hero-glow"></div>
         <div className="eyebrow">Collective Loft · Est. 2026</div>
-<h1>
-  Building the infrastructure<br/>
-  <em>meant</em> for the<br/>
-  <em>creative class</em>
-</h1>
+<h1>Your people are out there</h1>
+        <p style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1.4rem, 3vw, 2.25rem)', fontStyle: 'italic', fontWeight: 400, color: 'var(--gold)', margin: '0 0 1.5rem', lineHeight: 1.2, animation: 'fadeUp 0.8s 0.15s ease both' }}>Collaborators, not Bosses</p>
         <p className="hero-sub">
           The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and open a Loft Studio — a shared workspace built around the work.
         </p>
         <div className="hero-actions">
-          <a href="#waitlist" className="btn-primary">Request early access ↗</a>
+          <a href="#waitlist" className="btn-primary">Claim your founding spot ↗</a>
           <button className="btn-ghost" id="btnSeeHowItWorks">See how it works</button>
           <a href="/blog" className="btn-ghost">Read The Brief</a>
         </div>
@@ -1156,9 +1104,6 @@ export default function Home() {
               <div className="faq-a">Founding members get 3 months free, no charge, no catch. After that it&rsquo;s $15/month, same as everyone else. The founding member badge on your profile stays forever.</div>
             </div>
           </div>
-          <div className="faq-more">
-            <a href="/faq" className="faq-more-link">Have more questions? Read the full FAQ →</a>
-          </div>
         </div>
       </section>
 
@@ -1167,7 +1112,10 @@ export default function Home() {
           <span className="waitlist-mark">✦</span>
           <div className="section-eyebrow" style={{textAlign:'center',marginBottom:'1.25rem'}}>Early access</div>
           <h2 className="section-title">The platform is built.<br/><em>We&rsquo;re selecting founding members.</em></h2>
-          <p className="section-body" style={{margin:'0 auto'}}>We&rsquo;re not doing an open beta. We&rsquo;re building the founding cohort by hand — across disciplines, across cities, with people who are actively making work right now. Founding members shape the platform.</p>
+          <p style={{ fontFamily: 'var(--sans)', fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--gold)', margin: '1.75rem 0 0.85rem' }}>500 founding spots. Admitted by hand.</p>
+          <p style={{ fontFamily: 'var(--sans)', fontSize: '0.95rem', fontWeight: 300, color: 'var(--muted)', maxWidth: '520px', margin: '0 auto', lineHeight: 1.7 }}>
+            <span style={{ color: 'var(--cream)', fontWeight: 500 }}>Already inside:</span> Musicians, Filmmakers, Visual Artists, Photographers, Writers, Poets and Creative Tech.
+          </p>
 
           <form className="waitlist-form" id="waitlistForm">
             <div className="form-row">
@@ -1188,7 +1136,7 @@ export default function Home() {
               <option>Other</option>
             </select>
             <input className="form-input" type="text" name="city" placeholder="Your city" />
-            <button className="form-submit" type="submit">Request early access ↗</button>
+            <button className="form-submit" type="submit">Claim your founding spot ↗</button>
           </form>
 
           <div className="success-msg" id="successMsg">
@@ -1204,15 +1152,14 @@ export default function Home() {
         <a href="/" className="footer-logo" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', lineHeight: 1 }}>
             <span style={{ color: 'var(--gold)' }}>✦</span>
-            <span>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
+            <span style={{ color: '#1A1814' }}>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
           </span>
           <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '4px 0' }} />
-          <span style={{ fontFamily: 'var(--sans)', fontSize: '10.5px' /* was 7.5px */, letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
+          <span style={{ fontFamily: 'var(--sans)', fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
         </a>
         <div className="footer-links">
           <a href="#how-it-works" className="footer-link">How it works</a>
           <a href="#waitlist" className="footer-link">Early access</a>
-          <a href="/faq" className="footer-link">FAQ</a>
           <a href="https://www.instagram.com/the.collective.loft" target="_blank" rel="noopener noreferrer" className="footer-link">Instagram</a>
           <a href="mailto:help@collectiveloft.com" className="footer-link">Contact</a>
         </div>
@@ -1279,12 +1226,12 @@ export default function Home() {
                 form.style.display = 'none';
                 success.style.display = 'block';
               } else {
-                btn.textContent = 'Request early access ↗';
+                btn.textContent = 'Claim your founding spot ↗';
                 btn.disabled = false;
                 alert('Something went wrong. Email us directly at help@collectiveloft.com');
               }
             } catch {
-              btn.textContent = 'Request early access ↗';
+              btn.textContent = 'Claim your founding spot ↗';
               btn.disabled = false;
               alert('Something went wrong. Email us directly at help@collectiveloft.com');
             }

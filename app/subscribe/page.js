@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
+import styles from './subscribe.module.css'
 
 export default function SubscribePage() {
   const [loading, setLoading] = useState(false)
@@ -11,29 +13,25 @@ export default function SubscribePage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     setCancelled(params.get('cancelled') === 'true')
-
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user)
-    })
+    supabase.auth.getUser().then(({ data }) => setUser(data.user))
   }, [])
 
+  const trialEnd = (() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 7)
+    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+  })()
+
   const handleSubscribe = async () => {
-    if (!user) {
-      window.location.href = '/login'
-      return
-    }
-
+    if (!user) { window.location.href = '/login'; return }
     setLoading(true)
-
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id, email: user.email }),
       })
-
       const data = await res.json()
-
       if (data.url) {
         window.location.href = data.url
       } else {
@@ -47,102 +45,69 @@ export default function SubscribePage() {
     }
   }
 
+  const features = [
+    'Full access to Discover and Matching',
+    'Post and apply to Collab Briefs',
+    'A Loft Studio for every active collaboration',
+    'Portfolio and profile tools',
+    'Direct messaging with collaborators',
+  ]
+
   return (
-    <main style={{
-      minHeight: '100vh',
-      background: 'var(--background)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem',
-    }}>
-      <div style={{
-        maxWidth: '480px',
-        width: '100%',
-        textAlign: 'center',
-      }}>
-        <img src="/logo.png" alt="Collective Loft" style={{ height: '48px', marginBottom: '2rem' }} />
+    <div className={styles.page}>
+      <nav className={styles.nav}>
+        <Link href="/" className={styles.logo}>
+          <span className={styles.logoRow}>
+            <span className={styles.mark}>✦</span>
+            <span className={styles.wm}>Collective <em>Loft</em></span>
+          </span>
+          <span className={styles.logoRule} />
+          <span className={styles.tag}>Where creatives find each other</span>
+        </Link>
+      </nav>
 
-        {cancelled && (
-          <p style={{ color: 'var(--gold)', marginBottom: '1rem', fontSize: '0.9rem' }}>
-            Payment cancelled. No worries -- you can try again whenever you're ready.
+      <div className={styles.wrap}>
+        <div className={styles.inner}>
+          {cancelled && (
+            <div className={styles.cancelled}>
+              Checkout cancelled — no charge was made. You can start your trial whenever you&apos;re ready.
+            </div>
+          )}
+
+          <div className={styles.eyebrow}>One last step</div>
+          <h1 className={styles.title}>Membership is what keeps<br /><em>Collective Loft</em> a safe space.</h1>
+          <p className={styles.why}>
+            Your membership is what keeps the people who exploit creatives out — so this stays a protected place to find your people and do real work. That&apos;s what your $15 protects.
           </p>
-        )}
-
-        <h1 style={{ fontSize: '1.8rem', marginBottom: '0.75rem', color: 'var(--cream)' }}>
-          Join Collective Loft
-        </h1>
-
-        <p style={{ color: 'var(--cream-muted)', marginBottom: '0.5rem', lineHeight: '1.6' }}>
-          A curated network for creatives who are serious about collaboration.
-        </p>
-
-        <p style={{ color: 'var(--cream-muted)', marginBottom: '2.5rem', fontSize: '0.9rem' }}>
-          7-day free trial, then $15/month. Cancel anytime.
-        </p>
-
-        <div style={{
-          background: 'var(--card-bg)',
-          border: '1px solid var(--rule)',
-          borderRadius: '12px',
-          padding: '2rem',
-          marginBottom: '1.5rem',
-        }}>
-          <div style={{ fontSize: '2.5rem', fontWeight: '700', color: 'var(--cream)', marginBottom: '0.25rem' }}>
-            $15
-            <span style={{ fontSize: '1rem', fontWeight: '400', color: 'var(--cream-muted)' }}>/month</span>
-          </div>
-          <p style={{ color: 'var(--cream-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
-            After your 7-day free trial
+          <p className={styles.reassure}>
+            Your first 7 days are free. You won&apos;t be charged until <strong>{trialEnd}</strong>, and you can cancel anytime.
           </p>
 
-          <div style={{ textAlign: 'left', marginBottom: '1.5rem' }}>
-            {[
-              'Full access to Discover and Matching',
-              'Post and apply to Collab Briefs',
-              'Loft Studio for active collabs',
-              'Portfolio and profile tools',
-              'Direct messaging with collaborators',
-            ].map((feature) => (
-              <div key={feature} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                marginBottom: '0.6rem',
-                color: 'var(--cream)',
-                fontSize: '0.9rem',
-              }}>
-                <span style={{ color: 'var(--gold)' }}>✦</span>
-                {feature}
-              </div>
-            ))}
+          <div className={styles.card}>
+            <div className={styles.price}>
+              $15<span className={styles.per}>/month</span>
+            </div>
+            <p className={styles.priceNote}>After your 7-day free trial</p>
+
+            <div className={styles.features}>
+              {features.map(f => (
+                <div key={f} className={styles.feature}>
+                  <span className={styles.fmark}>✦</span>{f}
+                </div>
+              ))}
+            </div>
+
+            <button className={styles.btn} onClick={handleSubscribe} disabled={loading}>
+              {loading ? 'Taking you to secure checkout…' : 'Start my 7-day free trial →'}
+            </button>
+            <p className={styles.secure}>Secure checkout powered by Stripe. Cancel anytime before {trialEnd} and you won&apos;t be charged.</p>
           </div>
 
-          <button
-            onClick={handleSubscribe}
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: '0.9rem',
-              background: 'var(--gold)',
-              color: 'var(--background)',
-              border: 'none',
-              borderRadius: '8px',
-              fontSize: '1rem',
-              fontWeight: '600',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading ? 'Redirecting...' : 'Start Free Trial'}
-          </button>
+          <p className={styles.footer}>
+            Already a member? <Link href="/login">Sign in</Link>
+          </p>
         </div>
-
-        <p style={{ color: 'var(--cream-muted)', fontSize: '0.8rem' }}>
-          Already a member?{' '}
-          <a href="/login" style={{ color: 'var(--gold)', textDecoration: 'none' }}>Sign in</a>
-        </p>
       </div>
-    </main>
+    </div>
   )
 }

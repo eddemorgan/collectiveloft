@@ -30,7 +30,7 @@ export async function GET() {
 
     // Take 20, and strip to ONLY the safe, capped fields.
     // No name, no email, no location, no photo — anonymization happens here, server-side.
-    const creatives = usable.slice(0, 20).map((p, idx) => ({
+    const creatives = usable.slice(0, 18).map((p, idx) => ({
       key: idx, // positional key only — not the real id
       discipline: (p.disciplines && p.disciplines[0]) || 'Creative',
       skills: Array.isArray(p.skills) ? p.skills.slice(0, 3) : [],

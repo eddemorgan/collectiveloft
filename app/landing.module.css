@@ -89,3 +89,7 @@
   .signin { display: none; }
   .heroInner { padding: 72px 32px 60px; }
 }
+
+.socials { display: flex; gap: 18px; align-items: center; justify-content: center; }
+.social { color: var(--muted); display: inline-flex; transition: color 0.2s, transform 0.2s; }
+.social:hover { color: var(--gold); transform: translateY(-2px); }

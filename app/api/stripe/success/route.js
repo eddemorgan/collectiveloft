@@ -10,7 +10,7 @@ export async function GET(req) {
   const userId = searchParams.get('userId')
 
   if (!userId) {
-    return Response.redirect(new URL('/?onboarding=true', req.url))
+    return Response.redirect(new URL('/onboarding?onboarding=true', req.url))
   }
 
   const { data: profile } = await supabase
@@ -20,5 +20,5 @@ export async function GET(req) {
     .single()
 
   // Always send to onboarding form so new user can complete their profile
-  return Response.redirect(new URL('/?onboarding=true', req.url))
+  return Response.redirect(new URL('/onboarding?onboarding=true', req.url))
 }

@@ -45,7 +45,7 @@ export default function Home() {
           <div className={styles.menuLabel}>The platform</div>
           <Link href="/how-it-works" onClick={toggle}>How it works<span className={styles.mSub}>From first hello to finished work</span></Link>
           <Link href="/discover" onClick={toggle}>Discover creatives<span className={styles.mSub}>Browse who&apos;s already here</span></Link>
-          <Link href="/blog" onClick={toggle}>The Brief<span className={styles.mSub}>Our journal for the creative class</span></Link>
+          <a href="https://collectiveloft.com/blog" onClick={toggle}>The Brief<span className={styles.mSub}>Our journal for the creative class</span></a>
         </div>
         <div className={styles.menuSec}>
           <div className={styles.menuLabel}>Company</div>
@@ -136,7 +136,7 @@ export default function Home() {
                 <div className={styles.fcolL}>Platform</div>
                 <Link href="/how-it-works">How it works</Link>
                 <Link href="/discover">Discover</Link>
-                <Link href="/blog">The Brief</Link>
+                <a href="https://collectiveloft.com/blog">The Brief</a>
               </div>
               <div className={styles.fcol}>
                 <div className={styles.fcolL}>Company</div>

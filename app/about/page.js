@@ -30,7 +30,7 @@ export default function AboutPage() {
 
       <header className={styles.hero}>
         <div className={styles.eyebrow}>Why we built this</div>
-        <h1 className={styles.title}>Someone I love is an artist. <em>That changed everything.</em></h1>
+        <h1 className={styles.title}>Someone I <em>love</em> is an artist. That <em>changed everything.</em></h1>
         <p className={styles.lede}>This didn&rsquo;t start with a business plan. It started with a person, and what I noticed watching them try to build a life out of what they make.</p>
       </header>
 

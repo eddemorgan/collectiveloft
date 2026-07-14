@@ -38,7 +38,7 @@ export default function MorganCollectivePage() {
       <header className={styles.hero}>
         <div className={styles.heroMark}>&#10022;</div>
         <div className={styles.eyebrow}>The parent company</div>
-        <h1 className={styles.title}>Building the infrastructure <em>meant for</em> the creative class.</h1>
+        <h1 className={styles.title}>Building the infrastructure <em>meant</em> for the <em>creative</em> <em>class.</em></h1>
         <p className={styles.lede}>Morgan Collective Group is a holding company formed to build, own, and operate the companies that give the creative class the professional infrastructure the industry never offered them.</p>
       </header>
 
@@ -46,9 +46,9 @@ export default function MorganCollectivePage() {
         <div className={styles.secEyebrow}>What we are</div>
         <h2 className={styles.secTitle}>The company behind the Collective.</h2>
         <div className={styles.secBody}>
-          <p>Morgan Collective Group is the silent parent. It never appears on a storefront or a product. It is the architecture that owns and builds everything beneath it, and every company it creates answers one question: <b>does this give creatives something they were never supposed to have access to?</b></p>
+          <p>Morgan Collective Group is the silent parent. It never appears on a storefront or a product. It is the architecture that owns and builds everything beneath it, and every company it creates answers one question: <b>does this give creatives something they were meant to have access to?</b></p>
         </div>
-        <p className={styles.pullquote}>We are not building products for the creative class. We are building the infrastructure they were never supposed to have.</p>
+        <p className={styles.pullquote}>We are not building products for the creative class, but we are building the infrastructure meant for them.</p>
       </section>
 
       <section className={styles.section}>
@@ -86,14 +86,14 @@ export default function MorganCollectivePage() {
 
           <div className={styles.flagship}>
             <div className={styles.flagHead}>
-              <div className={styles.flagName}>Collective <em>Loft</em></div>
+              <div className={styles.flagName}><span style={{ color: 'var(--cream)' }}>Collective</span> <em style={{ color: '#B8922E' }}>Loft</em></div>
               <div className={styles.flagSub}>Flagship &middot; The creative professional ecosystem</div>
             </div>
             <div className={styles.divisions}>
               {DIVISIONS.map(d => (
                 <div key={d.name} className={styles.division}>
                   <span className={styles.divDot} style={{ background: d.color }} />
-                  <span className={styles.divName}>{d.name}</span>
+                  <em className={styles.divName} style={{ color: d.color, fontStyle: 'italic' }}>{d.name}</em>
                   <span className={`${styles.divStatus} ${d.status === 'live' ? styles.live : styles.planned}`}>
                     {d.status === 'live' ? 'Live now' : 'Planned'}
                   </span>
@@ -105,7 +105,7 @@ export default function MorganCollectivePage() {
 
           <div className={styles.connector} />
           <div className={styles.sibling}>
-            <div className={styles.sibName} style={{ color: '#7B2D42' }}>Collective Pour</div>
+            <div className={styles.sibName}><span style={{ color: 'var(--cream)' }}>Collective</span> <em style={{ color: '#7B2D42' }}>Pour</em></div>
             <div className={styles.sibDesc}>Planned. The physical space where the community gathers, where collaboration happens in person over coffee or wine.</div>
           </div>
         </div>

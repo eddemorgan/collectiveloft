@@ -18,8 +18,8 @@ export async function POST(request) {
 
     const { error } = await resend.emails.send({
       from: 'Collective Loft <studio@collectiveloft.com>',
-      to: 'help@collectiveloft.com',
-      reply_to: email,
+      to: 'edde@collectiveloft.com',
+      replyTo: email,
       subject: `New Help request from ${name}`,
       html: `
         <!DOCTYPE html>

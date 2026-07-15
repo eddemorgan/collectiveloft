@@ -49,7 +49,7 @@ export default function Home() {
         </div>
         <div className={styles.menuSec}>
           <div className={styles.menuLabel}>Company</div>
-          <Link href="/about" onClick={toggle}>About Collective Loft<span className={styles.mSub}>Why we built this — and who it&apos;s for</span></Link>
+          <Link href="/about" onClick={toggle}>About Collective Loft<span className={styles.mSub}>Why we built this, and who it&apos;s for</span></Link>
           <Link href="/morgan-collective" onClick={toggle}>Morgan Collective Group</Link>
           <Link href="/help" onClick={toggle}>Help &amp; support</Link>
         </div>
@@ -63,10 +63,10 @@ export default function Home() {
         <div className={styles.heroRule} />
         <div className={styles.heroInner}>
           <div className={styles.heroEyebrow}>A professional network for the creative class</div>
-          <div className={styles.heroPromise}>Your people are out there.</div>
-          <h1 className={styles.heroH1}>Collaborators,<br />not bosses.</h1>
+          <div className={styles.heroPromise}>Your people are here.</div>
+          <h1 className={styles.heroH1}>Find collaborators, not bosses.</h1>
           <p className={styles.heroSub}>
-            The professional network where <span className={styles.k}>artists, musicians, writers, designers, and filmmakers</span> find each other, negotiate real terms, and open a <span className={styles.k}>Loft Studio</span> — a shared workspace built around the work.
+            The professional network where <span className={styles.k}>artists, musicians, writers, designers, and filmmakers</span> find each other, negotiate real terms, and open a <span className={styles.k}>Loft Studio</span>, a shared workspace built around the work.
           </p>
           <div className={styles.heroCta}>
             <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
@@ -87,19 +87,19 @@ export default function Home() {
           </div>
           <div className={styles.beatGrid}>
             <div className={styles.card}>
-              <div className={styles.cardN}>Terms, honored</div>
-              <div className={styles.cardT}>An agreement kept</div>
-              <div className={styles.cardD}>Every collaboration starts with real terms — <b>compensation, rights, timeline</b> — agreed before the work begins. On record, for both sides.</div>
+              <div className={styles.cardN}>Terms honored</div>
+              <div className={styles.cardT}>Make an agreement</div>
+              <div className={styles.cardD}>Every collaboration starts with real terms: <b>compensation, rights, and timeline</b>, agreed before the work begins. On record, for both sides.</div>
             </div>
             <div className={styles.card}>
-              <div className={styles.cardN}>Work, finished</div>
-              <div className={styles.cardT}>Something real, made</div>
-              <div className={styles.cardD}>The Loft Studio is where two creatives actually work — <b>files, milestones, and messages</b> in one place — until the thing you agreed on exists.</div>
+              <div className={styles.cardN}>Work finished</div>
+              <div className={styles.cardT}>Build something real</div>
+              <div className={styles.cardD}>Two people work together in a Loft Studio, sharing <b>files, milestones, and messages</b> in one place.</div>
             </div>
             <div className={styles.card}>
-              <div className={styles.cardN}>Reputation, earned</div>
-              <div className={styles.cardT}>A rating that vouches</div>
-              <div className={styles.cardD}>When it&apos;s complete, you rate each other. Future collaborators can read it — so <b>being great to work with</b> becomes something people can see.</div>
+              <div className={styles.cardN}>Reputation earned</div>
+              <div className={styles.cardT}>Collect ratings</div>
+              <div className={styles.cardD}>When the work is complete, you rate each other. Future collaborators can read the feedback and <b>you can build a reputation</b>.</div>
             </div>
           </div>
         </div>
@@ -107,8 +107,8 @@ export default function Home() {
 
       <section className={styles.heart}>
         <div className={styles.heartInner}>
-          <p className={styles.heartLine}>Built for creatives, <em>protected on purpose.</em> A safe space to find your people and do your best work — by design.</p>
-          <p className={styles.heartSub}>Collective Loft started as a way to help one artist succeed. Somewhere along the way it became something bigger: a home for the creative class, and a real commitment to protecting it.</p>
+          <p className={styles.heartLine}>Built for creatives, <em>selectively curated by design.</em> A safe space to find your people and do your best work.</p>
+          <p className={styles.heartSub}>Collective Loft started as a way to help one artist succeed. Somewhere along the way it became something bigger: a home for the creative class. And a commitment to the people who make it.</p>
           <Link href="/about" className={styles.heartMore}>Read why we built this →</Link>
         </div>
       </section>
@@ -116,7 +116,7 @@ export default function Home() {
       <section className={styles.close}>
         <div className={styles.closeInner}>
           <h2 className={styles.closeH}>Your next collaborator<br />is already <em>here.</em></h2>
-          <p className={styles.closeSub}>Build a profile, say what you&apos;re making, and find the people who&apos;ll help you make it real.</p>
+          <p className={styles.closeSub}>Build a profile. Describe what you&apos;re working on &amp; what type of help you need. Find the people who can make your dream a reality.</p>
           <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
         </div>
       </section>

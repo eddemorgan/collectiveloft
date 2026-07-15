@@ -70,7 +70,7 @@
 
 .close { border-top: 0.5px solid var(--rule); background: var(--bg); text-align: center; padding: 104px 0; }
 .closeInner { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
-.closeH { font-family: var(--serif); font-size: clamp(38px,7vw,76px); font-weight: 600; line-height: 1.0; letter-spacing: -0.02em; margin-bottom: 16px; }
+.closeH { font-family: var(--serif); font-size: clamp(30px,5vw,52px); font-weight: 600; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 16px; }
 .closeH em { font-style: italic; color: var(--gold); }
 .closeSub { max-width: 480px; margin: 0 auto 34px; color: var(--muted); font-size: 16px; line-height: 1.7; }
 

@@ -16,7 +16,7 @@ export async function POST(request) {
 
     const { data: terms } = await supabase
       .from('collab_terms')
-      .select('id, initiator_id, partner_id, current_editor, status, project_title, collab_type, fee_from, fee_to, timeline, deadline, deliverables')
+      .select('id, initiator_id, partner_id, current_editor, status, project_title, collab_type, agreed_fee, fee_from, fee_to, timeline, deadline, deliverables')
       .eq('id', studioId)
       .single()
 
@@ -47,11 +47,17 @@ export async function POST(request) {
 
     const senderName = [sender?.firstname, sender?.lastname].filter(Boolean).join(' ') || 'Your collaborator'
 
+    // Fees are stored two ways: agreed_fee for a single figure (what the terms
+    // page writes), fee_from/fee_to for a range. Honor whichever is present.
+    const feeText =
+      terms.agreed_fee ? ` · $${terms.agreed_fee}`
+      : terms.fee_from ? ` · $${terms.fee_from}${terms.fee_to ? '-' + terms.fee_to : ''}`
+      : ''
+
     const compType =
       terms.collab_type === 'exchange' ? 'Creative exchange'
-      : terms.collab_type === 'paid'
-        ? `Paid${terms.fee_from ? ` · $${terms.fee_from}${terms.fee_to ? '-' + terms.fee_to : ''}` : ''}`
-        : terms.collab_type === 'revshare' ? 'Revenue share' : ''
+      : terms.collab_type === 'paid' ? `Paid${feeText}`
+      : terms.collab_type === 'revshare' ? 'Revenue share' : ''
 
     // A handoff is any review turn that is not the initiator's opening send.
     const isHandoff = terms.current_editor !== 'partner'

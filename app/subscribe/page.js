@@ -46,11 +46,11 @@ export default function SubscribePage() {
   }
 
   const features = [
-    'Full access to Discover and Matching',
-    'Post and apply to Collab Briefs',
-    'A Loft Studio for every active collaboration',
-    'Portfolio and profile tools',
-    'Direct messaging with collaborators',
+    'Find your people by discipline, skill, and distance',
+    'Post a brief. Say what you are making and who you need.',
+    'Set real terms before the work starts. Paid, revenue share, or creative exchange.',
+    'A Loft Studio for every collaboration. Files, milestones, and messages in one room.',
+    'A reputation built from finished work, not followers.',
   ]
 
   return (
@@ -70,14 +70,17 @@ export default function SubscribePage() {
         <div className={styles.inner}>
           {cancelled && (
             <div className={styles.cancelled}>
-              Checkout cancelled — no charge was made. You can start your trial whenever you&apos;re ready.
+              Checkout cancelled. No charge was made. You can start your trial whenever you&apos;re ready.
             </div>
           )}
 
           <div className={styles.eyebrow}>One last step</div>
-          <h1 className={styles.title}>Membership is what keeps<br /><em>Collective Loft</em> a safe space.</h1>
+          <h1 className={styles.title}>A room with a lock<br /><em>on the door.</em></h1>
           <p className={styles.why}>
-            Your membership is what keeps the people who exploit creatives out — so this stays a protected place to find your people and do real work. That&apos;s what your $15 protects.
+            Your membership is what keeps the people who exploit creatives out. Everyone inside has agreed to real terms and has skin in the game. The fee is the filter. That&apos;s what your $15 protects.
+          </p>
+          <p className={styles.why}>
+            Collective Loft is the first room of something bigger. A place to record. A label and a publishing arm built to protect the people who make the work. That&apos;s the plan, and it only happens if this room works first. You&apos;re early.
           </p>
           <p className={styles.reassure}>
             Your first 7 days are free. You won&apos;t be charged until <strong>{trialEnd}</strong>, and you can cancel anytime.

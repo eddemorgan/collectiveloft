@@ -144,7 +144,13 @@ export default function MorganCollectivePage() {
       <footer className={styles.foot}>
         <div className={styles.footInner}>
           <div className={styles.footRow}>
-            <div className={styles.fine}>&copy; 2026 Morgan Collective Group LLC</div>
+            <div className={styles.fine}>
+              &copy; 2026 Morgan Collective Group LLC
+              {' '}&middot;{' '}
+              <Link href="/legal/terms" style={{ color: 'var(--gold)', textDecoration: 'none' }}>Terms</Link>
+              {' '}&middot;{' '}
+              <Link href="/legal/privacy" style={{ color: 'var(--gold)', textDecoration: 'none' }}>Privacy</Link>
+            </div>
             <div className={styles.socials}>
               {SOCIALS.map(([name, href, d]) => (
                 <a key={name} href={href} target="_blank" rel="noopener noreferrer" aria-label={name} className={styles.social}>

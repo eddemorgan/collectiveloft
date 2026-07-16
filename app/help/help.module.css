@@ -65,3 +65,7 @@
 .foot { border-top: 0.5px solid var(--rule); padding: 40px 0; }
 .footInner { max-width: 1080px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
 .fine { font-size: 12px; color: var(--faint, rgba(26,24,20,0.34)); }
+
+.legalLinks { display: flex; gap: 18px; }
+.legalLinks a { font-size: 12px; color: var(--gold); text-decoration: none; }
+.legalLinks a:hover { text-decoration: underline; }

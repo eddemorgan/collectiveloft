@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { TERMS_URL, PRIVACY_URL } from '../../lib/legal'
 import styles from './help.module.css'
 
 const SOCIALS = [
@@ -142,6 +143,10 @@ export default function HelpPage() {
       <footer className={styles.foot}>
         <div className={styles.footInner}>
           <div className={styles.fine}>&copy; 2026 Collective Loft &middot; A Morgan Collective Group company</div>
+          <div className={styles.legalLinks}>
+            <Link href={TERMS_URL}>Terms &amp; Conditions</Link>
+            <Link href={PRIVACY_URL}>Privacy Policy</Link>
+          </div>
           <div className={styles.fine}>Chicago &middot; London</div>
         </div>
       </footer>

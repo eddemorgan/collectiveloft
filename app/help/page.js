@@ -121,7 +121,7 @@ export default function HelpPage() {
               <button className={styles.submit} onClick={submit} disabled={status === 'sending'}>
                 {status === 'sending' ? 'Sending&hellip;' : 'Send message'}
               </button>
-              <p className={styles.formNote}>Or email us directly at <a href="mailto:help@collectiveloft.com">help@collectiveloft.com</a></p>
+              <p className={styles.formNote}>A real person reads every message, and we reply to the address you give us.</p>
             </div>
           )}
         </div>

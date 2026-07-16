@@ -143,6 +143,8 @@ export default function Home() {
                 <Link href="/about">About</Link>
                 <Link href="/morgan-collective">Morgan Collective Group</Link>
                 <Link href="/help">Help</Link>
+                <Link href="/legal/terms">Terms &amp; Conditions</Link>
+                <Link href="/legal/privacy">Privacy Policy</Link>
               </div>
               <div className={styles.fcol}>
                 <div className={styles.fcolL}>Get started</div>

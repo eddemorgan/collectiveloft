@@ -47,11 +47,20 @@ export default function SignupPage() {
     }
 
     // Save name to profile
-await supabase
-  .from('profiles')
-  .upsert({ id: data.user.id, firstname, lastname })
-  
-  router.push('/subscribe')
+    await supabase
+      .from('profiles')
+      .upsert({ id: data.user.id, firstname, lastname })
+
+    // Send the welcome email. Fire and forget: a mail hiccup never blocks signup.
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.access_token) {
+      fetch('/api/send-welcome', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      }).catch(() => {})
+    }
+
+    router.push('/subscribe')
   }
 
   return (

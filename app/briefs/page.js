@@ -204,10 +204,22 @@ function BriefsInner() {
     if (selected?.require_work_sample && !applySample) return
     setSubmitting(true)
     try {
-      await supabase.from('applications').insert({
+      const { data: inserted } = await supabase.from('applications').insert({
         brief_id: selectedId, applicant_id: user.id, message: applyMsg, status: 'pending',
         sample_url: applySample?.url || null, sample_name: applySample?.name || null,
-      })
+      }).select().single()
+
+      // Tell the poster by email. Fire and forget: never block the application.
+      if (inserted?.id) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.access_token) {
+          fetch('/api/send-application-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+            body: JSON.stringify({ applicationId: inserted.id }),
+          }).catch(() => {})
+        }
+      }
       setAppliedBriefIds(prev => new Set([...prev, selectedId]))
       setApplyOpen(false)
       setApplyMsg('')

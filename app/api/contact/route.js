@@ -42,7 +42,7 @@ export async function POST(request) {
 
     if (error) {
       console.error('Resend error:', error)
-      return Response.json({ error: 'Something went wrong. Please email us directly at help@collectiveloft.com.' }, { status: 500 })
+      return Response.json({ error: 'Something went wrong on our end. Please try again in a moment.' }, { status: 500 })
     }
 
     return Response.json({ ok: true }, { status: 200 })

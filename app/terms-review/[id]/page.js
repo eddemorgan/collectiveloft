@@ -234,6 +234,16 @@ export default function TermsReviewPage() {
 
       if (error) { console.error('modify error:', error); setActing(null); return }
 
+      // Tell the other party it is their turn. Fire and forget.
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.access_token) {
+        fetch('/api/send-terms-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+          body: JSON.stringify({ studioId: term.id }),
+        }).catch(() => {})
+      }
+
       // Reload the term to get fresh data
       const { data: updated } = await supabase
         .from('collab_terms')

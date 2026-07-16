@@ -108,7 +108,6 @@ export default function StudioPage() {
   const [newMs,          setNewMs]          = useState({ title:'', due_date:'' })
 
   // Close flow
-  const [closeProposed,  setCloseProposed]  = useState(false)
   const [showComplete,   setShowComplete]   = useState(false)
 
   // Rating modal
@@ -187,7 +186,6 @@ export default function StudioPage() {
       setStudio(term)
       setOwner(term.initiator)
       setContributor(term.partner)
-      setCloseProposed(term.close_proposed || false)
       setShowComplete(term.status === 'complete')
     }
 
@@ -350,8 +348,8 @@ export default function StudioPage() {
 
     if (done) {
       sys(`${myName()} marked "${ms.title}" as complete.`)
-      if (updated.every(m => m.done) && !closeProposed) {
-        sys('All milestones complete. Either party can now propose closing this Loft Studio.')
+      if (updated.every(m => m.done)) {
+        sys('All milestones complete. The collab owner can now confirm this Loft Studio complete.')
       }
     } else {
       sys(`${myName()} marked "${ms.title}" as incomplete.`)
@@ -459,13 +457,6 @@ export default function StudioPage() {
     })
   }
 
-  async function proposeClose() {
-    if (closeProposed) return
-    setCloseProposed(true)
-    await supabase.from('collab_terms').update({ close_proposed: true }).eq('id', studioId)
-    sys(`${myName()} has proposed closing this Loft Studio. Both parties must agree to close.`)
-  }
-
   async function confirmComplete() {
     await supabase.from('collab_terms').update({
       status: 'complete',
@@ -513,12 +504,6 @@ export default function StudioPage() {
     setShowComplete(true)
     sys(`${myName()} confirmed this Loft Studio complete. Great work.`)
     sys(`⭐ Rate your collaboration → /studio/${studioId}?rate=1`)
-  }
-
-  async function withdrawClose() {
-    setCloseProposed(false)
-    await supabase.from('collab_terms').update({ close_proposed: false }).eq('id', studioId)
-    sys(`${myName()} has withdrawn the Studio close proposal.`)
   }
 
   async function uploadFile(file) {
@@ -614,6 +599,9 @@ export default function StudioPage() {
   const done  = milestones.filter(m => m.done).length
   const total = milestones.length
   const pct   = total ? Math.round(done / total * 100) : 0
+  // A studio with no milestones is still closeable. Requiring pct === 100 would
+  // trap it open forever, since pct is 0 when there is nothing to complete.
+  const canComplete = total === 0 || pct === 100
 
   const myInit         = myProfile    ? initials(myProfile.firstname, myProfile.lastname) : '?'
   const ownerInit      = owner        ? initials(owner.firstname, owner.lastname) : '?'
@@ -731,7 +719,7 @@ export default function StudioPage() {
               <button className={styles.btnExport} onClick={exportStudio}>↓ Export</button>
               {studio.status === 'complete' ? (
                 <span className={styles.completedLabel}>✦ Completed Collab</span>
-              ) : pct === 100 && myProfile?.id === owner?.id ? (
+              ) : canComplete && myProfile?.id === owner?.id ? (
                 <button className={styles.btnConfirmComplete} onClick={confirmComplete}>Confirm Complete</button>
               ) : null}
             </div>

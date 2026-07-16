@@ -409,6 +409,14 @@ export default function LandingPage() {
         }
         userId = authData.user.id
         await new Promise(r => setTimeout(r, 1000))
+
+        // Send the welcome email. Fire and forget: a mail hiccup never blocks onboarding.
+        if (authData.session?.access_token) {
+          fetch('/api/send-welcome', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${authData.session.access_token}` },
+          }).catch(() => {})
+        }
       }
 
       await supabase.from('profiles').update({

@@ -1,135 +1,84 @@
-import { Resend } from 'resend'
-import { createClient } from '@supabase/supabase-js'
+import { verifyCaller, sendMail, appUrl } from '../../../lib/mailer'
+import { termsEmailHtml } from '../../../lib/emails'
 
+// Tells the reviewing party that collab terms need their review.
+// Guard: the caller must be the initiator or the partner on the collab_terms
+// row. The recipient is derived from current_editor (whoever must act next),
+// never from the request body.
 export async function POST(request) {
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    const caller = await verifyCaller(request)
+    if (!caller) return Response.json({ error: 'Not signed in' }, { status: 401 })
+    const { user, supabase } = caller
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    )
+    const { studioId } = await request.json()
+    if (!studioId) return Response.json({ error: 'Missing studioId' }, { status: 400 })
 
-    const { studioId, initiatorId, partnerId } = await request.json()
-
-    const { data: initiator } = await supabase
-      .from('profiles')
-      .select('firstname, lastname, email, headline')
-      .eq('id', initiatorId)
-      .single()
-
-    const { data: partner } = await supabase
-      .from('profiles')
-      .select('firstname, lastname, email, headline')
-      .eq('id', partnerId)
-      .single()
-
-    const { data: studio } = await supabase
+    const { data: terms } = await supabase
       .from('collab_terms')
-      .select('project_title, collab_type, fee_from, fee_to, timeline, deliverables')
+      .select('id, initiator_id, partner_id, current_editor, status, project_title, collab_type, fee_from, fee_to, timeline, deadline, deliverables')
       .eq('id', studioId)
       .single()
 
-    if (!partner?.email) {
-      return Response.json({ error: 'No partner email found' }, { status: 400 })
+    if (!terms) return Response.json({ error: 'Not found' }, { status: 404 })
+
+    const isParty = terms.initiator_id === user.id || terms.partner_id === user.id
+    if (!isParty) return Response.json({ error: 'Not your collaboration' }, { status: 403 })
+
+    // Only mail while terms are actually awaiting review.
+    if (terms.status !== 'pending') {
+      return Response.json({ ok: true, skipped: 'terms are not pending' })
     }
 
-    const compType = studio.collab_type === 'exchange' ? 'Creative exchange'
-      : studio.collab_type === 'paid' ? `Paid${studio.fee_from ? ` · $${studio.fee_from}${studio.fee_to ? '–' + studio.fee_to : ''}` : ''}`
-      : 'Revenue share'
+    // current_editor is the party who must act. Mail them, not the sender.
+    const reviewerId = terms.current_editor === 'partner' ? terms.partner_id : terms.initiator_id
+    const senderId   = terms.current_editor === 'partner' ? terms.initiator_id : terms.partner_id
 
-    const deliverablesList = (studio.deliverables || [])
-      .slice(0, 5)
-      .map(d => `<li style="margin-bottom:6px;color:rgba(240,236,227,0.7);">${d}</li>`)
-      .join('')
+    if (!reviewerId || reviewerId === user.id) {
+      return Response.json({ ok: true, skipped: 'caller is the reviewer' })
+    }
 
-    const { data, error } = await resend.emails.send({
-      from: 'Collective Loft <studio@collectiveloft.com>',
-      to: partner.email,
-      subject: `${initiator.firstname} ${initiator.lastname} has sent you collab terms — ${studio.project_title || 'Untitled project'}`,
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="margin:0;padding:0;background:#111111;font-family:'DM Sans',system-ui,sans-serif;color:#F0ECE3;">
-          <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
+    const { data: reviewer } = await supabase
+      .from('profiles').select('email, firstname').eq('id', reviewerId).single()
+    const { data: sender } = await supabase
+      .from('profiles').select('firstname, lastname').eq('id', senderId).single()
 
-            <div style="margin-bottom:32px;">
-              <span style="font-family:Georgia,serif;font-size:20px;color:#F0ECE3;">Collective </span>
-              <span style="font-family:Georgia,serif;font-size:20px;color:#C9A84C;">Loft</span>
-            </div>
+    if (!reviewer?.email) return Response.json({ ok: true, skipped: 'no reviewer email' })
 
-            <div style="font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#C9A84C;opacity:0.75;margin-bottom:12px;">
-              Loft Studio · New collab terms
-            </div>
+    const senderName = [sender?.firstname, sender?.lastname].filter(Boolean).join(' ') || 'Your collaborator'
 
-            <h1 style="font-family:Georgia,serif;font-size:28px;font-weight:700;color:#F0ECE3;margin:0 0 8px;line-height:1.2;">
-              ${initiator.firstname} ${initiator.lastname} wants to collaborate.
-            </h1>
-            <p style="font-size:15px;color:rgba(240,236,227,0.55);font-weight:300;margin:0 0 32px;line-height:1.6;">
-              ${initiator.firstname} has sent you collab terms for <strong style="color:#F0ECE3;">${studio.project_title || 'a new project'}</strong>. Review them and open your Loft Studio.
-            </p>
+    const compType =
+      terms.collab_type === 'exchange' ? 'Creative exchange'
+      : terms.collab_type === 'paid'
+        ? `Paid${terms.fee_from ? ` · $${terms.fee_from}${terms.fee_to ? '-' + terms.fee_to : ''}` : ''}`
+        : terms.collab_type === 'revshare' ? 'Revenue share' : ''
 
-            <div style="background:#161616;border:0.5px solid rgba(240,236,227,0.08);border-radius:6px;padding:24px;margin-bottom:24px;">
-              <div style="font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:rgba(240,236,227,0.3);margin-bottom:16px;">Terms summary</div>
-              <table style="width:100%;border-collapse:collapse;">
-                <tr>
-                  <td style="font-size:12px;color:rgba(240,236,227,0.35);padding:6px 0;width:120px;">Project</td>
-                  <td style="font-size:13px;color:#F0ECE3;padding:6px 0;">${studio.project_title || 'Untitled project'}</td>
-                </tr>
-                <tr>
-                  <td style="font-size:12px;color:rgba(240,236,227,0.35);padding:6px 0;">Type</td>
-                  <td style="font-size:13px;color:#C9A84C;padding:6px 0;">${compType}</td>
-                </tr>
-                ${studio.timeline ? `
-                <tr>
-                  <td style="font-size:12px;color:rgba(240,236,227,0.35);padding:6px 0;">Timeline</td>
-                  <td style="font-size:13px;color:#F0ECE3;padding:6px 0;">${studio.timeline}</td>
-                </tr>` : ''}
-                ${deliverablesList ? `
-                <tr>
-                  <td style="font-size:12px;color:rgba(240,236,227,0.35);padding:6px 0;vertical-align:top;">Deliverables</td>
-                  <td style="padding:6px 0;">
-                    <ul style="margin:0;padding-left:16px;font-size:12px;line-height:1.6;">
-                      ${deliverablesList}
-                    </ul>
-                  </td>
-                </tr>` : ''}
-              </table>
-            </div>
+    // A handoff is any review turn that is not the initiator's opening send.
+    const isHandoff = terms.current_editor !== 'partner'
 
-            <a href="https://collectiveloft.com/my-studios" style="display:block;background:#C9A84C;color:#0D0D0D;text-align:center;padding:14px 24px;border-radius:3px;font-size:13px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;margin-bottom:16px;">
-              Review terms &amp; open studio ↗
-            </a>
-
-            <p style="font-size:12px;color:rgba(240,236,227,0.22);text-align:center;margin:0 0 32px;line-height:1.6;">
-              Once you accept, your Loft Studio opens and the collaboration officially begins.
-            </p>
-
-            <div style="border-top:0.5px solid rgba(240,236,227,0.06);padding-top:24px;">
-              <p style="font-size:11px;color:rgba(240,236,227,0.2);margin:0;line-height:1.6;">
-                You received this because ${initiator.firstname} ${initiator.lastname} sent you collab terms on Collective Loft.<br>
-                <a href="https://collectiveloft.com" style="color:rgba(201,168,76,0.5);text-decoration:none;">collectiveloft.com</a>
-              </p>
-            </div>
-
-          </div>
-        </body>
-        </html>
-      `,
+    const { error } = await sendMail({
+      to: reviewer.email,
+      subject: isHandoff
+        ? `${senderName} sent the terms back for ${terms.project_title || 'your collaboration'}`
+        : `${senderName} has sent you collab terms on Collective Loft`,
+      html: termsEmailHtml({
+        reviewerFirst: reviewer.firstname || '',
+        senderName,
+        projectTitle: terms.project_title || 'a collaboration',
+        compType,
+        timeline: terms.timeline || '',
+        deadline: terms.deadline || '',
+        deliverables: terms.deliverables || [],
+        isHandoff,
+        studioId: terms.id,
+        appUrl: appUrl(),
+      }),
     })
 
-    if (error) {
-      console.error('Resend error:', error)
-      return Response.json({ error }, { status: 400 })
-    }
-
-    return Response.json({ success: true, id: data?.id })
+    if (error) return Response.json({ error: 'Email failed to send' }, { status: 500 })
+    return Response.json({ ok: true })
   } catch (err) {
-    console.error('Email route error:', err)
-    return Response.json({ error: err.message }, { status: 500 })
+    console.error('Terms email route error:', err)
+    return Response.json({ error: 'Something went wrong' }, { status: 500 })
   }
 }

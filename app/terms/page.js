@@ -116,12 +116,15 @@ function TermsPage() {
         .select()
         .single()
 
-      if (inserted && partner?.id && myProfile?.id) {
-        await fetch('/api/send-terms-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ studioId: inserted.id, initiatorId: myProfile.id, partnerId: partner.id }),
-        })
+      if (inserted?.id) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.access_token) {
+          fetch('/api/send-terms-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+            body: JSON.stringify({ studioId: inserted.id }),
+          }).catch(() => {})
+        }
       }
     } catch (e) {
       console.error(e)

@@ -473,6 +473,16 @@ export default function StudioPage() {
       completed_at: new Date().toISOString(),
     }).eq('id', studioId)
 
+    // Ask both parties to rate. Fire and forget: never block completion.
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.access_token) {
+      fetch('/api/send-rating-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({ studioId }),
+      }).catch(() => {})
+    }
+
     // Check if these two have completed a studio together before (excluding this one)
     const { data: priorStudios } = await supabase
       .from('collab_terms')

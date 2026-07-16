@@ -38,9 +38,8 @@ export async function POST(request) {
     const resend = new Resend(process.env.RESEND_API_KEY)
 
     const { error } = await resend.emails.send({
-      from: 'Collective Loft <studio@collectiveloft.com>',
+      from: 'Collective Loft <noreply@collectiveloft.com>',
       to: user.email,
-      replyTo: 'edde@collectiveloft.com',
       subject: 'Welcome to Collective Loft. Your people are here.',
       html: welcomeEmailHtml({ firstname: profile?.firstname || '', appUrl }),
     })

@@ -1229,7 +1229,7 @@ export default function StudioPage() {
 
                         {!fullyPaid && recipientReady && (
                           <div style={{ fontFamily: 'var(--sans)', fontSize: '0.68rem', color: 'var(--muted)', marginTop: '0.85rem', lineHeight: 1.5 }}>
-                            Payments are processed securely by Stripe. A 5% platform fee applies. You'll enter your card on Stripe's secure page.
+                            Payments are processed securely by Stripe, and the full amount goes to your collaborator. Collective Loft takes no fee. You'll enter your card on Stripe's secure page.
                           </div>
                         )}
                       </div>

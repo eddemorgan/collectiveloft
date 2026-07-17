@@ -496,7 +496,7 @@ export default function LandingPage() {
             <Link href="/login">Sign in</Link>
           )}
           {!authUser && (
-            <a href="/collective-loft-user-guide.html" className={styles.btnS} style={{ textDecoration: 'none' }}>User Guide</a>
+            <Link href="/guide" className={styles.btnS} style={{ textDecoration: 'none' }}>Member Guide</Link>
           )}
           {!authUser && (
             <button className={styles.btnJoin} onClick={() => router.push('/signup')}>Join</button>

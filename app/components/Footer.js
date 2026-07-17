@@ -44,6 +44,7 @@ export default function Footer() {
         A Collective Codes Website
       </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <Link href="/guide" style={legalLink}>Guide</Link>
         <Link href={TERMS_URL} style={legalLink}>Terms</Link>
         <Link href={PRIVACY_URL} style={legalLink}>Privacy</Link>
         <span style={{

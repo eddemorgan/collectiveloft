@@ -144,6 +144,7 @@ export default function HelpPage() {
         <div className={styles.footInner}>
           <div className={styles.fine}>&copy; 2026 Collective Loft &middot; A Morgan Collective Group company</div>
           <div className={styles.legalLinks}>
+            <Link href="/guide">Member Guide</Link>
             <Link href={TERMS_URL}>Terms &amp; Conditions</Link>
             <Link href={PRIVACY_URL}>Privacy Policy</Link>
           </div>

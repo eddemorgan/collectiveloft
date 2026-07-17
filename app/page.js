@@ -136,6 +136,7 @@ export default function Home() {
                 <div className={styles.fcolL}>Platform</div>
                 <Link href="/how-it-works">How it works</Link>
                 <Link href="/browse">Discover</Link>
+                <Link href="/guide">Member Guide</Link>
                 <a href="https://collectiveloft.com/blog">The Brief</a>
               </div>
               <div className={styles.fcol}>

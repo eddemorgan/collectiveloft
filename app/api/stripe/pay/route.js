@@ -8,8 +8,8 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
-// Your platform's cut of each paid collaboration.
-const PLATFORM_FEE_RATE = 0.05  // 5%
+// Collective Loft takes no platform fee on collaborations. The full agreed
+// amount goes to the recipient. The platform is funded by membership.
 
 // --------------------------------------------------------------------------
 // POST /api/stripe/pay
@@ -17,9 +17,9 @@ const PLATFORM_FEE_RATE = 0.05  // 5%
 //   - milestoneIndex = number -> pay one milestone (agreed_fee * pct/100)
 //   - milestoneIndex = null   -> pay the full agreed_fee (lump sum / on delivery)
 //
-// Creates a hosted Stripe Checkout Session (payment mode) that routes money to
-// the recipient's connected account, with your 5% taken as the application fee.
-// Returns { url } to redirect the payer to Stripe's hosted page — same pattern
+// Creates a hosted Stripe Checkout Session (payment mode) that routes the full
+// amount to the recipient's connected account, with no platform fee taken.
+// Returns { url } to redirect the payer to Stripe's hosted page, same pattern
 // as the subscription checkout route.
 // --------------------------------------------------------------------------
 export async function POST(req) {
@@ -106,7 +106,6 @@ export async function POST(req) {
     }
 
     const amountCents = Math.round(amount * 100)
-    const feeCents    = Math.round(amountCents * PLATFORM_FEE_RATE)
 
     // 6. Look up / create the payer's Stripe customer (matches checkout route).
     const { data: payer } = await supabase
@@ -137,10 +136,11 @@ export async function POST(req) {
       label,
     }
 
-    // The payment intent behind the session: destination charge + 5% app fee,
-    // and (optionally) save the card for future milestone payments.
+    // Destination charge with NO platform fee. Collective Loft takes no cut of
+    // collaborations; the full agreed amount transfers to the recipient. The
+    // platform is funded by membership, not by skimming the work. (Note: on a
+    // destination charge the platform account bears Stripe's processing fee.)
     const paymentIntentData = {
-      application_fee_amount: feeCents,
       transfer_data: { destination: recipient.stripe_connect_id },
       metadata: sharedMetadata,
       description: `Collective Loft · ${collab.project_title || 'Collaboration'} · ${label}`,
@@ -179,7 +179,7 @@ export async function POST(req) {
       recipient_id: recipientId,
       milestone_index: milestoneIndex,
       amount,
-      platform_fee: feeCents / 100,
+      platform_fee: 0,
       stripe_payment_intent_id: null,  // filled in by the webhook from the session
       status: 'pending',
       metadata: { label, checkout_session_id: session.id },

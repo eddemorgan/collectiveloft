@@ -202,11 +202,11 @@ export default function GuidePage() {
             the Studio marks it paid and the money is on its way to your collaborator&rsquo;s bank.
           </p>
 
-          <div className={styles.h3}>The platform fee</div>
+          <div className={styles.h3}>No platform fee</div>
           <p className={styles.p}>
-            Collective Loft takes a <strong>5% platform fee</strong> on paid collaborations. On a $500 project,
-            $25 supports the platform and $475 goes to the creative. The fee is how Collective Loft keeps the
-            room open and invests in what comes next.
+            Collective Loft takes <strong>no fee</strong> on collaborations. The full agreed amount goes to the
+            creative who did the work. On a $500 project, the creative receives $500. The platform is funded by
+            membership, not by taking a cut of your work.
           </p>
         </section>
 

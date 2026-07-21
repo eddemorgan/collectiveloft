@@ -207,6 +207,35 @@ export default function Home() {
           animation: fadeUp 0.8s ease both;
         }
 
+        .launch-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.55rem;
+          font-family: var(--sans);
+          font-size: 0.78rem;
+          font-weight: 500;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--gold);
+          background: rgba(139,105,20,0.08);
+          border: 0.5px solid rgba(139,105,20,0.35);
+          border-radius: 2px;
+          padding: 0.5rem 1rem;
+          margin-bottom: 1.75rem;
+          text-decoration: none;
+          transition: background 0.2s, border-color 0.2s;
+          animation: fadeUp 0.8s ease both;
+        }
+        .launch-badge:hover {
+          background: rgba(139,105,20,0.14);
+          border-color: rgba(139,105,20,0.55);
+        }
+        .launch-badge .lb-mark { font-size: 0.7rem; }
+        .launch-badge .lb-strong { color: var(--cream); font-weight: 600; }
+        @media (max-width: 480px) {
+          .launch-badge { font-size: 0.68rem; letter-spacing: 0.06em; padding: 0.45rem 0.8rem; }
+        }
+
         .hero h1 {
           font-family: var(--serif);
           font-size: clamp(3rem, 8vw, 6.5rem);
@@ -914,10 +943,14 @@ export default function Home() {
         <div className="hero-grid"></div>
         <div className="hero-glow"></div>
         <div className="eyebrow">Collective Loft · Est. 2026</div>
+        <a href="#waitlist" className="launch-badge">
+          <span className="lb-mark">✦</span>
+          <span>The loft opens <span className="lb-strong">August 1</span>. Claim your spot.</span>
+        </a>
 <h1>Your people are out there</h1>
         <p style={{ fontFamily: 'var(--serif)', fontSize: 'clamp(1.4rem, 3vw, 2.25rem)', fontStyle: 'italic', fontWeight: 400, color: 'var(--gold)', margin: '0 0 1.5rem', lineHeight: 1.2, animation: 'fadeUp 0.8s 0.15s ease both' }}>Collaborators, not Bosses</p>
         <p className="hero-sub">
-          The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and open a Loft Studio — a shared workspace built around the work.
+          The professional network where artists, musicians, writers, designers, and filmmakers find each other, negotiate real terms, and open a Loft Studio, a shared workspace built around the work.
         </p>
         <div className="hero-actions">
           <a href="#waitlist" className="btn-primary">Claim your founding spot ↗</a>

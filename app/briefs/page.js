@@ -11,7 +11,7 @@ import styles from './briefs.module.css'
 
 const DISC_CLASS = {
   'Visual Art':'dtV','Music':'dtM','Writing':'dtW','Design & Web':'dtD',
-  'Film':'dtF','Photography':'dtV','Performance':'dtW','Creative Tech':'dtD',
+  'Film & Video':'dtF','Photography':'dtV','Performance':'dtW','Creative Tech':'dtD',
 }
 const AV_COLORS = ['avGold','avTeal','avPurp','avBlue','avRose','avGreen']
 const COMP_CLASS = {
@@ -20,7 +20,7 @@ const COMP_CLASS = {
 const DISC_OPTS = [
   { icon:'🎨', label:'Visual Art' },{ icon:'🎵', label:'Music' },
   { icon:'✍️', label:'Writing' },{ icon:'🖥', label:'Design & Web' },
-  { icon:'🎬', label:'Film' },{ icon:'📷', label:'Photography' },
+  { icon:'🎬', label:'Film & Video' },{ icon:'📷', label:'Photography' },
   { icon:'🎭', label:'Performance' },{ icon:'💻', label:'Creative Tech' },
 ]
 
@@ -264,7 +264,7 @@ function BriefsInner() {
       </div>
 
       <div className={styles.filterTabs}>
-        {[['all','All briefs'],['Visual Art','Visual art'],['Music','Music'],['Writing','Writing'],['Design & Web','Design & web'],['Film','Film'],['paid','Paid only']].map(([key, label]) => (
+        {[['all','All briefs'],['Visual Art','Visual art'],['Music','Music'],['Writing','Writing'],['Design & Web','Design & web'],['Film & Video','Film & Video'],['paid','Paid only']].map(([key, label]) => (
           <div key={key} className={`${styles.ftab} ${activeFilter === key ? styles.active : ''}`}
             onClick={() => { setActiveFilter(key); setSelectedId(null) }}>{label}</div>
         ))}

@@ -14,21 +14,21 @@ const DISC_OPTS = [
   { id:'music',   icon:'🎵', label:'Music' },
   { id:'writing', icon:'✍️', label:'Writing' },
   { id:'design',  icon:'🖥',  label:'Design & Web' },
-  { id:'film',    icon:'🎬', label:'Film' },
+  { id:'film',    icon:'🎬', label:'Film & Video' },
   { id:'photo',   icon:'📷', label:'Photography' },
   { id:'perf',    icon:'🎭', label:'Performance' },
   { id:'tech',    icon:'💻', label:'Creative Tech' },
 ]
 
 const SKILLS_BY_DISC = {
-  visual:  ['Oil on canvas','Watercolour','Illustration','Large format','Art direction','Sculpture','Mixed media','Printmaking'],
-  music:   ['Beat production','Mixing & mastering','Co-writing','Film scoring','Songwriting','Vocals','Sound design','Session musician'],
-  writing: ['Poetry','Copywriting','Editing','Screenwriting','Fiction','Arts writing','Grant writing','Writer','Novel','Short Story'],
-  design:  ['Web design','Branding','UX design','Motion design','Typography','Print design'],
-  film:    ['Cinematography','Directing','Film editing','Documentary','Short film'],
-  photo:   ['Portrait photography','Fine art photography','Documentary photography','Landscape photography'],
-  perf:    ['Choreography','Spoken word','Theatre','Dance','Singer','Acting'],
-  tech:    ['Creative coding','Generative art','Interactive installation','Audio-visual'],
+  visual:  ['Illustration','Digital art','Character design','Concept art','Comic & manga','Painting','Animation','Cover art'],
+  music:   ['Beat production','Producing','DJ','Songwriting','Vocals','Rap & MC','Instrumentalist','Mixing & mastering','Sound design','Film & game scoring'],
+  writing: ['Lyrics','Poetry','Fiction','Nonfiction','Screenwriting','Copywriting','Content writing','Editing','Ghostwriting'],
+  design:  ['Graphic design','Branding','Web design','UI/UX','Motion graphics','Album & cover art','Typography'],
+  film:    ['Directing','Cinematography','Video editing','Motion & VFX','Music video','Producing'],
+  photo:   ['Portrait','Fashion & editorial','Product & commercial','Music & band','Event','Photo retouching'],
+  perf:    ['Acting','Voice acting','Dance','Choreography','Spoken word','Comedy'],
+  tech:    ['Game design','3D modeling','Web development','AR/VR','Creative coding','AI & generative'],
 }
 
 function skillsForDiscs(discLabels) {

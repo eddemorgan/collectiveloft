@@ -15,7 +15,7 @@ const DISCIPLINES = [
   { key: 'Music',         label: 'Music',             icon: '🎵' },
   { key: 'Writing',       label: 'Writing',           icon: '✍️' },
   { key: 'Design & Web',  label: 'Design & Web',      icon: '🖥' },
-  { key: 'Film',          label: 'Film',              icon: '🎬' },
+  { key: 'Film & Video',  label: 'Film & Video',      icon: '🎬' },
   { key: 'Photography',   label: 'Photography',       icon: '📷' },
   { key: 'Performance',   label: 'Performance',       icon: '🎭' },
   { key: 'Creative Tech', label: 'Creative Tech',     icon: '💻' },
@@ -26,7 +26,7 @@ const DISC_KEY_MAP = {
   'Music':         'music',
   'Writing':       'writing',
   'Design & Web':  'design',
-  'Film':          'film',
+  'Film & Video':  'film',
   'Photography':   'photo',
   'Performance':   'perf',
   'Creative Tech': 'tech',
@@ -34,14 +34,14 @@ const DISC_KEY_MAP = {
 
 // Discipline affinity map -- which disciplines naturally collaborate
 const DISC_AFFINITY = {
-  'Visual Art':    { strong: ['Music','Film','Writing','Design & Web','Photography'], moderate: ['Creative Tech','Performance'] },
-  'Music':         { strong: ['Film','Visual Art','Performance','Writing'],           moderate: ['Design & Web','Creative Tech'] },
-  'Writing':       { strong: ['Visual Art','Performance','Film','Design & Web'],      moderate: ['Music','Photography'] },
-  'Design & Web':  { strong: ['Visual Art','Writing','Music','Creative Tech'],        moderate: ['Photography','Film'] },
-  'Film':          { strong: ['Music','Writing','Visual Art','Photography'],           moderate: ['Performance','Design & Web'] },
-  'Photography':   { strong: ['Visual Art','Film','Design & Web'],                    moderate: ['Music','Writing'] },
-  'Performance':   { strong: ['Music','Writing','Film'],                              moderate: ['Visual Art','Photography'] },
-  'Creative Tech': { strong: ['Music','Visual Art','Design & Web','Film'],            moderate: ['Writing','Photography'] },
+  'Visual Art':    { strong: ['Music','Film & Video','Writing','Design & Web','Photography'], moderate: ['Creative Tech','Performance'] },
+  'Music':         { strong: ['Film & Video','Visual Art','Performance','Writing'],           moderate: ['Design & Web','Creative Tech'] },
+  'Writing':       { strong: ['Visual Art','Performance','Film & Video','Design & Web'],      moderate: ['Music','Photography'] },
+  'Design & Web':  { strong: ['Visual Art','Writing','Music','Creative Tech'],        moderate: ['Photography','Film & Video'] },
+  'Film & Video':  { strong: ['Music','Writing','Visual Art','Photography'],           moderate: ['Performance','Design & Web'] },
+  'Photography':   { strong: ['Visual Art','Film & Video','Design & Web'],                    moderate: ['Music','Writing'] },
+  'Performance':   { strong: ['Music','Writing','Film & Video'],                              moderate: ['Visual Art','Photography'] },
+  'Creative Tech': { strong: ['Music','Visual Art','Design & Web','Film & Video'],            moderate: ['Writing','Photography'] },
 }
 
 // ── RIGHT NOW parser (seeking-cue gated) ─────────────────────────────────────
@@ -59,21 +59,21 @@ const DISC_TEXT_MATCHERS = {
   'Music':         [/\bmusicians?\b/, /\bcomposers?\b/, /\bproducers?\b/, /\bsongwriters?\b/, /\bbeat ?makers?\b/, /\bvocalists?\b/, /\binstrumentalist/, /\bsound designers?\b/],
   'Writing':       [/\bwriters?\b/, /\beditors?\b/, /\bauthors?\b/, /\bpoets?\b/, /\bcopywriters?\b/, /\bghostwriters?\b/, /\bnovelists?\b/, /\bscreenwriters?\b/],
   'Design & Web':  [/\bdesigners?\b/, /\bweb ?devs?\b/, /\bweb developers?\b/, /\bux\b/, /\bui\b/, /\bbrand(?:ing)? (?:designer|expert|specialist)/, /\btypographer/],
-  'Film':          [/\bfilm ?makers?\b/, /\bdirectors?\b/, /\bcinematographers?\b/, /\bvideographers?\b/, /\bfilm editors?\b/, /\bd(?:irector of photography|\.?o\.?p\.?)\b/],
+  'Film & Video':          [/\bfilm ?makers?\b/, /\bdirectors?\b/, /\bcinematographers?\b/, /\bvideographers?\b/, /\bfilm editors?\b/, /\bd(?:irector of photography|\.?o\.?p\.?)\b/],
   'Photography':   [/\bphotographers?\b/, /\bportrait (?:photographer|shooter)/, /\blandscape photographer/, /\bphoto(?:grapher)? for\b/],
   'Performance':   [/\bperformers?\b/, /\bdancers?\b/, /\bactors?\b/, /\bactress(?:es)?\b/, /\bchoreographers?\b/, /\btheatre? (?:artist|performer)/, /\bvoice actors?\b/],
   'Creative Tech': [/\bcreative technologist/, /\bdevelopers?\b/, /\bcreative coders?\b/, /\bprogrammers?\b/, /\bengineers?\b/, /\bgenerative artist/],
 }
 
 // The real skill vocabulary (from the platform). Matched as whole phrases.
-const SKILL_VOCAB = ['Acting','Art direction','Audio-visual','Beat production','Branding','Choreography','Cinematography','Co-writing','Copywriting','Creative coding','Dance','Directing','Documentary','Documentary photography','Editing','Fiction','Film editing','Film scoring','Fine art photography','Generative art','Illustration','Interactive installation','Landscape photography','Large format','Mixed media','Mixing & mastering','Motion design','Novel','Oil on canvas','Poetry','Portrait photography','Printmaking','Screenwriting','Session musician','Short film','Short Story','Songwriting','Sound design','Spoken word','Theatre','Typography','UX design','Watercolour','Web design','Writer']
+const SKILL_VOCAB = ['3D modeling','AI & generative','AR/VR','Acting','Album & cover art','Animation','Beat production','Branding','Character design','Choreography','Cinematography','Comedy','Comic & manga','Concept art','Content writing','Copywriting','Cover art','Creative coding','DJ','Dance','Digital art','Directing','Editing','Event','Fashion & editorial','Fiction','Film & game scoring','Game design','Ghostwriting','Graphic design','Illustration','Instrumentalist','Lyrics','Mixing & mastering','Motion & VFX','Motion graphics','Music & band','Music video','Nonfiction','Painting','Photo retouching','Poetry','Portrait','Producing','Product & commercial','Rap & MC','Screenwriting','Songwriting','Sound design','Spoken word','Typography','UI/UX','Video editing','Vocals','Voice acting','Web design','Web development']
 
 // Parse a Right Now string -> { disciplines:[], skills:[] } but ONLY from the
 // portion that follows a seeking cue.
 // Fallback skill vocabulary — used only if no profiles have loaded yet. The
 // live vocabulary is derived from the database (see buildSkillVocab) so any
 // skill added to the platform is caught automatically, no code change needed.
-const SKILL_VOCAB_FALLBACK = ['Acting','Art direction','Audio-visual','Beat production','Branding','Choreography','Cinematography','Co-writing','Copywriting','Creative coding','Dance','Directing','Documentary','Documentary photography','Editing','Fiction','Film editing','Film scoring','Fine art photography','Generative art','Illustration','Interactive installation','Landscape photography','Large format','Mixed media','Mixing & mastering','Motion design','Novel','Oil on canvas','Poetry','Portrait photography','Printmaking','Screenwriting','Session musician','Short film','Short Story','Songwriting','Sound design','Spoken word','Theatre','Typography','UX design','Watercolour','Web design','Writer']
+const SKILL_VOCAB_FALLBACK = ['3D modeling','AI & generative','AR/VR','Acting','Album & cover art','Animation','Beat production','Branding','Character design','Choreography','Cinematography','Comedy','Comic & manga','Concept art','Content writing','Copywriting','Cover art','Creative coding','DJ','Dance','Digital art','Directing','Editing','Event','Fashion & editorial','Fiction','Film & game scoring','Game design','Ghostwriting','Graphic design','Illustration','Instrumentalist','Lyrics','Mixing & mastering','Motion & VFX','Motion graphics','Music & band','Music video','Nonfiction','Painting','Photo retouching','Poetry','Portrait','Producing','Product & commercial','Rap & MC','Screenwriting','Songwriting','Sound design','Spoken word','Typography','UI/UX','Video editing','Vocals','Voice acting','Web design','Web development']
 
 // HYBRID VOCAB: skills come live from the DB (whatever exists on real profiles);
 // disciplines get a rich hardcoded synonym map (below) because natural-language

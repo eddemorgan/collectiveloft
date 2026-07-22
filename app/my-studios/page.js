@@ -13,7 +13,7 @@ const DISC_COLORS = {
   'Music':         { bg: 'rgba(86,179,156,0.18)',  color: 'var(--teal)' },
   'Writing':       { bg: 'rgba(160,120,208,0.18)', color: '#a078d0' },
   'Design & Web':  { bg: 'rgba(86,140,195,0.18)',  color: '#568cc3' },
-  'Film':          { bg: 'rgba(194,112,128,0.18)', color: '#c27080' },
+  'Film & Video':          { bg: 'rgba(194,112,128,0.18)', color: '#c27080' },
   'Photography':   { bg: 'rgba(130,180,120,0.18)', color: '#82b478' },
   'Performance':   { bg: 'rgba(200,140,100,0.18)', color: '#c88c64' },
   'Creative Tech': { bg: 'rgba(100,180,170,0.18)', color: '#64b4aa' },

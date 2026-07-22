@@ -15,7 +15,7 @@ const DISCIPLINES = [
   { key: 'Music',        icon: '🎵', label: 'Music' },
   { key: 'Writing',      icon: '✍️', label: 'Writing' },
   { key: 'Design & Web', icon: '🖥',  label: 'Design & Web' },
-  { key: 'Film',         icon: '🎬', label: 'Film' },
+  { key: 'Film & Video', icon: '🎬', label: 'Film & Video' },
   { key: 'Photography',  icon: '📷', label: 'Photography' },
   { key: 'Performance',  icon: '🎭', label: 'Performance' },
   { key: 'Creative Tech',icon: '💻', label: 'Creative Tech' },

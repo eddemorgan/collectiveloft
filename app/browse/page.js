@@ -10,7 +10,7 @@ const DISC_ICON = {
   'Writing': '✍️',
   'Writing & Poetry': '✍️',
   'Design & Web': '🖥',
-  'Film': '🎬',
+  'Film & Video': '🎬',
   'Photography': '📷',
   'Performance': '🎭',
   'Creative Tech': '💻',

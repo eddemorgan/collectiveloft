@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import styles from './landing.module.css'
 
-const DISCIPLINES = ['Visual Art','Music','Writing','Design & Web','Film','Photography','Performance','Creative Tech']
+const DISCIPLINES = ['Visual Art','Music','Writing','Design & Web','Film & Video','Photography','Performance','Creative Tech']
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)

@@ -51,16 +51,33 @@ export default function SignupPage() {
       .from('profiles')
       .upsert({ id: data.user.id, firstname, lastname })
 
-    // Send the welcome email. Fire and forget: a mail hiccup never blocks signup.
     const { data: { session } } = await supabase.auth.getSession()
-    if (session?.access_token) {
+    const token = session?.access_token
+
+    // Send the welcome email. Fire and forget: a mail hiccup never blocks signup.
+    if (token) {
       fetch('/api/send-welcome', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` },
+        headers: { Authorization: `Bearer ${token}` },
       }).catch(() => {})
     }
 
-    router.push('/subscribe')
+    // Founding recognition. If this email is on the founding allowlist, the
+    // server grants founding status and 90 days free, and we skip the paywall
+    // straight into building the profile. Everyone else goes to the trial.
+    let founding = false
+    if (token) {
+      try {
+        const res = await fetch('/api/founding/redeem', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const j = await res.json()
+        founding = !!j.founding
+      } catch { /* not founding, fall through to the normal path */ }
+    }
+
+    router.push(founding ? '/onboarding?onboarding=true' : '/subscribe')
   }
 
   return (

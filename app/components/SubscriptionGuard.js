@@ -42,13 +42,18 @@ export default function SubscriptionGuard({ children }) {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('subscription_status')
+        .select('subscription_status, comped_until')
         .eq('id', user.id)
         .single()
 
       const activeStatuses = ['active', 'trialing']
+      const subscribed = profile && activeStatuses.includes(profile.subscription_status)
+      // A founding member with an active comp gets full access and never sees
+      // the paywall while the comp lasts. At day 90 the comp lapses and normal
+      // subscription rules apply, which is when the add-a-card flow begins.
+      const comped = profile && profile.comped_until && new Date(profile.comped_until) > new Date()
 
-      if (!profile || !activeStatuses.includes(profile.subscription_status)) {
+      if (!subscribed && !comped) {
         router.push('/subscribe')
         return
       }

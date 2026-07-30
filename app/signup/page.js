@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
@@ -15,6 +15,13 @@ export default function SignupPage() {
   const [showPw,    setShowPw]    = useState(false)
   const [loading,   setLoading]   = useState(false)
   const [error,     setError]     = useState('')
+
+  // Founding invite links carry ?email=, so members sign up with the exact
+  // address on the allowlist and get recognized. Pre-fill it for them.
+  useEffect(() => {
+    const e = new URLSearchParams(window.location.search).get('email')
+    if (e) setEmail(e)
+  }, [])
 
   async function handleSignup() {
     if (!firstname || !lastname || !email || !password) {

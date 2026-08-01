@@ -46,7 +46,10 @@ export default function SubscriptionGuard({ children }) {
         .eq('id', user.id)
         .single()
 
-      const activeStatuses = ['active', 'trialing']
+      // 'cancelled' is Lemon Squeezy's word for "not renewing, but paid
+      // through the period" - the member keeps access until the
+      // subscription_expired webhook writes 'expired'.
+      const activeStatuses = ['active', 'trialing', 'cancelled']
       const subscribed = profile && activeStatuses.includes(profile.subscription_status)
       // A founding member with an active comp gets full access and never sees
       // the paywall while the comp lasts. At day 90 the comp lapses and normal

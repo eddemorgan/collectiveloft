@@ -26,7 +26,7 @@ export default function SubscribePage() {
     if (!user) { window.location.href = '/login'; return }
     setLoading(true)
     try {
-      const res = await fetch('/api/stripe/checkout', {
+      const res = await fetch('/api/ls/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id, email: user.email }),
@@ -103,7 +103,7 @@ export default function SubscribePage() {
             <button className={styles.btn} onClick={handleSubscribe} disabled={loading}>
               {loading ? 'Taking you to secure checkout…' : 'Start my 7-day free trial →'}
             </button>
-            <p className={styles.secure}>Secure checkout powered by Stripe. Cancel anytime before {trialEnd} and you won&apos;t be charged.</p>
+            <p className={styles.secure}>Secure checkout powered by Lemon Squeezy. Cancel anytime before {trialEnd} and you won&apos;t be charged.</p>
           </div>
 
           <p className={styles.footer}>

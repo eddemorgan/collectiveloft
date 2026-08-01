@@ -1,3 +1,5 @@
+import Footer from '../components/Footer'
+
 const FAQ_GROUPS = [
   {
     group: 'The basics',
@@ -422,24 +424,7 @@ export default function FAQPage() {
         </div>
       </section>
 
-      <footer>
-        <a href="/" className="footer-logo" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', lineHeight: 1 }}>
-            <span style={{ color: 'var(--gold)' }}>✦</span>
-            <span style={{ color: '#1A1814' }}>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
-          </span>
-          <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '4px 0' }} />
-          <span style={{ fontFamily: 'var(--sans)', fontSize: '10.5px' /* was 7.5px */, letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
-        </a>
-        <div className="footer-links">
-          <a href="/#how-it-works" className="footer-link">How it works</a>
-          <a href="/#waitlist" className="footer-link">Early access</a>
-          <a href="/blog" className="footer-link">The Brief</a>
-          <a href="https://www.instagram.com/the.collective.loft" target="_blank" rel="noopener noreferrer" className="footer-link">Instagram</a>
-          <a href="mailto:help@collectiveloft.com" className="footer-link">Contact</a>
-        </div>
-        <div className="footer-copy">© 2026 Morgan Collective Group LLC</div>
-      </footer>
+      <Footer />
     </>
   )
 }

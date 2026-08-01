@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { TERMS_URL, PRIVACY_URL } from '../../lib/legal'
 import styles from './guide.module.css'
+import Footer from '../components/Footer'
 
 const SECTIONS = [
   { id: 'account',  n: '1', t: 'Create your account' },
@@ -235,12 +236,7 @@ export default function GuidePage() {
           </p>
         </section>
 
-        <div className={styles.footer}>
-          <Link href="/help">Help</Link>
-          <Link href={TERMS_URL}>Terms &amp; Conditions</Link>
-          <Link href={PRIVACY_URL}>Privacy Policy</Link>
-          <Link href="/">Back to Collective Loft</Link>
-        </div>
+        <Footer />
       </div>
     </div>
   )

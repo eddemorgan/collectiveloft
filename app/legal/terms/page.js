@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { TermsDoc } from '../../components/LegalDocs'
 import { EFFECTIVE_DATE, PRIVACY_URL } from '../../../lib/legal'
 import styles from '../legal.module.css'
+import Footer from '../../components/Footer'
 
 export default function TermsPage() {
   return (
@@ -30,11 +31,7 @@ export default function TermsPage() {
           <TermsDoc />
         </div>
 
-        <div className={styles.footer}>
-          <Link href={PRIVACY_URL}>Privacy Policy</Link>
-          <Link href="/help">Help</Link>
-          <Link href="/">Back to Collective Loft</Link>
-        </div>
+        <Footer />
       </div>
     </div>
   )

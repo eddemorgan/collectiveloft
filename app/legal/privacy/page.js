@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { PrivacyDoc } from '../../components/LegalDocs'
 import { EFFECTIVE_DATE, TERMS_URL } from '../../../lib/legal'
 import styles from '../legal.module.css'
+import Footer from '../../components/Footer'
 
 export default function PrivacyPage() {
   return (
@@ -30,11 +31,7 @@ export default function PrivacyPage() {
           <PrivacyDoc />
         </div>
 
-        <div className={styles.footer}>
-          <Link href={TERMS_URL}>Terms &amp; Conditions</Link>
-          <Link href="/help">Help</Link>
-          <Link href="/">Back to Collective Loft</Link>
-        </div>
+        <Footer />
       </div>
     </div>
   )

@@ -1,0 +1,22 @@
+/* The one site footer. Used on every page, marketing and member alike,
+   so the platform ends the same way everywhere. Styles mirror the landing. */
+
+.foot { border-top: 0.5px solid var(--rule); padding: 56px 0 40px; margin-top: auto; background: var(--bg); }
+.footInner { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+.footTop { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 34px; padding-bottom: 36px; border-bottom: 0.5px solid var(--rule); }
+.footLinks { display: flex; gap: 52px; flex-wrap: wrap; }
+.fcolL { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.fcol a { display: block; font-size: 14px; color: var(--muted); padding: 5px 0; text-decoration: none; }
+.fcol a:hover { color: var(--cream); }
+.footBot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 28px; }
+.fine { font-size: 12px; color: var(--faint, rgba(26,24,20,0.34)); }
+
+.brand { display: flex; align-items: baseline; gap: 11px; text-decoration: none; }
+.mark { color: var(--gold); font-size: 21px; line-height: 1; transform: translateY(2px); }
+.wm { font-family: var(--serif); font-size: 24px; font-weight: 600; letter-spacing: 0.01em; color: var(--cream); display: block; }
+.wm em { font-style: italic; color: var(--gold); }
+.tag { font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); margin-top: 3px; display: block; }
+
+.socials { display: flex; gap: 18px; align-items: center; justify-content: center; }
+.social { color: var(--muted); display: inline-flex; transition: color 0.2s, transform 0.2s; }
+.social:hover { color: var(--gold); transform: translateY(-2px); }

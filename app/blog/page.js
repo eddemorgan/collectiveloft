@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getAllPosts, getFeaturedPost, LAYERS } from '../../lib/posts'
 import styles from './blog.module.css'
+import Footer from '../components/Footer'
 
 export const metadata = {
   title: 'The Brief — Collective Loft',
@@ -161,23 +162,7 @@ export default function BlogIndex({ searchParams }) {
         )}
       </main>
 
-      <footer className={styles.footer}>
-        <Link href="/" className={styles.footerLogo} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', lineHeight: 1 }}>
-            <span style={{ color: '#8B6914' }}>✦</span>
-            <span style={{ color: '#1A1814' }}>Collective <em style={{ fontStyle: 'italic', color: '#8B6914' }}>Loft</em></span>
-          </span>
-          <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '4px 0' }} />
-          <span style={{ fontFamily: "Arial, sans-serif", fontSize: '7.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'rgba(26,24,20,0.5)' }}>Where creatives find each other</span>
-        </Link>
-        <div className={styles.footerLinks}>
-          <a href="#" id="blogHowItWorks" className={styles.footerLink}>How it works</a>
-          <Link href="/#waitlist" className={styles.footerLink}>Early access</Link>
-          <a href="https://www.instagram.com/the.collective.loft" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>Instagram</a>
-          <a href="mailto:help@collectiveloft.com" className={styles.footerLink}>Contact</a>
-        </div>
-        <div className={styles.footerCopy}>© {new Date().getFullYear()} Morgan Collective Group LLC</div>
-      </footer>
+      <Footer />
 
       <div className="cl-demo-overlay" id="blogDemoModal">
         <div className="cl-demo-inner">

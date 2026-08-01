@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import styles from './browse.module.css'
+import Footer from '../components/Footer'
 
 const DISC_ICON = {
   'Visual Art': '🎨',
@@ -102,6 +103,8 @@ export default function BrowsePage() {
         <p className={styles.closeSub}>Build a profile, say what you&apos;re making, and connect with the creatives who need exactly what you do.</p>
         <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
       </section>
+
+      <Footer />
     </div>
   )
 }

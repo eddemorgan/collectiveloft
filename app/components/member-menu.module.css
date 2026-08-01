@@ -1,0 +1,19 @@
+/* Member hamburger menu — burger, scrim, and slide-out panel.
+   Mirrors the landing nav menu so the two feel like one system. */
+
+.burger { display: flex; flex-direction: column; gap: 4px; cursor: pointer; padding: 8px; background: none; border: none; }
+.burger span { width: 22px; height: 1.5px; background: var(--cream); transition: 0.25s; display: block; }
+.burgerOpen span:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+.burgerOpen span:nth-child(2) { opacity: 0; }
+.burgerOpen span:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+
+.menu { position: fixed; top: 72px; right: 0; width: 340px; max-width: 90vw; height: calc(100vh - 72px); background: var(--bg); border-left: 0.5px solid var(--rule); transform: translateX(105%); transition: transform 0.32s cubic-bezier(0.4,0,0.2,1); z-index: 149; box-shadow: -10px 0 50px rgba(26,24,20,0.07); overflow-y: auto; }
+.menuOpen { transform: translateX(0); }
+.menuSec { padding: 26px 30px; border-bottom: 0.5px solid var(--rule); }
+.menuLabel { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 15px; }
+.menu a { display: block; font-family: var(--serif); font-size: 20px; font-weight: 600; padding: 8px 0; color: var(--cream); text-decoration: none; transition: color 0.15s; text-transform: none; letter-spacing: normal; }
+.menu a:hover { color: var(--gold); }
+.mSub { display: block; font-family: var(--sans); font-size: 12px; font-weight: 400; color: var(--muted); margin-top: 1px; line-height: 1.4; }
+
+.scrim { position: fixed; inset: 72px 0 0 0; background: rgba(26,24,20,0.22); opacity: 0; pointer-events: none; transition: opacity 0.32s; z-index: 148; }
+.scrimOpen { opacity: 1; pointer-events: auto; }

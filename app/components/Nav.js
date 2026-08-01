@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
- 
+import MemberMenu from './MemberMenu'
+
 export default function Nav() {
   const router   = useRouter()
   const pathname = usePathname()
@@ -164,6 +165,8 @@ export default function Nav() {
         {!user && (
           <Link href="/login" style={navLinkStyle(false)}>Sign in</Link>
         )}
+
+        <MemberMenu />
       </div>
     </nav>
   )

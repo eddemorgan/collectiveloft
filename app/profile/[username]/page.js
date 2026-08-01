@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import Footer from '../../components/Footer'
+import MemberMenu from '../../components/MemberMenu'
 import styles from './profile.module.css'
 
 const SKILL_LEVEL_LABELS = ['', 'Beginner', 'Developing', 'Proficient', 'Advanced', 'Expert']
@@ -797,6 +798,7 @@ export default function ProfilePage() {
             </button>
           )}
           {isOwner && <button className={styles.btnSignOut} onClick={handleSignOut}>Sign out</button>}
+          <MemberMenu />
         </div>
       </nav>
 

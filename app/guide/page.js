@@ -74,7 +74,9 @@ export default function GuidePage() {
           <div className={styles.sHead}><span className={styles.sNum}>2</span><h2 className={styles.sTitle}>Your membership</h2></div>
           <p className={styles.p}>
             Membership is <strong>$15 a month</strong>, with a 7-day free trial. Your card is not charged until
-            the trial ends, and you can cancel anytime before then at no cost.
+            the trial ends, and you can cancel anytime before then at no cost. Checkout runs through Lemon
+            Squeezy, our merchant of record, which also handles any sales tax or VAT for your country, so the
+            price you see at checkout is the full price.
           </p>
           <p className={styles.p}>
             The membership is the filter. It keeps the people who exploit creatives out, so everyone inside has
@@ -169,7 +171,7 @@ export default function GuidePage() {
           <div className={styles.sHead}><span className={styles.sNum}>7</span><h2 className={styles.sTitle}>Getting paid</h2></div>
           <p className={styles.p}>
             On a <strong>paid</strong> collaboration, money moves through Collective Loft directly to the person
-            who did the work. Payments run on Stripe, the same service that handles your membership. To receive
+            who did the work. Payments run on Stripe, a payment provider built for exactly this. To receive
             money, you set up a payout account once. After that, you are paid straight into your bank.
           </p>
 
@@ -199,7 +201,7 @@ export default function GuidePage() {
             <li><strong>Milestone-based.</strong> Each milestone shows its share of the fee, and you pay them one at a time as the work lands.</li>
           </ul>
           <p className={styles.p}>
-            Paying takes you to Stripe&rsquo;s secure checkout, the same as membership. When the payment clears,
+            Paying takes you to Stripe&rsquo;s secure checkout. When the payment clears,
             the Studio marks it paid and the money is on its way to your collaborator&rsquo;s bank.
           </p>
 

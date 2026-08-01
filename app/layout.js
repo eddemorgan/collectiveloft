@@ -1,4 +1,5 @@
 import './globals.css'
+import SubscriptionGuard from './components/SubscriptionGuard'
 
 export const metadata = {
   metadataBase: new URL('https://collectiveloft.com'),
@@ -56,7 +57,11 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <SubscriptionGuard>
+          {children}
+        </SubscriptionGuard>
+      </body>
     </html>
   )
 }

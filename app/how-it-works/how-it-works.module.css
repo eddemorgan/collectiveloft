@@ -1,0 +1,53 @@
+.page { min-height: 100vh; background: var(--bg0); color: var(--cream); font-family: var(--sans); }
+
+/* NAV — matches landing */
+.nav { position: sticky; top: 0; z-index: 50; background: rgba(240,236,227,0.82); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--rule); }
+.navInner { max-width: 1160px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 72px; }
+.brand { display: flex; align-items: baseline; gap: 11px; text-decoration: none; }
+.mark { color: var(--gold); font-size: 21px; line-height: 1; transform: translateY(2px); }
+.wm { font-family: var(--serif); font-size: 24px; font-weight: 600; letter-spacing: 0.01em; color: var(--cream); display: block; }
+.wm em { font-style: italic; color: var(--gold); }
+.tag { font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); margin-top: 3px; display: block; }
+.join { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; background: var(--gold); color: var(--bg0); padding: 11px 22px; border-radius: 3px; text-decoration: none; transition: background 0.2s; }
+.join:hover { background: var(--gold2); }
+
+/* HERO */
+.hero { max-width: 780px; margin: 0 auto; padding: 88px 32px 56px; text-align: center; }
+.eyebrow { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 22px; }
+.title { font-family: var(--serif); font-size: clamp(40px,7vw,72px); font-weight: 600; line-height: 1.02; letter-spacing: -0.02em; color: var(--cream); margin-bottom: 20px; }
+.title em { font-style: italic; color: var(--gold); }
+.lede { max-width: 560px; margin: 0 auto; font-size: 17px; line-height: 1.75; color: var(--muted); }
+
+/* WALKTHROUGH */
+.steps { max-width: 860px; margin: 0 auto; padding: 20px 32px 40px; position: relative; }
+.step { position: relative; display: grid; grid-template-columns: 96px 1fr; gap: 32px; padding: 40px 0; border-top: 0.5px solid var(--rule); }
+.step:first-child { border-top: none; }
+.stepNum { font-family: var(--serif); font-size: 52px; font-weight: 600; color: var(--gold); line-height: 1; letter-spacing: -0.02em; }
+.stepBody { padding-top: 4px; }
+.stepTitle { font-family: var(--serif); font-size: clamp(26px,3.5vw,34px); font-weight: 600; line-height: 1.1; letter-spacing: -0.01em; color: var(--cream); margin-bottom: 14px; }
+.stepWhat { font-size: 16px; line-height: 1.7; color: var(--cream); margin-bottom: 12px; }
+.stepWhy { font-size: 15.5px; line-height: 1.7; color: var(--muted); }
+.stepWhy b { color: var(--cream); font-weight: 600; }
+.protect { display: inline-block; margin-bottom: 10px; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); border: 0.5px solid rgba(139,105,20,0.4); padding: 4px 10px; border-radius: 2px; }
+
+/* CLOSE */
+.close { border-top: 0.5px solid var(--rule); background: var(--bg); text-align: center; padding: 96px 32px; }
+.closeH { font-family: var(--serif); font-size: clamp(32px,5.5vw,58px); font-weight: 600; line-height: 1.04; letter-spacing: -0.02em; margin-bottom: 16px; color: var(--cream); }
+.closeH em { font-style: italic; color: var(--gold); }
+.closeSub { max-width: 500px; margin: 0 auto 32px; color: var(--muted); font-size: 16px; line-height: 1.7; }
+.btnPrimary { font-size: 15px; font-weight: 600; background: var(--gold); color: var(--bg0); padding: 16px 34px; border-radius: 3px; text-decoration: none; transition: 0.2s; display: inline-block; }
+.btnPrimary:hover { background: var(--gold2); }
+
+/* FOOTER */
+.foot { border-top: 0.5px solid var(--rule); padding: 48px 0 40px; }
+.footInner { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+.footRow { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; }
+.fine { font-size: 12px; color: var(--faint, rgba(26,24,20,0.34)); }
+.socials { display: flex; gap: 18px; align-items: center; }
+.social { color: var(--muted); display: inline-flex; transition: color 0.2s, transform 0.2s; }
+.social:hover { color: var(--gold); transform: translateY(-2px); }
+
+@media (max-width: 620px) {
+  .step { grid-template-columns: 1fr; gap: 8px; }
+  .stepNum { font-size: 40px; }
+}

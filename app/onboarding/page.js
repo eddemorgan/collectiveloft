@@ -1,0 +1,1202 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { supabase } from '../../lib/supabase'
+import { TermsDoc, PrivacyDoc } from '../components/LegalDocs'
+import { LEGAL_VERSION } from '../../lib/legal'
+import styles from './onboarding.module.css'
+
+const LOCATION_DATA = {
+  US: { states: { IL: { l: 'Illinois', c: ['Chicago','Aurora','Springfield'] }, NY: { l: 'New York', c: ['New York City','Brooklyn','Buffalo'] }, CA: { l: 'California', c: ['Los Angeles','San Francisco','San Diego'] }, TX: { l: 'Texas', c: ['Houston','Austin','Dallas'] }, GA: { l: 'Georgia', c: ['Atlanta','Savannah'] }, TN: { l: 'Tennessee', c: ['Nashville','Memphis'] }, WA: { l: 'Washington', c: ['Seattle','Spokane'] }, MA: { l: 'Massachusetts', c: ['Boston','Cambridge'] }, FL: { l: 'Florida', c: ['Miami','Orlando','Tampa'] } } },
+  CA: { states: { ON: { l: 'Ontario', c: ['Toronto','Ottawa'] }, BC: { l: 'British Columbia', c: ['Vancouver','Victoria'] }, QC: { l: 'Quebec', c: ['Montreal','Quebec City'] } } },
+  GB: { r: ['London','Manchester','Birmingham','Bristol','Edinburgh'] },
+  AU: { r: ['Sydney','Melbourne','Brisbane','Perth'] },
+  DE: { r: ['Berlin','Munich','Hamburg','Cologne'] },
+  FR: { r: ['Paris','Lyon','Marseille','Bordeaux'] },
+  JP: { r: ['Tokyo','Osaka','Kyoto','Fukuoka'] },
+  BR: { r: ['São Paulo','Rio de Janeiro','Brasília'] },
+  MX: { r: ['Mexico City','Guadalajara','Monterrey'] },
+  NG: { r: ['Lagos','Abuja','Ibadan'] },
+  ZA: { r: ['Cape Town','Johannesburg','Durban'] },
+  IN: { r: ['Mumbai','Delhi','Bangalore','Chennai'] },
+  OTHER: { r: ['Remote / Online only','Other location'] },
+}
+
+const DISCIPLINES = [
+  { id: 'visual',  icon: '🎨', label: 'Visual Art' },
+  { id: 'music',   icon: '🎵', label: 'Music' },
+  { id: 'writing', icon: '✍️', label: 'Writing' },
+  { id: 'design',  icon: '🖥',  label: 'Design & Web' },
+  { id: 'film',    icon: '🎬', label: 'Film & Video' },
+  { id: 'photo',   icon: '📷', label: 'Photography' },
+  { id: 'perf',    icon: '🎭', label: 'Performance' },
+  { id: 'tech',    icon: '💻', label: 'Creative Tech' },
+]
+
+const SKILLS = [
+  { d: 'visual', label: 'Illustration' },
+  { d: 'visual', label: 'Digital art' },
+  { d: 'visual', label: 'Character design' },
+  { d: 'visual', label: 'Concept art' },
+  { d: 'visual', label: 'Comic & manga' },
+  { d: 'visual', label: 'Painting' },
+  { d: 'visual', label: 'Animation' },
+  { d: 'visual', label: 'Cover art' },
+  { d: 'music', label: 'Beat production' },
+  { d: 'music', label: 'Producing' },
+  { d: 'music', label: 'DJ' },
+  { d: 'music', label: 'Songwriting' },
+  { d: 'music', label: 'Vocals' },
+  { d: 'music', label: 'Rap & MC' },
+  { d: 'music', label: 'Instrumentalist' },
+  { d: 'music', label: 'Mixing & mastering' },
+  { d: 'music', label: 'Sound design' },
+  { d: 'music', label: 'Film & game scoring' },
+  { d: 'writing', label: 'Lyrics' },
+  { d: 'writing', label: 'Poetry' },
+  { d: 'writing', label: 'Fiction' },
+  { d: 'writing', label: 'Nonfiction' },
+  { d: 'writing', label: 'Screenwriting' },
+  { d: 'writing', label: 'Copywriting' },
+  { d: 'writing', label: 'Content writing' },
+  { d: 'writing', label: 'Editing' },
+  { d: 'writing', label: 'Ghostwriting' },
+  { d: 'design', label: 'Graphic design' },
+  { d: 'design', label: 'Branding' },
+  { d: 'design', label: 'Web design' },
+  { d: 'design', label: 'UI/UX' },
+  { d: 'design', label: 'Motion graphics' },
+  { d: 'design', label: 'Album & cover art' },
+  { d: 'design', label: 'Typography' },
+  { d: 'film', label: 'Directing' },
+  { d: 'film', label: 'Cinematography' },
+  { d: 'film', label: 'Video editing' },
+  { d: 'film', label: 'Motion & VFX' },
+  { d: 'film', label: 'Music video' },
+  { d: 'film', label: 'Producing' },
+  { d: 'photo', label: 'Portrait' },
+  { d: 'photo', label: 'Fashion & editorial' },
+  { d: 'photo', label: 'Product & commercial' },
+  { d: 'photo', label: 'Music & band' },
+  { d: 'photo', label: 'Event' },
+  { d: 'photo', label: 'Photo retouching' },
+  { d: 'perf', label: 'Acting' },
+  { d: 'perf', label: 'Voice acting' },
+  { d: 'perf', label: 'Dance' },
+  { d: 'perf', label: 'Choreography' },
+  { d: 'perf', label: 'Spoken word' },
+  { d: 'perf', label: 'Comedy' },
+  { d: 'tech', label: 'Game design' },
+  { d: 'tech', label: '3D modeling' },
+  { d: 'tech', label: 'Web development' },
+  { d: 'tech', label: 'AR/VR' },
+  { d: 'tech', label: 'Creative coding' },
+  { d: 'tech', label: 'AI & generative' },
+]
+
+const DISC_GRID = [
+  { icon: '🎨', name: 'Visual Art',       discipline: 'Visual Art' },
+  { icon: '🎵', name: 'Music',            discipline: 'Music' },
+  { icon: '✍️', name: 'Writing & Poetry', discipline: 'Writing' },
+  { icon: '🖥',  name: 'Design & Web',    discipline: 'Design & Web' },
+  { icon: '🎬', name: 'Film & Video',      discipline: 'Film & Video' },
+  { icon: '📷', name: 'Photography',      discipline: 'Photography' },
+  { icon: '🎭', name: 'Performance',      discipline: 'Performance' },
+  { icon: '💻', name: 'Creative Tech',    discipline: 'Creative Tech' },
+]
+
+const AV_CLASSES = ['avG', 'avT', 'avR']
+
+export default function LandingPage() {
+  const router = useRouter()
+  const [members,    setMembers]    = useState([])
+  const [authUser,   setAuthUser]   = useState(null)
+  const [myProfile,  setMyProfile]  = useState(null)
+  const [discCounts, setDiscCounts] = useState({})
+  const [isOnboarding, setIsOnboarding] = useState(false)
+  const [demoOpen, setDemoOpen] = useState(false)
+
+  useEffect(() => {
+    supabase
+      .from('profiles')
+      .select('id, firstname, lastname, headline, disciplines, rightnow, compensation, availability, city, state')
+      .order('created_at', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setMembers(data || []))
+
+    supabase
+      .from('profiles')
+      .select('disciplines')
+      .then(({ data }) => {
+        const counts = {}
+        ;(data || []).forEach(p => {
+          ;(p.disciplines || []).forEach(d => {
+            counts[d] = (counts[d] || 0) + 1
+          })
+        })
+        setDiscCounts(counts)
+      })
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setAuthUser(session.user)
+        supabase
+          .from('profiles')
+          .select('firstname, lastname')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => setMyProfile(data))
+
+        const params = new URLSearchParams(window.location.search)
+        if (params.get('onboarding') === 'true') {
+          setIsOnboarding(true)
+          setModalOpen(true)
+          supabase
+            .from('profiles')
+            .select('firstname, lastname')
+            .eq('id', session.user.id)
+            .single()
+            .then(({ data }) => {
+              if (data) {
+                setForm(f => ({
+                  ...f,
+                  firstname: data.firstname || '',
+                  lastname: data.lastname || '',
+                  email: session.user.email || '',
+                }))
+              }
+            })
+        }
+      }
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setAuthUser(session?.user || null)
+      if (session?.user) {
+        supabase
+          .from('profiles')
+          .select('firstname, lastname')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data }) => setMyProfile(data))
+      } else {
+        setMyProfile(null)
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const [modalOpen,  setModalOpen]  = useState(false)
+  const [submitted,  setSubmitted]  = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [formError,  setFormError]  = useState('')
+  const [showPw,     setShowPw]     = useState(false)
+  const [showConfPw, setShowConfPw] = useState(false)
+
+  const [showTcDoc,   setShowTcDoc]   = useState(false)
+  const [showPpDoc,   setShowPpDoc]   = useState(false)
+  const [tcScrolled,  setTcScrolled]  = useState(false)
+  const [ppScrolled,  setPpScrolled]  = useState(false)
+  const [tcAccepted,  setTcAccepted]  = useState(false)
+  const [ppAccepted,  setPpAccepted]  = useState(false)
+  const [tcChecked,   setTcChecked]   = useState(false)
+  const [ppChecked,   setPpChecked]   = useState(false)
+
+  const [form, setForm] = useState({
+    firstname: '', lastname: '', email: '', headline: '',
+    bio: '', rightnow: '', seeking: '', password: '', confirmPassword: '', portfolio_link: '', availability: '', location_preference: '',
+  })
+  const [country,        setCountry]        = useState('')
+  const [stateVal,       setStateVal]       = useState('')
+  const [city,           setCity]           = useState('')
+  const [locQuery,       setLocQuery]       = useState('')   // text in the location box
+  const [locResults,     setLocResults]     = useState([])   // Mapbox suggestions
+  const [locLat,         setLocLat]         = useState(null)
+  const [locLng,         setLocLng]         = useState(null)
+  const [locPicked,      setLocPicked]      = useState(false) // true once a suggestion is chosen
+  const [selectedDiscs,  setSelectedDiscs]  = useState([])
+  const [selectedSkills, setSelectedSkills] = useState([])
+  const [selectedComps,    setSelectedComps]    = useState(['Creative exchange'])
+  const [seekingDiscs,     setSeekingDiscs]     = useState([])
+  const [seekingSkills,    setSeekingSkills]    = useState([])
+  const [seekingOpen,      setSeekingOpen]      = useState(false)
+  const [skillRatings,     setSkillRatings]     = useState({})
+  const [queuedFiles,      setQueuedFiles]      = useState([])
+  const [uploadingPortfolio, setUploadingPortfolio] = useState(false)
+
+  const REQUIRED = isOnboarding ? [
+    form.firstname.trim().length > 0,
+    form.lastname.trim().length > 0,
+    form.email.trim().length > 0,
+    selectedDiscs.length > 0,
+    selectedSkills.length > 0,
+    form.headline.trim().length > 0,
+    form.bio.trim().length > 0,
+  ] : [
+    form.firstname.trim().length > 0,
+    form.lastname.trim().length > 0,
+    form.email.trim().length > 0,
+    form.password.length >= 8,
+    form.confirmPassword === form.password && form.confirmPassword.length > 0,
+    selectedDiscs.length > 0,
+    selectedSkills.length > 0,
+    form.headline.trim().length > 0,
+    form.bio.trim().length > 0,
+  ]
+  const requiredComplete = REQUIRED.every(Boolean)
+  const canSubmit = requiredComplete && tcChecked && ppChecked && !submitting
+
+  const progress = Math.round(REQUIRED.filter(Boolean).length / REQUIRED.length * 100)
+  const visibleSkills = selectedDiscs.length === 0
+    ? SKILLS : SKILLS.filter(s => selectedDiscs.includes(s.d))
+
+  const countryData  = LOCATION_DATA[country]
+  const stateOptions = countryData?.states
+    ? Object.entries(countryData.states).map(([k, v]) => ({ value: k, label: v.l }))
+    : countryData?.r?.map(r => ({ value: r, label: r })) ?? []
+  const cityOptions = (country && LOCATION_DATA[country]?.states?.[stateVal]?.c) ?? []
+
+  function toggleDisc(id) {
+    setSelectedDiscs(prev => {
+      const next = prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]
+      const validSkillLabels = SKILLS.filter(s => next.includes(s.d)).map(s => s.label)
+      setSelectedSkills(sk => sk.filter(s => validSkillLabels.includes(s)))
+      return next
+    })
+  }
+  function toggleSkill(label) {
+    setSelectedSkills(prev => prev.includes(label) ? prev.filter(s => s !== label) : [...prev, label])
+  }
+  function toggleComp(label) {
+    setSelectedComps(prev => prev.includes(label) ? prev.filter(c => c !== label) : [...prev, label])
+  }
+
+  function detectFileType(file) {
+    if (file.type.startsWith('image/')) return 'image'
+    if (file.type.startsWith('video/')) return 'video'
+    if (file.type.startsWith('audio/')) return 'audio'
+    return 'document'
+  }
+
+  function bucketForType(type) {
+    if (type === 'image') return 'portfolio-images'
+    if (type === 'video') return 'portfolio-video'
+    if (type === 'audio') return 'portfolio-audio'
+    return 'portfolio-docs'
+  }
+
+  function handleFileQueue(e) {
+    const files = Array.from(e.target.files || [])
+    const valid = files.filter(f => f.size <= 20 * 1024 * 1024)
+    setQueuedFiles(prev => [...prev, ...valid].slice(0, 12))
+    e.target.value = ''
+  }
+
+  function removeQueuedFile(idx) {
+    setQueuedFiles(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  async function uploadQueuedPortfolioFiles(userId) {
+    if (queuedFiles.length === 0) return
+    setUploadingPortfolio(true)
+    for (let i = 0; i < queuedFiles.length; i++) {
+      const file = queuedFiles[i]
+      const type = detectFileType(file)
+      const ext = file.name.split('.').pop()
+      const path = `${userId}/${Date.now()}-${i}.${ext}`
+      try {
+        const { error: uploadError } = await supabase.storage
+          .from(bucketForType(type))
+          .upload(path, file, { upsert: true })
+        if (uploadError) { console.error(uploadError); continue }
+        const { data: { publicUrl } } = supabase.storage
+          .from(bucketForType(type))
+          .getPublicUrl(path)
+        const title = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ')
+        await supabase.from('portfolio_items').insert({
+          profile_id: userId,
+          type,
+          title,
+          file_url: publicUrl,
+          sort_order: i,
+        })
+      } catch (err) {
+        console.error('Portfolio upload error:', err)
+      }
+    }
+    setUploadingPortfolio(false)
+  }
+
+  function handleCountryChange(val) {
+    setCountry(val); setStateVal(''); setCity('')
+  }
+
+  // --- Mapbox city autocomplete ---
+  async function searchCities(q) {
+    setLocQuery(q)
+    setLocPicked(false)
+    if (!q || q.trim().length < 2) { setLocResults([]); return }
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+    if (!token) { setLocResults([]); return }
+    try {
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place&limit=5&access_token=${token}`
+      const res = await fetch(url)
+      const data = await res.json()
+      setLocResults(Array.isArray(data.features) ? data.features : [])
+    } catch (err) {
+      setLocResults([])
+    }
+  }
+
+  function pickCity(feature) {
+    // feature.text = city name; context holds region (state) and country.
+    const cityName = feature.text || ''
+    let regionName = ''
+    let countryName = ''
+    ;(feature.context || []).forEach(c => {
+      if (c.id?.startsWith('region')) regionName = c.text
+      if (c.id?.startsWith('country')) countryName = c.text
+    })
+    const [lng, lat] = feature.center || [null, null]
+    setCity(cityName)
+    setStateVal(regionName)
+    setCountry(countryName)
+    setLocLat(lat)
+    setLocLng(lng)
+    setLocQuery(feature.place_name || cityName)
+    setLocPicked(true)
+    setLocResults([])
+  }
+
+  function closeModal() {
+    setModalOpen(false); setSubmitted(false); setFormError('')
+    setShowTcDoc(false); setShowPpDoc(false)
+    setTcScrolled(false); setPpScrolled(false)
+    setTcAccepted(false); setPpAccepted(false)
+    setTcChecked(false); setPpChecked(false)
+    setIsOnboarding(false)
+  }
+
+  async function handleSubmit() {
+    setFormError('')
+
+    if (!form.firstname || !form.lastname || !form.email) {
+      setFormError('Please fill in your first name, last name, and email.'); return
+    }
+
+    if (!isOnboarding) {
+      if (!form.password) {
+        setFormError('Please choose a password.'); return
+      }
+      if (form.password.length < 8) {
+        setFormError('Password must be at least 8 characters.'); return
+      }
+      if (form.password !== form.confirmPassword) {
+        setFormError("Passwords don't match."); return
+      }
+    }
+
+    setSubmitting(true)
+    // Stamped once so the Terms and Privacy consent share the same instant.
+    const acceptedAt = new Date().toISOString()
+    try {
+      let userId
+
+      const { data: { session: currentSession } } = await supabase.auth.getSession()
+
+      if (currentSession?.user) {
+        userId = currentSession.user.id
+      } else {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.password,
+          options: { data: { firstname: form.firstname, lastname: form.lastname } }
+        })
+        if (authError) throw authError
+        if (!authData.user) {
+          throw new Error('An account with this email already exists. Try signing in instead.')
+        }
+        userId = authData.user.id
+        await new Promise(r => setTimeout(r, 1000))
+
+        // Send the welcome email. Fire and forget: a mail hiccup never blocks onboarding.
+        if (authData.session?.access_token) {
+          fetch('/api/send-welcome', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${authData.session.access_token}` },
+          }).catch(() => {})
+        }
+      }
+
+      await supabase.from('profiles').update({
+        firstname:   form.firstname,
+        lastname:    form.lastname,
+        email:       form.email,
+        headline:    form.headline,
+        bio:         form.bio,
+        rightnow:    form.rightnow,
+        seeking:     form.seeking,
+        country,
+        state:       stateVal,
+        city:        city,
+        latitude:    locLat,
+        longitude:   locLng,
+        disciplines: selectedDiscs.map(id => {
+          const found = DISCIPLINES.find(d => d.id === id)
+          return found ? found.label : id
+        }),
+        skills:               selectedSkills,
+        compensation:         selectedComps,
+        seeking_disciplines:  seekingDiscs,
+        seeking_skills:       seekingSkills,
+        skill_ratings:        Object.keys(skillRatings).length > 0 ? skillRatings : null,
+        portfolio_link:       form.portfolio_link || null,
+        availability:         form.availability || null,
+        location_preference:  form.location_preference || null,
+        // Consent record. Both boxes are required to reach this point, and the
+        // version tells us which text they actually agreed to.
+        terms_accepted_at:    acceptedAt,
+        terms_version:        LEGAL_VERSION,
+        privacy_accepted_at:  acceptedAt,
+        privacy_version:      LEGAL_VERSION,
+      }).eq('id', userId)
+
+      if (queuedFiles.length > 0) {
+        uploadQueuedPortfolioFiles(userId)
+      }
+
+      if (isOnboarding) {
+        const slug = `${form.firstname.toLowerCase()}-${form.lastname.toLowerCase()}`
+        router.push(`/profile/${slug}`)
+      } else {
+        setSubmitted(true)
+      }
+
+    } catch (err) {
+      setFormError(err.message || 'Something went wrong. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const profileSlug = myProfile
+    ? `${myProfile.firstname.toLowerCase()}-${myProfile.lastname.toLowerCase()}`
+    : null
+
+  return (
+    <>
+      <nav className={styles.nav}>
+        <Link href="/" className={styles.logo} style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', textDecoration: 'none', lineHeight: 1 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontFamily: 'var(--serif)', fontSize: '1.6rem', fontWeight: 400, lineHeight: 1, letterSpacing: '0.02em' }}>
+            <span style={{ color: '#B8922E' }}>✦</span>
+            <span style={{ color: '#1A1A1A' }}>Collective <em style={{ fontStyle: 'italic', color: '#B8922E' }}>Loft</em></span>
+          </span>
+          <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(184,146,46,0.35)', margin: '5px 0' }} />
+          <span style={{ fontFamily: 'var(--sans)', fontSize: '8.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: '#7A7060' }}>Where creatives find each other</span>
+        </Link>
+        <div className={styles.navLinks}>
+          {authUser && profileSlug ? (
+            <Link href={`/profile/${profileSlug}`}>My Profile</Link>
+          ) : (
+            <Link href="/login">Sign in</Link>
+          )}
+          {!authUser && (
+            <Link href="/guide" className={styles.btnS} style={{ textDecoration: 'none' }}>Member Guide</Link>
+          )}
+          {!authUser && (
+            <button className={styles.btnJoin} onClick={() => router.push('/signup')}>Join</button>
+          )}
+        </div>
+      </nav>
+
+      <div className={styles.hero}>
+        <div className={styles.heroLeft}>
+          <div className={styles.eyebrow}>Where Creatives Find Each Other</div>
+          <div className={styles.headline}>Make<br /><em>something</em><br />together.</div>
+          <div className={styles.sub}>
+            Collective Loft is a professional network built for artists, musicians,
+            writers, poets, designers, and makers. Find collaborators who match your vision.
+          </div>
+          <div className={styles.heroBtns}>
+            {authUser && profileSlug ? (
+              <Link href={`/profile/${profileSlug}`} className={styles.btnP}>My Profile</Link>
+            ) : (
+              <button className={styles.btnP} onClick={() => router.push('/signup')}>Build Your Profile</button>
+            )}
+            {!authUser && (
+              <button className={styles.btnS} onClick={() => setDemoOpen(true)}>See How It Works</button>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.heroRight}>
+          {members.length === 0 ? (
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', flex:1 }}>
+              <div style={{ color:'rgba(240,236,227,0.18)', fontSize:'0.78rem', fontWeight:300, textAlign:'center', lineHeight:1.7 }}>
+                Creatives joining now.<br />Be the first to build your profile.
+              </div>
+            </div>
+          ) : (
+            members.map((m, i) => {
+              const name = `${m.firstname || ''} ${m.lastname || ''}`.trim()
+              const ini  = [(m.firstname||'?')[0], (m.lastname||'?')[0]].join('').toUpperCase()
+              const disc = (m.disciplines || [])[0] || 'Creative'
+              const loc  = m.city || m.state || null
+              return (
+                <div key={m.id} className={styles.mc}>
+                  <div className={`${styles.mcAv} ${styles[AV_CLASSES[i] || 'avG']}`}>
+                    {ini}
+                    <div className={styles.dot} style={{ background: 'var(--teal)' }} />
+                  </div>
+                  <div>
+                    <div className={styles.mcName}>{name}</div>
+                    <div className={styles.mcRole}>{disc}</div>
+                    <div className={styles.mcText}>{m.rightnow || 'Building something new on Collective Loft.'}</div>
+                    <div className={styles.mcTags}>
+                      {m.availability === 'open' && (
+                        <span className={`${styles.tag} ${styles.tagG}`}>Open to Collab</span>
+                      )}
+                      {loc && <span className={styles.tag}>{loc}</span>}
+                      {(m.compensation || []).slice(0,1).map(c => (
+                        <span key={c} className={`${styles.tag} ${styles.tagG}`}>{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
+      </div>
+
+      <div className={styles.discStrip}>
+        <div className={styles.stripLbl}>Disciplines on the platform</div>
+        <div className={styles.discGrid}>
+          {DISC_GRID.map((d, i) => {
+            const count = discCounts[d.discipline] || 0
+            return (
+              <div className={styles.dc} key={i}>
+                <div className={styles.dcIcon}>{d.icon}</div>
+                <div className={styles.dcName}>{d.name}</div>
+                <div className={styles.dcCount}>{count} {count === 1 ? 'creative' : 'creatives'}</div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className={styles.manifesto}>
+        <div className={styles.manifestoTxt}>
+          Not a marketplace. Not a portfolio dump.{' '}
+          A <strong>living network</strong> of people making real things together.
+        </div>
+      </div>
+
+      <div className={styles.how}>
+        {[
+          { num: '01', title: 'Build your creative identity',  desc: 'Show your work, your influences, what you\'re making right now, and what kind of collaborators you\'re looking for.' },
+          { num: '02', title: 'Post a Collab Brief',           desc: 'Describe your project and who you need. Creatives apply or reach out directly. The brief lives on your profile and in the public feed.' },
+          { num: '03', title: 'Create in the Loft Studio',     desc: 'Your shared Studio holds your brief, files, messages, and milestones — a home for the work as it comes to life.' },
+        ].map((h, i) => (
+          <div className={styles.hi} key={i}>
+            <div className={styles.hiNum}>{h.num}</div>
+            <div className={styles.hiTitle}>{h.title}</div>
+            <div className={styles.hiDesc}>{h.desc}</div>
+          </div>
+        ))}
+      </div>
+
+      {modalOpen && (
+        <div className={styles.mo} onClick={e => { if (e.target === e.currentTarget) closeModal() }}>
+          <div className={styles.modal}>
+
+            <div className={styles.mhdr}>
+              <div>
+                <div className={styles.mey}>{isOnboarding ? 'Welcome to Collective Loft' : 'Join Collective Loft'}</div>
+                <div className={styles.mt}>{isOnboarding ? 'Complete your creative profile.' : 'Build your creative profile.'}</div>
+                <div className={styles.ms}>{isOnboarding ? 'Tell the community who you are and what you make.' : 'One form. Everything a collaborator needs to know about you.'}</div>
+              </div>
+              <button className={styles.mcl} onClick={closeModal}>✕</button>
+            </div>
+
+            <div className={styles.pbWrap}>
+              <div className={styles.pb} style={{ width: `${progress}%` }} />
+            </div>
+
+            {submitted ? (
+              <div className={styles.scs}>
+                <div className={styles.scM}>✦</div>
+                <div className={styles.scT}>Check your <span>inbox.</span></div>
+                <div className={styles.scS}>
+                  We sent a confirmation link to{' '}
+                  <strong style={{ color: 'var(--cream)' }}>{form.email}</strong>.
+                  Click it to activate your account and access your profile for the first time.
+                </div>
+                <div className={styles.scS} style={{ marginTop: '0.5rem', fontSize: '0.72rem', color: 'rgba(240,236,227,0.35)' }}>
+                  Don't see it? Check your spam folder or contact{' '}
+                  <a href="mailto:help@collectiveloft.com" style={{ color: 'var(--gold)', textDecoration: 'none' }}>
+                    help@collectiveloft.com
+                  </a>
+                </div>
+                <div className={styles.scA}>
+                  <button className={styles.bbh} onClick={closeModal}>Got it</button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className={styles.mbody}>
+
+                  {formError && (
+                    <div style={{
+                      background: 'rgba(194,112,128,0.1)',
+                      border: '0.5px solid rgba(194,112,128,0.35)',
+                      borderRadius: '3px',
+                      padding: '0.65rem 0.85rem',
+                      fontSize: '0.75rem',
+                      color: '#c27080',
+                      marginBottom: '1rem',
+                    }}>
+                      {formError}
+                    </div>
+                  )}
+
+                  <section>
+                    <div className={styles.msl}>Your identity</div>
+                    <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>
+                      <div className={styles.mf}>
+                        <label>First name</label>
+                        <input type="text" value={form.firstname} onChange={e => setForm(f => ({ ...f, firstname: e.target.value }))} />
+                      </div>
+                      <div className={styles.mf}>
+                        <label>Last name</label>
+                        <input type="text" value={form.lastname} onChange={e => setForm(f => ({ ...f, lastname: e.target.value }))} />
+                      </div>
+                    </div>
+                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
+                      <label>Email</label>
+                      <input type="email" placeholder="you@example.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} readOnly={isOnboarding} style={isOnboarding ? { opacity: 0.6, cursor: 'not-allowed' } : {}} />
+                    </div>
+
+                    {!isOnboarding && (
+                      <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>
+                        <div className={styles.mf}>
+                          <label>Password</label>
+                          <div className={styles.pwWrap}>
+                            <input
+                              type={showPw ? 'text' : 'password'}
+                              placeholder="Min 8 characters"
+                              value={form.password}
+                              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                            />
+                            <button type="button" className={styles.pwEye} onClick={() => setShowPw(v => !v)}>
+                              {showPw ? '🙈' : '👁'}
+                            </button>
+                          </div>
+                        </div>
+                        <div className={styles.mf}>
+                          <label>Confirm password</label>
+                          <div className={styles.pwWrap}>
+                            <input
+                              type={showConfPw ? 'text' : 'password'}
+                              placeholder="Repeat password"
+                              value={form.confirmPassword}
+                              onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                            />
+                            <button type="button" className={styles.pwEye} onClick={() => setShowConfPw(v => !v)}>
+                              {showConfPw ? '🙈' : '👁'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className={styles.mf}>
+                      <label>Location</label>
+                      <div style={{ position: 'relative' }}>
+                        <input
+                          type="text"
+                          placeholder="Start typing your city…"
+                          value={locQuery}
+                          onChange={e => searchCities(e.target.value)}
+                          autoComplete="off"
+                        />
+                        {locResults.length > 0 && (
+                          <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20, background: '#fff', border: '0.5px solid rgba(26,24,20,0.15)', borderRadius: '4px', marginTop: '2px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
+                            {locResults.map(f => (
+                              <div
+                                key={f.id}
+                                onClick={() => pickCity(f)}
+                                style={{ padding: '0.6rem 0.8rem', cursor: 'pointer', fontFamily: 'var(--sans)', fontSize: '0.85rem', color: '#1A1A1A', borderBottom: '0.5px solid rgba(26,24,20,0.06)' }}
+                                onMouseEnter={e => e.currentTarget.style.background = 'rgba(184,146,46,0.08)'}
+                                onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                              >
+                                {f.place_name}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {locPicked && city && (
+                        <div style={{ fontFamily: 'var(--sans)', fontSize: '0.7rem', color: 'var(--gold)', marginTop: '0.35rem' }}>
+                          ✓ {[city, stateVal, country].filter(Boolean).join(', ')}
+                        </div>
+                      )}
+                    </div>
+                  </section>
+
+                  <section>
+                    <div className={styles.msl}>Discipline &amp; skills</div>
+                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
+                      <label>Primary discipline(s)</label>
+                      <div className={styles.mdg}>
+                        {DISCIPLINES.map(d => (
+                          <div key={d.id} className={`${styles.mdo} ${selectedDiscs.includes(d.id) ? styles.on : ''}`} onClick={() => toggleDisc(d.id)}>
+                            <span className={styles.mdoI}>{d.icon}</span>
+                            <div className={styles.mdoN}>{d.label}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
+                      <label>Your headline</label>
+                      <input type="text" placeholder="e.g. Beat producer building jazz and hip hop, looking for vocalists" maxLength={100} value={form.headline} onChange={e => setForm(f => ({ ...f, headline: e.target.value }))} />
+                    </div>
+                    <div className={styles.mf}>
+                      <label>Specific skills</label>
+                      <div className={styles.stags}>
+                        {visibleSkills.map(s => (
+                          <button key={s.label} className={`${styles.stag} ${selectedSkills.includes(s.label) ? styles.on : ''}`} onClick={() => toggleSkill(s.label)}>{s.label}</button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {selectedSkills.length > 0 && (
+                      <div style={{ marginTop:'1rem' }}>
+                        <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(26,24,20,0.45)', marginBottom:'0.6rem' }}>
+                          Rate your proficiency <span style={{ color:'rgba(26,24,20,0.3)', letterSpacing:'0', textTransform:'none', fontSize:'0.6rem' }}>— optional</span>
+                        </div>
+                        {selectedSkills.map(skill => {
+                          const rating = skillRatings[skill] || 0
+                          return (
+                            <div key={skill} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'0.5rem', gap:'0.75rem' }}>
+                              <span style={{ fontSize:'0.72rem', color:'var(--muted)', fontWeight:300, minWidth:'120px', flexShrink:0 }}>{skill}</span>
+                              <div style={{ display:'flex', gap:'0.3rem', alignItems:'center' }}>
+                                {[1,2,3,4,5].map(n => (
+                                  <button
+                                    key={n}
+                                    type="button"
+                                    onClick={() => setSkillRatings(prev => ({
+                                      ...prev,
+                                      [skill]: prev[skill] === n ? 0 : n
+                                    }))}
+                                    style={{
+                                      width:'28px', height:'6px', borderRadius:'1px',
+                                      border:'none', cursor:'pointer', transition:'all 0.15s',
+                                      background: n <= rating ? 'var(--gold)' : 'rgba(26,24,20,0.18)',
+                                    }}
+                                    title={['','Beginner','Developing','Proficient','Advanced','Expert'][n]}
+                                  />
+                                ))}
+                                <span style={{ fontSize:'0.58rem', color:'var(--muted)', marginLeft:'0.35rem', minWidth:'54px' }}>
+                                  {rating === 0 ? 'not set' : ['','Beginner','Developing','Proficient','Advanced','Expert'][rating]}
+                                </span>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </section>
+
+                  <section>
+                    <div className={styles.msl}>About you</div>
+                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
+                      <label>Your bio</label>
+                      <textarea placeholder="Tell other creatives who you are, what drives your practice…" rows={3} value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))} />
+                    </div>
+                    <div className={styles.mf}>
+                      <label>Right now — what are you actively making?</label>
+                      <textarea placeholder="e.g. Producing a 5-track EP. Looking for a vocalist and someone to design the cover art. Aiming to release this fall." rows={3} value={form.rightnow} onChange={e => setForm(f => ({ ...f, rightnow: e.target.value }))} />
+                      <div className={styles.hint}>The most important field on your profile.</div>
+                    </div>
+                  </section>
+
+                  <section>
+                    <div className={styles.msl}>Work samples <span style={{ fontSize:'0.62rem', color:'rgba(240,236,227,0.25)', fontWeight:300, letterSpacing:'0', textTransform:'none' }}>— optional</span></div>
+                    <label
+                      style={{
+                        display:'block', border:'0.5px dashed rgba(26,24,20,0.15)', borderRadius:'4px',
+                        padding:'1.25rem', textAlign:'center', cursor:'pointer',
+                        background: queuedFiles.length > 0 ? 'rgba(201,168,76,0.04)' : 'transparent',
+                        transition:'all 0.2s',
+                      }}
+                    >
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*,audio/*,video/*,.pdf"
+                        style={{ display:'none' }}
+                        onChange={handleFileQueue}
+                      />
+                      <div style={{ fontSize:'1.2rem', marginBottom:'0.35rem', color:'rgba(26,24,20,0.35)' }}>↑</div>
+                      <div style={{ fontSize:'0.72rem', color:'var(--muted)', marginBottom:'0.2rem' }}>
+                        {queuedFiles.length === 0 ? 'Drop files here or click to browse' : `${queuedFiles.length} file${queuedFiles.length !== 1 ? 's' : ''} queued`}
+                      </div>
+                      <div style={{ fontSize:'0.6rem', color:'rgba(26,24,20,0.35)' }}>JPG, PNG, MP3, MP4, PDF · Max 20MB · Up to 12 files</div>
+                    </label>
+
+                    {queuedFiles.length > 0 && (
+                      <div style={{ marginTop:'0.65rem', display:'flex', flexDirection:'column', gap:'0.3rem' }}>
+                        {queuedFiles.map((file, idx) => (
+                          <div key={idx} style={{
+                            display:'flex', alignItems:'center', justifyContent:'space-between',
+                            padding:'0.35rem 0.65rem', background:'rgba(26,24,20,0.03)',
+                            border:'0.5px solid var(--rule)', borderRadius:'3px',
+                          }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:'0.5rem', minWidth:0 }}>
+                              <span style={{ fontSize:'0.75rem' }}>
+                                {file.type.startsWith('image/') ? '🖼' : file.type.startsWith('audio/') ? '🎵' : file.type.startsWith('video/') ? '🎬' : '📄'}
+                              </span>
+                              <span style={{ fontSize:'0.68rem', color:'var(--muted)', fontWeight:300, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                                {file.name}
+                              </span>
+                              <span style={{ fontSize:'0.58rem', color:'rgba(26,24,20,0.35)', flexShrink:0 }}>
+                                {(file.size / (1024*1024)).toFixed(1)}MB
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeQueuedFile(idx)}
+                              style={{ background:'none', border:'none', color:'rgba(26,24,20,0.35)', cursor:'pointer', fontSize:'0.7rem', padding:'0 0.25rem', flexShrink:0 }}
+                            >✕</button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className={styles.mf} style={{ marginTop: '0.85rem' }}>
+                      <label>Portfolio link <span style={{ color: 'rgba(240,236,227,0.25)', fontSize: '0.65rem' }}>— optional</span></label>
+                      <input type="url" placeholder="https://yoursite.com · SoundCloud · Behance" value={form.portfolio_link || ''} onChange={e => setForm(f => ({ ...f, portfolio_link: e.target.value }))} />
+                    </div>
+                  </section>
+
+                  <section>
+                    <div className={styles.msl}>Collaboration</div>
+                    <div className={styles.mf} style={{ marginBottom: '0.85rem' }}>
+                      <label>Compensation type</label>
+                      <div className={styles.co}>
+                        {['Creative exchange', 'Paid', 'Revenue share'].map(c => (
+                          <div key={c} className={`${styles.coo} ${selectedComps.includes(c) ? styles.on : ''}`} onClick={() => toggleComp(c)}>
+                            <div className={styles.cooT}>{c}</div>
+                            <div className={styles.cooD}>{c === 'Creative exchange' ? 'Trade skills. No money moves.' : c === 'Paid' ? 'Fee agreed upfront.' : 'Split the outcome.'}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className={styles.mfRow}>
+                      <div className={styles.mf}>
+                        <label>Location preference</label>
+                        <select value={form.location_preference} onChange={e => setForm(f => ({ ...f, location_preference: e.target.value }))}><option value="">Select…</option><option value="local">Local only</option><option value="remote_ok">Remote OK</option><option value="remote_preferred">Remote preferred</option><option value="no_preference">No preference</option></select>
+                      </div>
+                      <div className={styles.mf}>
+                        <label>Availability</label>
+                        <select value={form.availability} onChange={e => setForm(f => ({ ...f, availability: e.target.value }))}><option value="">Select…</option><option value="open">Open to collabs now</option><option value="available_soon">Available in 1–2 months</option><option value="not_available">Not available right now</option></select>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop:'1rem', border:'0.5px solid var(--rule)', borderRadius:'4px', overflow:'hidden' }}>
+                      <button
+                        type="button"
+                        onClick={() => setSeekingOpen(v => !v)}
+                        style={{
+                          width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between',
+                          padding:'0.75rem 1rem', background:'var(--bg1)',
+                          border:'none', cursor:'pointer', textAlign:'left',
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontFamily:'var(--sans)', fontSize:'0.7rem', fontWeight:500, color:'var(--cream)', marginBottom:'0.1rem' }}>
+                            Who are you looking to collaborate with?
+                          </div>
+                          <div style={{ fontSize:'0.62rem', color:'var(--muted)', fontWeight:300 }}>
+                            {seekingDiscs.length === 0 && seekingSkills.length === 0
+                              ? 'Optional — helps the matching algorithm find the right people for you'
+                              : `${seekingDiscs.length} discipline${seekingDiscs.length !== 1 ? 's' : ''} · ${seekingSkills.length} skill${seekingSkills.length !== 1 ? 's' : ''} selected`
+                            }
+                          </div>
+                        </div>
+                        <span style={{ color:'var(--gold)', fontSize:'0.75rem', transform: seekingOpen ? 'rotate(180deg)' : 'none', transition:'transform 0.2s', flexShrink:0, marginLeft:'0.5rem' }}>▼</span>
+                      </button>
+
+                      {seekingOpen && (
+                        <div style={{ padding:'1rem', borderTop:'0.5px solid rgba(26,24,20,0.06)' }}>
+                          <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(26,24,20,0.45)', marginBottom:'0.6rem' }}>
+                            I'm looking to work with
+                          </div>
+                          <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'0.4rem', marginBottom:'1rem' }}>
+                            {DISC_GRID.map(d => (
+                              <div
+                                key={d.discipline}
+                                onClick={() => {
+                                  setSeekingDiscs(prev => {
+                                    const next = prev.includes(d.discipline)
+                                      ? prev.filter(x => x !== d.discipline)
+                                      : [...prev, d.discipline]
+                                    const validSkills = SKILLS.filter(s => {
+                                      return next.some(n => {
+                                        const found = DISCIPLINES.find(dd => dd.label === n)
+                                        return found && s.d === found.id
+                                      })
+                                    }).map(s => s.label)
+                                    setSeekingSkills(sk => sk.filter(s => validSkills.includes(s)))
+                                    return next
+                                  })
+                                }}
+                                style={{
+                                  border: seekingDiscs.includes(d.discipline) ? '0.5px solid var(--gold)' : '0.5px solid var(--rule)',
+                                  background: seekingDiscs.includes(d.discipline) ? 'rgba(139,105,20,0.08)' : 'var(--bg)',
+                                  borderRadius:'3px', padding:'0.5rem 0.35rem', textAlign:'center',
+                                  cursor:'pointer', transition:'all 0.15s', userSelect:'none',
+                                }}
+                              >
+                                <div style={{ fontSize:'0.9rem', marginBottom:'0.15rem' }}>{d.icon}</div>
+                                <div style={{ fontFamily:'var(--sans)', fontSize:'0.55rem', color: seekingDiscs.includes(d.discipline) ? 'var(--gold)' : 'var(--cream)', lineHeight:1.2 }}>{d.name}</div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {seekingDiscs.length > 0 && (() => {
+                            const availSkills = SKILLS.filter(s =>
+                              seekingDiscs.some(disc => {
+                                const found = DISCIPLINES.find(d => d.label === disc)
+                                return found && s.d === found.id
+                              })
+                            ).map(s => s.label)
+                            return availSkills.length > 0 ? (
+                              <>
+                                <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'0.6rem' }}>
+                                  Specific skills I need
+                                </div>
+                                <div style={{ display:'flex', flexWrap:'wrap', gap:'0.35rem' }}>
+                                  {availSkills.map(s => (
+                                    <button
+                                      key={s}
+                                      type="button"
+                                      onClick={() => setSeekingSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+                                      style={{
+                                        fontFamily:'var(--sans)', fontSize:'0.65rem',
+                                        padding:'0.2rem 0.6rem', borderRadius:'2px',
+                                        border: seekingSkills.includes(s) ? '0.5px solid var(--gold)' : '0.5px solid var(--rule)',
+                                        background: seekingSkills.includes(s) ? 'rgba(139,105,20,0.1)' : 'var(--bg)',
+                                        color: seekingSkills.includes(s) ? 'var(--gold)' : 'var(--cream)',
+                                        cursor:'pointer', transition:'all 0.15s',
+                                      }}
+                                    >{s}</button>
+                                  ))}
+                                </div>
+                              </>
+                            ) : null
+                          })()}
+                        </div>
+                      )}
+                    </div>
+                  </section>
+
+                  <section>
+                    <div className={styles.msl}>Find me elsewhere</div>
+                    <div className={styles.mfRow} style={{ marginBottom: '0.85rem' }}>
+                      <div className={styles.mf}><label>Personal website</label><input type="url" placeholder="https://yoursite.com" /></div>
+                      <div className={styles.mf}><label>Instagram</label><input type="text" placeholder="@yourhandle" /></div>
+                    </div>
+                    <div className={styles.mfRow}>
+                      <div className={styles.mf}><label>SoundCloud / Spotify</label><input type="url" placeholder="https://soundcloud.com/…" /></div>
+                      <div className={styles.mf}><label>Other link</label><input type="url" placeholder="Behance, Vimeo, LinkedIn…" /></div>
+                    </div>
+                  </section>
+
+                </div>
+
+                <div className={styles.mftr}>
+                  <div style={{ width:'100%', marginBottom:'1rem' }}>
+                    <div style={{ fontSize:'0.58rem', letterSpacing:'0.14em', textTransform:'uppercase', color:'rgba(26,24,20,0.45)', marginBottom:'0.75rem' }}>
+                      Required acknowledgements
+                    </div>
+
+                    <div style={{ display:'flex', alignItems:'center', gap:'0.65rem', marginBottom:'0.5rem' }}>
+                      <div
+                        onClick={() => { if (tcAccepted) setTcChecked(v => !v) }}
+                        style={{
+                          width:'18px', height:'18px', borderRadius:'3px', flexShrink:0,
+                          border: tcChecked ? '0.5px solid var(--gold)' : '0.5px solid rgba(26,24,20,0.3)',
+                          background: tcChecked ? 'rgba(201,168,76,0.15)' : 'transparent',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          cursor: tcAccepted ? 'pointer' : 'not-allowed',
+                          opacity: tcAccepted ? 1 : 0.4,
+                          transition:'all 0.15s',
+                          color:'var(--gold)', fontSize:'0.65rem',
+                        }}
+                      >{tcChecked ? '✓' : ''}</div>
+                      <span style={{ fontSize:'0.72rem', color:'rgba(26,24,20,0.7)', fontWeight:300 }}>
+                        I have read and agree to the{' '}
+                        <button
+                          type="button"
+                          onClick={() => setShowTcDoc(true)}
+                          style={{ background:'none', border:'none', color:'var(--gold)', cursor:'pointer', fontSize:'0.72rem', fontFamily:'var(--sans)', textDecoration:'underline', padding:0 }}
+                        >Terms & Conditions</button>
+                        {!tcAccepted && <span style={{ fontSize:'0.6rem', color:'rgba(26,24,20,0.45)', marginLeft:'0.4rem' }}>(must read to enable)</span>}
+                        {tcAccepted && !tcChecked && <span style={{ fontSize:'0.6rem', color:'var(--teal)', marginLeft:'0.4rem' }}>✓ read — check to confirm</span>}
+                      </span>
+                    </div>
+
+                    <div style={{ display:'flex', alignItems:'center', gap:'0.65rem' }}>
+                      <div
+                        onClick={() => { if (ppAccepted) setPpChecked(v => !v) }}
+                        style={{
+                          width:'18px', height:'18px', borderRadius:'3px', flexShrink:0,
+                          border: ppChecked ? '0.5px solid var(--gold)' : '0.5px solid rgba(26,24,20,0.3)',
+                          background: ppChecked ? 'rgba(201,168,76,0.15)' : 'transparent',
+                          display:'flex', alignItems:'center', justifyContent:'center',
+                          cursor: ppAccepted ? 'pointer' : 'not-allowed',
+                          opacity: ppAccepted ? 1 : 0.4,
+                          transition:'all 0.15s',
+                          color:'var(--gold)', fontSize:'0.65rem',
+                        }}
+                      >{ppChecked ? '✓' : ''}</div>
+                      <span style={{ fontSize:'0.72rem', color:'rgba(26,24,20,0.7)', fontWeight:300 }}>
+                        I have read and agree to the{' '}
+                        <button
+                          type="button"
+                          onClick={() => setShowPpDoc(true)}
+                          style={{ background:'none', border:'none', color:'var(--gold)', cursor:'pointer', fontSize:'0.72rem', fontFamily:'var(--sans)', textDecoration:'underline', padding:0 }}
+                        >Privacy Policy</button>
+                        {!ppAccepted && <span style={{ fontSize:'0.6rem', color:'rgba(26,24,20,0.45)', marginLeft:'0.4rem' }}>(must read to enable)</span>}
+                        {ppAccepted && !ppChecked && <span style={{ fontSize:'0.6rem', color:'var(--teal)', marginLeft:'0.4rem' }}>✓ read — check to confirm</span>}
+                      </span>
+                    </div>
+
+                    {!requiredComplete && (
+                      <div style={{ marginTop:'0.75rem', fontSize:'0.62rem', color:'rgba(26,24,20,0.4)', fontWeight:300, lineHeight:1.5 }}>
+                        {isOnboarding
+                          ? 'Required: First name, Last name, at least one Discipline, at least one Skill, Headline, and Bio.'
+                          : 'Required to create profile: First name, Last name, Email, Password (8+ chars), at least one Discipline, at least one Skill, Headline, and Bio.'
+                        }
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.fbtns}>
+                    <button className={styles.bcn} onClick={closeModal}>Cancel</button>
+                    <button
+                      className={styles.bsp}
+                      onClick={handleSubmit}
+                      disabled={!canSubmit}
+                      style={{ opacity: canSubmit ? 1 : 0.4, cursor: canSubmit ? 'pointer' : 'not-allowed' }}
+                    >
+                      {submitting
+                        ? (isOnboarding ? 'Saving profile…' : 'Creating profile…')
+                        : (isOnboarding ? 'Complete my profile ↗' : 'Create my profile ↗')
+                      }
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {(showTcDoc || showPpDoc) && (() => {
+        const isTc = showTcDoc
+        const scrolled = isTc ? tcScrolled : ppScrolled
+        const setScrolled = isTc ? setTcScrolled : setPpScrolled
+        const onAgree = isTc
+          ? () => { setTcAccepted(true); setTcChecked(true); setShowTcDoc(false) }
+          : () => { setPpAccepted(true); setPpChecked(true); setShowPpDoc(false) }
+        const onClose = isTc ? () => setShowTcDoc(false) : () => setShowPpDoc(false)
+        const title = isTc ? 'Terms & Conditions' : 'Privacy Policy'
+        const agreeLabel = isTc
+          ? 'By clicking I Agree, you confirm you have read and agree to Collective Loft\'s Terms & Conditions and that you are 18 years of age or older.'
+          : 'By clicking I Agree, you confirm you have read and agree to Collective Loft\'s Privacy Policy.'
+
+        return (
+          <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.92)',zIndex:10000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1.5rem'}}>
+            <div style={{background:'var(--bg1)',border:'0.5px solid rgba(139,105,20,0.3)',borderRadius:'6px',width:'100%',maxWidth:'760px',height:'88vh',display:'flex',flexDirection:'column',overflow:'hidden',boxShadow:'0 20px 60px rgba(26,24,20,0.15)'}}>
+              <div style={{padding:'1.25rem 1.5rem',borderBottom:'0.5px solid var(--rule)',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0}}>
+                <div>
+                  <div style={{fontSize:'0.55rem',letterSpacing:'0.18em',textTransform:'uppercase',color:'var(--gold)',opacity:0.8,marginBottom:'0.2rem'}}>Legal Document</div>
+                  <div style={{fontFamily:'var(--serif)',fontSize:'1.3rem',fontWeight:400,color:'var(--cream)'}}>{title}</div>
+                </div>
+                <button onClick={onClose} style={{background:'transparent',border:'0.5px solid var(--rule)',color:'var(--muted)',width:'30px',height:'30px',borderRadius:'50%',cursor:'pointer',fontSize:'0.85rem',display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+              </div>
+              {!scrolled && (
+                <div style={{background:'rgba(201,168,76,0.08)',borderBottom:'0.5px solid rgba(201,168,76,0.2)',padding:'0.6rem 1.5rem',fontSize:'0.68rem',color:'rgba(201,168,76,0.8)',flexShrink:0}}>
+                  ↓ Scroll to the bottom to read the full document and enable acceptance.
+                </div>
+              )}
+              <div
+                style={{flex:1,overflowY:'auto',padding:'1.5rem'}}
+                onScroll={e => {
+                  const el = e.currentTarget
+                  if (!scrolled && el.scrollTop + el.clientHeight >= el.scrollHeight - 60) {
+                    setScrolled(true)
+                  }
+                }}
+              >
+                {isTc ? <TermsDoc /> : <PrivacyDoc />}
+              </div>
+              <div style={{padding:'1rem 1.5rem',borderTop:'0.5px solid var(--rule)',display:'flex',alignItems:'center',justifyContent:'space-between',flexShrink:0,background:'var(--bg)'}}>
+                <div style={{fontSize:'0.68rem',color:'var(--muted)',fontWeight:300,maxWidth:'420px',lineHeight:1.5}}>{agreeLabel}</div>
+                <button
+                  onClick={onAgree}
+                  disabled={!scrolled}
+                  style={{background:scrolled?'var(--gold)':'rgba(139,105,20,0.2)',color:scrolled?'var(--bg0)':'var(--muted)',border:'none',borderRadius:'2px',padding:'0.6rem 1.5rem',fontFamily:'var(--sans)',fontSize:'0.72rem',fontWeight:500,letterSpacing:'0.08em',textTransform:'uppercase',cursor:scrolled?'pointer':'not-allowed',transition:'all 0.2s',whiteSpace:'nowrap',flexShrink:0,marginLeft:'1rem'}}
+                >
+                  {scrolled ? 'I Agree ✓' : 'Read to continue ↓'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {demoOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          background: 'rgba(0,0,0,0.95)',
+          display: 'flex', flexDirection: 'column',
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '0.65rem 1.25rem',
+            borderBottom: '0.5px solid rgba(240,236,227,0.08)',
+            background: '#0D0B09',
+            flexShrink: 0,
+          }}>
+            <div style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--cream)' }}>
+              Collective <span style={{ color: 'var(--gold)' }}>Loft</span>
+              <span style={{ fontSize: '0.62rem', color: 'rgba(240,236,227,0.3)', marginLeft: '0.75rem', fontFamily: 'var(--sans)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Platform Demo</span>
+            </div>
+            <button
+              onClick={() => setDemoOpen(false)}
+              style={{
+                background: 'transparent',
+                border: '0.5px solid rgba(240,236,227,0.15)',
+                color: 'rgba(240,236,227,0.5)',
+                width: '30px', height: '30px', borderRadius: '50%',
+                cursor: 'pointer', fontSize: '0.85rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
+          </div>
+          <iframe
+            src="/demo.html"
+            style={{ flex: 1, border: 'none', width: '100%' }}
+            title="Collective Loft Platform Demo"
+          />
+        </div>
+      )}
+    </>
+  )
+}

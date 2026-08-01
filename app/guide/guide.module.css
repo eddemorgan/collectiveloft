@@ -1,0 +1,66 @@
+.page { min-height: 100vh; background: var(--bg0); color: var(--cream); font-family: var(--sans); }
+
+.nav { padding: 1.5rem 2rem; border-bottom: 0.5px solid var(--rule); background: var(--bg0); }
+.logo { display: inline-flex; flex-direction: column; align-items: flex-start; text-decoration: none; line-height: 1; }
+.logoRow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--serif); font-size: 1.5rem; font-weight: 400; color: var(--cream); letter-spacing: 0.02em; }
+.logoRow em { font-style: italic; color: var(--gold); }
+.mark { color: var(--gold); font-size: 1rem; }
+.tag { font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-top: 0.35rem; }
+
+.wrap { max-width: 780px; margin: 0 auto; padding: 3.5rem 1.5rem 5rem; }
+
+.eyebrow { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.6rem; }
+.title { font-family: var(--serif); font-size: 3rem; font-weight: 600; color: var(--cream); margin: 0 0 0.75rem; line-height: 1.08; }
+.lede { font-size: 1rem; color: var(--muted); line-height: 1.75; margin-bottom: 2.5rem; padding-bottom: 2.5rem; border-bottom: 0.5px solid var(--rule); }
+
+/* table of contents */
+.toc { margin: 0 0 3rem; }
+.tocLbl { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 1rem; }
+.tocList { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 2rem; }
+.tocList a { color: var(--cream); text-decoration: none; font-size: 0.9rem; display: flex; gap: 0.6rem; align-items: baseline; padding: 0.15rem 0; }
+.tocNum { color: var(--gold); font-family: var(--serif); font-size: 0.95rem; min-width: 1.1rem; }
+.tocList a:hover { color: var(--gold); }
+
+.section { margin-bottom: 3rem; scroll-margin-top: 1.5rem; }
+.sHead { display: flex; align-items: baseline; gap: 0.75rem; margin-bottom: 1rem; padding-top: 1.5rem; border-top: 0.5px solid var(--rule); }
+.sNum { font-family: var(--serif); font-size: 1.6rem; font-weight: 600; color: var(--gold); }
+.sTitle { font-family: var(--serif); font-size: 1.7rem; font-weight: 600; color: var(--cream); margin: 0; }
+
+.h3 { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); margin: 1.75rem 0 0.6rem; }
+.p { font-size: 0.95rem; color: var(--cream); line-height: 1.75; font-weight: 300; margin: 0 0 0.9rem; }
+.p strong { font-weight: 600; }
+.p a { color: var(--gold); text-decoration: none; }
+.p a:hover { text-decoration: underline; }
+
+.steps { list-style: none; counter-reset: step; padding: 0; margin: 0 0 1rem; }
+.steps li { counter-increment: step; position: relative; padding: 0 0 0.9rem 2.4rem; font-size: 0.95rem; color: var(--cream); line-height: 1.7; font-weight: 300; }
+.steps li::before { content: counter(step); position: absolute; left: 0; top: -0.1rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; border: 0.5px solid var(--gold); color: var(--gold); font-family: var(--serif); font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+.steps li strong { font-weight: 600; color: var(--cream); }
+
+.bullets { list-style: none; padding: 0; margin: 0 0 1rem; }
+.bullets li { position: relative; padding: 0 0 0.7rem 1.4rem; font-size: 0.95rem; color: var(--cream); line-height: 1.7; font-weight: 300; }
+.bullets li::before { content: '✦'; position: absolute; left: 0; top: 0.05rem; color: var(--gold); font-size: 0.7rem; }
+.bullets li strong { font-weight: 600; }
+
+.callout { background: var(--bg1); border-left: 3px solid var(--gold); padding: 1rem 1.25rem; margin: 1.25rem 0; border-radius: 0 4px 4px 0; }
+.calloutLbl { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.4rem; }
+.callout p { font-size: 0.88rem; color: var(--cream); line-height: 1.7; font-weight: 300; margin: 0; }
+
+.note { background: rgba(42,122,104,0.08); border-left: 3px solid var(--teal); padding: 1rem 1.25rem; margin: 1.25rem 0; border-radius: 0 4px 4px 0; }
+.note p { font-size: 0.88rem; color: var(--cream); line-height: 1.7; font-weight: 300; margin: 0; }
+.note .calloutLbl { color: var(--teal); }
+
+.table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.25rem; font-size: 0.88rem; }
+.table th { text-align: left; font-weight: 600; color: var(--gold); padding: 0.5rem 0.75rem; border-bottom: 0.5px solid var(--rule); font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; }
+.table td { padding: 0.6rem 0.75rem; border-bottom: 0.5px solid var(--rule); color: var(--cream); font-weight: 300; line-height: 1.6; vertical-align: top; }
+.table tr:last-child td { border-bottom: none; }
+
+.footer { margin-top: 4rem; padding-top: 1.5rem; border-top: 0.5px solid var(--rule); font-size: 0.8rem; color: var(--muted); display: flex; gap: 1.25rem; flex-wrap: wrap; }
+.footer a { color: var(--gold); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+
+@media (max-width: 640px) {
+  .title { font-size: 2.1rem; }
+  .wrap { padding: 2.5rem 1.25rem 3.5rem; }
+  .tocList { grid-template-columns: 1fr; }
+}

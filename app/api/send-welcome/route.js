@@ -1,0 +1,38 @@
+import { verifyCaller, sendMail, appUrl } from '../../../lib/mailer'
+import { welcomeEmailHtml } from '../../../lib/emails'
+
+// Sends the welcome email to the signed-in caller only.
+// Guarded: requires a valid session token, sends only to the caller's own
+// address, and only within 24 hours of account creation.
+export async function POST(request) {
+  try {
+    const caller = await verifyCaller(request)
+    if (!caller) return Response.json({ error: 'Not signed in' }, { status: 401 })
+    const { user, supabase } = caller
+
+    if (!user.email) return Response.json({ error: 'No address' }, { status: 400 })
+
+    const accountAgeMs = Date.now() - new Date(user.created_at).getTime()
+    if (accountAgeMs > 24 * 60 * 60 * 1000) {
+      return Response.json({ ok: true, skipped: 'account is not new' })
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('firstname')
+      .eq('id', user.id)
+      .single()
+
+    const { error } = await sendMail({
+      to: user.email,
+      subject: 'Welcome to Collective Loft. Your people are here.',
+      html: welcomeEmailHtml({ firstname: profile?.firstname || '', appUrl: appUrl() }),
+    })
+
+    if (error) return Response.json({ error: 'Email failed to send' }, { status: 500 })
+    return Response.json({ ok: true })
+  } catch (err) {
+    console.error('Welcome email route error:', err)
+    return Response.json({ error: 'Something went wrong' }, { status: 500 })
+  }
+}

@@ -30,8 +30,8 @@ const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY
 const RESEND_KEY = process.env.RESEND_API_KEY
 
-function looksPlaceholder(k) {
-  return !k || k.length < 40 || /placeholder|build_/i.test(k)
+function looksPlaceholder(k, minLen = 40) {
+  return !k || k.length < minLen || /placeholder|build_/i.test(k)
 }
 
 async function main() {
@@ -69,7 +69,7 @@ async function main() {
     return
   }
 
-  if (looksPlaceholder(RESEND_KEY)) {
+  if (looksPlaceholder(RESEND_KEY, 30) || !RESEND_KEY.startsWith('re_')) {
     console.error('\n  --send was passed but RESEND_API_KEY is missing or a placeholder. Aborting. No email sent.\n')
     process.exit(1)
   }

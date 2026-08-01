@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
@@ -8,6 +8,21 @@ import styles from './login.module.css'
 
 export default function LoginPage() {
   const router = useRouter()
+
+  // Already signed in? Skip the form entirely.
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session?.user) return
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('firstname, lastname')
+        .eq('id', session.user.id)
+        .single()
+      router.replace(profile
+        ? `/profile/${profile.firstname.toLowerCase()}-${profile.lastname.toLowerCase()}`
+        : '/discover')
+    })
+  }, [router])
   const [email,      setEmail]      = useState('')
   const [password,   setPassword]   = useState('')
   const [showPw,     setShowPw]     = useState(false)

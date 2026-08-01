@@ -1,15 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import styles from './landing.module.css'
 import Footer from './components/Footer'
+import { supabase } from '../lib/supabase'
 
 const DISCIPLINES = ['Visual Art','Music','Writing','Design & Web','Film & Video','Photography','Performance','Creative Tech']
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
   const toggle = () => setMenuOpen(o => !o)
+
+  // Signed-in members get "My Profile" instead of Sign in / Join.
+  const [member, setMember] = useState(null)
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session?.user) return
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('firstname, lastname')
+        .eq('id', session.user.id)
+        .single()
+      setMember({
+        href: profile
+          ? `/profile/${profile.firstname.toLowerCase()}-${profile.lastname.toLowerCase()}`
+          : '/onboarding',
+      })
+    })
+  }, [])
 
   return (
     <div className={styles.page}>
@@ -23,8 +42,14 @@ export default function Home() {
             </span>
           </Link>
           <div className={styles.navRight}>
-            <Link href="/login" className={styles.signin}>Sign in</Link>
-            <Link href="/signup" className={styles.join}>Join Collective Loft</Link>
+            {member ? (
+              <Link href={member.href} className={styles.join}>My Profile</Link>
+            ) : (
+              <>
+                <Link href="/login" className={styles.signin}>Sign in</Link>
+                <Link href="/signup" className={styles.join}>Join Collective Loft</Link>
+              </>
+            )}
             <button
               className={`${styles.burger} ${menuOpen ? styles.burgerOpen : ''}`}
               onClick={toggle}
@@ -55,8 +80,14 @@ export default function Home() {
           <Link href="/help" onClick={toggle}>Help &amp; support</Link>
         </div>
         <div className={styles.menuSec}>
-          <Link href="/login" onClick={toggle} className={styles.menuSi}>Already a member? Sign in</Link>
-          <Link href="/signup" onClick={toggle} className={styles.menuJoin}>Join Collective Loft</Link>
+          {member ? (
+            <Link href={member.href} onClick={toggle} className={styles.menuJoin}>My Profile</Link>
+          ) : (
+            <>
+              <Link href="/login" onClick={toggle} className={styles.menuSi}>Already a member? Sign in</Link>
+              <Link href="/signup" onClick={toggle} className={styles.menuJoin}>Join Collective Loft</Link>
+            </>
+          )}
         </div>
       </aside>
 

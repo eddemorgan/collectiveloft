@@ -19,7 +19,7 @@ export async function POST(request) {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('firstname')
+      .select('firstname, lastname, founding_member')
       .eq('id', user.id)
       .single()
 
@@ -28,6 +28,18 @@ export async function POST(request) {
       subject: 'Welcome to Collective Loft. Your people are here.',
       html: welcomeEmailHtml({ firstname: profile?.firstname || '', appUrl: appUrl() }),
     })
+
+    // Owner notification: fire-and-forget, never blocks the member's welcome.
+    const name = [profile?.firstname, profile?.lastname].filter(Boolean).join(' ') || 'No name yet'
+    sendMail({
+      to: 'edde@collectiveloft.com',
+      subject: `New member: ${name}${profile?.founding_member ? ' (founding)' : ''}`,
+      html: `<p><strong>${name}</strong> just signed up.</p>
+<p>Email: ${user.email}<br>
+Founding member: ${profile?.founding_member ? 'yes' : 'no'}<br>
+Signed up: ${new Date(user.created_at).toUTCString()}</p>
+<p><a href="${appUrl()}/discover">See who's in the loft</a></p>`,
+    }).catch(e => console.error('Owner signup notification failed:', e))
 
     if (error) return Response.json({ error: 'Email failed to send' }, { status: 500 })
     return Response.json({ ok: true })

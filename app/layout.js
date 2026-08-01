@@ -32,6 +32,9 @@ const orgSchema = {
         'https://www.instagram.com/the.collective.loft',
         'https://www.tiktok.com/@the.collective.loft',
         'https://bsky.app/profile/thecollectiveloft.bsky.social',
+        'https://www.linkedin.com/company/collectiveloft',
+        'https://www.reddit.com/r/CollectiveLoft/',
+        'https://www.facebook.com/people/Collective-Loft/61591496305697/',
       ],
     },
     {

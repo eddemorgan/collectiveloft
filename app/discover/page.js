@@ -140,12 +140,14 @@ export default function DiscoverPage() {
   }
 
   const discCounts = useMemo(() => {
-    const counts = { all: creatives.length }
+    // Count what the grid actually shows: everyone but you.
+    const others = creatives.filter(c => !(user && c.id === user.id))
+    const counts = { all: others.length }
     DISCIPLINES.slice(1).forEach(d => {
-      counts[d.key] = creatives.filter(c => (c.disciplines || []).includes(d.key)).length
+      counts[d.key] = others.filter(c => (c.disciplines || []).includes(d.key)).length
     })
     return counts
-  }, [creatives])
+  }, [creatives, user])
 
   const filtered = useMemo(() => {
     let list = creatives.filter(c => {

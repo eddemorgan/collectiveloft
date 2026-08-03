@@ -42,7 +42,7 @@ export default function SubscriptionGuard({ children }) {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('subscription_status, comped_until')
+        .select('subscription_status, comped_until, disciplines')
         .eq('id', user.id)
         .single()
 
@@ -58,6 +58,16 @@ export default function SubscriptionGuard({ children }) {
 
       if (!subscribed && !comped) {
         router.push('/subscribe')
+        return
+      }
+
+      // Discipline is what the platform runs on: Discover, Matching, and
+      // Briefs all key off it, and a profile without one cannot be found.
+      // Signup creates the profile row, so a member who abandons onboarding
+      // reaches the platform empty. Send them back until they finish.
+      const hasDiscipline = Array.isArray(profile.disciplines) && profile.disciplines.length > 0
+      if (!hasDiscipline) {
+        router.push('/onboarding?onboarding=true')
         return
       }
 

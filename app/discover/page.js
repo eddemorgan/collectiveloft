@@ -32,6 +32,16 @@ const COVER_PATTERNS = {
   tech:    `repeating-linear-gradient(90deg,rgba(100,180,170,0.04) 0,rgba(100,180,170,0.04) 1px,transparent 1px,transparent 8px),repeating-linear-gradient(0deg,rgba(100,180,170,0.04) 0,rgba(100,180,170,0.04) 1px,transparent 1px,transparent 8px)`,
 }
 
+// Which discipline a card announces. With a filter on, show the one the
+// visitor filtered for, so the card explains why it is in the results.
+// Otherwise show the alphabetically first, so the choice is stable.
+function displayDiscipline(disciplines, activeDisc) {
+  const list = (disciplines || []).filter(Boolean)
+  if (list.length === 0) return null
+  if (activeDisc !== 'all' && list.includes(activeDisc)) return activeDisc
+  return [...list].sort((a, b) => a.localeCompare(b))[0]
+}
+
 function discKey(discipline) {
   if (!discipline) return 'visual'
   const d = discipline.toLowerCase()
@@ -341,7 +351,9 @@ export default function DiscoverPage() {
               </div>
             ) : (
               filtered.map((c, i) => {
-                const dk   = discKey((c.disciplines || [])[0])
+                const disc = displayDiscipline(c.disciplines, activeDisc)
+                const dk   = discKey(disc)
+                const dicon = DISCIPLINES.find(d => d.key === disc)?.icon
                 const slug = profileSlug(c)
                 const ini  = initials(c)
                 const loc  = locationStr(c)
@@ -356,6 +368,11 @@ export default function DiscoverPage() {
                   <Link key={c.id} href={`/profile/${slug}`} className={styles.profileCard} style={{ animationDelay: `${i * 30}ms` }}>
                     <div className={`${styles.cardCover} ${styles[`cv_${dk}`]}`}>
                       <div className={styles.cardCoverPattern} style={{ backgroundImage: COVER_PATTERNS[dk] }} />
+                      {disc && (
+                        <span className={styles.cardDisc}>
+                          {dicon ? `${dicon} ` : ''}{disc}
+                        </span>
+                      )}
                     </div>
                     <div className={styles.cardBody}>
                       <div className={styles.cardAvWrap}>

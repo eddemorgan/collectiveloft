@@ -19,13 +19,54 @@ const DISC_ICON = {
 
 export default function BrowsePage() {
   const [creatives, setCreatives] = useState(null)
+  const [matched,   setMatched]   = useState(null)
+  const [total,     setTotal]     = useState(null)
+
+  // Radius search: a chosen center city, a distance, and a unit. The distance
+  // itself is measured on the server, so no member coordinates come down here.
+  const [city,    setCity]    = useState(null)   // { name, lat, lng }
+  const [query,   setQuery]   = useState('')
+  const [results, setResults] = useState([])
+  const [dist,    setDist]    = useState(50)
+  const [unit,    setUnit]    = useState('mi')
 
   useEffect(() => {
-    fetch('/api/browse')
+    const qs = city
+      ? `?lat=${city.lat}&lng=${city.lng}&radius=${dist || 0}&unit=${unit}`
+      : ''
+    fetch(`/api/browse${qs}`)
       .then(r => r.json())
-      .then(d => setCreatives(Array.isArray(d.creatives) ? d.creatives : []))
+      .then(d => {
+        setCreatives(Array.isArray(d.creatives) ? d.creatives : [])
+        setMatched(typeof d.matched === 'number' ? d.matched : null)
+        setTotal(typeof d.total === 'number' ? d.total : null)
+      })
       .catch(() => setCreatives([]))
-  }, [])
+  }, [city, dist, unit])
+
+  async function searchCity(q) {
+    setQuery(q)
+    if (!q || q.trim().length < 2) { setResults([]); return }
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+    if (!token) { setResults([]); return }
+    try {
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place&limit=5&access_token=${token}`
+      const res = await fetch(url)
+      const data = await res.json()
+      setResults(Array.isArray(data.features) ? data.features : [])
+    } catch { setResults([]) }
+  }
+
+  function pickCity(f) {
+    const [lng, lat] = f.center || [null, null]
+    setCity({ name: f.place_name, lat, lng })
+    setQuery(f.place_name)
+    setResults([])
+  }
+
+  function clearCity() {
+    setCity(null); setQuery(''); setResults([])
+  }
 
   return (
     <div className={styles.page}>
@@ -50,10 +91,79 @@ export default function BrowsePage() {
         </p>
       </header>
 
+      <div className={styles.locBar}>
+        <div className={styles.locInner}>
+          <div className={styles.locLabel}>Who is near you</div>
+          {city ? (
+            <div className={styles.locActive}>
+              <span className={styles.locPin}>📍 {city.name}</span>
+              <div className={styles.locDist}>
+                <span>Within</span>
+                <input
+                  type="number"
+                  min="10"
+                  value={dist}
+                  onChange={e => setDist(Number(e.target.value) || 0)}
+                  className={styles.locNum}
+                  aria-label="Distance"
+                />
+                <div className={styles.locUnits}>
+                  {['mi', 'km'].map(u => (
+                    <button
+                      key={u}
+                      onClick={() => setUnit(u)}
+                      className={`${styles.locUnit} ${unit === u ? styles.locUnitOn : ''}`}
+                    >
+                      {u}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button onClick={clearCity} className={styles.locClear}>Clear</button>
+            </div>
+          ) : (
+            <div className={styles.locSearchWrap}>
+              <input
+                type="text"
+                value={query}
+                onChange={e => searchCity(e.target.value)}
+                placeholder="Search a city to see who is nearby"
+                className={styles.locInput}
+              />
+              {results.length > 0 && (
+                <div className={styles.locResults}>
+                  {results.map(f => (
+                    <button key={f.id} onClick={() => pickCity(f)} className={styles.locResult}>
+                      {f.place_name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          {city && matched !== null && (
+            <div className={styles.locCount}>
+              {matched === 0
+                ? `No one within ${dist} ${unit} yet. Be the first.`
+                : `${matched} ${matched === 1 ? 'creative' : 'creatives'} within ${dist} ${unit}`}
+            </div>
+          )}
+          {!city && total !== null && total > 0 && (
+            <div className={styles.locCount}>
+              {total} {total === 1 ? 'creative' : 'creatives'} on the platform
+            </div>
+          )}
+        </div>
+      </div>
+
       {creatives === null ? (
         <div className={styles.loading}>Loading creatives…</div>
       ) : creatives.length === 0 ? (
-        <div className={styles.empty}>Creatives are joining now. Be one of the first.</div>
+        <div className={styles.empty}>
+          {city
+            ? 'No one in range yet. Widen the distance, or be the first one here.'
+            : 'Creatives are joining now. Be one of the first.'}
+        </div>
       ) : (
         <div className={styles.grid}>
           {creatives.map(c => {

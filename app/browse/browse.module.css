@@ -46,3 +46,32 @@
 
 @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+
+/* ── Location search: who is near you ───────────────────────────────── */
+.locBar { padding: 0 32px 40px; }
+.locInner { max-width: 1160px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; padding: 20px 24px; border: 0.5px solid var(--rule); border-radius: 4px; background: var(--bg1); }
+.locLabel { font-family: var(--sans); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+
+.locSearchWrap { position: relative; flex: 1 1 320px; min-width: 240px; }
+.locInput { width: 100%; padding: 0.6rem 0.8rem; font-family: var(--sans); font-size: 0.85rem; color: #1A1A1A; background: #fff; border: 0.5px solid rgba(26,24,20,0.2); border-radius: 4px; }
+.locInput:focus { outline: none; border-color: var(--gold); }
+.locResults { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20; background: #fff; border: 0.5px solid rgba(26,24,20,0.15); border-radius: 4px; box-shadow: 0 8px 28px rgba(26,24,20,0.1); overflow: hidden; }
+.locResult { display: block; width: 100%; text-align: left; padding: 0.6rem 0.8rem; font-family: var(--sans); font-size: 0.82rem; color: #1A1A1A; background: none; border: none; cursor: pointer; }
+.locResult:hover { background: var(--bg2); }
+
+.locActive { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; flex: 1 1 320px; }
+.locPin { font-family: var(--sans); font-size: 0.82rem; color: var(--cream); }
+.locDist { display: flex; align-items: center; gap: 8px; font-family: var(--sans); font-size: 0.78rem; color: var(--muted); }
+.locNum { width: 62px; padding: 0.35rem 0.45rem; font-family: var(--sans); font-size: 0.8rem; color: #1A1A1A; background: #fff; border: 0.5px solid rgba(26,24,20,0.2); border-radius: 4px; }
+.locUnits { display: inline-flex; border: 0.5px solid rgba(26,24,20,0.2); border-radius: 4px; overflow: hidden; }
+.locUnit { padding: 0.35rem 0.6rem; font-family: var(--sans); font-size: 0.72rem; font-weight: 600; border: none; cursor: pointer; background: transparent; color: var(--muted); }
+.locUnitOn { background: var(--gold); color: var(--bg0); }
+.locClear { padding: 0.35rem 0.7rem; font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: none; border: 0.5px solid rgba(26,24,20,0.2); border-radius: 4px; cursor: pointer; }
+.locClear:hover { color: var(--cream); border-color: rgba(26,24,20,0.35); }
+
+.locCount { font-family: var(--serif); font-size: 1.05rem; color: var(--cream); margin-left: auto; }
+
+@media (max-width: 720px) {
+  .locInner { flex-direction: column; align-items: stretch; }
+  .locCount { margin-left: 0; }
+}

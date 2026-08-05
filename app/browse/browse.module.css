@@ -72,6 +72,9 @@
 .locCount { font-family: var(--serif); font-size: 1.05rem; color: var(--cream); margin-left: auto; }
 
 @media (max-width: 720px) {
-  .locInner { flex-direction: column; align-items: stretch; }
+  .locInner { flex-direction: column; align-items: stretch; gap: 12px; padding: 18px 18px 20px; }
+  /* Stop the row from stretching to fill the column and opening big gaps. */
+  .locActive { flex: 0 0 auto; align-items: flex-start; gap: 10px; }
+  .locSearchWrap { flex: 0 0 auto; }
   .locCount { margin-left: 0; }
 }

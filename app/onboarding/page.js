@@ -168,6 +168,23 @@ export default function LandingPage() {
                 }))
               }
             })
+
+          // Founding members already told us their discipline on the signup
+          // form. Pre-select it so the first choice is a confirmation, not a
+          // decision. They can change it: this is a starting point, not a
+          // claim made on their behalf.
+          supabase.auth.getSession().then(({ data: { session: s } }) => {
+            const token = s?.access_token
+            if (!token) return
+            fetch('/api/founding/invite', { headers: { Authorization: `Bearer ${token}` } })
+              .then(r => r.json())
+              .then(({ discipline }) => {
+                if (!discipline) return
+                const match = DISCIPLINES.find(d => d.label === discipline)
+                if (match) setSelectedDiscs(prev => (prev.length === 0 ? [match.id] : prev))
+              })
+              .catch(() => {})
+          })
         }
       }
     })

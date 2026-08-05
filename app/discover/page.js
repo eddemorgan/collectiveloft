@@ -368,13 +368,13 @@ export default function DiscoverPage() {
                   <Link key={c.id} href={`/profile/${slug}`} className={styles.profileCard} style={{ animationDelay: `${i * 30}ms` }}>
                     <div className={`${styles.cardCover} ${styles[`cv_${dk}`]}`}>
                       <div className={styles.cardCoverPattern} style={{ backgroundImage: COVER_PATTERNS[dk] }} />
+                    </div>
+                    <div className={styles.cardBody}>
                       {disc && (
                         <span className={styles.cardDisc}>
                           {dicon ? `${dicon} ` : ''}{disc}
                         </span>
                       )}
-                    </div>
-                    <div className={styles.cardBody}>
                       <div className={styles.cardAvWrap}>
                         <div className={`${styles.cardAv} ${styles[`av_${dk}`]}`}>
                           {c.avatar_url ? <img src={c.avatar_url} alt={ini} style={{ width:'100%',height:'100%',objectFit:'cover',borderRadius:'50%' }} /> : ini}

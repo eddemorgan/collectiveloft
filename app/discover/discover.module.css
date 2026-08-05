@@ -270,9 +270,9 @@
 /* Card cover -- warm parchment tones per discipline */
 .cardCover { height: 72px; position: relative; overflow: hidden; }
 .cardCoverPattern { position: absolute; inset: 0; }
-/* Which discipline this card is answering for. Sits on the cover, bottom
-   right, clear of the avatar on the left. */
-.cardDisc { position: absolute; right: 12px; bottom: 10px; z-index: 2; max-width: calc(100% - 96px); padding: 4px 10px; border-radius: 3px; background: rgba(240,236,227,0.92); border: 0.5px solid rgba(26,24,20,0.12); font-family: var(--sans); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Which discipline this card is answering for. Sits in the cream body,
+   top right, level with the avatar that overlaps on the left. */
+.cardDisc { position: absolute; top: 0.7rem; right: 0.9rem; z-index: 2; max-width: calc(100% - 5.5rem); padding: 4px 10px; border-radius: 3px; background: rgba(26,24,20,0.05); border: 0.5px solid rgba(26,24,20,0.12); font-family: var(--sans); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .cv_visual  { background: #d4c8b8; }
 .cv_music   { background: #c8d0cc; }

@@ -64,7 +64,10 @@ export default function SignupPage() {
     // Founding recognition. If this email is on the founding allowlist, the
     // server grants founding status and 90 days free, and we skip the paywall
     // straight into building the profile. Everyone else goes to the trial.
-    let founding = false
+    // `comped` covers both: a founding member on the allowlist, and anyone who
+    // joined during the launch window and got their first month free. Either
+    // way they have access, so they skip the paywall and go build a profile.
+    let comped = false
     if (token) {
       try {
         const res = await fetch('/api/founding/redeem', {
@@ -72,8 +75,8 @@ export default function SignupPage() {
           headers: { Authorization: `Bearer ${token}` },
         })
         const j = await res.json()
-        founding = !!j.founding
-      } catch { /* not founding, fall through to the normal path */ }
+        comped = !!j.founding || !!j.launch_comp
+      } catch { /* no comp, fall through to the normal path */ }
     }
 
     // Send the welcome email. Fire and forget: a mail hiccup never blocks
@@ -86,7 +89,7 @@ export default function SignupPage() {
       }).catch(() => {})
     }
 
-    router.push(founding ? '/onboarding?onboarding=true' : '/subscribe')
+    router.push(comped ? '/onboarding?onboarding=true' : '/subscribe')
   }
 
   return (

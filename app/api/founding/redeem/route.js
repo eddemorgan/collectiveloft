@@ -12,6 +12,13 @@ import { verifyCaller, serviceClient } from '../../../../lib/mailer'
 // own invite, it still reports founding:true without changing anything.
 const COMP_DAYS = 90
 
+// Launch window. Anyone who joins while the founding class is still filling
+// gets their first month free, no card. They arrived early and the platform
+// is still finding its feet; the comp is the thank-you for that.
+// Set LAUNCH_COMP_THROUGH to null to close the window.
+const LAUNCH_COMP_THROUGH = '2026-09-01T23:59:59Z'
+const LAUNCH_COMP_DAYS = 30
+
 export async function POST(request) {
   try {
     const caller = await verifyCaller(request)
@@ -28,8 +35,34 @@ export async function POST(request) {
       .eq('email', email)
       .maybeSingle()
 
-    // Not on the list: a normal member. No error, just not founding.
-    if (!invite) return Response.json({ founding: false })
+    // Not on the list: a normal member. Not founding, but if they arrived
+    // during the launch window their first month is on us. Never overwrites an
+    // existing comp, so this cannot shorten someone's access or stack.
+    if (!invite) {
+      const windowOpen = LAUNCH_COMP_THROUGH && Date.now() < Date.parse(LAUNCH_COMP_THROUGH)
+      if (!windowOpen) return Response.json({ founding: false })
+
+      const { data: profile } = await db
+        .from('profiles')
+        .select('comped_until')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      const alreadyComped = profile?.comped_until && new Date(profile.comped_until) > new Date()
+      if (alreadyComped) return Response.json({ founding: false, launch_comp: true })
+
+      const compedUntil = new Date(Date.now() + LAUNCH_COMP_DAYS * 24 * 60 * 60 * 1000).toISOString()
+      const { error: compErr } = await db
+        .from('profiles')
+        .update({ comped_until: compedUntil })
+        .eq('id', user.id)
+      if (compErr) {
+        console.error('launch comp: profile update failed', compErr)
+        return Response.json({ founding: false })
+      }
+
+      return Response.json({ founding: false, launch_comp: true, comped_until: compedUntil })
+    }
 
     // Already redeemed by someone else (email is unique, so this is defensive).
     if (invite.redeemed_by && invite.redeemed_by !== user.id) {

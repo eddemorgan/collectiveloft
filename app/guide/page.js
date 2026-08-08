@@ -74,8 +74,8 @@ export default function GuidePage() {
           <div className={styles.sHead}><span className={styles.sNum}>2</span><h2 className={styles.sTitle}>Your membership</h2></div>
           <p className={styles.p}>
             Membership is <strong>$15 a month</strong>, with a 7-day free trial. Your card is not charged until
-            the trial ends, and you can cancel anytime before then at no cost. Checkout runs through Lemon
-            Squeezy, our merchant of record, which also handles any sales tax or VAT for your country, so the
+            the trial ends, and you can cancel anytime before then at no cost. Checkout runs through Paddle,
+            our merchant of record, which also handles any sales tax or VAT for your country, so the
             price you see at checkout is the full price.
           </p>
           <p className={styles.p}>

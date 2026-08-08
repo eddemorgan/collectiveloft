@@ -90,6 +90,11 @@ export default function GuidePage() {
             Manage or cancel your plan anytime from your profile. Cancelling stops the next renewal; you keep
             access through the end of the period you already paid for.
           </p>
+          <p className={styles.p}>
+            Want your money back? You have <strong>14 days</strong> from any payment to request a full refund,
+            for any reason. Refunds are issued by Paddle, our merchant of record. Ask them directly at
+            paddle.net, or send us a note from the Help page and we will pass it on.
+          </p>
         </section>
 
         {/* 3 */}

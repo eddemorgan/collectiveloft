@@ -46,8 +46,8 @@ That is the honest version. It is not a feed to post into or a marketplace to be
 
 Membership is fifteen dollars a month, no tiers, no feature gates. Founding members get three months free and keep a permanent founding badge. The subscription is the filter that keeps it a professional room where everyone has skin in the game.
 
-If you want to see it work, the founding cohort is open. We are building it by hand, choosing people who are actively making work right now.
+If you want to see it works, check it out.  We are live now!
 
-Apply at collectiveloft.com.
+collectiveloft.com.
 
 *Edde Morgan is the CEO and Founder of Morgan Collective Group and the creator of Collective Loft, the professional network built for the creative class.*

@@ -41,12 +41,17 @@ export async function POST(req) {
   const userId = data?.custom_data?.user_id
   const status = STATUS_MAP[data.status] || data.status
 
-  if (!userId) {
-    console.error('Paddle webhook without user_id custom data:', eventType, data.id)
-    return Response.json({ ok: true, skipped: 'no user_id' })
+  // Anything that can never succeed is acknowledged, not failed. Paddle retries
+  // on a non-2xx, so returning 500 for a subscription whose member no longer
+  // exists would retry that event forever. Only real database trouble gets a
+  // 500, because that is the case where retrying is the right thing to do.
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId || '')
+  if (!isUuid) {
+    console.error('Paddle webhook with missing or malformed user_id:', eventType, data.id, userId)
+    return Response.json({ ok: true, skipped: 'no usable user_id' })
   }
 
-  const { error } = await supabaseAdmin
+  const { data: updated, error } = await supabaseAdmin
     .from('profiles')
     .update({
       subscription_status: status,
@@ -54,10 +59,16 @@ export async function POST(req) {
       paddle_customer_id: data.customer_id ? String(data.customer_id) : null,
     })
     .eq('id', userId)
+    .select('id')
 
   if (error) {
     console.error('Paddle webhook profile update failed:', error)
     return Response.json({ error: 'Database update failed' }, { status: 500 })
+  }
+
+  if (!updated || updated.length === 0) {
+    console.error('Paddle webhook for a profile that no longer exists:', eventType, userId)
+    return Response.json({ ok: true, skipped: 'no such profile' })
   }
 
   return Response.json({ ok: true })

@@ -556,7 +556,7 @@ export default function ProfilePage() {
     setPortalLoading(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      const res = await fetch('/api/ls/portal', {
+      const res = await fetch('/api/paddle/portal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id }),

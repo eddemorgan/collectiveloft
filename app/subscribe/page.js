@@ -10,11 +10,16 @@ import styles from './subscribe.module.css'
 // their build for card fields to stay inside their iframe.
 const PADDLE_JS = 'https://cdn.paddle.com/paddle/v2/paddle.js'
 
+// Paddle finds the inline frame by CSS class name, so this one cannot come
+// from the CSS module: module class names are hashed at build time.
+const CHECKOUT_FRAME_CLASS = 'paddle-checkout-frame'
+
 export default function SubscribePage() {
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState(null)
   const [cancelled, setCancelled] = useState(false)
   const [paddleReady, setPaddleReady] = useState(false)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -60,24 +65,31 @@ export default function SubscribePage() {
       return
     }
     setLoading(true)
+    setCheckoutOpen(true)
     try {
-      // user_id rides along as custom data and comes back on every webhook,
-      // which is how a payment finds the profile it belongs to.
+      // Inline, so checkout renders inside the page rather than as a popup:
+      // the member stays on Collective Loft instead of feeling handed off.
+      // Card fields still live in Paddle's iframe, so nothing sensitive
+      // touches this site. user_id rides along as custom data and comes back
+      // on every webhook, which is how a payment finds its profile.
       window.Paddle.Checkout.open({
         items: [{ priceId: process.env.NEXT_PUBLIC_PADDLE_PRICE_ID, quantity: 1 }],
         customer: { email: user.email },
         customData: { user_id: user.id },
         settings: {
-          displayMode: 'overlay',
+          displayMode: 'inline',
+          frameTarget: CHECKOUT_FRAME_CLASS,
+          frameInitialHeight: 460,
+          frameStyle: 'width:100%; min-width:312px; background-color:transparent; border:none;',
+          theme: 'light',
           successUrl: `${window.location.origin}/onboarding?onboarding=true`,
         },
       })
-      // The overlay owns the flow from here. Re-enable the button so a member
-      // who closes it without paying is not left staring at a dead control.
       setLoading(false)
     } catch (err) {
       console.error(err)
       alert('Something went wrong. Please try again.')
+      setCheckoutOpen(false)
       setLoading(false)
     }
   }
@@ -129,17 +141,29 @@ export default function SubscribePage() {
             </div>
             <p className={styles.priceNote}>After your 7-day free trial</p>
 
-            <div className={styles.features}>
-              {features.map(f => (
-                <div key={f} className={styles.feature}>
-                  <span className={styles.fmark}>✦</span>{f}
+            {!checkoutOpen && (
+              <>
+                <div className={styles.features}>
+                  {features.map(f => (
+                    <div key={f} className={styles.feature}>
+                      <span className={styles.fmark}>✦</span>{f}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <button className={styles.btn} onClick={handleSubscribe} disabled={loading}>
-              {loading ? 'Taking you to secure checkout…' : 'Start my 7-day free trial →'}
-            </button>
+                <button className={styles.btn} onClick={handleSubscribe} disabled={loading}>
+                  {loading ? 'Opening secure checkout…' : 'Start my 7-day free trial →'}
+                </button>
+              </>
+            )}
+
+            {/* Paddle mounts its iframe here once checkout opens. Kept mounted
+                and hidden beforehand so the target exists when Paddle looks. */}
+            <div
+              className={CHECKOUT_FRAME_CLASS}
+              style={{ display: checkoutOpen ? 'block' : 'none', marginTop: '0.5rem' }}
+            />
+
             <p className={styles.secure}>Secure checkout powered by Paddle. Cancel anytime before {trialEnd} and you won&apos;t be charged.</p>
           </div>
 

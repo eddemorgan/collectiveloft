@@ -12,11 +12,12 @@ import { verifyCaller, serviceClient } from '../../../../lib/mailer'
 // own invite, it still reports founding:true without changing anything.
 const COMP_DAYS = 90
 
-// Launch window. Anyone who joins while the founding class is still filling
-// gets their first month free, no card. They arrived early and the platform
-// is still finding its feet; the comp is the thank-you for that.
-// Set LAUNCH_COMP_THROUGH to null to close the window.
-const LAUNCH_COMP_THROUGH = '2026-09-01T23:59:59Z'
+// Launch window, closed August 8, 2026 when Paddle went live. While it was
+// open, anyone joining outside the founding class got their first month free
+// because there was no working checkout to send them to. New members now get
+// the standard 7-day trial. Comps already granted are untouched and run to
+// their own end dates. Set a future date here to reopen the window.
+const LAUNCH_COMP_THROUGH = null
 const LAUNCH_COMP_DAYS = 30
 
 export async function POST(request) {

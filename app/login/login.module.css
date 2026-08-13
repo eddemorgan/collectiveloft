@@ -7,7 +7,7 @@
   flex-direction: column;
 }
 
-.nav {
+.nav { zoom: 0.9;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -165,7 +165,7 @@
   background: rgba(139,105,20,0.04);
 }
 
-.footer {
+.footer { zoom: 0.9;
   display: flex;
   align-items: center;
   gap: 0.5rem;

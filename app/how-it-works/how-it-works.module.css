@@ -1,7 +1,7 @@
 .page { min-height: 100vh; background: var(--bg0); color: var(--cream); font-family: var(--sans); }
 
 /* NAV — matches landing */
-.nav { position: sticky; top: 0; z-index: 50; background: rgba(240,236,227,0.82); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--rule); }
+.nav { zoom: 0.9; position: sticky; top: 0; z-index: 50; background: rgba(240,236,227,0.82); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--rule); }
 .navInner { max-width: 1160px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 72px; }
 .brand { display: flex; align-items: baseline; gap: 11px; text-decoration: none; }
 .mark { color: var(--gold); font-size: 1.3125rem; line-height: 1; transform: translateY(2px); }
@@ -39,7 +39,7 @@
 .btnPrimary:hover { background: var(--gold2); }
 
 /* FOOTER */
-.foot { border-top: 0.5px solid var(--rule); padding: 48px 0 40px; }
+.foot { zoom: 0.9; border-top: 0.5px solid var(--rule); padding: 48px 0 40px; }
 .footInner { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
 .footRow { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; }
 .fine { font-size: 0.75rem; color: var(--faint, rgba(26,24,20,0.34)); }

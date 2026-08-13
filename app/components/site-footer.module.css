@@ -1,7 +1,7 @@
 /* The one site footer. Used on every page, marketing and member alike,
    so the platform ends the same way everywhere. Styles mirror the landing. */
 
-.foot { border-top: 0.5px solid var(--rule); padding: 56px 0 40px; margin-top: auto; background: var(--bg); }
+.foot { zoom: 0.9; border-top: 0.5px solid var(--rule); padding: 56px 0 40px; margin-top: auto; background: var(--bg); }
 .footInner { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
 .footTop { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 34px; padding-bottom: 36px; border-bottom: 0.5px solid var(--rule); }
 .footLinks { display: flex; gap: 52px; flex-wrap: wrap; }

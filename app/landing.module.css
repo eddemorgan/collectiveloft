@@ -1,6 +1,6 @@
 .page { background: var(--bg0); color: var(--cream); font-family: var(--sans); min-height: 100vh; }
 
-.nav { position: sticky; top: 0; z-index: 50; background: rgba(240,236,227,0.82); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--rule); }
+.nav { zoom: 0.9; position: sticky; top: 0; z-index: 50; background: rgba(240,236,227,0.82); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--rule); }
 .navInner { max-width: 1160px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 72px; }
 .brand { display: flex; align-items: baseline; gap: 11px; text-decoration: none; }
 .mark { color: var(--gold); font-size: 1.3125rem; line-height: 1; transform: translateY(2px); }
@@ -74,7 +74,7 @@
 .closeH em { font-style: italic; color: var(--gold); }
 .closeSub { max-width: 480px; margin: 0 auto 34px; color: var(--muted); font-size: 1rem; line-height: 1.7; }
 
-.foot { border-top: 0.5px solid var(--rule); padding: 56px 0 40px; }
+.foot { zoom: 0.9; border-top: 0.5px solid var(--rule); padding: 56px 0 40px; }
 .footInner { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
 .footTop { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 34px; padding-bottom: 36px; border-bottom: 0.5px solid var(--rule); }
 .footLinks { display: flex; gap: 52px; flex-wrap: wrap; }

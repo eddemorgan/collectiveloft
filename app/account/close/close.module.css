@@ -1,7 +1,7 @@
 .page { min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; }
 .loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; color: var(--muted); font-family: var(--sans); font-size: 0.9rem; }
 
-.nav { padding: 0.85rem 2rem; border-bottom: 0.5px solid var(--rule); }
+.nav { zoom: 0.9; padding: 0.85rem 2rem; border-bottom: 0.5px solid var(--rule); }
 .brand { display: flex; align-items: baseline; gap: 11px; text-decoration: none; }
 .mark { color: var(--gold); font-size: 1.3125rem; line-height: 1; transform: translateY(2px); }
 .wm { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; color: var(--cream); display: block; }

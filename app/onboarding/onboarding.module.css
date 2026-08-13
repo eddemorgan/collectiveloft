@@ -4,7 +4,7 @@
 @keyframes cardSlide { from { opacity:0; transform:translateX(16px) } to { opacity:1; transform:translateX(0) } }
 
 /* ── Nav ── */
-.nav {
+.nav { zoom: 0.9;
   display: flex;
   align-items: center;
   justify-content: space-between;

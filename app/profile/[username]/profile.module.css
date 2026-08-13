@@ -9,7 +9,7 @@
 .nfBtn { margin-top:0.5rem; background:var(--gold); color:var(--bg0); padding:0.55rem 1.25rem; border-radius:2px; text-decoration:none; font-size:0.7rem; font-weight:500; letter-spacing:0.07em; text-transform:uppercase; }
 
 /* ── Nav ── */
-.nav { display:flex; align-items:center; justify-content:space-between; padding:0.85rem 2rem; border-bottom:0.5px solid var(--rule); background:rgba(240,236,227,0.95); backdrop-filter:blur(12px); position:sticky; top:0; z-index:100; }
+.nav { zoom: 0.9; display:flex; align-items:center; justify-content:space-between; padding:0.85rem 2rem; border-bottom:0.5px solid var(--rule); background:rgba(240,236,227,0.95); backdrop-filter:blur(12px); position:sticky; top:0; z-index:100; }
 .logo { font-family:var(--serif); font-size:2.2rem; color:var(--cream); text-decoration:none; }
 .logo span { color:var(--gold); }
 .navLinks { display:flex; align-items:center; gap:1.5rem; font-size:0.68rem; font-weight:300; letter-spacing:0.07em; text-transform:uppercase; color:var(--muted); }

@@ -63,6 +63,7 @@ export default function Nav() {
  
   return (
     <nav style={{
+      zoom: 0.9,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',

@@ -17,3 +17,7 @@
 
 .scrim { position: fixed; inset: 72px 0 0 0; background: rgba(26,24,20,0.22); opacity: 0; pointer-events: none; transition: opacity 0.32s; z-index: 148; }
 .scrimOpen { opacity: 1; pointer-events: auto; }
+
+/* Rare and irreversible, so it sits last and reads quietly. */
+.menu a.menuClose { font-family: var(--sans); font-size: 13px; font-weight: 400; color: var(--muted); }
+.menu a.menuClose:hover { color: rgba(160,60,50,0.95); }

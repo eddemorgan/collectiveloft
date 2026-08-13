@@ -32,6 +32,7 @@ export async function GET(request) {
     const { data, error } = await supabase
       .from('profiles')
       .select('id, disciplines, skills, seeking_disciplines, seeking_skills, latitude, longitude')
+      .is('deleted_at', null)
 
     if (error) {
       return Response.json({ creatives: [], matched: 0, total: 0 }, { status: 200 })

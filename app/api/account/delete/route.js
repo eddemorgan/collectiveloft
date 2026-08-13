@@ -1,0 +1,178 @@
+import { createClient } from '@supabase/supabase-js'
+import { verifyCaller, serviceClient, sendMail, appUrl } from '../../../../lib/mailer'
+import { paddleFetch } from '../../../../lib/paddle'
+
+// Closes the caller's own account.
+//
+// Anonymize, do not erase. Collaboration records, terms, messages, ratings and
+// the shared files inside a Loft Studio are the other party's history too:
+// deleting them would tear holes in someone else's reputation. So the person
+// is scrubbed out and the work stands, attributed to a former member.
+//
+// Security: the account closed is always the caller's own, taken from their
+// verified session. No id is read from the request body.
+
+// Personal media. Shared studio files are deliberately absent from this list.
+const PERSONAL_BUCKETS = [
+  'avatars',
+  'covers',
+  'portfolio-images',
+  'portfolio-video',
+  'portfolio-audio',
+  'portfolio-docs',
+]
+
+export async function POST(request) {
+  try {
+    const caller = await verifyCaller(request)
+    if (!caller) return Response.json({ error: 'Not signed in' }, { status: 401 })
+    const userId = caller.user.id
+    const callerEmail = (caller.user.email || '').trim().toLowerCase()
+
+    const { email, password, reason } = await request.json().catch(() => ({}))
+
+    if (!reason || !String(reason).trim()) {
+      return Response.json({ error: 'Please tell us why you are leaving.' }, { status: 400 })
+    }
+
+    // The address typed must be the caller's own, so a mistyped or someone
+    // else's account cannot be closed by accident.
+    if ((email || '').trim().toLowerCase() !== callerEmail) {
+      return Response.json({ error: 'That email does not match this account.' }, { status: 400 })
+    }
+
+    // Re-authenticate server side. A live session is not enough on its own for
+    // something irreversible: this stops an unattended laptop from being used
+    // to close someone's account.
+    const authCheck = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    )
+    const { data: reauth, error: reauthErr } = await authCheck.auth.signInWithPassword({
+      email: callerEmail,
+      password: password || '',
+    })
+    if (reauthErr || reauth?.user?.id !== userId) {
+      return Response.json({ error: 'That password is not correct.' }, { status: 401 })
+    }
+
+    const db = serviceClient()
+
+    const { data: profile } = await db
+      .from('profiles')
+      .select('paddle_subscription_id, deleted_at, firstname')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (profile?.deleted_at) {
+      return Response.json({ ok: true, already: true })
+    }
+
+    // Stop the billing relationship first. If this fails the account still
+    // closes, because a member who asked to leave should not be held open by
+    // a payment provider hiccup; the subscription is logged for follow-up.
+    if (profile?.paddle_subscription_id) {
+      try {
+        await paddleFetch(`/subscriptions/${profile.paddle_subscription_id}/cancel`, {
+          method: 'POST',
+          body: { effective_from: 'immediately' },
+        })
+      } catch (e) {
+        console.error('account delete: paddle cancel failed', profile.paddle_subscription_id, e.message)
+      }
+    }
+
+    // Remove personal media. Studio files stay: they belong to the collaboration.
+    for (const bucket of PERSONAL_BUCKETS) {
+      try {
+        const { data: files } = await db.storage.from(bucket).list(userId, { limit: 1000 })
+        if (files && files.length) {
+          await db.storage.from(bucket).remove(files.map(f => `${userId}/${f.name}`))
+        }
+      } catch (e) {
+        console.error(`account delete: could not clear ${bucket}`, e.message)
+      }
+    }
+
+    // Confirmation goes out before the address is scrubbed, since afterwards
+    // there is nowhere left to send it. Awaited, because an un-awaited send
+    // dies when the function freezes on response.
+    try {
+      await sendMail({
+        to: callerEmail,
+        subject: 'Your Collective Loft account is closed',
+        html: `<p>${profile?.firstname ? profile.firstname + ',' : 'Hello,'}</p>
+<p>Your Collective Loft account is closed. Your profile, photos, and portfolio have been deleted, and any subscription has been cancelled, so you will not be charged again.</p>
+<p>Collaborations you completed remain on record for the people you worked with, credited to a former member, so their history and ratings are unchanged.</p>
+<p>If this was not you, reply to nothing here and contact us straight away through <a href="${appUrl()}/help">${appUrl()}/help</a>.</p>
+<p>Thanks for the time you spent here.</p>
+<p>Edde<br>Collective Loft</p>`,
+      })
+    } catch (e) {
+      console.error('account delete: confirmation email failed', e)
+    }
+
+    // Scrub the person. Name becomes the label the rest of the app renders,
+    // so existing collaboration views show "Former Member" with no changes.
+    const { error: scrubErr } = await db
+      .from('profiles')
+      .update({
+        deleted_at: new Date().toISOString(),
+        closure_reason: String(reason).slice(0, 500),
+        firstname: 'Former',
+        lastname: 'Member',
+        email: null,
+        headline: null,
+        bio: null,
+        rightnow: null,
+        country: null,
+        state: null,
+        city: null,
+        latitude: null,
+        longitude: null,
+        disciplines: null,
+        skills: null,
+        seeking: null,
+        seeking_disciplines: null,
+        seeking_skills: null,
+        skill_ratings: null,
+        compensation: null,
+        location_preference: null,
+        availability: null,
+        website: null,
+        instagram: null,
+        soundcloud: null,
+        other_link: null,
+        portfolio_link: null,
+        portfolio_types: null,
+        avatar_url: null,
+        cover_url: null,
+        stripe_customer_id: null,
+        stripe_connect_id: null,
+        connect_onboarded: false,
+        paddle_customer_id: null,
+        paddle_subscription_id: null,
+        subscription_status: 'deleted',
+        comped_until: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', userId)
+
+    if (scrubErr) {
+      console.error('account delete: scrub failed', scrubErr)
+      return Response.json({ error: 'Could not close the account' }, { status: 500 })
+    }
+
+    // Finally remove the login. Done last so a failure above never leaves
+    // someone locked out of an account that still holds their data.
+    const { error: authErr } = await db.auth.admin.deleteUser(userId)
+    if (authErr) {
+      console.error('account delete: auth user removal failed', authErr)
+    }
+
+    return Response.json({ ok: true })
+  } catch (err) {
+    console.error('Account delete route error:', err)
+    return Response.json({ error: 'Something went wrong' }, { status: 500 })
+  }
+}

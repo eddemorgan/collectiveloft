@@ -108,6 +108,7 @@ export default function DiscoverPage() {
       const { data } = await supabase
         .from('profiles')
         .select('*')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
       setCreatives(data || [])
       setLoading(false)

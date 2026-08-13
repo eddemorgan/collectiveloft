@@ -552,6 +552,7 @@ export default function ProfilePage() {
 
   async function handleSignOut() { await supabase.auth.signOut(); router.push('/') }
 
+
   async function handleManageSubscription() {
     setPortalLoading(true)
     try {

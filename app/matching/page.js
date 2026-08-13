@@ -255,6 +255,7 @@ export default function MatchingPage() {
       let query = supabase
         .from('profiles')
         .select('id, firstname, lastname, headline, disciplines, skills, city, state, country, avatar_url, availability, collabs_count, compensation, seeking, seeking_disciplines, seeking_skills, bio, rightnow')
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
       if (user) query = query.neq('id', user.id)
       const { data: all } = await query

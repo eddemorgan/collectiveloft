@@ -44,6 +44,9 @@ export default function MemberMenu() {
           <Link href="/morgan-collective" onClick={toggle}>Morgan Collective Group</Link>
           <Link href="/help" onClick={toggle}>Help &amp; support</Link>
         </div>
+        <div className={styles.menuSec}>
+          <Link href="/account/close" onClick={toggle} className={styles.menuClose}>Close your account</Link>
+        </div>
       </aside>
     </>
   )

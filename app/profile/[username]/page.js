@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import Footer from '../../components/Footer'
+import { locationLabel } from '../../../lib/labels'
 import MemberMenu from '../../components/MemberMenu'
 import styles from './profile.module.css'
 
@@ -1221,7 +1222,7 @@ export default function ProfilePage() {
           {(profile.seeking||profile.compensation?.length)&&(
             <div className={styles.availCard}>
               <div className={styles.availTitle}>Open to collaborate</div>
-              <div className={styles.availText}>{[profile.seeking&&`Seeking ${profile.seeking}.`,profile.location_preference,profile.compensation?.length&&`${profile.compensation.join(' or ')}.`].filter(Boolean).join(' ')}</div>
+              <div className={styles.availText}>{[profile.seeking&&`Seeking ${profile.seeking}.`,locationLabel(profile.location_preference)&&`${locationLabel(profile.location_preference)}.`,profile.compensation?.length&&`${profile.compensation.join(' or ')}.`].filter(Boolean).join(' ')}</div>
             </div>
           )}
           {disciplines.length>0&&<div><div className={styles.sbLabel}>Disciplines</div><div className={styles.discTags}>{disciplines.map(d=><span key={d} className={styles.discTag}>{d}</span>)}</div></div>}

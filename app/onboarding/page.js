@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { TermsDoc, PrivacyDoc } from '../components/LegalDocs'
+import { LOCATION_PREFERENCES } from '../../lib/labels'
 import { LEGAL_VERSION } from '../../lib/legal'
 import styles from './onboarding.module.css'
 
@@ -915,7 +916,7 @@ export default function LandingPage() {
                     <div className={styles.mfRow}>
                       <div className={styles.mf}>
                         <label>Location preference</label>
-                        <select value={form.location_preference} onChange={e => setForm(f => ({ ...f, location_preference: e.target.value }))}><option value="">Select…</option><option value="local">Local only</option><option value="remote_ok">Remote OK</option><option value="remote_preferred">Remote preferred</option><option value="no_preference">No preference</option></select>
+                        <select value={form.location_preference} onChange={e => setForm(f => ({ ...f, location_preference: e.target.value }))}><option value="">Select…</option>{LOCATION_PREFERENCES.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}</select>
                       </div>
                       <div className={styles.mf}>
                         <label>Availability</label>

@@ -112,6 +112,21 @@ export async function POST(request) {
       console.error('account delete: confirmation email failed', e)
     }
 
+    // Personal content goes. Anything that is only theirs and would otherwise
+    // linger under a former member's name: portfolio pieces, briefs still
+    // soliciting collaborators, their applications, their notifications.
+    // Collaborations, terms, ratings, studios and studio messages are
+    // deliberately untouched, because they are the other party's record too.
+    for (const [table, column] of [
+      ['portfolio_items', 'profile_id'],
+      ['applications', 'applicant_id'],
+      ['briefs', 'poster_id'],
+      ['notifications', 'user_id'],
+    ]) {
+      const { error: delErr } = await db.from(table).delete().eq(column, userId)
+      if (delErr) console.error(`account delete: could not clear ${table}`, delErr.message)
+    }
+
     // Scrub the person. Name becomes the label the rest of the app renders,
     // so existing collaboration views show "Former Member" with no changes.
     const { error: scrubErr } = await db
@@ -163,11 +178,22 @@ export async function POST(request) {
       return Response.json({ error: 'Could not close the account' }, { status: 500 })
     }
 
-    // Finally remove the login. Done last so a failure above never leaves
-    // someone locked out of an account that still holds their data.
-    const { error: authErr } = await db.auth.admin.deleteUser(userId)
+    // Disable the login rather than deleting the auth user. Deleting it
+    // cascades to the profile row, and studios, ratings, collab_terms and
+    // messages all point at that row: for anyone who has collaborated the
+    // delete fails outright, and for anyone who has not it destroys the row
+    // that was supposed to survive as the former member. So the identity is
+    // stripped from auth and the account is banned instead.
+    const closedAddress = `closed-${userId}@deleted.collectiveloft.com`
+    const { error: authErr } = await db.auth.admin.updateUserById(userId, {
+      email: closedAddress,
+      password: crypto.randomUUID() + crypto.randomUUID(),
+      ban_duration: '876000h', // a century; Supabase has no permanent ban
+      user_metadata: {},
+    })
     if (authErr) {
-      console.error('account delete: auth user removal failed', authErr)
+      console.error('account delete: could not disable login', authErr)
+      return Response.json({ error: 'Could not fully close the account' }, { status: 500 })
     }
 
     return Response.json({ ok: true })

@@ -349,16 +349,20 @@
 .tagPaid { border-color: rgba(139,105,20,0.28);  color: var(--gold); }
 .tagDisc { border-color: rgba(139,105,20,0.15);  color: rgba(139,105,20,0.7); }
 
+/* Stays on one line while it fits, and drops the button to its own line when
+   the location runs long, rather than crushing all three together. */
 .cardFooter {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
   border-top: 0.5px solid var(--rule);
   padding-top: 0.55rem;
 }
 .cardLocation { font-size: 0.6rem; color: var(--muted); font-weight: 300; }
 .cardCollabs  { font-size: 0.6rem; color: var(--muted); font-weight: 300; }
 .cardConnect {
+  margin-left: auto;
   font-size: 0.6rem;
   padding: 0.22rem 0.65rem;
   border-radius: 2px;

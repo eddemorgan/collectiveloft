@@ -321,17 +321,22 @@
   text-transform: uppercase;
 }
 
+/* Stacked, not side by side: a long city and country plus a collab count
+   left the button nothing to sit in, and everything wrapped into itself. */
 .mcFooter {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
   border-top: 0.5px solid var(--rule);
   padding-top: 0.55rem;
 }
-.mcMeta { font-size: 0.6rem; color: var(--muted); display: flex; align-items: center; gap: 0.65rem; }
+.mcMeta { font-size: 0.6rem; color: var(--muted); display: flex; align-items: center; flex-wrap: wrap; gap: 0.35rem 0.65rem; }
 .btnReachOut {
+  width: 100%;
+  text-align: center;
   font-size: 0.6rem;
-  padding: 0.24rem 0.7rem;
+  padding: 0.4rem 0.7rem;
   border-radius: 2px;
   background: rgba(139,105,20,0.08);
   border: 0.5px solid rgba(139,105,20,0.25);

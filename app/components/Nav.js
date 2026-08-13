@@ -104,7 +104,7 @@ export default function Nav() {
         }} />
         <span style={{
           fontFamily: 'var(--sans)',
-          fontSize: '8.5px',
+          fontSize: '0.5312rem',
           letterSpacing: '0.18em',
           textTransform: 'uppercase',
           lineHeight: 1,

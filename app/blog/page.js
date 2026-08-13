@@ -36,7 +36,7 @@ export default function BlogIndex({ searchParams }) {
             <span style={{ color: '#1A1814' }}>Collective <em style={{ fontStyle: 'italic', color: '#8B6914' }}>Loft</em></span>
           </span>
           <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '5px 0' }} />
-          <span style={{ fontFamily: "Arial, sans-serif", fontSize: '8.5px', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'rgba(26,24,20,0.5)' }}>Where creatives find each other</span>
+          <span style={{ fontFamily: "Arial, sans-serif", fontSize: '0.5312rem', letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'rgba(26,24,20,0.5)' }}>Where creatives find each other</span>
         </Link>
         <div className={styles.navLinks}>
           <Link href="/blog" className={styles.navLink}>Blog</Link>

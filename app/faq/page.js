@@ -387,7 +387,7 @@ export default function FAQPage() {
             <span style={{ color: '#1A1814', fontSize: '1.55rem' }}>Collective <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Loft</em></span>
           </span>
           <span style={{ alignSelf: 'stretch', height: '0.5px', background: 'rgba(139,105,20,0.35)', margin: '5px 0' }} />
-          <span style={{ fontFamily: 'var(--sans)', fontSize: '11px' /* was 8.5px */, letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
+          <span style={{ fontFamily: 'var(--sans)', fontSize: '0.6875rem' /* was 8.5px */, letterSpacing: '0.18em', textTransform: 'uppercase', lineHeight: 1, color: 'var(--muted)' }}>Where creatives find each other</span>
         </a>
         <a href="/#waitlist" className="nav-cta">Request early access</a>
       </nav>

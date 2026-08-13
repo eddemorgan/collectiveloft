@@ -6,17 +6,17 @@
 .wm { color: var(--cream); }
 .wm em { font-style: italic; color: var(--gold); }
 .logoRule { align-self: stretch; height: 0.5px; background: rgba(139,105,20,0.35); margin: 5px 0; }
-.tag { font-family: var(--sans); font-size: 8.5px; letter-spacing: 0.18em; text-transform: uppercase; line-height: 1; color: var(--muted); }
+.tag { font-family: var(--sans); font-size: 0.5312rem; letter-spacing: 0.18em; text-transform: uppercase; line-height: 1; color: var(--muted); }
 
 .wrap { display: flex; justify-content: center; padding: 56px 24px 80px; }
 .inner { max-width: 500px; width: 100%; text-align: center; }
 .cancelled { background: rgba(139,105,20,0.08); border: 0.5px solid rgba(139,105,20,0.3); border-radius: 4px; padding: 12px 16px; font-size: 0.82rem; color: var(--gold); margin-bottom: 28px; line-height: 1.5; }
 
-.eyebrow { font-size: 11px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); margin-bottom: 18px; }
+.eyebrow { font-size: 0.6875rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); margin-bottom: 18px; }
 .title { font-family: var(--serif); font-size: clamp(30px,5vw,42px); font-weight: 600; line-height: 1.08; letter-spacing: -0.01em; color: var(--cream); margin-bottom: 22px; }
 .title em { font-style: italic; color: var(--gold); }
-.why { font-size: 15.5px; line-height: 1.7; color: var(--muted); margin-bottom: 18px; }
-.reassure { font-size: 14px; line-height: 1.65; color: var(--muted); margin-bottom: 36px; }
+.why { font-size: 0.9688rem; line-height: 1.7; color: var(--muted); margin-bottom: 18px; }
+.reassure { font-size: 0.875rem; line-height: 1.65; color: var(--muted); margin-bottom: 36px; }
 .reassure strong { color: var(--cream); font-weight: 600; }
 
 .card { background: var(--bg); border: 0.5px solid var(--rule); border-radius: 8px; padding: 34px 30px; text-align: left; }

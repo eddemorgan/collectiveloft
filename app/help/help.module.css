@@ -3,33 +3,33 @@
 .nav { position: sticky; top: 0; z-index: 50; background: rgba(240,236,227,0.82); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--rule); }
 .navInner { max-width: 1080px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 72px; }
 .brand { display: flex; align-items: baseline; gap: 11px; text-decoration: none; }
-.mark { color: var(--gold); font-size: 20px; line-height: 1; transform: translateY(2px); }
-.wm { font-family: var(--serif); font-size: 22px; font-weight: 600; letter-spacing: 0.01em; color: var(--cream); display: block; }
+.mark { color: var(--gold); font-size: 1.25rem; line-height: 1; transform: translateY(2px); }
+.wm { font-family: var(--serif); font-size: 1.375rem; font-weight: 600; letter-spacing: 0.01em; color: var(--cream); display: block; }
 .wm em { font-style: italic; color: var(--gold); }
-.tag { font-size: 8.5px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-top: 3px; display: block; }
-.navBack { font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.tag { font-size: 0.5312rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-top: 3px; display: block; }
+.navBack { font-size: 0.8125rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.2s; }
 .navBack:hover { color: var(--gold); }
 
 .hero { max-width: 720px; margin: 0 auto; padding: 88px 32px 48px; text-align: center; }
-.eyebrow { font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 22px; }
+.eyebrow { font-size: 0.6875rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); margin-bottom: 22px; }
 .title { font-family: var(--serif); font-size: clamp(38px,6.5vw,66px); font-weight: 600; line-height: 1.03; letter-spacing: -0.02em; color: var(--cream); margin-bottom: 18px; }
 .title em { font-style: italic; color: var(--gold); }
-.lede { max-width: 520px; margin: 0 auto; font-size: 17px; line-height: 1.7; color: var(--muted); }
+.lede { max-width: 520px; margin: 0 auto; font-size: 1.0625rem; line-height: 1.7; color: var(--muted); }
 
 .section { max-width: 720px; margin: 0 auto; padding: 56px 32px; }
 .secTitle { font-family: var(--serif); font-size: clamp(26px,4vw,38px); font-weight: 600; line-height: 1.1; letter-spacing: -0.01em; color: var(--cream); margin-bottom: 8px; text-align: center; }
-.secSub { text-align: center; color: var(--muted); font-size: 15px; margin-bottom: 40px; }
+.secSub { text-align: center; color: var(--muted); font-size: 0.9375rem; margin-bottom: 40px; }
 
 /* FAQ accordion */
 .faqList { border-top: 0.5px solid var(--rule); }
 .faqItem { border-bottom: 0.5px solid var(--rule); }
-.faqQ { width: 100%; background: none; border: none; text-align: left; cursor: pointer; padding: 22px 4px; display: flex; align-items: center; justify-content: space-between; gap: 20px; font-family: var(--serif); font-size: 19px; font-weight: 600; color: var(--cream); transition: color 0.15s; }
+.faqQ { width: 100%; background: none; border: none; text-align: left; cursor: pointer; padding: 22px 4px; display: flex; align-items: center; justify-content: space-between; gap: 20px; font-family: var(--serif); font-size: 1.1875rem; font-weight: 600; color: var(--cream); transition: color 0.15s; }
 .faqQ:hover { color: var(--gold); }
-.faqIcon { flex-shrink: 0; font-size: 20px; color: var(--gold); transition: transform 0.2s; line-height: 1; }
+.faqIcon { flex-shrink: 0; font-size: 1.25rem; color: var(--gold); transition: transform 0.2s; line-height: 1; }
 .faqIconOpen { transform: rotate(45deg); }
 .faqA { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
 .faqAOpen { max-height: 600px; }
-.faqAInner { padding: 0 4px 24px; font-size: 15px; line-height: 1.75; color: var(--muted); }
+.faqAInner { padding: 0 4px 24px; font-size: 0.9375rem; line-height: 1.75; color: var(--muted); }
 .faqAInner b { color: var(--cream); font-weight: 600; }
 
 /* Contact */
@@ -37,35 +37,35 @@
 .contactInner { max-width: 620px; margin: 0 auto; padding: 64px 32px; }
 .form { display: flex; flex-direction: column; gap: 18px; margin-top: 8px; }
 .field { display: flex; flex-direction: column; gap: 7px; }
-.label { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
-.input, .textarea { width: 100%; background: var(--bg0); border: 0.5px solid var(--rule); border-radius: 3px; padding: 12px 14px; font-family: var(--sans); font-size: 15px; color: var(--cream); }
+.label { font-size: 0.6562rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+.input, .textarea { width: 100%; background: var(--bg0); border: 0.5px solid var(--rule); border-radius: 3px; padding: 12px 14px; font-family: var(--sans); font-size: 0.9375rem; color: var(--cream); }
 .input::placeholder, .textarea::placeholder { color: var(--muted); }
 .input:focus, .textarea:focus { outline: none; border-color: var(--gold); }
 .textarea { resize: vertical; min-height: 130px; line-height: 1.6; }
-.submit { background: var(--gold); color: var(--bg0); border: none; border-radius: 3px; padding: 14px; font-size: 15px; font-weight: 600; font-family: var(--sans); cursor: pointer; transition: background 0.2s; margin-top: 4px; }
+.submit { background: var(--gold); color: var(--bg0); border: none; border-radius: 3px; padding: 14px; font-size: 0.9375rem; font-weight: 600; font-family: var(--sans); cursor: pointer; transition: background 0.2s; margin-top: 4px; }
 .submit:hover:not(:disabled) { background: var(--gold2); }
 .submit:disabled { opacity: 0.6; cursor: not-allowed; }
-.formNote { text-align: center; font-size: 13px; color: var(--muted); margin-top: 18px; }
+.formNote { text-align: center; font-size: 0.8125rem; color: var(--muted); margin-top: 18px; }
 .formNote a { color: var(--gold); text-decoration: none; }
 .formNote a:hover { text-decoration: underline; }
 .sent { text-align: center; padding: 40px 20px; }
-.sentIcon { font-size: 32px; color: var(--gold); margin-bottom: 14px; }
-.sentTitle { font-family: var(--serif); font-size: 26px; font-weight: 600; color: var(--cream); margin-bottom: 8px; }
-.sentSub { color: var(--muted); font-size: 15px; line-height: 1.6; }
-.error { background: rgba(176,58,46,0.1); border: 0.5px solid rgba(176,58,46,0.4); color: #B03A2E; border-radius: 3px; padding: 11px 14px; font-size: 14px; text-align: center; }
+.sentIcon { font-size: 2rem; color: var(--gold); margin-bottom: 14px; }
+.sentTitle { font-family: var(--serif); font-size: 1.625rem; font-weight: 600; color: var(--cream); margin-bottom: 8px; }
+.sentSub { color: var(--muted); font-size: 0.9375rem; line-height: 1.6; }
+.error { background: rgba(176,58,46,0.1); border: 0.5px solid rgba(176,58,46,0.4); color: #B03A2E; border-radius: 3px; padding: 11px 14px; font-size: 0.875rem; text-align: center; }
 
 /* Connect */
 .connect { text-align: center; padding: 72px 32px; }
 .connectTitle { font-family: var(--serif); font-size: clamp(24px,3.6vw,34px); font-weight: 600; color: var(--cream); margin-bottom: 10px; }
-.connectSub { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
+.connectSub { color: var(--muted); font-size: 0.9375rem; margin-bottom: 28px; }
 .socials { display: flex; gap: 22px; align-items: center; justify-content: center; }
 .social { color: var(--muted); display: inline-flex; transition: color 0.2s, transform 0.2s; }
 .social:hover { color: var(--gold); transform: translateY(-2px); }
 
 .foot { border-top: 0.5px solid var(--rule); padding: 40px 0; }
 .footInner { max-width: 1080px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.fine { font-size: 12px; color: var(--faint, rgba(26,24,20,0.34)); }
+.fine { font-size: 0.75rem; color: var(--faint, rgba(26,24,20,0.34)); }
 
 .legalLinks { display: flex; gap: 18px; }
-.legalLinks a { font-size: 12px; color: var(--gold); text-decoration: none; }
+.legalLinks a { font-size: 0.75rem; color: var(--gold); text-decoration: none; }
 .legalLinks a:hover { text-decoration: underline; }

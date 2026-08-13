@@ -3,28 +3,28 @@
 .nav { position: sticky; top: 0; z-index: 50; background: rgba(240,236,227,0.82); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--rule); }
 .navInner { max-width: 1080px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 72px; }
 .brand { display: flex; align-items: baseline; gap: 11px; text-decoration: none; }
-.mark { color: var(--gold); font-size: 20px; line-height: 1; transform: translateY(2px); }
-.wm { font-family: var(--serif); font-size: 22px; font-weight: 600; letter-spacing: 0.01em; color: var(--cream); display: block; }
+.mark { color: var(--gold); font-size: 1.25rem; line-height: 1; transform: translateY(2px); }
+.wm { font-family: var(--serif); font-size: 1.375rem; font-weight: 600; letter-spacing: 0.01em; color: var(--cream); display: block; }
 .wm em { font-style: italic; color: var(--gold); }
-.tag { font-size: 8.5px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-top: 3px; display: block; }
-.navBack { font-size: 13px; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+.tag { font-size: 0.5312rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); margin-top: 3px; display: block; }
+.navBack { font-size: 0.8125rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.2s; }
 .navBack:hover { color: var(--gold); }
 
 /* HERO — quiet, editorial */
 .hero { max-width: 720px; margin: 0 auto; padding: 100px 32px 40px; text-align: center; }
-.eyebrow { font-size: 11px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold); margin-bottom: 28px; }
+.eyebrow { font-size: 0.6875rem; letter-spacing: 0.32em; text-transform: uppercase; color: var(--gold); margin-bottom: 28px; }
 .title { font-family: var(--serif); font-size: clamp(36px,6vw,64px); font-weight: 600; line-height: 1.06; letter-spacing: -0.02em; color: var(--cream); margin-bottom: 26px; }
 .title em { font-style: italic; color: var(--gold); }
-.lede { max-width: 540px; margin: 0 auto; font-size: 18px; line-height: 1.75; color: var(--muted); font-style: italic; font-family: var(--serif); }
+.lede { max-width: 540px; margin: 0 auto; font-size: 1.125rem; line-height: 1.75; color: var(--muted); font-style: italic; font-family: var(--serif); }
 
 /* BODY — narrow measure, generous, writing carries it */
 .body { max-width: 620px; margin: 0 auto; padding: 40px 32px 20px; }
-.para { font-size: 18px; line-height: 1.85; color: var(--cream); margin-bottom: 26px; font-weight: 300; }
+.para { font-size: 1.125rem; line-height: 1.85; color: var(--cream); margin-bottom: 26px; font-weight: 300; }
 .para:last-child { margin-bottom: 0; }
 .lead { font-family: var(--serif); font-size: clamp(22px,3vw,28px); line-height: 1.5; font-weight: 500; color: var(--cream); margin-bottom: 30px; letter-spacing: -0.01em; }
 
 .divider { max-width: 620px; margin: 44px auto; padding: 0 32px; display: flex; align-items: center; justify-content: center; }
-.dividerMark { color: var(--gold); font-size: 16px; letter-spacing: 0.5em; opacity: 0.7; }
+.dividerMark { color: var(--gold); font-size: 1rem; letter-spacing: 0.5em; opacity: 0.7; }
 
 /* PULLQUOTE — the moat line, set apart */
 .pullSection { max-width: 720px; margin: 0 auto; padding: 20px 32px; }
@@ -35,20 +35,20 @@
 .close { border-top: 0.5px solid var(--rule); background: var(--bg); text-align: center; padding: 90px 32px; margin-top: 40px; }
 .closeLead { font-family: var(--serif); font-size: clamp(28px,4.5vw,46px); font-weight: 600; line-height: 1.15; letter-spacing: -0.015em; color: var(--cream); margin-bottom: 20px; max-width: 620px; margin-left: auto; margin-right: auto; }
 .closeLead em { font-style: italic; color: var(--gold); }
-.closeBody { max-width: 500px; margin: 0 auto 34px; color: var(--muted); font-size: 17px; line-height: 1.75; }
-.btnPrimary { font-size: 15px; font-weight: 600; background: var(--gold); color: var(--bg0); padding: 16px 34px; border-radius: 3px; text-decoration: none; transition: 0.2s; display: inline-block; }
+.closeBody { max-width: 500px; margin: 0 auto 34px; color: var(--muted); font-size: 1.0625rem; line-height: 1.75; }
+.btnPrimary { font-size: 0.9375rem; font-weight: 600; background: var(--gold); color: var(--bg0); padding: 16px 34px; border-radius: 3px; text-decoration: none; transition: 0.2s; display: inline-block; }
 .btnPrimary:hover { background: var(--gold2); }
-.signature { margin-top: 34px; font-size: 13.5px; color: var(--muted); font-style: italic; font-family: var(--serif); }
+.signature { margin-top: 34px; font-size: 0.8438rem; color: var(--muted); font-style: italic; font-family: var(--serif); }
 
 /* FOOTER */
 .foot { border-top: 0.5px solid var(--rule); padding: 40px 0; }
 .footInner { max-width: 1080px; margin: 0 auto; padding: 0 32px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.fine { font-size: 12px; color: var(--faint, rgba(26,24,20,0.34)); }
+.fine { font-size: 0.75rem; color: var(--faint, rgba(26,24,20,0.34)); }
 .socials { display: flex; gap: 18px; align-items: center; }
 .social { color: var(--muted); display: inline-flex; transition: color 0.2s, transform 0.2s; }
 .social:hover { color: var(--gold); transform: translateY(-2px); }
 
 @media (max-width: 640px) {
   .hero { padding-top: 72px; }
-  .para, .lede { font-size: 17px; }
+  .para, .lede { font-size: 1.0625rem; }
 }

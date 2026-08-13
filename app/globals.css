@@ -18,13 +18,20 @@
   --sans:  'DM Sans', system-ui, sans-serif;
 }
 
-html { scroll-behavior: smooth }
+/* One knob for the whole site's text scale. Every font size is in rem, so
+   raising this raises all of them together and keeps the proportions the
+   design was drawn with. The site was built around a 16px root and read too
+   small: members were zooming their browsers to 125% to use it. 118.75% is
+   19px, which is that zoom baked in, minus a little.
+   Percent rather than px so a reader who sets a larger default in their own
+   browser still gets it: their preference is multiplied, not overridden. */
+html { font-size: 118.75%; scroll-behavior: smooth }
 
 body {
   background: var(--bg);
   color: var(--cream);
   font-family: var(--sans);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.6;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;

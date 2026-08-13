@@ -51,7 +51,10 @@
 .profileTags { display:flex; flex-direction:column; gap:0.4rem; margin-top:0.25rem; }
 .tagRow { display:flex; align-items:center; gap:0.35rem; flex-wrap:wrap; }
 .tagRowLabel { font-size:0.58rem; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--muted); flex-shrink:0; min-width:72px; }
-.ptag { display:inline-block; font-size:0.6rem; padding:0.15rem 0.55rem; border-radius:2px; border:0.5px solid var(--rule); color:var(--muted); letter-spacing:0.04em; text-transform:uppercase; white-space:nowrap; }
+/* align-self, because a flex item in a column container stretches to the
+   full width no matter what its display is. The pill should be the width of
+   its words. */
+.ptag { display:inline-block; align-self:flex-start; font-size:0.6rem; padding:0.15rem 0.55rem; border-radius:2px; border:0.5px solid var(--rule); color:var(--muted); letter-spacing:0.04em; text-transform:uppercase; white-space:nowrap; }
 .ptagOpen { border-color:rgba(42,122,104,0.35); color:var(--teal); }
 .ptagDisc { border-color:rgba(139,105,20,0.2); color:rgba(139,105,20,0.75); }
 

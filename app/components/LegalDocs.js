@@ -116,7 +116,7 @@ export const PrivacyDoc = () => (
     </Sec>
     <Sec num="4" title="Payment Data"><P>Collective Loft does not store your full payment card information. Membership billing is handled by Paddle as merchant of record; collaboration payments are handled by Stripe.</P></Sec>
     <Sec num="5" title="Data Retention">
-      {[['Active account data','Life of account'],['Completed Loft Studio records','Indefinitely as part of collaboration history'],['Billing records','7 years (tax and legal compliance)'],['System backups','Purged within 90 days'],['Google Analytics data','~26 months']].map(([t,r]) => (
+      {[['Active account data','Life of account'],['Completed Loft Studio records','Indefinitely as part of collaboration history, anonymized if you close your account'],['Billing records','7 years (tax and legal compliance)'],['System backups','Purged within 90 days'],['Google Analytics data','~26 months']].map(([t,r]) => (
         <div key={t} style={{display:'flex',justifyContent:'space-between',padding:'0.3rem 0',borderBottom:'0.5px solid var(--rule)',fontSize:'0.75rem'}}>
           <span style={{color:'var(--muted)'}}>{t}</span>
           <span style={{color:'var(--muted)',textAlign:'right',maxWidth:'55%'}}>{r}</span>
@@ -126,7 +126,7 @@ export const PrivacyDoc = () => (
     </Sec>
     <Sec num="6" title="Your Rights & Choices">
       <Sub>6.1 Access & Correction</Sub><P>Update your profile information directly through your account settings at any time.</P>
-      <Sub>6.2 Account Deletion</Sub><P>Contact hello@collectiveloft.com to request deletion. We process requests within 30 days.</P>
+      <Sub>6.2 Account Deletion</Sub><P>You can close your account yourself at any time. Open the menu and choose Close your account, confirm your email and password, and the closure happens immediately. Your profile, photos, portfolio, and links are deleted, and any subscription is cancelled so you are not charged again.</P><P>Collaborations you completed remain on record for the people you worked with, credited to a former member rather than to you. Ratings, agreed terms, and the shared contents of a Loft Studio are part of another person's history as much as your own, so they are not removed when you leave. Your name, contact details, and profile content are.</P><P>If you would rather we handle it, or you want data removed that closing your account does not cover, contact us through the Help page at collectiveloft.com/help or write to hello@collectiveloft.com. We process those requests within 30 days.</P>
       <Sub>6.3 California Residents (CCPA)</Sub><P>California residents have rights under the CCPA. We do not sell personal information. Contact hello@collectiveloft.com.</P>
       <Sub>6.4 European Users (GDPR)</Sub><P>Users in the EEA, UK, or Switzerland have rights under GDPR. Contact hello@collectiveloft.com.</P>
     </Sec>

@@ -95,6 +95,22 @@ export default function GuidePage() {
             for any reason. Refunds are issued by Paddle, our merchant of record. Ask them directly at
             paddle.net, or send us a note from the Help page and we will pass it on.
           </p>
+
+          <div className={styles.h3}>Closing your account</div>
+          <p className={styles.p}>
+            Cancelling your subscription and closing your account are two different things. Cancelling stops
+            the billing and leaves everything else where it is. Closing removes you from the platform.
+          </p>
+          <p className={styles.p}>
+            To close it, open the menu and choose <strong>Close your account</strong> at the bottom. You confirm
+            your email and password, tell us why you are going, and it happens immediately. Your profile,
+            photos, portfolio, and links are deleted, and any subscription is cancelled so you are not charged
+            again. You get an email confirming it.
+          </p>
+          <div className={styles.note}>
+            <div className={styles.calloutLbl}>What stays, and why</div>
+            <p>Collaborations you finished stay on record, credited to a former member instead of to you. The terms you agreed, the ratings you gave and received, and the files inside a shared Loft Studio are part of your collaborator&rsquo;s history too. Deleting them would rewrite someone else&rsquo;s reputation to settle your exit, so we do not. Your name and everything personal comes off. The work stands.</p>
+          </div>
         </section>
 
         {/* 3 */}

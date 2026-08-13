@@ -22,11 +22,11 @@
    raising this raises all of them together and keeps the proportions the
    design was drawn with. The site was built around a 16px root and read too
    small: members were zooming their browsers to 125% and 150% to use it,
-   which on the old 16px root meant 20px to 24px. 137.5% is 22px, the middle
-   of the range people were choosing for themselves.
+   which on the old 16px root meant 20px to 24px. 125% is 20px: the bottom of
+   that range, since 22px started breaking the nav onto two lines.
    Percent rather than px so a reader who sets a larger default in their own
    browser still gets it: their preference is multiplied, not overridden. */
-html { font-size: 137.5%; scroll-behavior: smooth }
+html { font-size: 125%; scroll-behavior: smooth }
 
 body {
   background: var(--bg);

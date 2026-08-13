@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { verifyCaller, serviceClient, sendMail, appUrl } from '../../../../lib/mailer'
+import { accountClosedEmailHtml } from '../../../../lib/emails'
 import { paddleFetch } from '../../../../lib/paddle'
 
 // Closes the caller's own account.
@@ -101,12 +102,7 @@ export async function POST(request) {
       await sendMail({
         to: callerEmail,
         subject: 'Your Collective Loft account is closed',
-        html: `<p>${profile?.firstname ? profile.firstname + ',' : 'Hello,'}</p>
-<p>Your Collective Loft account is closed. Your profile, photos, and portfolio have been deleted, and any subscription has been cancelled, so you will not be charged again.</p>
-<p>Collaborations you completed remain on record for the people you worked with, credited to a former member, so their history and ratings are unchanged.</p>
-<p>If this was not you, reply to nothing here and contact us straight away through <a href="${appUrl()}/help">${appUrl()}/help</a>.</p>
-<p>Thanks for the time you spent here.</p>
-<p>Edde<br>Collective Loft</p>`,
+        html: accountClosedEmailHtml({ firstname: profile?.firstname || '', appUrl: appUrl() }),
       })
     } catch (e) {
       console.error('account delete: confirmation email failed', e)

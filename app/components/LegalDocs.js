@@ -95,8 +95,8 @@ export const PrivacyDoc = () => (
     </div>
     <Sec num="1" title="Information We Collect">
       <Sub>1.1 Information You Provide Directly</Sub><Ul items={['Name and email address','Password (stored encrypted)','Location (country, state, city)','Creative profile: disciplines, skills, bio, headline, Right Now card, portfolio links, social links','Collaboration preferences','Uploaded content: portfolio files, studio files, profile and cover images','Messages and communications within Loft Studios','Collaboration terms you create or accept','Ratings and reviews you submit','Payment information (processed by Paddle for membership, Stripe for collaboration payments)']}/>
-      <Sub>1.2 Information Collected Automatically</Sub><Ul items={['Log data: IP address, browser type, pages visited, time spent','Device information: device type, operating system, browser version','Usage data: features used, actions taken, collaboration activity','Session data: authentication tokens managed by Supabase Auth','Analytics data via Google Analytics']}/>
-      <Sub>1.3 Cookies & Tracking Technologies</Sub><Ul items={['Authentication cookies (Supabase): maintain your logged-in session. Required for Platform functionality.','Google Analytics cookies: understand how users navigate the Platform.']}/>
+      <Sub>1.2 Information Collected Automatically</Sub><Ul items={['Log data: IP address, browser type, pages visited, time spent','Device information: device type, operating system, browser version','Usage data: features used, actions taken, collaboration activity','Session data: authentication tokens managed by Supabase Auth','Anonymous page view counts via Vercel Analytics']}/>
+      <Sub>1.3 Cookies & Tracking Technologies</Sub><Ul items={['Authentication cookies (Supabase): maintain your logged-in session. Required for Platform functionality.','We do not use analytics or advertising cookies. Page views are counted anonymously by Vercel Analytics, which sets no cookies and does not track you across sites.']}/>
       <P>We do not use advertising cookies, third-party tracking pixels, or behavioral targeting technologies beyond those described above.</P>
     </Sec>
     <Sec num="2" title="How We Use Your Information"><Ul items={['Create and manage your account','Provide, operate, and improve the Platform','Power the Discipline Matching algorithm','Enable Briefs, Terms, and Loft Studio features','Process membership payments through Paddle and collaboration payments through Stripe','Send transactional emails','Display your profile to other users','Generate and display Community Voice ratings and reviews','Analyze Platform usage to improve features','Respond to support requests and resolve disputes','Comply with legal obligations']}/>
@@ -105,7 +105,7 @@ export const PrivacyDoc = () => (
     <Sec num="3" title="How We Share Your Information">
       <Sub>3.1 With Other Users (visible by default)</Sub><Ul items={['Name, headline, bio, and Right Now card','Disciplines, skills, and collaboration preferences','Location','Portfolio links and social links','Collaboration history','Community Voice rating and reviews']}/>
       <Sub>3.2 With Service Providers</Sub>
-      {[['Supabase','Database, auth, storage, realtime'],['Vercel','Platform hosting and deployment'],['Paddle','Membership billing (merchant of record)'],['Stripe','Collaboration payments and member payouts'],['Resend','Transactional email delivery'],['Google Analytics','Platform usage analytics (anonymized)']].map(([p,pu]) => (
+      {[['Supabase','Database, auth, storage, realtime'],['Vercel','Platform hosting and deployment'],['Paddle','Membership billing (merchant of record)'],['Stripe','Collaboration payments and member payouts'],['Resend','Transactional email delivery'],['Vercel Analytics','Anonymous page view counts. No cookies, no cross-site tracking.']].map(([p,pu]) => (
         <div key={p} style={{display:'flex',gap:'1rem',padding:'0.3rem 0',borderBottom:'0.5px solid var(--rule)',fontSize:'0.75rem'}}>
           <span style={{color:'var(--gold)',fontWeight:500,minWidth:'120px'}}>{p}</span>
           <span style={{color:'var(--muted)'}}>{pu}</span>
@@ -116,7 +116,7 @@ export const PrivacyDoc = () => (
     </Sec>
     <Sec num="4" title="Payment Data"><P>Collective Loft does not store your full payment card information. Membership billing is handled by Paddle as merchant of record; collaboration payments are handled by Stripe.</P></Sec>
     <Sec num="5" title="Data Retention">
-      {[['Active account data','Life of account'],['Completed Loft Studio records','Indefinitely as part of collaboration history, anonymized if you close your account'],['Billing records','7 years (tax and legal compliance)'],['System backups','Purged within 90 days'],['Google Analytics data','~26 months']].map(([t,r]) => (
+      {[['Active account data','Life of account'],['Completed Loft Studio records','Indefinitely as part of collaboration history, anonymized if you close your account'],['Billing records','7 years (tax and legal compliance)'],['System backups','Purged within 90 days'],['Anonymous page view counts','~12 months']].map(([t,r]) => (
         <div key={t} style={{display:'flex',justifyContent:'space-between',padding:'0.3rem 0',borderBottom:'0.5px solid var(--rule)',fontSize:'0.75rem'}}>
           <span style={{color:'var(--muted)'}}>{t}</span>
           <span style={{color:'var(--muted)',textAlign:'right',maxWidth:'55%'}}>{r}</span>

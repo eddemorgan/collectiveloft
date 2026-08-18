@@ -1,4 +1,5 @@
 import './globals.css'
+import { Analytics } from '@vercel/analytics/next'
 import SubscriptionGuard from './components/SubscriptionGuard'
 
 export const metadata = {
@@ -64,6 +65,11 @@ export default function RootLayout({ children }) {
         <SubscriptionGuard>
           {children}
         </SubscriptionGuard>
+        {/* Pageviews only, no cookies and no cross-site identifiers, so it
+            needs no consent banner. Sits outside the guard so traffic that
+            never signs in is still counted, which is the traffic we are
+            currently blind to. */}
+        <Analytics />
       </body>
     </html>
   )

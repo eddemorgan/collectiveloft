@@ -98,15 +98,18 @@ export default function Home() {
           <div className={styles.heroPromise}>Your people are here.</div>
           <h1 className={styles.heroH1}>Find collaborators, not bosses.</h1>
           <p className={styles.heroSub}>
-            The professional network where <span className={styles.k}>artists, musicians, writers, designers, and filmmakers</span> find each other, negotiate real terms, and open a <span className={styles.k}>Loft Studio</span>, a shared workspace built around the work.
+            For the people looking for a collaborator, and the people who want to be <span className={styles.k}>found by one</span>. Musicians, photographers, writers, performers, designers, filmmakers. You set real terms before the work starts, then build it together in a <span className={styles.k}>Loft Studio</span>.
           </p>
           <div className={styles.heroCta}>
             <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
-            <a href="#beat" className={styles.btnGhost}>See how it works</a>
+            <Link href="/browse" className={styles.btnGhost}>See who is already here</Link>
           </div>
           <div className={styles.discRow}>
             {DISCIPLINES.map(d => <span key={d} className={styles.disc}>{d}</span>)}
           </div>
+          <p className={styles.heroFor}>
+            You do not have to be the one hiring. Being findable is the point.
+          </p>
         </div>
       </header>
 
@@ -148,7 +151,7 @@ export default function Home() {
       <section className={styles.close}>
         <div className={styles.closeInner}>
           <h2 className={styles.closeH}>Your next collaborator<br />is already <em>here.</em></h2>
-          <p className={styles.closeSub}>Build a profile. Describe what you&apos;re working on &amp; what type of help you need. Find the people who can make your dream a reality.</p>
+          <p className={styles.closeSub}>Build a profile. Say what you make, and what you are working on right now. That is how the right people find you, and how you find them.</p>
           <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
         </div>
       </section>

@@ -44,6 +44,10 @@
 .btnPrimary:hover { background: var(--gold2); transform: translateY(-1px); }
 .btnGhost { font-size: 0.9375rem; font-weight: 500; color: var(--cream); padding: 16px 30px; border: 0.5px solid var(--rule); border-radius: 3px; text-decoration: none; transition: 0.2s; }
 .btnGhost:hover { border-color: var(--gold); color: var(--gold); }
+/* Answers the question a photographer or singer asks on arrival: is this
+   for people like me, or only for the people hiring them. */
+.heroFor { max-width: 640px; margin: 22px auto 0; font-size: clamp(13px,1.6vw,15px); line-height: 1.6; color: var(--muted); font-style: italic; }
+
 .discRow { display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; max-width: 720px; margin: 0 auto; }
 .disc { font-size: 0.7188rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); border: 0.5px solid var(--rule); padding: 8px 15px; border-radius: 2px; transition: 0.2s; }
 .disc:hover { color: var(--gold); border-color: var(--gold); }

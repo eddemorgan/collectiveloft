@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useMembership } from '../hooks/useMembership'
 import Nav from '../components/Nav'
 import Footer from '../components/Footer'
 import styles from './matching.module.css'
@@ -229,6 +230,7 @@ function slugify(first, last) {
 
 export default function MatchingPage() {
   const router = useRouter()
+  const { paid } = useMembership()
   const { loading: authLoading } = useAuth()
 
   const [myProfile,  setMyProfile]  = useState(null)
@@ -311,6 +313,9 @@ export default function MatchingPage() {
     e.preventDefault()
     e.stopPropagation()
     if (!myProfile) { router.push('/login'); return }
+    // Being found and answering are free. Starting the conversation is what
+    // membership pays for, so a free member is sent to upgrade instead.
+    if (!paid) { router.push('/subscribe?reason=reach'); return }
     router.push(`/terms?with=${id}`)
   }
 

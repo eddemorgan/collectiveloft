@@ -61,22 +61,16 @@ export default function SignupPage() {
     const { data: { session } } = await supabase.auth.getSession()
     const token = session?.access_token
 
-    // Founding recognition. If this email is on the founding allowlist, the
-    // server grants founding status and 90 days free, and we skip the paywall
-    // straight into building the profile. Everyone else goes to the trial.
-    // `comped` covers both: a founding member on the allowlist, and anyone who
-    // joined during the launch window and got their first month free. Either
-    // way they have access, so they skip the paywall and go build a profile.
-    let comped = false
+    // Founding recognition. Still runs: it grants founding status and the 90
+    // day comp to anyone on the allowlist. It no longer decides where they go,
+    // because nobody is sent to a paywall on the way in any more.
     if (token) {
       try {
-        const res = await fetch('/api/founding/redeem', {
+        await fetch('/api/founding/redeem', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
         })
-        const j = await res.json()
-        comped = !!j.founding || !!j.launch_comp
-      } catch { /* no comp, fall through to the normal path */ }
+      } catch { /* not founding, and nothing here depends on it */ }
     }
 
     // Send the welcome email. Fire and forget: a mail hiccup never blocks
@@ -89,7 +83,10 @@ export default function SignupPage() {
       }).catch(() => {})
     }
 
-    router.push(comped ? '/onboarding?onboarding=true' : '/subscribe')
+    // Everyone goes and builds a profile. Membership is offered later, at the
+    // moment someone tries to do the thing it pays for, rather than demanded
+    // at the door before they have seen anyone here.
+    router.push('/onboarding?onboarding=true')
   }
 
   return (
@@ -110,7 +107,7 @@ export default function SignupPage() {
           <div className={styles.eyebrow}>Collective Loft</div>
           <div className={styles.title}>Create your account.</div>
           <div className={styles.sub}>
-            Join a curated network of creatives. 7-day free trial, then $15/month.
+            Build a profile, be found by the people who need what you make, and answer them. Free.
           </div>
 
           {error && <div className={styles.errorBox}>{error}</div>}
@@ -169,7 +166,7 @@ export default function SignupPage() {
             onClick={handleSignup}
             disabled={loading}
           >
-            {loading ? 'Creating account…' : 'Continue to membership'}
+            {loading ? 'Creating account…' : 'Create my account'}
           </button>
 
           <div className={styles.footer}>

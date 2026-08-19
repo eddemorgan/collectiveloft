@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useMembership } from '../hooks/useMembership'
 import Nav from '../components/Nav'
 import Footer from '../components/Footer'
 import styles from './discover.module.css'
@@ -81,6 +82,7 @@ function distanceMiles(lat1, lng1, lat2, lng2) {
 export default function DiscoverPage() {
   const router = useRouter()
   const { loading: authLoading, user } = useAuth()
+  const { paid } = useMembership()
 
   const [creatives,     setCreatives]     = useState([])
   const [loading,       setLoading]       = useState(true)
@@ -207,6 +209,9 @@ export default function DiscoverPage() {
   function handleReachOut(e, id) {
     e.preventDefault()
     e.stopPropagation()
+    // Being found and answering are free. Starting the conversation is what
+    // membership pays for, so a free member is sent to upgrade instead.
+    if (!paid) { router.push('/subscribe?reason=reach'); return }
     router.push(`/terms?with=${id}`)
   }
 

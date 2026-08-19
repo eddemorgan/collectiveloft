@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { supabase } from '../../lib/supabase'
+import { upgradeReason } from '../../lib/membership'
 import styles from './subscribe.module.css'
 
 // Paddle.js is loaded from their CDN rather than added as a dependency: it is
@@ -18,12 +19,14 @@ export default function SubscribePage() {
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState(null)
   const [cancelled, setCancelled] = useState(false)
+  const [reason, setReason] = useState('default')
   const [paddleReady, setPaddleReady] = useState(false)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     setCancelled(params.get('cancelled') === 'true')
+    setReason(params.get('reason') || 'default')
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
   }, [])
 
@@ -94,12 +97,13 @@ export default function SubscribePage() {
     }
   }
 
+  // What membership adds. Everything not listed here is free for every
+  // member, and saying so plainly is the point.
   const features = [
-    'Find your people by discipline, skill, and distance',
-    'Post a brief. Say what you are making and who you need.',
-    'Set real terms before the work starts. Paid, revenue share, or creative exchange.',
-    'A Loft Studio for every collaboration. Files, milestones, and messages in one room.',
-    'A reputation built from finished work, not followers.',
+    'Reach out to anyone you find, and start the conversation yourself',
+    'Post briefs. Say what you are making and who you need, and let people come to you',
+    'Priority in Matching, so the right people see you first',
+    'You are funding a platform that takes no cut of your collaborations, ever',
   ]
 
   return (
@@ -123,10 +127,11 @@ export default function SubscribePage() {
             </div>
           )}
 
-          <div className={styles.eyebrow}>One last step</div>
-          <h1 className={styles.title}>A room with a lock<br /><em>on the door.</em></h1>
+          <div className={styles.eyebrow}>Become a member</div>
+          <h1 className={styles.title}>{upgradeReason(reason).headline}</h1>
+          <p className={styles.why}>{upgradeReason(reason).line}</p>
           <p className={styles.why}>
-            Your membership is what keeps the people who exploit creatives out. Everyone inside has agreed to real terms and has skin in the game. The fee is the filter. That&apos;s what your $15 protects.
+            Your profile stays free. You stay findable, you can answer anyone who reaches out to you, agree real terms, run the collaboration, and build a rating from finished work. None of that is going away and none of it costs anything.
           </p>
           <p className={styles.why}>
             Collective Loft is the first room of something bigger. A place to record. A label and a publishing arm built to protect the people who make the work. That&apos;s the plan, and it only happens if this room works first. You&apos;re early.
@@ -168,7 +173,7 @@ export default function SubscribePage() {
           </div>
 
           <p className={styles.footer}>
-            Already a member? <Link href="/login">Sign in</Link>
+            Not now? <Link href="/discover">Keep using your free profile</Link>
           </p>
         </div>
       </div>

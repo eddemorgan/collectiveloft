@@ -42,24 +42,15 @@ export default function SubscriptionGuard({ children }) {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('subscription_status, comped_until, disciplines')
+        .select('disciplines')
         .eq('id', user.id)
         .single()
 
-      // 'cancelled' is Lemon Squeezy's word for "not renewing, but paid
-      // through the period" - the member keeps access until the
-      // subscription_expired webhook writes 'expired'.
-      const activeStatuses = ['active', 'trialing', 'cancelled']
-      const subscribed = profile && activeStatuses.includes(profile.subscription_status)
-      // A founding member with an active comp gets full access and never sees
-      // the paywall while the comp lasts. At day 90 the comp lapses and normal
-      // subscription rules apply, which is when the add-a-card flow begins.
-      const comped = profile && profile.comped_until && new Date(profile.comped_until) > new Date()
-
-      if (!subscribed && !comped) {
-        router.push('/subscribe')
-        return
-      }
+      // No paywall. Being here, being findable, and answering someone are free
+      // for every member. Payment gates starting things, and those checks live
+      // at the actions themselves: see lib/membership.js. A guard that turned
+      // people away at the door was costing us the supply side, who are the
+      // reason anyone would pay to reach in.
 
       // Discipline is what the platform runs on: Discover, Matching, and
       // Briefs all key off it, and a profile without one cannot be found.

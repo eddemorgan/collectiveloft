@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import { useMembership } from '../hooks/useMembership'
 import { useAuth } from '../hooks/useAuth'
 import Nav from '../components/Nav'
 import Footer from '../components/Footer'
@@ -36,6 +37,7 @@ function initials(firstname, lastname) {
 
 function BriefsInner() {
   const router = useRouter()
+  const { paid } = useMembership()
   const searchParams = useSearchParams()
   const openBriefId  = searchParams.get('open')
   const fromProfile  = searchParams.get('from')
@@ -72,9 +74,18 @@ function BriefsInner() {
     loadBriefs()
   }, [authLoading])
 
+
+  // Answering a brief is free for every member. Posting one is what
+  // membership pays for: the member posting has a project, the member
+  // answering is looking for work.
+  function openPostBrief() {
+    if (!paid) { router.push('/subscribe?reason=brief'); return }
+    setPostOpen(true)
+  }
+
   // Auto-open post modal when ?post=true
   useEffect(() => {
-    if (autoPost) setPostOpen(true)
+    if (autoPost) openPostBrief()
   }, [autoPost])
 
   // Load applied brief IDs from DB
@@ -153,6 +164,7 @@ function BriefsInner() {
 
   async function submitBrief() {
     if (!postForm.title.trim()) return
+    if (!paid) { router.push('/subscribe?reason=brief'); return }
     setSubmitting(true)
     try {
       const { data: { user: u } } = await supabase.auth.getUser()
@@ -260,7 +272,7 @@ function BriefsInner() {
           <div className={styles.hdrTitle}>Collab Briefs</div>
           <div className={styles.hdrCount}>{filtered.length} open</div>
         </div>
-        <button className={styles.btnPost} onClick={() => setPostOpen(true)}>+ Post a Brief</button>
+        <button className={styles.btnPost} onClick={openPostBrief}>+ Post a Brief</button>
       </div>
 
       <div className={styles.filterTabs}>

@@ -102,7 +102,6 @@ export default function SubscribePage() {
   const features = [
     'Reach out to anyone you find, and start the conversation yourself',
     'Post briefs. Say what you are making and who you need, and let people come to you',
-    'Priority in Matching, so the right people see you first',
     'You are funding a platform that takes no cut of your collaborations, ever',
   ]
 

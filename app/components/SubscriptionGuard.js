@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 
 // Pages a logged-out visitor may see. Matched exactly.
-const PUBLIC_PATHS = ['/', '/login', '/subscribe', '/signup', '/onboarding', '/browse', '/how-it-works', '/morgan-collective', '/help', '/about', '/guide', '/Collective_Loft_User_Guide.pdf']
+const PUBLIC_PATHS = ['/', '/login', '/subscribe', '/signup', '/onboarding', '/student/verify', '/browse', '/how-it-works', '/morgan-collective', '/help', '/about', '/guide', '/Collective_Loft_User_Guide.pdf']
 
 // Whole public sections, matched by prefix. An exact-match list cannot cover
 // these: /blog/some-post is never equal to /blog, so every post and every
@@ -42,7 +42,7 @@ export default function SubscriptionGuard({ children }) {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('subscription_status, comped_until, disciplines')
+        .select('subscription_status, comped_until, student_until, disciplines')
         .eq('id', user.id)
         .single()
 
@@ -55,8 +55,13 @@ export default function SubscriptionGuard({ children }) {
       // the paywall while the comp lasts. At day 90 the comp lapses and normal
       // subscription rules apply, which is when the add-a-card flow begins.
       const comped = profile && profile.comped_until && new Date(profile.comped_until) > new Date()
+      // A verified student rides free while student_until holds. The date is
+      // granted a year at a time by /api/student/confirm, so expiry IS the
+      // annual re-verification: the day it lapses, this check fails and the
+      // subscribe page offers the re-verify path.
+      const student = profile && profile.student_until && new Date(profile.student_until) > new Date()
 
-      if (!subscribed && !comped) {
+      if (!subscribed && !comped && !student) {
         router.push('/subscribe')
         return
       }

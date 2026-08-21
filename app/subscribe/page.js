@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import { eduDomain } from '../../lib/students'
 import styles from './subscribe.module.css'
 
 // Paddle.js is loaded from their CDN rather than added as a dependency: it is
@@ -15,17 +17,61 @@ const PADDLE_JS = 'https://cdn.paddle.com/paddle/v2/paddle.js'
 const CHECKOUT_FRAME_CLASS = 'paddle-checkout-frame'
 
 export default function SubscribePage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState(null)
   const [cancelled, setCancelled] = useState(false)
   const [paddleReady, setPaddleReady] = useState(false)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [studentSending, setStudentSending] = useState(false)
+  const [studentError, setStudentError] = useState('')
+  const [wasStudent, setWasStudent] = useState(false)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     setCancelled(params.get('cancelled') === 'true')
-    supabase.auth.getUser().then(({ data }) => setUser(data.user))
+    supabase.auth.getUser().then(async ({ data }) => {
+      setUser(data.user)
+      // A lapsed student lands here when student_until expires. Knowing they
+      // verified before changes the offer from "students join free" to
+      // "still a student? re-verify", which is the honest version of both.
+      if (data.user && eduDomain(data.user.email)) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('student_domain')
+          .eq('id', data.user.id)
+          .maybeSingle()
+        setWasStudent(!!profile?.student_domain)
+      }
+    })
   }, [])
+
+  // The .edu path around the paywall: send the code, go type it in. Serves
+  // both the brand-new student and the annual re-verify, because the flow is
+  // identical and the server does not care which one you are.
+  const handleStudentVerify = async () => {
+    setStudentSending(true)
+    setStudentError('')
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      if (!token) { window.location.href = '/login'; return }
+      const res = await fetch('/api/student/request', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      const j = await res.json()
+      if (!res.ok) {
+        setStudentError(j.error || 'Could not send a code. Try again.')
+        setStudentSending(false)
+        return
+      }
+      router.push('/student/verify')
+    } catch {
+      setStudentError('Could not send a code. Try again.')
+      setStudentSending(false)
+    }
+  }
 
   useEffect(() => {
     const token = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN
@@ -134,6 +180,24 @@ export default function SubscribePage() {
           <p className={styles.reassure}>
             Your first 7 days are free. You won&apos;t be charged until <strong>{trialEnd}</strong>, and you can cancel anytime.
           </p>
+
+          {user && eduDomain(user.email) && (
+            <div className={styles.card} style={{ marginBottom: '1.25rem' }}>
+              <div className={styles.priceNote} style={{ marginBottom: '0.5rem' }}>
+                {wasStudent
+                  ? 'Your student year is up. Still enrolled? Re-verify your school email and the next year is free too.'
+                  : 'You signed up with a school email. Students pay nothing on Collective Loft: verify it and skip this page entirely.'}
+              </div>
+              {studentError && (
+                <div className={styles.priceNote} style={{ color: '#a05b47', marginBottom: '0.5rem' }}>{studentError}</div>
+              )}
+              <button className={styles.btn} onClick={handleStudentVerify} disabled={studentSending}>
+                {studentSending
+                  ? 'Sending your code…'
+                  : wasStudent ? 'Re-verify my student email →' : 'Verify my student email →'}
+              </button>
+            </div>
+          )}
 
           <div className={styles.card}>
             <div className={styles.price}>

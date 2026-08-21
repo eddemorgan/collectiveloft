@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import { eduDomain } from '../../lib/students'
 import styles from '../login/login.module.css'
 
 export default function SignupPage() {
@@ -89,6 +90,20 @@ export default function SignupPage() {
       }).catch(() => {})
     }
 
+    // Students skip the paywall a different way: a .edu sign-in address earns
+    // a verification code and a free year once it is entered. Founding status
+    // wins if both apply, since 90 days comped plus a badge beats a bare comp.
+    if (!comped && eduDomain(email) && token) {
+      try {
+        await fetch('/api/student/request', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        router.push('/student/verify')
+        return
+      } catch { /* code send failed, fall through to the normal path */ }
+    }
+
     router.push(comped ? '/onboarding?onboarding=true' : '/subscribe')
   }
 
@@ -111,6 +126,7 @@ export default function SignupPage() {
           <div className={styles.title}>Create your account.</div>
           <div className={styles.sub}>
             Join a curated network of creatives. 7-day free trial, then $15/month.
+            Students join free: sign up with your .edu email and we verify it, no card ever.
           </div>
 
           {error && <div className={styles.errorBox}>{error}</div>}

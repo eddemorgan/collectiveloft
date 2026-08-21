@@ -3,7 +3,7 @@ import { verifyCaller, sendMail, appUrl } from '../../../../lib/mailer'
 import { eduDomain, CODE_TTL_MINUTES } from '../../../../lib/students'
 import { studentVerifyEmailHtml } from '../../../../lib/emails'
 
-// Sends a six-digit verification code to the caller's own .edu address.
+// Sends a six-digit verification code to the caller's own school address.
 //
 // Security model, same shape as founding redeem: the caller never chooses the
 // recipient. The code goes to the verified email on the caller's session and
@@ -25,7 +25,7 @@ export async function POST(request) {
     const domain = eduDomain(user.email)
     if (!domain) {
       return Response.json(
-        { error: 'Student membership needs a .edu sign-in email.' },
+        { error: 'Student membership needs a recognized school sign-in email.' },
         { status: 400 }
       )
     }

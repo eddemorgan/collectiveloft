@@ -90,7 +90,7 @@ export default function SignupPage() {
       }).catch(() => {})
     }
 
-    // Students skip the paywall a different way: a .edu sign-in address earns
+    // Students skip the paywall a different way: a school sign-in address earns
     // a verification code and a free year once it is entered. Founding status
     // wins if both apply, since 90 days comped plus a badge beats a bare comp.
     if (!comped && eduDomain(email) && token) {
@@ -126,7 +126,7 @@ export default function SignupPage() {
           <div className={styles.title}>Create your account.</div>
           <div className={styles.sub}>
             Join a curated network of creatives. 7-day free trial, then $15/month.
-            Students join free: sign up with your .edu email and we verify it, no card ever.
+            Students join free: sign up with your school email and we verify it, no card ever.
           </div>
 
           {error && <div className={styles.errorBox}>{error}</div>}

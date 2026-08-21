@@ -23,7 +23,7 @@ export async function POST(request) {
     const domain = eduDomain(user.email)
     if (!domain) {
       return Response.json(
-        { error: 'Student membership needs a .edu sign-in email.' },
+        { error: 'Student membership needs a recognized school sign-in email.' },
         { status: 400 }
       )
     }

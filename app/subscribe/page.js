@@ -46,7 +46,7 @@ export default function SubscribePage() {
     })
   }, [])
 
-  // The .edu path around the paywall: send the code, go type it in. Serves
+  // The school-email path around the paywall: send the code, go type it in. Serves
   // both the brand-new student and the annual re-verify, because the flow is
   // identical and the server does not care which one you are.
   const handleStudentVerify = async () => {

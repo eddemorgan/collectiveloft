@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import styles from '../../login/login.module.css'
 
-// Where a .edu signup lands after the code email goes out, and where a lapsed
+// Where a school-email signup lands after the code email goes out, and where a lapsed
 // student comes back each year. One input, one job: type the six digits, get
 // the year. The heavy lifting lives in /api/student/confirm; this page just
 // carries the code there and routes on the answer.
@@ -105,7 +105,7 @@ export default function StudentVerifyPage() {
           <div className={styles.eyebrow}>Student membership</div>
           <div className={styles.title}>Check your school inbox.</div>
           <div className={styles.sub}>
-            We sent a six-digit code to {email || 'your .edu address'}. Enter it here and your membership is free for the next year. Students pay nothing on Collective Loft.
+            We sent a six-digit code to {email || 'your school address'}. Enter it here and your membership is free for the next year. Students pay nothing on Collective Loft.
           </div>
 
           {error && <div className={styles.errorBox}>{error}</div>}

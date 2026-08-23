@@ -73,7 +73,7 @@ export default function GuidePage() {
         <section id="membership" className={styles.section}>
           <div className={styles.sHead}><span className={styles.sNum}>2</span><h2 className={styles.sTitle}>Your membership</h2></div>
           <p className={styles.p}>
-            Membership is <strong>$15 a month</strong>, with a 7-day free trial. Your card is not charged until
+            Membership is <strong>$10 a month</strong>, with a 7-day free trial. Your card is not charged until
             the trial ends, and you can cancel anytime before then at no cost. Checkout runs through Paddle,
             our merchant of record, which also handles any sales tax or VAT for your country, so the
             price you see at checkout is the full price.
@@ -84,7 +84,7 @@ export default function GuidePage() {
           </p>
           <div className={styles.callout}>
             <div className={styles.calloutLbl}>Founding members</div>
-            <p>If you joined through a founding claim link, your first 90 days are free. No card is needed to reach the platform. Near the end of that window you will be invited to add a card to continue at $15 a month.</p>
+            <p>If you joined through a founding claim link, your first 90 days are free. No card is needed to reach the platform. Near the end of that window you will be invited to add a card to continue at $10 a month.</p>
           </div>
           <p className={styles.p}>
             Manage or cancel your plan anytime from your profile. Cancelling stops the next renewal; you keep
@@ -94,6 +94,21 @@ export default function GuidePage() {
             Want your money back? You have <strong>14 days</strong> from any payment to request a full refund,
             for any reason. Refunds are issued by Paddle, our merchant of record. Ask them directly at
             paddle.net, or send us a note from the Help page and we will pass it on.
+          </p>
+
+          <div className={styles.h3}>Students join free</div>
+          <p className={styles.p}>
+            If you are enrolled, membership costs nothing. Sign up with your school email address,
+            we send a six-digit code to that address, you enter it, and you have a free year with
+            full access and no card. Re-verify the same way each year for as long as you are a
+            student.
+          </p>
+          <p className={styles.p}>
+            This works in countries where school email domains are reserved for accredited
+            institutions, which covers the United States, the United Kingdom, Australia, Japan,
+            India, South Africa and around thirty others. Some countries put universities on
+            ordinary domains with nothing to tell them apart, so the check cannot recognise them
+            yet. If that is you, send us a note from the Help page.
           </p>
 
           <div className={styles.h3}>Closing your account</div>

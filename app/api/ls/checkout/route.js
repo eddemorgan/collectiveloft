@@ -1,6 +1,6 @@
 import { createMembershipCheckout } from '../../../../lib/lemonsqueezy'
 
-// Hands the member a Lemon Squeezy hosted checkout for the $15 membership
+// Hands the member a Lemon Squeezy hosted checkout for the $10 membership
 // (7-day trial on the variant). LS is merchant of record: they collect and
 // remit sales tax worldwide, so the platform files nothing.
 export async function POST(req) {

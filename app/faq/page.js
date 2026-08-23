@@ -44,19 +44,19 @@ const FAQ_GROUPS = [
     items: [
       {
         q: 'How much does Collective Loft cost?',
-        a: 'Membership is $15 per month. There are no tiers, no feature gates, and no pay-to-unlock. The subscription gets you full access to everything: Discover, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio.',
+        a: 'Membership is $10 per month. There are no tiers, no feature gates, and no pay-to-unlock. The subscription gets you full access to everything: Discover, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio.',
       },
       {
         q: 'Why does Collective Loft charge a subscription?',
-        a: 'Because free platforms attract people who aren\u2019t serious. The $15 a month keeps this a professional environment, a room where everyone has skin in the game, agreements are in writing before work starts, and your creative work is protected from day one. The cost is the filter that keeps the quality high.',
+        a: 'Because free platforms attract people who aren\u2019t serious. The $10 a month keeps this a professional environment, a room where everyone has skin in the game, agreements are in writing before work starts, and your creative work is protected from day one. The cost is the filter that keeps the quality high.',
       },
       {
-        q: 'What does the $15 a month actually get me?',
+        q: 'What does the $10 a month actually get me?',
         a: 'Everything. Full access to Discover, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio, with no tiers or locked features. Use it to run ten collaborations a month, or use it to build your profile and get discovered. The platform works on your timeline and your priorities.',
       },
       {
         q: 'Is there a free trial?',
-        a: 'Founding members get three months free, no charge, no catch. After that it\u2019s $15 a month, the same as everyone else. The founding member badge on your profile stays forever.',
+        a: 'Founding members get three months free, no charge, no catch. After that it\u2019s $10 a month, the same as everyone else. The founding member badge on your profile stays forever.',
       },
     ],
   },
@@ -73,7 +73,7 @@ const FAQ_GROUPS = [
       },
       {
         q: 'What happens after the three free months end?',
-        a: 'It becomes $15 a month, the same as every other member. Nothing else changes, you keep full access and your founding member badge stays on your profile permanently.',
+        a: 'It becomes $10 a month, the same as every other member. Nothing else changes, you keep full access and your founding member badge stays on your profile permanently.',
       },
     ],
   },

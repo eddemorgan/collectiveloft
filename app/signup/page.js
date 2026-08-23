@@ -125,7 +125,7 @@ export default function SignupPage() {
           <div className={styles.eyebrow}>Collective Loft</div>
           <div className={styles.title}>Create your account.</div>
           <div className={styles.sub}>
-            Join a curated network of creatives. 7-day free trial, then $15/month.
+            Join a curated network of creatives. 7-day free trial, then $10/month.
             Students join free: sign up with your school email and we verify it, no card ever.
           </div>
 

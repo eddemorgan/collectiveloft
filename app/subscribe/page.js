@@ -172,7 +172,7 @@ export default function SubscribePage() {
           <div className={styles.eyebrow}>One last step</div>
           <h1 className={styles.title}>A room with a lock<br /><em>on the door.</em></h1>
           <p className={styles.why}>
-            Your membership is what keeps the people who exploit creatives out. Everyone inside has agreed to real terms and has skin in the game. The fee is the filter. That&apos;s what your $15 protects.
+            Your membership is what keeps the people who exploit creatives out. Everyone inside has agreed to real terms and has skin in the game. The fee is the filter. That&apos;s what your $10 protects.
           </p>
           <p className={styles.why}>
             Collective Loft is the first room of something bigger. A place to record. A label and a publishing arm built to protect the people who make the work. That&apos;s the plan, and it only happens if this room works first. You&apos;re early.
@@ -201,7 +201,7 @@ export default function SubscribePage() {
 
           <div className={styles.card}>
             <div className={styles.price}>
-              $15<span className={styles.per}>/month</span>
+              $10<span className={styles.per}>/month</span>
             </div>
             <p className={styles.priceNote}>After your 7-day free trial</p>
 

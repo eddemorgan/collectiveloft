@@ -458,47 +458,34 @@ export default function StudioPage() {
   }
 
   async function confirmComplete() {
-    await supabase.from('collab_terms').update({
-      status: 'complete',
-      close_proposed: false,
-      completed_at: new Date().toISOString(),
-    }).eq('id', studioId)
+    // The completion runs server side. Crediting a collaboration writes BOTH
+    // members' profiles, and the browser can only ever write its own row, so
+    // doing it here credited whoever clicked and silently skipped their
+    // collaborator. The route holds the service role and closes the studio,
+    // credits both sides, and is safe to call twice.
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session?.access_token) {
+      sys('Could not confirm completion. Please refresh and try again.')
+      return
+    }
+
+    const res = await fetch('/api/studio/complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ studioId }),
+    }).catch(() => null)
+
+    if (!res || !res.ok) {
+      sys('Could not confirm completion. Please try again.')
+      return
+    }
 
     // Ask both parties to rate. Fire and forget: never block completion.
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session?.access_token) {
-      fetch('/api/send-rating-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-        body: JSON.stringify({ studioId }),
-      }).catch(() => {})
-    }
-
-    // Check if these two have completed a studio together before (excluding this one)
-    const { data: priorStudios } = await supabase
-      .from('collab_terms')
-      .select('id')
-      .neq('id', studioId)
-      .eq('status', 'complete')
-      .or(`and(initiator_id.eq.${owner?.id},partner_id.eq.${contributor?.id}),and(initiator_id.eq.${contributor?.id},partner_id.eq.${owner?.id})`)
-
-    const firstTimeCollaborators = !priorStudios || priorStudios.length === 0
-
-    // Increment collabs_count on both profiles always
-    if (owner?.id) {
-      const { data: ownerProfile } = await supabase.from('profiles').select('collabs_count, connections_count').eq('id', owner.id).single()
-      await supabase.from('profiles').update({
-        collabs_count: (ownerProfile?.collabs_count || 0) + 1,
-        connections_count: firstTimeCollaborators ? (ownerProfile?.connections_count || 0) + 1 : (ownerProfile?.connections_count || 0),
-      }).eq('id', owner.id)
-    }
-    if (contributor?.id) {
-      const { data: contribProfile } = await supabase.from('profiles').select('collabs_count, connections_count').eq('id', contributor.id).single()
-      await supabase.from('profiles').update({
-        collabs_count: (contribProfile?.collabs_count || 0) + 1,
-        connections_count: firstTimeCollaborators ? (contribProfile?.connections_count || 0) + 1 : (contribProfile?.connections_count || 0),
-      }).eq('id', contributor.id)
-    }
+    fetch('/api/send-rating-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ studioId }),
+    }).catch(() => {})
 
     setStudio(prev => ({ ...prev, status: 'complete' }))
     setShowComplete(true)

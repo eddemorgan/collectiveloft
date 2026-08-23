@@ -21,3 +21,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 scripts/founding-sample.html
+
+# Vercel CLI project linkage, local only.
+.vercel

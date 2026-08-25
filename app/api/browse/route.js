@@ -35,7 +35,7 @@ export async function GET(request) {
       .is('deleted_at', null)
 
     if (error) {
-      return Response.json({ creatives: [], matched: 0, total: 0 }, { status: 200 })
+      return Response.json({ creatives: [], matched: 0, total: 0, counts: {} }, { status: 200 })
     }
 
     // Keep only profiles that have at least a discipline — so cards aren't empty
@@ -46,6 +46,7 @@ export async function GET(request) {
 
     // Optional radius search around a chosen city.
     const params = new URL(request.url).searchParams
+    const discipline = (params.get('discipline') || '').trim()
     const lat = parseFloat(params.get('lat'))
     const lng = parseFloat(params.get('lng'))
     const radius = parseFloat(params.get('radius'))
@@ -67,7 +68,26 @@ export async function GET(request) {
     }
 
     const matched = inRange.length
-    const shown = [...inRange]
+
+    // Per-discipline totals across everyone in range, not just the handful of
+    // cards that get shown. A visitor's real question is not how many people
+    // are here, it is whether their people are here, and a count of 18 shuffled
+    // cards cannot answer that.
+    const counts = {}
+    for (const p of inRange) {
+      for (const d of p.disciplines || []) {
+        if (d) counts[d] = (counts[d] || 0) + 1
+      }
+    }
+
+    // Filtering happens here rather than in the browser for the same reason:
+    // the browser only ever receives 18 cards, so filtering them client side
+    // would show two Musicians out of a platform that has forty.
+    const filtered = discipline
+      ? inRange.filter(p => (p.disciplines || []).includes(discipline))
+      : inRange
+
+    const shown = [...filtered]
 
     // Shuffle
     for (let i = shown.length - 1; i > 0; i--) {
@@ -79,7 +99,9 @@ export async function GET(request) {
     // No name, no email, no location, no coordinates, no photo.
     const creatives = shown.slice(0, 18).map((p, idx) => ({
       key: idx, // positional key only — not the real id
-      discipline: (p.disciplines && p.disciplines[0]) || 'Creative',
+      discipline: discipline && (p.disciplines || []).includes(discipline)
+        ? discipline
+        : (p.disciplines && p.disciplines[0]) || 'Creative',
       skills: Array.isArray(p.skills) ? p.skills.slice(0, 3) : [],
       seekingDiscipline:
         Array.isArray(p.seeking_disciplines) && p.seeking_disciplines.length > 0
@@ -90,8 +112,8 @@ export async function GET(request) {
         : [],
     }))
 
-    return Response.json({ creatives, matched, total, located }, { status: 200 })
+    return Response.json({ creatives, matched, total, located, counts, showing: filtered.length }, { status: 200 })
   } catch (err) {
-    return Response.json({ creatives: [], matched: 0, total: 0 }, { status: 200 })
+    return Response.json({ creatives: [], matched: 0, total: 0, counts: {} }, { status: 200 })
   }
 }

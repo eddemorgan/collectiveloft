@@ -5,6 +5,19 @@ import Link from 'next/link'
 import styles from './browse.module.css'
 import Footer from '../components/Footer'
 
+// The eight disciplines, in the same order and with the same icons Discover
+// uses, so the public page and the member page describe one platform.
+const DISCIPLINES = [
+  { key: 'Visual Art',    icon: '🎨' },
+  { key: 'Music',         icon: '🎵' },
+  { key: 'Writing',       icon: '✍️' },
+  { key: 'Design & Web',  icon: '🖥' },
+  { key: 'Film & Video',  icon: '🎬' },
+  { key: 'Photography',   icon: '📷' },
+  { key: 'Performance',   icon: '🎭' },
+  { key: 'Creative Tech', icon: '💻' },
+]
+
 const DISC_ICON = {
   'Visual Art': '🎨',
   'Music': '🎵',
@@ -21,6 +34,8 @@ export default function BrowsePage() {
   const [creatives, setCreatives] = useState(null)
   const [matched,   setMatched]   = useState(null)
   const [total,     setTotal]     = useState(null)
+  const [counts,    setCounts]    = useState({})
+  const [activeDisc, setActiveDisc] = useState(null)
 
   // Radius search: a chosen center city, a distance, and a unit. The distance
   // itself is measured on the server, so no member coordinates come down here.
@@ -31,18 +46,25 @@ export default function BrowsePage() {
   const [unit,    setUnit]    = useState('mi')
 
   useEffect(() => {
-    const qs = city
-      ? `?lat=${city.lat}&lng=${city.lng}&radius=${dist || 0}&unit=${unit}`
-      : ''
+    const p = new URLSearchParams()
+    if (city) {
+      p.set('lat', city.lat)
+      p.set('lng', city.lng)
+      p.set('radius', String(dist || 0))
+      p.set('unit', unit)
+    }
+    if (activeDisc) p.set('discipline', activeDisc)
+    const qs = p.toString() ? `?${p.toString()}` : ''
     fetch(`/api/browse${qs}`)
       .then(r => r.json())
       .then(d => {
         setCreatives(Array.isArray(d.creatives) ? d.creatives : [])
         setMatched(typeof d.matched === 'number' ? d.matched : null)
         setTotal(typeof d.total === 'number' ? d.total : null)
+        setCounts(d.counts && typeof d.counts === 'object' ? d.counts : {})
       })
       .catch(() => setCreatives([]))
-  }, [city, dist, unit])
+  }, [city, dist, unit, activeDisc])
 
   async function searchCity(q) {
     setQuery(q)
@@ -87,7 +109,7 @@ export default function BrowsePage() {
         <div className={styles.eyebrow}>Real creatives, already here</div>
         <h1 className={styles.title}>Your people are <em>out there.</em></h1>
         <p className={styles.sub}>
-          A look at who&apos;s on Collective Loft right now — real disciplines, real skills, real collaborators. Join to see who they are and reach them.
+          A look at who&apos;s on Collective Loft right now. Real disciplines, real skills, real collaborators. Join to see who they are and reach them.
         </p>
       </header>
 
@@ -156,13 +178,51 @@ export default function BrowsePage() {
         </div>
       </div>
 
+      <div className={styles.layout}>
+        {/* The discipline rail. A visitor's real question is not how many
+            people are here, it is whether their people are here, so the counts
+            are per discipline and every discipline is listed even at zero. The
+            counts come from the server across everyone in range, not from the
+            handful of cards on screen. */}
+        <aside className={styles.rail}>
+          <div className={styles.railLabel}>Disciplines</div>
+          <div className={styles.railBtns}>
+            <button
+              className={`${styles.railBtn} ${activeDisc === null ? styles.railBtnOn : ''}`}
+              onClick={() => setActiveDisc(null)}
+            >
+              <span className={styles.railLeft}>
+                <span className={styles.railIcon}>✦</span>
+                <span className={styles.railName}>All disciplines</span>
+              </span>
+              <span className={styles.railCount}>{total ?? 0}</span>
+            </button>
+            {DISCIPLINES.map(d => (
+              <button
+                key={d.key}
+                className={`${styles.railBtn} ${activeDisc === d.key ? styles.railBtnOn : ''}`}
+                onClick={() => setActiveDisc(activeDisc === d.key ? null : d.key)}
+              >
+                <span className={styles.railLeft}>
+                  <span className={styles.railIcon}>{d.icon}</span>
+                  <span className={styles.railName}>{d.key}</span>
+                </span>
+                <span className={styles.railCount}>{counts[d.key] || 0}</span>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        <div className={styles.results}>
       {creatives === null ? (
         <div className={styles.loading}>Loading creatives…</div>
       ) : creatives.length === 0 ? (
         <div className={styles.empty}>
-          {city
-            ? 'No one in range yet. Widen the distance, or be the first one here.'
-            : 'Creatives are joining now. Be one of the first.'}
+          {activeDisc
+            ? `No ${activeDisc} yet. That is an opening, not a gap.`
+            : city
+              ? 'No one in range yet. Widen the distance, or be the first one here.'
+              : 'Creatives are joining now. Be one of the first.'}
         </div>
       ) : (
         <div className={styles.grid}>
@@ -207,6 +267,8 @@ export default function BrowsePage() {
           })}
         </div>
       )}
+        </div>
+      </div>
 
       <section className={styles.close}>
         <h2 className={styles.closeH}>Find the one who&apos;s <em>looking for you.</em></h2>

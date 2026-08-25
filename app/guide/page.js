@@ -61,7 +61,7 @@ export default function GuidePage() {
           <ol className={styles.steps}>
             <li>Click <strong>Join Collective Loft</strong> on the landing page.</li>
             <li>Enter your first name, last name, email, and a password of at least 8 characters.</li>
-            <li>You are signed in immediately and taken to membership.</li>
+            <li>You are signed in immediately and taken to onboarding, where you set up your profile. There is nothing to pay.</li>
           </ol>
           <div className={styles.note}>
             <div className={styles.calloutLbl}>Welcome email</div>
@@ -73,22 +73,34 @@ export default function GuidePage() {
         <section id="membership" className={styles.section}>
           <div className={styles.sHead}><span className={styles.sNum}>2</span><h2 className={styles.sTitle}>Your membership</h2></div>
           <p className={styles.p}>
-            Membership is <strong>$10 a month</strong>, with a 7-day free trial. Your card is not charged until
-            the trial ends, and you can cancel anytime before then at no cost. Checkout runs through Paddle,
-            our merchant of record, which also handles any sales tax or VAT for your country, so the
-            price you see at checkout is the full price.
+            <strong>Joining is free, and a free member is a real member.</strong> You have a profile, you appear
+            in Discover and Matching, people can reach you, and when they do you can agree terms, work in the
+            Loft Studio, get paid, and build a rating from finished work. That never expires and never needs a
+            card.
           </p>
           <p className={styles.p}>
-            The membership is the filter. It keeps the people who exploit creatives out, so everyone inside has
-            agreed to real terms and has skin in the game. It is what keeps this a protected place to work.
+            Membership is <strong>$10 a month</strong>, and what it buys is the right to{' '}
+            <strong>start things</strong>: posting a Collab Brief, and reaching out to someone first. There is a
+            7-day free trial, your
+            card is not charged until it ends, and you can cancel anytime before then at no cost. Checkout runs
+            through Paddle, our merchant of record, which also handles any sales tax or VAT for your country, so
+            the price you see at checkout is the full price.
+          </p>
+          <p className={styles.p}>
+            That split is deliberate. The person starting a project has a budget. The person answering is looking
+            for work, and charging them to be found is the thing this platform was built to argue against. It also
+            puts the filter where it belongs: people who exploit creatives do it by contacting a great many at
+            once, and that is exactly the side that costs money here.
           </p>
           <div className={styles.callout}>
             <div className={styles.calloutLbl}>Founding members</div>
-            <p>If you joined through a founding claim link, your first 90 days are free. No card is needed to reach the platform. Near the end of that window you will be invited to add a card to continue at $10 a month.</p>
+            <p>If you joined through a founding claim link, your first 90 days carry full membership, including posting briefs and reaching out. No card is needed. When the 90 days end you become a free member, keeping your profile, your rating and your badge, and you add a card whenever you want to start something of your own again.</p>
           </div>
           <p className={styles.p}>
-            Manage or cancel your plan anytime from your profile. Cancelling stops the next renewal; you keep
-            access through the end of the period you already paid for.
+            Manage or cancel your plan anytime from your profile. Cancelling stops the next renewal, you keep
+            everything through the end of the period you already paid for, and then you are a free member again.
+            Nothing is closed or emptied. Any collaboration already running carries on to the end with full
+            access for both of you, and any brief you already posted stays live.
           </p>
           <p className={styles.p}>
             Want your money back? You have <strong>14 days</strong> from any payment to request a full refund,

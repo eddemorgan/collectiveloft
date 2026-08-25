@@ -44,7 +44,7 @@ const FAQ_GROUPS = [
     items: [
       {
         q: 'How much does Collective Loft cost?',
-        a: 'Membership is $10 per month after a 7-day free trial, and enrolled students pay nothing at all. There are no feature gates and no pay-to-unlock: every member gets full access to everything, which is Discover, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio.',
+        a: 'Joining is free. Membership is $10 per month after a 7-day free trial, and enrolled students pay nothing at all. What the $10 buys is the right to start things: posting a Collab Brief, and reaching out to someone first. Being found, answering, agreeing terms, working in the Loft Studio, getting paid and building a rating are free for every member, always.',
       },
       {
         q: 'Why does Collective Loft charge a subscription?',
@@ -57,6 +57,14 @@ const FAQ_GROUPS = [
       {
         q: 'Is there a free trial?',
         a: 'Yes. Your first 7 days are free. Your card is not charged until the trial ends, and you can cancel anytime before then at no cost.',
+      },
+      {
+        q: 'Is there a free version?',
+        a: 'Joining is free, and a free member is a real member. You get a profile, you appear in Discover and Discipline Matching, other members can reach you, and when they do you can agree terms, work in the Loft Studio, get paid, and build a rating from finished work. It never expires and never needs a card. Membership at $10 a month buys the right to START things: posting a Collab Brief, and reaching out to someone first. The person starting a project has a budget. The person answering is looking for work, and charging them to be found is the thing this platform was built to argue against.',
+      },
+      {
+        q: 'What happens if I cancel?',
+        a: 'You keep everything through the end of the month you already paid for, and then you are a free member again. Your profile, portfolio, rating and collaboration history all stay. Any collaboration already running carries on to the end with full access for both of you, and any brief you already posted stays live. You just cannot start a new one until you subscribe again.',
       },
       {
         q: 'Are students free?',
@@ -81,7 +89,7 @@ const FAQ_GROUPS = [
       },
       {
         q: 'What happens when the founding 90 days end?',
-        a: 'It becomes $10 a month, the same as every other member. Nothing else changes, you keep full access and your founding member badge stays on your profile permanently.',
+        a: 'You become a free member, keeping your profile, your portfolio, your rating and your founding badge, which stays permanently. What ends is the ability to start things: posting briefs and reaching out first. Add a card at $10 a month whenever you want that back.',
       },
     ],
   },

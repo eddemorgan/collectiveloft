@@ -44,7 +44,11 @@ That is the honest version. It is not a feed to post into or a marketplace to be
 
 ## What it costs
 
-Membership is ten dollars a month, no feature gates, nothing locked behind a higher plan. Your first seven days are free. If you are an enrolled student, verify a school email address and it costs you nothing at all. The subscription is the filter that keeps it a professional room where everyone has skin in the game.
+Joining is free, and a free member is a real member. You get a profile, you turn up in Discover and Matching, people can reach you, and when they do you agree terms, work in the Loft Studio, get paid, and build a rating out of finished work.
+
+Membership is ten dollars a month and it buys one thing: the right to start. Posting a brief. Reaching out to someone first. Your first seven days are free, and if you are an enrolled student, verify a school email address and it costs you nothing at all.
+
+That split is the whole argument. The person starting a project has a budget. The person answering is looking for work. Charging the second one to be found is the thing this platform exists to argue against. And it puts the filter exactly where it belongs, because people who exploit creatives do it by contacting a great many of them at once, and that is the side that now costs money.
 
 If you want to see it works, check it out.  We are live now!
 

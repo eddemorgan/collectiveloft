@@ -44,7 +44,7 @@ That is the honest version. It is not a feed to post into or a marketplace to be
 
 ## What it costs
 
-Membership is fifteen dollars a month, no tiers, no feature gates. Founding members get three months free and keep a permanent founding badge. The subscription is the filter that keeps it a professional room where everyone has skin in the game.
+Membership is ten dollars a month, no feature gates, nothing locked behind a higher plan. Your first seven days are free. If you are an enrolled student, verify a school email address and it costs you nothing at all. The subscription is the filter that keeps it a professional room where everyone has skin in the game.
 
 If you want to see it works, check it out.  We are live now!
 

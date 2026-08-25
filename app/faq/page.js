@@ -44,7 +44,7 @@ const FAQ_GROUPS = [
     items: [
       {
         q: 'How much does Collective Loft cost?',
-        a: 'Membership is $10 per month. There are no tiers, no feature gates, and no pay-to-unlock. The subscription gets you full access to everything: Discover, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio.',
+        a: 'Membership is $10 per month after a 7-day free trial, and enrolled students pay nothing at all. There are no feature gates and no pay-to-unlock: every member gets full access to everything, which is Discover, Collab Briefs, discipline matching, Collab Terms, and the Loft Studio.',
       },
       {
         q: 'Why does Collective Loft charge a subscription?',
@@ -56,7 +56,15 @@ const FAQ_GROUPS = [
       },
       {
         q: 'Is there a free trial?',
-        a: 'Founding members get three months free, no charge, no catch. After that it\u2019s $10 a month, the same as everyone else. The founding member badge on your profile stays forever.',
+        a: 'Yes. Your first 7 days are free. Your card is not charged until the trial ends, and you can cancel anytime before then at no cost.',
+      },
+      {
+        q: 'Are students free?',
+        a: 'Yes. Enrolled students pay nothing. Sign up with your school email address, we send a six-digit code to that address, you enter it, and you get a free year with full access and no card. Re-verify the same way each year for as long as you are a student. This works in countries where school email domains are reserved for accredited institutions, which covers the United States, the United Kingdom, Australia, Japan, India, South Africa and around thirty others. If your school sits on an ordinary domain, send us a note from the Help page.',
+      },
+      {
+        q: 'What if I want my money back?',
+        a: 'You have 14 days from any payment to request a full refund, for any reason. Refunds are issued by Paddle, our merchant of record. Ask them directly at paddle.net, or send us a note from the Help page and we will pass it on.',
       },
     ],
   },
@@ -65,14 +73,14 @@ const FAQ_GROUPS = [
     items: [
       {
         q: 'What is a founding member?',
-        a: 'Founding members are the first cohort on the platform, selected by hand across disciplines and cities. They get three months free, full access, a permanent founding member badge on their profile, and a direct hand in shaping the platform as it grows. There are 500 founding spots.',
+        a: 'The founding members are the first cohort on the platform, chosen by hand across disciplines and cities before launch on August 1, 2026. They get 90 days free, full access, a permanent founding member badge on their profile, and a direct hand in shaping the platform as it grows.',
       },
       {
-        q: 'How do I become a founding member?',
-        a: 'Request early access and tell us your primary discipline. We\u2019re not running an open beta, we\u2019re building the founding cohort by hand, choosing people who are actively making work right now. We read every application. If you\u2019re selected, we\u2019ll be in touch with next steps before anyone else hears about it.',
+        q: 'Can I still become a founding member?',
+        a: 'No. The founding class was invited by name and the list is closed. Anyone can join Collective Loft now on the normal terms: 7 days free, then $10 a month, or free while you are an enrolled student. The founding badge is the one thing that cannot be bought later, which is rather the point of it.',
       },
       {
-        q: 'What happens after the three free months end?',
+        q: 'What happens when the founding 90 days end?',
         a: 'It becomes $10 a month, the same as every other member. Nothing else changes, you keep full access and your founding member badge stays on your profile permanently.',
       },
     ],

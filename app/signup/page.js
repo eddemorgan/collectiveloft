@@ -104,7 +104,11 @@ export default function SignupPage() {
       } catch { /* code send failed, fall through to the normal path */ }
     }
 
-    router.push(comped ? '/onboarding?onboarding=true' : '/subscribe')
+    // Everyone lands in onboarding now, comped or not. Sending a brand new
+    // member straight to a payment page contradicts the whole model: they are
+    // free, they are real members, and the upgrade prompt belongs at the moment
+    // they try to start something, not before they have seen the place.
+    router.push('/onboarding?onboarding=true')
   }
 
   return (

@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import { canInitiate, upgradeHref } from '../../lib/membership'
 import Footer from '../components/Footer'
 import styles from './terms.module.css'
 
@@ -53,6 +54,11 @@ function TermsPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      // The terms builder IS reaching out: it writes the collab_terms row that
+      // opens a Loft Studio. A free member who arrives here by link, back
+      // button or bookmark is sent to the upgrade page rather than allowed to
+      // fill in a long form the insert policy will refuse at the end of it.
+      if (!canInitiate(data)) { router.push(upgradeHref('reach')); return }
       setMyProfile(data)
       if (partnerId) {
         const { data: p } = await supabase.from('profiles').select('*').eq('id', partnerId).single()

@@ -21,6 +21,9 @@ function isPublic(pathname) {
   return PUBLIC_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/'))
 }
 
+// Named for what it used to do. It no longer guards a subscription: it keeps
+// logged-out visitors out of member pages and pushes half-finished profiles
+// back to onboarding.
 export default function SubscriptionGuard({ children }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -42,35 +45,22 @@ export default function SubscriptionGuard({ children }) {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('subscription_status, comped_until, student_until, disciplines')
+        .select('disciplines')
         .eq('id', user.id)
         .single()
 
-      // 'cancelled' is Lemon Squeezy's word for "not renewing, but paid
-      // through the period" - the member keeps access until the
-      // subscription_expired webhook writes 'expired'.
-      const activeStatuses = ['active', 'trialing', 'cancelled']
-      const subscribed = profile && activeStatuses.includes(profile.subscription_status)
-      // A founding member with an active comp gets full access and never sees
-      // the paywall while the comp lasts. At day 90 the comp lapses and normal
-      // subscription rules apply, which is when the add-a-card flow begins.
-      const comped = profile && profile.comped_until && new Date(profile.comped_until) > new Date()
-      // A verified student rides free while student_until holds. The date is
-      // granted a year at a time by /api/student/confirm, so expiry IS the
-      // annual re-verification: the day it lapses, this check fails and the
-      // subscribe page offers the re-verify path.
-      const student = profile && profile.student_until && new Date(profile.student_until) > new Date()
-
-      if (!subscribed && !comped && !student) {
-        router.push('/subscribe')
-        return
-      }
+      // No paywall here any more. Membership decides what you can START, not
+      // whether you can be here: posting a brief and reaching out first are the
+      // paid actions, gated at their own buttons and enforced by the insert
+      // policies on briefs and collab_terms. A free member is a real member,
+      // and locking them out would empty the room of exactly the people the
+      // paying members come here to find. See lib/membership.js.
 
       // Discipline is what the platform runs on: Discover, Matching, and
       // Briefs all key off it, and a profile without one cannot be found.
       // Signup creates the profile row, so a member who abandons onboarding
       // reaches the platform empty. Send them back until they finish.
-      const hasDiscipline = Array.isArray(profile.disciplines) && profile.disciplines.length > 0
+      const hasDiscipline = profile && Array.isArray(profile.disciplines) && profile.disciplines.length > 0
       if (!hasDiscipline) {
         router.push('/onboarding?onboarding=true')
         return

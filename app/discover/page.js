@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useMembership } from '../hooks/useMembership'
+import { upgradeHref } from '../../lib/membership'
 import Nav from '../components/Nav'
 import Footer from '../components/Footer'
 import styles from './discover.module.css'
@@ -80,6 +82,7 @@ function distanceMiles(lat1, lng1, lat2, lng2) {
 
 export default function DiscoverPage() {
   const router = useRouter()
+  const { canInitiate } = useMembership()
   const { loading: authLoading, user } = useAuth()
 
   const [creatives,     setCreatives]     = useState([])
@@ -204,9 +207,12 @@ export default function DiscoverPage() {
     setLocation(''); setSearch(''); setSortMode('recent'); clearRadius()
   }
 
+  // Reaching out is the paid action. A free member is sent to the upgrade page
+  // with the reason, rather than to a terms form the database will refuse.
   function handleReachOut(e, id) {
     e.preventDefault()
     e.stopPropagation()
+    if (!canInitiate) { router.push(upgradeHref('reach')); return }
     router.push(`/terms?with=${id}`)
   }
 

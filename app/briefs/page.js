@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { useMembership } from '../hooks/useMembership'
+import { upgradeHref } from '../../lib/membership'
 import Nav from '../components/Nav'
 import Footer from '../components/Footer'
 import styles from './briefs.module.css'
@@ -36,6 +38,7 @@ function initials(firstname, lastname) {
 
 function BriefsInner() {
   const router = useRouter()
+  const { canInitiate } = useMembership()
   const searchParams = useSearchParams()
   const openBriefId  = searchParams.get('open')
   const fromProfile  = searchParams.get('from')
@@ -74,7 +77,8 @@ function BriefsInner() {
 
   // Auto-open post modal when ?post=true
   useEffect(() => {
-    if (autoPost) setPostOpen(true)
+    if (autoPost && canInitiate) setPostOpen(true)
+    else if (autoPost) router.push(upgradeHref('brief'))
   }, [autoPost])
 
   // Load applied brief IDs from DB
@@ -149,6 +153,14 @@ function BriefsInner() {
     setBriefs(prev => prev.filter(b => b.id !== id))
     if (selectedId === id) setSelectedId(null)
     setDeletingId(null)
+  }
+
+  // Posting is the paid action. Answering a brief is not, and never will be:
+  // the member replying is looking for work, and charging them to answer is
+  // the thing this platform argues against.
+  function openPostForm() {
+    if (!canInitiate) { router.push(upgradeHref('brief')); return }
+    setPostOpen(true)
   }
 
   async function submitBrief() {
@@ -260,7 +272,7 @@ function BriefsInner() {
           <div className={styles.hdrTitle}>Collab Briefs</div>
           <div className={styles.hdrCount}>{filtered.length} open</div>
         </div>
-        <button className={styles.btnPost} onClick={() => setPostOpen(true)}>+ Post a Brief</button>
+        <button className={styles.btnPost} onClick={openPostForm}>+ Post a Brief</button>
       </div>
 
       <div className={styles.filterTabs}>

@@ -1,26 +1,26 @@
-import { createClient } from '@supabase/supabase-js'
+import { verifyCaller } from '../../../../lib/mailer'
 import { paddleFetch } from '../../../../lib/paddle'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
-
-// Returns the member's Paddle customer portal URL, where they update cards,
-// cancel, or resume. The customer id is read from their profile, never taken
-// from the request, so a caller cannot open someone else's portal.
-export async function POST(req) {
+// Returns the signed-in member's Paddle customer portal URL, where they update
+// a card, cancel, or resume.
+//
+// The member is taken from the verified session and never from the request
+// body. This route used to read a userId off the POST body with no session
+// check at all, which meant anyone holding a member's UUID could open that
+// member's billing portal: their payment method, their invoices, their cancel
+// button. Profile UUIDs travel in ordinary profile links, so that was not a
+// theoretical id to come by.
+export async function POST(request) {
   try {
-    const { userId } = await req.json()
-    if (!userId) {
-      return Response.json({ error: 'userId required' }, { status: 400 })
-    }
+    const caller = await verifyCaller(request)
+    if (!caller) return Response.json({ error: 'Not signed in' }, { status: 401 })
+    const { user, supabase: db } = caller
 
-    const { data: profile } = await supabaseAdmin
+    const { data: profile } = await db
       .from('profiles')
       .select('paddle_customer_id, paddle_subscription_id')
-      .eq('id', userId)
-      .single()
+      .eq('id', user.id)
+      .maybeSingle()
 
     if (!profile?.paddle_customer_id) {
       return Response.json({ error: 'No subscription on file' }, { status: 404 })

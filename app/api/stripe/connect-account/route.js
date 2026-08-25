@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
+import { verifyCaller } from '../../../../lib/mailer'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
@@ -8,13 +9,17 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 )
 
+// Starts or resumes Stripe Connect onboarding for the signed-in member.
+//
+// The member comes from the verified session. It used to come from a userId in
+// the POST body with no session check, so anyone holding a member's UUID could
+// mint a Connect onboarding link for that member and attach their own bank
+// details to someone else's payout account.
 export async function POST(req) {
   try {
-    const { userId } = await req.json()
-
-    if (!userId) {
-      return Response.json({ error: 'userId required' }, { status: 400 })
-    }
+    const caller = await verifyCaller(req)
+    if (!caller) return Response.json({ error: 'Not signed in' }, { status: 401 })
+    const userId = caller.user.id
 
     // Pull the profile to check for an existing Connect account
     const { data: profile, error: profileError } = await supabaseAdmin

@@ -557,11 +557,14 @@ export default function ProfilePage() {
   async function handleManageSubscription() {
     setPortalLoading(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        alert('Please sign in again to manage your subscription.')
+        return
+      }
       const res = await fetch('/api/paddle/portal', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id }),
+        headers: { Authorization: `Bearer ${session.access_token}` },
       })
       const data = await res.json()
       if (data.url) {
@@ -581,11 +584,14 @@ export default function ProfilePage() {
   async function handleConnectPayout() {
     setConnectLoading(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        alert('Please sign in again to set up payouts.')
+        return
+      }
       const res = await fetch('/api/stripe/connect-account', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id }),
+        headers: { Authorization: `Bearer ${session.access_token}` },
       })
       const data = await res.json()
       if (data.url) {

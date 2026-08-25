@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
+import { verifyCaller } from '../../../../lib/mailer'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
@@ -13,7 +14,8 @@ const supabase = createClient(
 
 // --------------------------------------------------------------------------
 // POST /api/stripe/pay
-// Body: { collabId, userId, milestoneIndex|null, savePaymentMethod }
+// Body: { collabId, milestoneIndex|null, savePaymentMethod }. The payer is
+// taken from the bearer token, never from the body.
 //   - milestoneIndex = number -> pay one milestone (agreed_fee * pct/100)
 //   - milestoneIndex = null   -> pay the full agreed_fee (lump sum / on delivery)
 //
@@ -24,10 +26,18 @@ const supabase = createClient(
 // --------------------------------------------------------------------------
 export async function POST(req) {
   try {
-    const { collabId, userId, milestoneIndex = null, savePaymentMethod = false } = await req.json()
+    // The payer is whoever is signed in. It used to be a userId in the request
+    // body, which meant an unauthenticated caller who knew a collab id and the
+    // initiator's UUID could start a payment against that member's account. The
+    // initiator check below is only meaningful once the caller is verified.
+    const caller = await verifyCaller(req)
+    if (!caller) return Response.json({ error: 'Not signed in' }, { status: 401 })
+    const userId = caller.user.id
 
-    if (!collabId || !userId) {
-      return Response.json({ error: 'Missing collabId or userId' }, { status: 400 })
+    const { collabId, milestoneIndex = null, savePaymentMethod = false } = await req.json()
+
+    if (!collabId) {
+      return Response.json({ error: 'Missing collabId' }, { status: 400 })
     }
 
     // 1. Load the collaboration (source of truth for amounts and parties).

@@ -827,6 +827,11 @@ export default function ProfilePage() {
       const data = await res.json()
       if (data.url) {
         window.location.href = data.url
+      } else if (res.status === 404) {
+        // No subscription to manage: this member is comped, a student, or
+        // free. The door they are actually looking for is the one that starts
+        // a membership. Michael Flynn hit this exact wall trying to PAY us.
+        router.push('/subscribe')
       } else {
         alert('Could not open billing portal. Please try again.')
       }
@@ -1076,7 +1081,7 @@ export default function ProfilePage() {
               className={styles.btnSignOut}
               style={{ opacity: portalLoading ? 0.6 : 1 }}
             >
-              {portalLoading ? 'Loading…' : 'Manage subscription'}
+              {portalLoading ? 'Loading…' : (profile?.paddle_subscription_id ? 'Manage subscription' : 'Become a member')}
             </button>
           )}
           {isOwner && <button className={styles.btnSignOut} onClick={handleSignOut}>Sign out</button>}

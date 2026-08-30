@@ -28,6 +28,14 @@
    browser still gets it: their preference is multiplied, not overridden. */
 html { font-size: 125%; scroll-behavior: smooth }
 
+/* The slide-out member menu hides off the right edge (340px, translateX
+   105%), and mobile browsers count off-canvas fixed elements when sizing the
+   layout viewport: every page rendering the menu laid out at ~694px on a
+   375px phone, zoomed out and blurry, and media queries judged against the
+   inflated width. Clipping horizontal overflow at the root stops the
+   expansion. Nothing on this site scrolls the page sideways on purpose. */
+html, body { overflow-x: clip }
+
 body {
   background: var(--bg);
   color: var(--cream);

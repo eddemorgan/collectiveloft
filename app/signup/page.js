@@ -189,7 +189,7 @@ export default function SignupPage() {
             onClick={handleSignup}
             disabled={loading}
           >
-            {loading ? 'Creating account…' : 'Continue to membership'}
+            {loading ? 'Creating account…' : 'Create my account →'}
           </button>
 
           <div className={styles.footer}>

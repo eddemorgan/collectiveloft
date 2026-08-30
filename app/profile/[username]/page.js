@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import Footer from '../../components/Footer'
 import { locationLabel } from '../../../lib/labels'
+import { eduDomain } from '../../../lib/students'
 import MemberMenu from '../../components/MemberMenu'
 import styles from './profile.module.css'
 
@@ -34,10 +36,12 @@ const SKILLS_BY_DISC = {
 }
 
 function skillsForDiscs(discLabels) {
-  return discLabels.flatMap(label => {
+  // Deduped: Music and Film & Video both list Producing, and a duplicate here
+  // becomes two identical chips fighting over one selection.
+  return [...new Set(discLabels.flatMap(label => {
     const disc = DISC_OPTS.find(d => d.label === label)
     return disc ? (SKILLS_BY_DISC[disc.id] || []) : []
-  })
+  }))]
 }
 function detectType(file) {
   const mime = file.type
@@ -144,6 +148,236 @@ function Editable({ value, onSave, placeholder, multiline, isOwner, editMode, cl
       {value || <span className={styles.editPlaceholder}>{placeholder}</span>}
       <span className={styles.editPencil}>✎</span>
     </span>
+  )
+}
+
+// The one edit form. Every text field the profile owns, in one place, with
+// one Save and one Cancel. It replaced the pencil-per-section editing because
+// scattered pencils made updating feel like a scavenger hunt, and because the
+// email needed a home that inline editing could never give it: changing the
+// sign-in address goes through Supabase auth, which mails confirmation links
+// to BOTH the old and the new inbox, and only a confirmed click completes it.
+// So everything else saves immediately, and the email change is kicked off
+// with an explanation of what happens next.
+function EditProfileModal({ profile, userEmail, onClose, onSaved }) {
+  const [firstname, setFirstname] = useState(profile.firstname || '')
+  const [lastname,  setLastname]  = useState(profile.lastname || '')
+  const [email,     setEmail]     = useState(userEmail || profile.email || '')
+  const [headline,  setHeadline]  = useState(profile.headline || '')
+  const [rightnow,  setRightnow]  = useState(profile.rightnow || '')
+  const [bio,       setBio]       = useState(profile.bio || '')
+  const [discs,     setDiscs]     = useState(profile.disciplines || [])
+  const [skills,    setSkills]    = useState(profile.skills || [])
+  const [seekDiscs, setSeekDiscs] = useState(profile.seeking_disciplines || [])
+  const [seekSkills,setSeekSkills]= useState(profile.seeking_skills || [])
+  const [loc,       setLoc]       = useState(null) // set only when changed
+  const [locQuery,  setLocQuery]  = useState('')
+  const [locResults,setLocResults]= useState([])
+  const [saving,    setSaving]    = useState(false)
+  const [error,     setError]     = useState('')
+
+  function toggleDisc(label) {
+    setDiscs(prev => {
+      const next = prev.includes(label) ? prev.filter(x => x !== label) : [...prev, label]
+      setSkills(sk => sk.filter(x => skillsForDiscs(next).includes(x)))
+      return next
+    })
+  }
+  function toggleSkill(label) {
+    setSkills(prev => prev.includes(label) ? prev.filter(x => x !== label) : [...prev, label])
+  }
+  function toggleSeekDisc(label) {
+    setSeekDiscs(prev => {
+      const next = prev.includes(label) ? prev.filter(x => x !== label) : [...prev, label]
+      setSeekSkills(sk => sk.filter(x => skillsForDiscs(next).includes(x)))
+      return next
+    })
+  }
+  function toggleSeekSkill(label) {
+    setSeekSkills(prev => prev.includes(label) ? prev.filter(x => x !== label) : [...prev, label])
+  }
+
+  async function searchCity(q) {
+    setLocQuery(q)
+    if (!q || q.trim().length < 2) { setLocResults([]); return }
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
+    if (!token) { setLocResults([]); return }
+    try {
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?types=place&limit=5&access_token=${token}`
+      const res = await fetch(url)
+      const data = await res.json()
+      setLocResults(Array.isArray(data.features) ? data.features : [])
+    } catch { setLocResults([]) }
+  }
+  function pickCity(f) {
+    let region = '', country = ''
+    ;(f.context || []).forEach(c => {
+      if (c.id?.startsWith('region')) region = c.text
+      if (c.id?.startsWith('country')) country = c.text
+    })
+    const [lng, lat] = f.center || [null, null]
+    setLoc({ city: f.text || '', state: region, country, latitude: lat, longitude: lng })
+    setLocQuery(''); setLocResults([])
+  }
+
+  const currentLoc = loc
+    ? [loc.city, loc.state, loc.country].filter(Boolean).join(', ')
+    : [profile.city, profile.state, profile.country].filter(Boolean).join(', ')
+
+  const emailChanged = email.trim().toLowerCase() !== (userEmail || '').trim().toLowerCase()
+  const newIsAcademic = emailChanged && !!eduDomain(email.trim())
+
+  async function save() {
+    setError('')
+    if (!firstname.trim()) { setError('Your first name is the one thing the profile cannot do without.'); return }
+    if (discs.length === 0) { setError('Pick at least one discipline. It is how anyone finds you.'); return }
+    if (emailChanged && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) { setError('That email address does not look complete.'); return }
+    setSaving(true)
+
+    const patch = {}
+    const set = (k, v, cur) => { if ((v ?? '') !== (cur ?? '')) patch[k] = v }
+    set('firstname', firstname.trim(), profile.firstname)
+    set('lastname',  lastname.trim(),  profile.lastname)
+    set('headline',  headline.trim(),  profile.headline)
+    set('rightnow',  rightnow.trim(),  profile.rightnow)
+    set('bio',       bio.trim(),       profile.bio)
+    if (JSON.stringify(discs)      !== JSON.stringify(profile.disciplines || []))         patch.disciplines = discs
+    if (JSON.stringify(skills)     !== JSON.stringify(profile.skills || []))              patch.skills = skills
+    if (JSON.stringify(seekDiscs)  !== JSON.stringify(profile.seeking_disciplines || [])) patch.seeking_disciplines = seekDiscs
+    if (JSON.stringify(seekSkills) !== JSON.stringify(profile.seeking_skills || []))      patch.seeking_skills = seekSkills
+    if (loc) Object.assign(patch, loc)
+
+    if (Object.keys(patch).length > 0) {
+      patch.updated_at = new Date().toISOString()
+      const { error: dbErr } = await supabase.from('profiles').update(patch).eq('id', profile.id)
+      if (dbErr) { setError('Could not save. Try again.'); setSaving(false); return }
+    }
+
+    // The email is different plumbing entirely. This starts Supabase's
+    // change-of-address flow; profiles.email is deliberately NOT written here,
+    // because the change is not real until the links are clicked. The page
+    // syncs it on a later visit, once auth and profile disagree.
+    let emailPending = false
+    if (emailChanged) {
+      const { error: authErr } = await supabase.auth.updateUser({ email: email.trim() })
+      if (authErr) {
+        setError(authErr.message || 'Could not start the email change.')
+        setSaving(false)
+        return
+      }
+      emailPending = true
+    }
+
+    onSaved(patch, emailPending ? { newEmail: email.trim(), academic: newIsAcademic } : null)
+  }
+
+  return createPortal(
+    <div className={styles.epOverlay}>
+      <div className={styles.epBox}>
+        <div className={styles.epHead}>
+          <div className={styles.epTitle}>Edit profile</div>
+          <button className={styles.epClose} onClick={onClose}>✕</button>
+        </div>
+
+        <div className={styles.epBody}>
+          <div className={styles.epRow2}>
+            <div className={styles.epField}>
+              <label className={styles.epLabel}>First name</label>
+              <input className={styles.editInput} value={firstname} onChange={e=>setFirstname(e.target.value)} />
+            </div>
+            <div className={styles.epField}>
+              <label className={styles.epLabel}>Last name</label>
+              <input className={styles.editInput} value={lastname} onChange={e=>setLastname(e.target.value)} />
+            </div>
+          </div>
+
+          <div className={styles.epField}>
+            <label className={styles.epLabel}>Email</label>
+            <input className={styles.editInput} type="email" value={email} onChange={e=>setEmail(e.target.value)} />
+            {emailChanged ? (
+              <div className={styles.epNote}>
+                Changing your email sends confirmation links to both your current and your new address, and the change completes when they are confirmed.
+                {newIsAcademic && ' Your new address is a school email: once it is confirmed, verify it here and your membership is free while you are enrolled.'}
+              </div>
+            ) : (
+              <div className={styles.epNote}>This is your sign-in address, and where Collective Loft reaches you.</div>
+            )}
+          </div>
+
+          <div className={styles.epField}>
+            <label className={styles.epLabel}>Headline</label>
+            <input className={styles.editInput} value={headline} onChange={e=>setHeadline(e.target.value)} placeholder="Your discipline · Your style · Your medium" />
+          </div>
+
+          <div className={styles.epField}>
+            <label className={styles.epLabel}>Location</label>
+            {currentLoc && <div className={styles.epCurrent}>📍 {currentLoc}</div>}
+            <input className={styles.editInput} value={locQuery} onChange={e=>searchCity(e.target.value)} placeholder="Search a city to change it" />
+            {locResults.length > 0 && (
+              <div className={styles.epLocResults}>
+                {locResults.map(f => (
+                  <button key={f.id} type="button" className={styles.epLocResult} onClick={()=>pickCity(f)}>{f.place_name}</button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className={styles.epField}>
+            <label className={styles.epLabel}>What you are making right now</label>
+            <textarea className={`${styles.editInput} ${styles.editTextarea}`} rows={2} value={rightnow} onChange={e=>setRightnow(e.target.value)} />
+          </div>
+
+          <div className={styles.epField}>
+            <label className={styles.epLabel}>Bio</label>
+            <textarea className={`${styles.editInput} ${styles.editTextarea}`} rows={4} value={bio} onChange={e=>setBio(e.target.value)} />
+          </div>
+
+          <div className={styles.epField}>
+            <label className={styles.epLabel}>Disciplines</label>
+            <div className={styles.epChips}>
+              {DISC_OPTS.map(d => (
+                <button key={d.id} type="button" className={`${styles.epChip} ${discs.includes(d.label)?styles.epChipOn:''}`} onClick={()=>toggleDisc(d.label)}>{d.icon} {d.label}</button>
+              ))}
+            </div>
+          </div>
+
+          {discs.length > 0 && (
+            <div className={styles.epField}>
+              <label className={styles.epLabel}>Skills</label>
+              <div className={styles.epChips}>
+                {skillsForDiscs(discs).map(sk => (
+                  <button key={sk} type="button" className={`${styles.epChip} ${skills.includes(sk)?styles.epChipOn:''}`} onClick={()=>toggleSkill(sk)}>{sk}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className={styles.epField}>
+            <label className={styles.epLabel}>Looking to collaborate with</label>
+            <div className={styles.epChips}>
+              {DISC_OPTS.map(d => (
+                <button key={d.id} type="button" className={`${styles.epChip} ${seekDiscs.includes(d.label)?styles.epChipOn:''}`} onClick={()=>toggleSeekDisc(d.label)}>{d.icon} {d.label}</button>
+              ))}
+            </div>
+            {seekDiscs.length > 0 && (
+              <div className={styles.epChips} style={{ marginTop: '0.5rem' }}>
+                {skillsForDiscs(seekDiscs).map(sk => (
+                  <button key={sk} type="button" className={`${styles.epChip} ${seekSkills.includes(sk)?styles.epChipOn:''}`} onClick={()=>toggleSeekSkill(sk)}>{sk}</button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {error && <div className={styles.epError}>{error}</div>}
+        </div>
+
+        <div className={styles.epActions}>
+          <button className={styles.cancelBtn} onClick={onClose} disabled={saving}>Cancel</button>
+          <button className={styles.saveBtn} onClick={save} disabled={saving}>{saving ? 'Saving…' : 'Save profile'}</button>
+        </div>
+      </div>
+    </div>,
+    document.body
   )
 }
 
@@ -378,7 +612,14 @@ export default function ProfilePage() {
   const [activeTab,        setActiveTab]        = useState('about')
   const [connected,        setConnected]        = useState(false)
   const [isOwner,          setIsOwner]          = useState(false)
-  const [editMode,         setEditMode]         = useState(false)
+  // Inline pencil editing is retired: text edits live in the one modal form.
+  // editMode stays only so the old Editable spans render as plain text.
+  const editMode = false
+  const [showEdit,         setShowEdit]         = useState(false)
+  const [emailNotice,      setEmailNotice]      = useState('')
+  const [studentOffer,     setStudentOffer]     = useState(false)
+  const [studentSending,   setStudentSending]   = useState(false)
+  const [sessionEmail,     setSessionEmail]     = useState('')
   const [editingLoc,       setEditingLoc]       = useState(false)
   const [locQuery,         setLocQuery]         = useState('')
   const [locResults,       setLocResults]       = useState([])
@@ -477,8 +718,25 @@ export default function ProfilePage() {
       setCurrentUserId(user.id)
       if (user.id === data.id) {
         setIsOwner(true)
+        setSessionEmail(user.email || '')
         loadNotifCount(user.id)
         loadBriefs(user.id)
+
+        // A confirmed email change lives in auth first and nowhere else. When
+        // auth and the profile disagree, auth has the truth: sync it so the
+        // legal-notice sender, the owner notifications, and this page all
+        // speak to the address the member actually uses now.
+        if (user.email && data.email && user.email.toLowerCase() !== data.email.toLowerCase()) {
+          await supabase.from('profiles').update({ email: user.email, updated_at: new Date().toISOString() }).eq('id', user.id)
+          data.email = user.email
+          setProfile(p => ({ ...p, email: user.email }))
+        }
+
+        // A school address that has never been verified is a free year waiting
+        // to be claimed, whether it arrived at signup or by a change just now.
+        // Brandon moving to his Ravensbourne address lands exactly here.
+        const studentNow = data.student_until && new Date(data.student_until) > new Date()
+        if (eduDomain(user.email) && !studentNow) setStudentOffer(true)
       }
     }
 
@@ -616,6 +874,22 @@ export default function ProfilePage() {
   }
   function flashSave() { setSaveMsg('Saved ✦'); setTimeout(() => setSaveMsg(''), 2000) }
 
+  // Same flow signup uses: request a code to the session's own address, then
+  // hand over to /student/verify to enter it. The server rechecks everything.
+  async function startStudentVerify() {
+    setStudentSending(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) { setStudentSending(false); return }
+      const res = await fetch('/api/student/request', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+      if (res.ok) { router.push('/student/verify'); return }
+    } catch { /* fall through to reset */ }
+    setStudentSending(false)
+  }
+
   // --- Location editing (Mapbox autocomplete) ---
   async function searchProfileCity(q) {
     setLocQuery(q)
@@ -722,7 +996,7 @@ export default function ProfilePage() {
   ].filter(Boolean)
 
   const GRID_SIZE       = 12
-  const emptySlots      = isOwner && editMode ? Math.max(0, GRID_SIZE - portfolio.length) : 0
+  const emptySlots      = isOwner ? Math.max(0, GRID_SIZE - portfolio.length) : 0
   const gridItems       = [...portfolio.map(p => ({ ...p, isEmpty:false })), ...Array(emptySlots).fill(null).map((_,i) => ({ id:`empty-${i}`, isEmpty:true }))]
   const availableSkills = skillsForDiscs(draftDiscs)
 
@@ -771,7 +1045,7 @@ export default function ProfilePage() {
           <Link href="/my-studios">My Loft Studios</Link>
           {isOwner && saving && <span className={styles.saveIndicator}>Saving…</span>}
           {isOwner && saveMsg && !saving && <span className={styles.saveIndicator}>{saveMsg}</span>}
-          {isOwner && <button className={`${styles.btnEdit} ${editMode?styles.btnEditActive:''}`} onClick={()=>setEditMode(v=>!v)}>{editMode?'Done editing':'Edit profile'}</button>}
+          {isOwner && <button className={styles.btnEdit} onClick={()=>setShowEdit(true)}>Edit profile</button>}
 
           {/* Stripe Connect payout button — owner only */}
           {isOwner && (
@@ -812,14 +1086,30 @@ export default function ProfilePage() {
 
       <div className={styles.coverBanner}>
         {profile.cover_url?<img src={profile.cover_url} alt="Cover" className={styles.coverImg}/>:<div className={styles.coverPattern}/>}
-        {isOwner&&editMode&&(<><button className={styles.coverUploadBtn} onClick={()=>coverInputRef.current?.click()}>{profile.cover_url?'↑ Change cover':'+ Add cover image'}</button><input ref={coverInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>uploadImage(e.target.files[0],'covers','cover_url')}/></>)}
+        {isOwner&&(<><button className={styles.coverUploadBtn} onClick={()=>coverInputRef.current?.click()}>{profile.cover_url?'↑ Change cover':'+ Add cover image'}</button><input ref={coverInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>uploadImage(e.target.files[0],'covers','cover_url')}/></>)}
       </div>
+
+      {isOwner && emailNotice && (
+        <div className={styles.epBanner}>
+          <span>{emailNotice}</span>
+          <button className={styles.epBannerX} onClick={()=>setEmailNotice('')}>✕</button>
+        </div>
+      )}
+      {isOwner && studentOffer && !emailNotice && (
+        <div className={styles.epBanner}>
+          <span><strong>Your email is a school address.</strong> Students are free on Collective Loft: verify it and your membership costs nothing while you are enrolled.</span>
+          <span className={styles.epBannerActions}>
+            <button className={styles.epBannerBtn} onClick={startStudentVerify} disabled={studentSending}>{studentSending ? 'Sending your code…' : 'Verify my student email →'}</button>
+            <button className={styles.epBannerX} onClick={()=>setStudentOffer(false)}>✕</button>
+          </span>
+        </div>
+      )}
 
       <div className={styles.identityStrip}>
         <div className={styles.avWrap}>
-          <div className={styles.avCircle} onClick={()=>isOwner&&editMode&&avatarInputRef.current?.click()} style={isOwner&&editMode?{cursor:'pointer'}:{}}>
+          <div className={styles.avCircle} onClick={()=>isOwner&&avatarInputRef.current?.click()} style={isOwner?{cursor:'pointer'}:{}}>
             {profile.avatar_url?<img src={profile.avatar_url} alt={fullName}/>:<span>{ini}</span>}
-            {isOwner&&editMode&&<div className={styles.avOverlay}>↑</div>}
+            {isOwner&&<div className={styles.avOverlay}>↑</div>}
             <div className={styles.onlineDot}/>
           </div>
           <input ref={avatarInputRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>uploadImage(e.target.files[0],'avatars','avatar_url')}/>
@@ -971,7 +1261,7 @@ export default function ProfilePage() {
               <div className={styles.contentSection}>
                 <div className={styles.secLabelRow}>
                   <div className={styles.secLabel}>Portfolio</div>
-                  {isOwner&&editMode&&<div className={styles.portfolioHint}>{uploading?'Uploading…':'Click any slot to upload — images, video, audio, or PDF'}</div>}
+                  {isOwner&&<div className={styles.portfolioHint}>{uploading?'Uploading…':'Click any slot to upload: images, video, audio, or PDF'}</div>}
                 </div>
                 <input ref={portfolioInputRef} type="file" accept="image/*,video/*,audio/*,.pdf" style={{display:'none'}} onChange={e=>{if(e.target.files[0])uploadPortfolioItem(e.target.files[0]);e.target.value=''}}/>
                 {portfolio.length===0&&!isOwner?<div className={styles.emptyState}>No portfolio items yet.</div>:(
@@ -987,7 +1277,7 @@ export default function ProfilePage() {
                           <div className={styles.slotOverlay}>
                             <div className={styles.slotTypeIcon}>{typeIcon(item.type)}</div>
                             <div className={styles.slotTitle}>{item.title||item.type}</div>
-                            {isOwner&&editMode&&<button className={styles.slotDelete} onClick={e=>{e.stopPropagation();deletePortfolioItem(item.id)}}>✕</button>}
+                            {isOwner&&<button className={styles.slotDelete} onClick={e=>{e.stopPropagation();deletePortfolioItem(item.id)}}>✕</button>}
                           </div>
                         </div>
                       )
@@ -1271,6 +1561,21 @@ export default function ProfilePage() {
       <Footer/>
 
       {selectedBrief&&<BriefModal brief={selectedBrief} isOwner={isOwner} onClose={()=>setSelectedBrief(null)} onDelete={id=>{deleteBrief(id);setSelectedBrief(null)}}/>}
+      {showEdit && (
+        <EditProfileModal
+          profile={profile}
+          userEmail={sessionEmail}
+          onClose={()=>setShowEdit(false)}
+          onSaved={(patch, emailChange) => {
+            if (Object.keys(patch).length > 0) setProfile(p => ({ ...p, ...patch }))
+            if (emailChange) {
+              setEmailNotice(`Confirmation links are on their way to ${sessionEmail} and ${emailChange.newEmail}. The email change completes once both are confirmed${emailChange.academic ? ', and your new school address can then be verified for free student membership' : ''}.`)
+            }
+            setShowEdit(false)
+            flashSave()
+          }}
+        />
+      )}
       {lightboxIdx!==null&&<Lightbox items={portfolio} startIndex={lightboxIdx} onClose={()=>setLightboxIdx(null)}/>}
     </div>
   )

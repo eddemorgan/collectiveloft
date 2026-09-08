@@ -1,4 +1,5 @@
 import { verifyCaller, sendMail, appUrl } from '../../../lib/mailer'
+import { academicDomain } from '../../../lib/students'
 import { welcomeEmailHtml } from '../../../lib/emails'
 
 // Sends the welcome email to the signed-in caller only.
@@ -42,6 +43,7 @@ export async function POST(request) {
         html: `<p><strong>${name}</strong> just signed up.</p>
 <p>Email: ${user.email}<br>
 Founding member: ${profile?.founding_member ? 'yes' : 'no'}<br>
+Student: ${academicDomain(user.email) ? 'yes' : 'no'}<br>
 Signed up: ${new Date(user.created_at).toUTCString()}</p>
 <p><a href="${appUrl()}/discover">See who's in the loft</a></p>`,
       })

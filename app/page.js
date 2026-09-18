@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import styles from './landing.module.css'
 import Footer from './components/Footer'
@@ -9,6 +10,7 @@ import { supabase } from '../lib/supabase'
 const DISCIPLINES = ['Visual Art','Music','Writing','Design & Web','Film & Video','Photography','Performance','Creative Tech']
 
 export default function Home() {
+  const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const toggle = () => setMenuOpen(o => !o)
 
@@ -22,11 +24,14 @@ export default function Home() {
         .select('firstname, lastname')
         .eq('id', session.user.id)
         .single()
-      setMember({
-        href: profile
-          ? `/profile/${profile.firstname.toLowerCase()}-${profile.lastname.toLowerCase()}`
-          : '/onboarding',
-      })
+      const href = profile
+        ? `/profile/${profile.firstname.toLowerCase()}-${profile.lastname.toLowerCase()}`
+        : '/onboarding'
+      setMember({ href })
+      // A signed-in member typing collectiveloft.com is going home, and home
+      // is their profile, not the brochure. replace() rather than push(), so
+      // the back button does not bounce them off the landing page again.
+      router.replace(href)
     })
   }, [])
 

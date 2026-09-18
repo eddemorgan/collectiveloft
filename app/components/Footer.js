@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import styles from './site-footer.module.css'
+import { useIsMember } from '../hooks/useIsMember'
 
 const SOCIALS = [
   {
@@ -37,6 +38,7 @@ const SOCIALS = [
 ]
 
 export default function Footer() {
+  const { member, profileHref } = useIsMember()
   return (
     <footer className={styles.foot}>
       <div className={styles.footInner}>
@@ -65,9 +67,18 @@ export default function Footer() {
               <Link href="/legal/privacy">Privacy Policy</Link>
             </div>
             <div className={styles.fcol}>
-              <div className={styles.fcolL}>Get started</div>
-              <Link href="/signup">Join</Link>
-              <Link href="/login">Sign in</Link>
+              <div className={styles.fcolL}>{member ? 'Your loft' : 'Get started'}</div>
+              {member ? (
+                <>
+                  <Link href={profileHref}>My Profile</Link>
+                  <Link href="/discover">Discover</Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/signup">Join</Link>
+                  <Link href="/login">Sign in</Link>
+                </>
+              )}
             </div>
           </div>
         </div>

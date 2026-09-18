@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import styles from './browse.module.css'
 import Footer from '../components/Footer'
+import { supabase } from '../../lib/supabase'
 
 // The eight disciplines, in the same order and with the same icons Discover
 // uses, so the public page and the member page describe one platform.
@@ -32,6 +33,7 @@ const DISC_ICON = {
 
 export default function BrowsePage() {
   const [creatives, setCreatives] = useState(null)
+  const [member,    setMember]    = useState(false)
   const [matched,   setMatched]   = useState(null)
   const [total,     setTotal]     = useState(null)
   const [counts,    setCounts]    = useState({})
@@ -86,6 +88,12 @@ export default function BrowsePage() {
     setResults([])
   }
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) setMember(true)
+    })
+  }, [])
+
   function clearCity() {
     setCity(null); setQuery(''); setResults([])
   }
@@ -101,7 +109,9 @@ export default function BrowsePage() {
               <span className={styles.tag}>Where creatives find each other</span>
             </span>
           </Link>
-          <Link href="/signup" className={styles.join}>Join Collective Loft</Link>
+          {member
+            ? <Link href="/discover" className={styles.join}>Open Discover</Link>
+            : <Link href="/signup" className={styles.join}>Join Collective Loft</Link>}
         </div>
       </nav>
 
@@ -261,7 +271,9 @@ export default function BrowsePage() {
                 )}
 
                 <div className={styles.spacer} />
-                <Link href="/signup" className={styles.joinLink}>Join to connect →</Link>
+                {member
+                  ? <Link href="/discover" className={styles.joinLink}>See them in Discover →</Link>
+                  : <Link href="/signup" className={styles.joinLink}>Join to connect →</Link>}
               </div>
             )
           })}
@@ -272,8 +284,12 @@ export default function BrowsePage() {
 
       <section className={styles.close}>
         <h2 className={styles.closeH}>Find the one who&apos;s <em>looking for you.</em></h2>
-        <p className={styles.closeSub}>Build a profile, say what you&apos;re making, and connect with the creatives who need exactly what you do.</p>
-        <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
+        <p className={styles.closeSub}>{member
+          ? 'You are already inside, and this is only the preview. Discover shows you these same people with names, work, and a way to reach them.'
+          : 'Build a profile, say what you’re making, and connect with the creatives who need exactly what you do.'}</p>
+        {member
+          ? <Link href="/discover" className={styles.btnPrimary}>Find your next collaborator</Link>
+          : <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>}
       </section>
 
       <Footer />

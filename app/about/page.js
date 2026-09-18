@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useIsMember } from '../hooks/useIsMember'
 import styles from './about.module.css'
 import Footer from '../components/Footer'
 
@@ -14,6 +15,7 @@ const SOCIALS = [
 ]
 
 export default function AboutPage() {
+  const { member } = useIsMember()
   return (
     <div className={styles.page}>
       <nav className={styles.nav}>
@@ -66,7 +68,9 @@ export default function AboutPage() {
       <section className={styles.close}>
         <p className={styles.closeLead}>This was built out of love, and it&rsquo;s run the same way.</p>
         <p className={styles.closeBody}>If you make things, this is your place. Come find your people, set your terms, and do the work that&rsquo;s yours, protected, and on equal footing, the way it always should have been.</p>
-        <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft &rarr;</Link>
+        {member
+          ? <Link href="/discover" className={styles.btnPrimary}>Find your next collaborator &rarr;</Link>
+          : <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft &rarr;</Link>}
         <p className={styles.signature}>Built in Chicago, with care, by Edde and Stephanie Morgan.</p>
       </section>
 

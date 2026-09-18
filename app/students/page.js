@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useIsMember } from '../hooks/useIsMember'
 import Footer from '../components/Footer'
 import styles from './students.module.css'
 
@@ -26,6 +29,7 @@ const STEPS = [
 ]
 
 export default function StudentsPage() {
+  const { member, profileHref } = useIsMember()
   return (
     <div className={styles.page}>
       <nav className={styles.nav}>
@@ -37,7 +41,9 @@ export default function StudentsPage() {
               <span className={styles.tag}>Where creatives find each other</span>
             </span>
           </Link>
-          <Link href="/signup" className={styles.join}>Join free</Link>
+          {member
+            ? <Link href="/discover" className={styles.join}>Open Discover</Link>
+            : <Link href="/signup" className={styles.join}>Join free</Link>}
         </div>
       </nav>
 
@@ -49,7 +55,9 @@ export default function StudentsPage() {
           starts, and finish things that build a reputation. If you&rsquo;re a student, the whole
           platform costs you nothing. Verify your school email and you&rsquo;re in.
         </p>
-        <Link href="/signup" className={styles.cta}>Join with your school email →</Link>
+        {member
+          ? <Link href={profileHref} className={styles.cta}>You are in. Add your school email in your profile →</Link>
+          : <Link href="/signup" className={styles.cta}>Join with your school email →</Link>}
         <div className={styles.ctaNote}>No card. No trial clock. Nothing to cancel.</div>
       </header>
 
@@ -128,7 +136,9 @@ export default function StudentsPage() {
           Filmmakers who need composers. Writers who need illustrators. Producers who need vocalists.
           Show up with what you make, and be findable.
         </p>
-        <Link href="/signup" className={styles.cta}>Join free with your school email →</Link>
+        {member
+          ? <Link href="/discover" className={styles.cta}>Find your people in Discover →</Link>
+          : <Link href="/signup" className={styles.cta}>Join free with your school email →</Link>}
       </section>
 
       <Footer />

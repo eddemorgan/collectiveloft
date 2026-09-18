@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useIsMember } from '../hooks/useIsMember'
 import styles from './how-it-works.module.css'
 import Footer from '../components/Footer'
 
@@ -48,6 +49,7 @@ const STEPS = [
 ]
 
 export default function HowItWorksPage() {
+  const { member } = useIsMember()
   return (
     <div className={styles.page}>
       <nav className={styles.nav}>
@@ -59,7 +61,9 @@ export default function HowItWorksPage() {
               <span className={styles.tag}>Where creatives find each other</span>
             </span>
           </Link>
-          <Link href="/signup" className={styles.join}>Join Collective Loft</Link>
+          {member
+            ? <Link href="/discover" className={styles.join}>Open Discover</Link>
+            : <Link href="/signup" className={styles.join}>Join Collective Loft</Link>}
         </div>
       </nav>
 
@@ -86,7 +90,9 @@ export default function HowItWorksPage() {
       <section className={styles.close}>
         <h2 className={styles.closeH}>Built for creatives, <em>protected on purpose.</em></h2>
         <p className={styles.closeSub}>Your people are out there. Membership keeps this a safe place to find them and do your best work.</p>
-        <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
+        {member
+          ? <Link href="/discover" className={styles.btnPrimary}>Find your next collaborator</Link>
+          : <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>}
       </section>
 
       <Footer />

@@ -101,8 +101,17 @@ export default function Home() {
             For the people looking for a collaborator, and the people who want to be <span className={styles.k}>found by one</span>. Musicians, photographers, writers, performers, designers, filmmakers. You set real terms before the work starts, then build it together in a <span className={styles.k}>Loft Studio</span>.
           </p>
           <div className={styles.heroCta}>
-            <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
-            <Link href="/browse" className={styles.btnGhost}>See who is already here</Link>
+            {member ? (
+              <>
+                <Link href="/discover" className={styles.btnPrimary}>Open Discover</Link>
+                <Link href="/briefs" className={styles.btnGhost}>See the Collab Briefs</Link>
+              </>
+            ) : (
+              <>
+                <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
+                <Link href="/browse" className={styles.btnGhost}>See who is already here</Link>
+              </>
+            )}
           </div>
           <div className={styles.discRow}>
             {DISCIPLINES.map(d => <span key={d} className={styles.disc}>{d}</span>)}
@@ -152,7 +161,11 @@ export default function Home() {
         <div className={styles.closeInner}>
           <h2 className={styles.closeH}>Your next collaborator<br />is already <em>here.</em></h2>
           <p className={styles.closeSub}>Build a profile. Say what you make, and what you are working on right now. That is how the right people find you, and how you find them.</p>
-          <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
+          {member ? (
+            <Link href="/discover" className={styles.btnPrimary}>Find your next collaborator</Link>
+          ) : (
+            <Link href="/signup" className={styles.btnPrimary}>Join Collective Loft</Link>
+          )}
         </div>
       </section>
 

@@ -143,7 +143,11 @@ export const PrivacyDoc = () => (
       <Sub>7.3 California Residents (CCPA)</Sub><P>California residents have rights under the CCPA. We do not sell personal information. Contact hello@collectiveloft.com.</P>
       <Sub>7.4 European Users (GDPR)</Sub><P>Users in the EEA, UK, or Switzerland have rights under GDPR. Contact hello@collectiveloft.com.</P>
     </Sec>
-    <Sec num="8" title="Data Security"><Ul items={['Encrypted data transmission (HTTPS/TLS)','Encrypted password storage (managed by Supabase Auth)','Row Level Security (RLS) enforced at the database level','Access controls limiting staff access to user data']}/></Sec>
+    <Sec num="8" title="Data Security">
+      <Ul items={['Encrypted data transmission (HTTPS/TLS)','Encrypted password storage (managed by Supabase Auth)','Row Level Security (RLS) enforced at the database level','Access controls limiting staff access to user data']}/>
+      <Sub>8.1 Where Your Data Is Stored</Sub><P>Member data is stored in the United States. Our database, authentication, and file storage run on Supabase in its us-west-1 region in Northern California, and the Platform itself is hosted on Vercel in the United States. If you use Collective Loft from the EEA, the UK, or Switzerland, your personal data is transferred to and processed in the United States.</P>
+      <Sub>8.2 Processor Commitments</Sub><P>Each processor named in Section 4 handles member data under a data processing agreement that commits it to act only on our instructions, to secure the data, to notify us of any breach, to disclose its subprocessors, and to delete member data when our relationship ends. Transfers of EEA, UK, and Swiss personal data to the United States rely on the Standard Contractual Clauses incorporated in those agreements. We keep copies of these agreements on file, and you may request confirmation of them at hello@collectiveloft.com.</P>
+    </Sec>
     <Sec num="9" title="Children's Privacy"><P>The Platform is exclusively for users 18 years of age or older. We do not knowingly collect personal information from anyone under 18.</P></Sec>
     <Sec num="10" title="Changes to This Policy"><P>We will notify you by email at least 14 days before material changes take effect. Changes that weaken the Data Covenant require at least 30 days notice and never apply retroactively to data collected before they take effect.</P></Sec>
     <Sec num="11" title="Contact Us">

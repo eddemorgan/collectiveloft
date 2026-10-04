@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import ReAccept from './ReAccept'
+import { LEGAL_VERSION } from '../../lib/legal'
 
 // Pages a logged-out visitor may see. Matched exactly.
 const PUBLIC_PATHS = ['/', '/login', '/subscribe', '/signup', '/onboarding', '/student/verify', '/students', '/browse', '/how-it-works', '/morgan-collective', '/help', '/about', '/guide', '/Collective_Loft_User_Guide.pdf']
@@ -28,6 +30,7 @@ export default function SubscriptionGuard({ children }) {
   const router = useRouter()
   const pathname = usePathname()
   const [checking, setChecking] = useState(true)
+  const [reaccept, setReaccept] = useState(null) // profile row, when re-consent is due
 
   useEffect(() => {
     if (isPublic(pathname)) {
@@ -45,7 +48,7 @@ export default function SubscriptionGuard({ children }) {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('disciplines')
+        .select('id, disciplines, terms_version, marketing_opt_in')
         .eq('id', user.id)
         .single()
 
@@ -63,6 +66,17 @@ export default function SubscriptionGuard({ children }) {
       const hasDiscipline = profile && Array.isArray(profile.disciplines) && profile.disciplines.length > 0
       if (!hasDiscipline) {
         router.push('/onboarding?onboarding=true')
+        return
+      }
+
+      // Re-consent gate. LEGAL_VERSION is a date, so the version string itself
+      // says when it takes effect: once that day arrives, every member who
+      // consented to an older version sees the re-accept screen exactly once.
+      // Until the day arrives, nobody is interrupted.
+      const inForce = Date.now() >= Date.parse(LEGAL_VERSION + 'T00:00:00Z')
+      if (inForce && profile && profile.terms_version !== LEGAL_VERSION) {
+        setReaccept(profile)
+        setChecking(false)
         return
       }
 
@@ -84,6 +98,10 @@ export default function SubscriptionGuard({ children }) {
         <div style={{ color: 'var(--cream-muted)', fontSize: '0.9rem' }}>Loading...</div>
       </div>
     )
+  }
+
+  if (reaccept) {
+    return <ReAccept profile={reaccept} onDone={() => setReaccept(null)} />
   }
 
   return children

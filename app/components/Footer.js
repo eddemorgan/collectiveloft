@@ -61,7 +61,6 @@ export default function Footer() {
             <div className={styles.fcol}>
               <div className={styles.fcolL}>Company</div>
               <Link href="/about">About</Link>
-              <Link href="/morgan-collective">Morgan Collective Group</Link>
               <Link href="/help">Help</Link>
               <Link href="/legal/terms">Terms &amp; Conditions</Link>
               <Link href="/legal/privacy">Privacy Policy</Link>
@@ -83,7 +82,7 @@ export default function Footer() {
           </div>
         </div>
         <div className={styles.footBot}>
-          <div className={styles.fine}>© {new Date().getFullYear()} Collective Loft · A Morgan Collective Group company</div>
+          <div className={styles.fine}>© {new Date().getFullYear()} Collective Loft</div>
           <div className={styles.socials}>
             {SOCIALS.map(s => (
               <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className={styles.social}>
@@ -91,7 +90,7 @@ export default function Footer() {
               </a>
             ))}
           </div>
-          <div className={styles.fine}>Chicago · London</div>
+          <div className={styles.fine}>Chicago</div>
         </div>
       </div>
     </footer>

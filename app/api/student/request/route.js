@@ -59,6 +59,7 @@ export async function POST(request) {
     }
 
     const { error: mailErr } = await sendMail({
+      userId: user.id,
       to: user.email,
       subject: `${code} is your Collective Loft student code`,
       html: studentVerifyEmailHtml({ code, appUrl: appUrl() }),

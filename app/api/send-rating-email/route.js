@@ -47,6 +47,7 @@ export async function POST(request) {
       if (!me?.email) continue
       const partnerName = [other?.firstname, other?.lastname].filter(Boolean).join(' ') || 'your collaborator'
       const { error } = await sendMail({
+        userId: id,
         to: me.email,
         subject: `Rate your collaboration with ${partnerName}`,
         html: ratingEmailHtml({

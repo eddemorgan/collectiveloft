@@ -63,6 +63,7 @@ export async function POST(request) {
     const isHandoff = terms.current_editor !== 'partner'
 
     const { error } = await sendMail({
+      userId: reviewerId,
       to: reviewer.email,
       subject: isHandoff
         ? `${senderName} sent the terms back for ${terms.project_title || 'your collaboration'}`

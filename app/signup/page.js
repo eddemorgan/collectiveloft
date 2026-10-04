@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { eduDomain } from '../../lib/students'
+import { MARKETING_CONSENT_TEXT } from '../../lib/legal'
 import styles from '../login/login.module.css'
 
 export default function SignupPage() {
@@ -13,6 +14,9 @@ export default function SignupPage() {
   const [lastname,  setLastname]  = useState('')
   const [email,     setEmail]     = useState('')
   const [password,  setPassword]  = useState('')
+  // Unticked by default, and it stays that way unless the member acts: a
+  // pre-ticked box is not consent in the UK or EU.
+  const [updatesOptIn, setUpdatesOptIn] = useState(false)
   const [showPw,    setShowPw]    = useState(false)
   const [loading,   setLoading]   = useState(false)
   const [error,     setError]     = useState('')
@@ -57,7 +61,14 @@ export default function SignupPage() {
     // Save name to profile
     await supabase
       .from('profiles')
-      .upsert({ id: data.user.id, firstname, lastname })
+      .upsert({
+        id: data.user.id, firstname, lastname,
+        ...(updatesOptIn ? {
+          marketing_opt_in: true,
+          marketing_consent_at: new Date().toISOString(),
+          marketing_consent_text: MARKETING_CONSENT_TEXT,
+        } : {}),
+      })
 
     const { data: { session } } = await supabase.auth.getSession()
     const token = session?.access_token
@@ -184,6 +195,15 @@ export default function SignupPage() {
             </div>
           </div>
 
+                    <label style={{ display:'flex', alignItems:'flex-start', gap:'0.55rem', margin:'0.9rem 0 0.2rem', cursor:'pointer', fontSize:'0.78rem', color:'#7A7060', lineHeight:1.5 }}>
+            <input
+              type="checkbox"
+              checked={updatesOptIn}
+              onChange={e => setUpdatesOptIn(e.target.checked)}
+              style={{ marginTop:'2px', accentColor:'#8B6914' }}
+            />
+            <span>{MARKETING_CONSENT_TEXT}</span>
+          </label>
           <button
             className={styles.btnPrimary}
             onClick={handleSignup}

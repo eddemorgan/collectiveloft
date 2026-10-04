@@ -25,6 +25,7 @@ export async function POST(request) {
       .single()
 
     const { error } = await sendMail({
+      userId: user.id,
       to: user.email,
       subject: 'Welcome to Collective Loft. Your people are here.',
       html: welcomeEmailHtml({ firstname: profile?.firstname || '', appUrl: appUrl() }),

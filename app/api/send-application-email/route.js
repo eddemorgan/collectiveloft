@@ -52,6 +52,7 @@ export async function POST(request) {
     const applicantName = [applicant?.firstname, applicant?.lastname].filter(Boolean).join(' ') || 'Someone'
 
     const { error } = await sendMail({
+      userId: brief.poster_id,
       to: poster.email,
       subject: `${applicantName} applied to your brief on Collective Loft`,
       html: applicationEmailHtml({

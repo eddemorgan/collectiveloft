@@ -9,7 +9,8 @@
 .fcol a { display: block; font-size: 0.875rem; color: var(--muted); padding: 5px 0; text-decoration: none; }
 .fcol a:hover { color: var(--cream); }
 .footBot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 28px; }
-.fine { font-size: 0.75rem; color: var(--faint, rgba(26,24,20,0.34)); }
+/* 0.34 alpha vanished into the cream. Legible muted, not a whisper. */
+.fine { font-size: 0.75rem; color: var(--muted, rgba(26,24,20,0.62)); }
 
 .brand { display: flex; align-items: baseline; gap: 11px; text-decoration: none; }
 .mark { color: var(--gold); font-size: 1.3125rem; line-height: 1; transform: translateY(2px); }

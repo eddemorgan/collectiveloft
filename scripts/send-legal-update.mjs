@@ -79,10 +79,11 @@ async function main() {
   let sent = 0, failed = 0
   for (const m of recipients) {
     const { error: mailErr } = await resend.emails.send({
-      from: 'Collective Loft <noreply@collectiveloft.com>',
+      from: 'Collective Loft <noreply@collectiveloft.com>', // service notice: goes to ALL members regardless of marketing choice
       to: m.email,
       subject: 'We put "never sell your data" in the contract',
-      html: legalUpdateEmailHtml({ firstname: m.firstname || '', effectiveDate: EFFECTIVE_DATE, appUrl: APP_URL }),
+      html: legalUpdateEmailHtml({ firstname: m.firstname || '', effectiveDate: EFFECTIVE_DATE, appUrl: APP_URL })
+        .replace('</body>', `<p style="font-size:11px;color:rgba(26,24,20,0.5);text-align:center;margin:16px 0 24px;">Collective Loft · 201 West Lake St, Ste 40769, Chicago, IL 60606 · +1 708.325.8893</p></body>`),
     })
     if (mailErr) { failed++; console.error(`  FAILED ${m.email}:`, mailErr.message || mailErr) }
     else { sent++; console.log(`  sent ${m.email}`) }

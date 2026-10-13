@@ -8,6 +8,7 @@ import { supabase } from '../../../lib/supabase'
 import Footer from '../../components/Footer'
 import { locationLabel } from '../../../lib/labels'
 import { eduDomain } from '../../../lib/students'
+import { MARKETING_CONSENT_TEXT } from '../../../lib/legal'
 import MemberMenu from '../../components/MemberMenu'
 import styles from './profile.module.css'
 
@@ -170,6 +171,9 @@ function EditProfileModal({ profile, userEmail, onClose, onSaved }) {
   const [skills,    setSkills]    = useState(profile.skills || [])
   const [seekDiscs, setSeekDiscs] = useState(profile.seeking_disciplines || [])
   const [seekSkills,setSeekSkills]= useState(profile.seeking_skills || [])
+  // The account-settings home of the updates choice, which Terms 11 and
+  // Privacy 7.1 and 10 promise exists. Starts from what the member chose.
+  const [updates,   setUpdates]   = useState(!!profile.marketing_opt_in)
   const [loc,       setLoc]       = useState(null) // set only when changed
   const [locQuery,  setLocQuery]  = useState('')
   const [locResults,setLocResults]= useState([])
@@ -245,6 +249,15 @@ function EditProfileModal({ profile, userEmail, onClose, onSaved }) {
     if (JSON.stringify(skills)     !== JSON.stringify(profile.skills || []))              patch.skills = skills
     if (JSON.stringify(seekDiscs)  !== JSON.stringify(profile.seeking_disciplines || [])) patch.seeking_disciplines = seekDiscs
     if (JSON.stringify(seekSkills) !== JSON.stringify(profile.seeking_skills || []))      patch.seeking_skills = seekSkills
+    // Ticking records fresh consent with the exact wording shown. Unticking
+    // turns updates off but keeps the earlier consent record, which Privacy 6
+    // retains for 3 years as proof of what was agreed.
+    if (updates !== !!profile.marketing_opt_in) {
+      const now = new Date().toISOString()
+      Object.assign(patch, updates
+        ? { marketing_opt_in: true, marketing_consent_at: now, marketing_consent_text: MARKETING_CONSENT_TEXT }
+        : { marketing_opt_in: false, marketing_unsub_at: now })
+    }
     if (loc) Object.assign(patch, loc)
 
     if (Object.keys(patch).length > 0) {
@@ -366,6 +379,15 @@ function EditProfileModal({ profile, userEmail, onClose, onSaved }) {
                 ))}
               </div>
             )}
+          </div>
+
+          <div className={styles.epField}>
+            <label className={styles.epLabel}>Email updates</label>
+            <label style={{ display:'flex', alignItems:'flex-start', gap:'0.55rem', cursor:'pointer', fontSize:'0.82rem', lineHeight:1.5 }}>
+              <input type="checkbox" checked={updates} onChange={e=>setUpdates(e.target.checked)} style={{ marginTop:'3px', accentColor:'#8B6914' }} />
+              <span>{MARKETING_CONSENT_TEXT}</span>
+            </label>
+            <div className={styles.epNote}>Optional. Emails about your account and your collaborations arrive either way.</div>
           </div>
 
           {error && <div className={styles.epError}>{error}</div>}

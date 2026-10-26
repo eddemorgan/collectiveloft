@@ -90,7 +90,9 @@ export default function Footer() {
               </a>
             ))}
           </div>
-          <div className={styles.fine}>Chicago</div>
+          <div className={styles.fine}>
+            Chicago · <a href="https://www.persnicketypenguin.com" target="_blank" rel="noopener noreferrer" className={styles.credit}>A Persnickety Penguin Website</a>
+          </div>
         </div>
       </div>
     </footer>

@@ -135,6 +135,11 @@ async function handleSubscription(eventType, data) {
       subscription_status: status,
       paddle_subscription_id: data.id ? String(data.id) : null,
       paddle_customer_id: data.customer_id ? String(data.customer_id) : null,
+      // While trialing, the current billing period IS the trial, and its end is
+      // the first charge. The reminder job reads this to keep Terms 3.7.
+      trial_ends_at: status === 'trialing'
+        ? (data.current_billing_period?.ends_at || data.next_billed_at || null)
+        : null,
     })
     .eq('id', userId)
     .select('id')

@@ -12,9 +12,16 @@ import { foundingEndingEmailHtml, studentEndingEmailHtml, trialEndingEmailHtml }
 export const dynamic = 'force-dynamic'
 
 export async function GET(request) {
-  const auth = request.headers.get('authorization') || ''
-  if (!process.env.CRON_SECRET || auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  // Trimmed on both sides: a secret pasted into the dashboard can carry a
+  // stray newline, and that should not lock the job out of its own route.
+  const secret = (process.env.CRON_SECRET || '').trim()
+  const auth = (request.headers.get('authorization') || '').trim()
+  if (!secret || auth !== `Bearer ${secret}`) {
+    // TEMP diagnostic (remove after setup): lengths only, never the value.
+    const diag = new URL(request.url).searchParams.has('diag')
+      ? { secretLength: secret.length, rawLength: (process.env.CRON_SECRET || '').length, headerLength: auth.length }
+      : undefined
+    return Response.json({ error: 'Unauthorized', diag }, { status: 401 })
   }
   const live = process.env.REMINDERS_LIVE === 'true' && !new URL(request.url).searchParams.has('dry')
   const supabase = serviceClient()

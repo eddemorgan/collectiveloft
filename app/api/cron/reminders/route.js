@@ -6,9 +6,10 @@ import { foundingEndingEmailHtml, studentEndingEmailHtml, trialEndingEmailHtml }
 // Vercel Cron calls this once a day (vercel.json) with the CRON_SECRET as a
 // bearer token; anyone else gets a 401.
 //
-// It mails nobody unless REMINDERS_LIVE is 'true'. Without it, or with ?dry=1,
-// it reports who would be emailed and with what, and writes nothing. That is
-// how a schedule change gets checked before it reaches a real inbox.
+// Live since Nov 9, 2026, when Edde approved the four emails. ?dry=1 reports
+// who would be emailed and with what, and writes nothing: that is how a
+// schedule change gets checked before it reaches a real inbox. Setting
+// REMINDERS_LIVE=false in Vercel stops all sending without a code change.
 export const dynamic = 'force-dynamic'
 
 export async function GET(request) {
@@ -19,7 +20,7 @@ export async function GET(request) {
   if (!secret || auth !== `Bearer ${secret}`) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
-  const live = process.env.REMINDERS_LIVE === 'true' && !new URL(request.url).searchParams.has('dry')
+  const live = process.env.REMINDERS_LIVE !== 'false' && !new URL(request.url).searchParams.has('dry')
   const supabase = serviceClient()
   const base = appUrl()
 
